@@ -155,12 +155,17 @@ test('opening comparison preserves purchase drafts, budget, scroll position and 
   await expect(page.getByLabel('Preço da opção A (R$)', { exact: true })).toHaveValue('10,90');
   await page.getByRole('button', { name: 'Fechar comparador', exact: true }).tap();
   await page.getByRole('link', { name: '← Mercado comparador', exact: true }).tap();
-  await page.getByRole('link').filter({ has: page.getByRole('heading', { name: 'Hortifruti', exact: true }) }).tap();
+  await page
+    .getByRole('link')
+    .filter({ has: page.getByRole('heading', { name: 'Hortifruti', exact: true }) })
+    .tap();
   await launch.tap();
   await expect(page.getByLabel('Preço da opção A (R$)', { exact: true })).toHaveValue('10,90');
   await expect(page.getByLabel('Unidade da opção B', { exact: true })).toHaveValue('kg');
   await page.getByRole('button', { name: 'Fechar comparador', exact: true }).tap();
-  await expect(page.getByLabel('Saldo do orçamento', { exact: true })).toContainText(/Restam.*81,49/);
+  await expect(page.getByLabel('Saldo do orçamento', { exact: true })).toContainText(
+    /Restam.*81,49/,
+  );
 });
 
 test('comparison opens for the first time offline and survives a same-tab reload', async ({
