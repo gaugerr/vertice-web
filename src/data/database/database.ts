@@ -1,5 +1,5 @@
-import Dexie, {type EntityTable} from 'dexie';
-import type {Category, ShoppingItem, ShoppingList} from '../../domain/models/shopping';
+import Dexie, { type EntityTable } from 'dexie';
+import type { Category, ShoppingItem, ShoppingList } from '../../domain/models/shopping';
 
 export class VerticeDatabase extends Dexie {
   lists!: EntityTable<ShoppingList, 'id'>;

@@ -1,18 +1,18 @@
 # Do Flutter para React
 
-| Flutter | Neste projeto |
-| --- | --- |
-| Widget | Componente React, uma função que retorna JSX |
-| `State` e `setState` | `useState` mantém valores e solicita atualização do componente |
-| `TextEditingController` | Valor do campo ligado ao estado com `value` e `onChange` |
-| `ChangeNotifier` / `ListenableBuilder` | Consultas reativas `useLiveQuery` para os dados persistidos |
-| `Navigator` e rotas | React Router e URLs navegáveis |
-| `sqflite` / Drift | Dexie sobre IndexedDB, usando tabelas e índices em vez de SQL |
-| `ThemeData` | Tokens CSS, Tailwind e componentes compartilhados |
-| `Form` e validadores | Formulário HTML, validações nativas e schemas Zod |
-| `Future` | `Promise`, com `async` e `await` |
-| `flutter build web` | `npm run build`, gerando `dist` |
-| `pubspec.yaml` e lock | `package.json` e `package-lock.json` |
+| Flutter                                | Neste projeto                                                  |
+| -------------------------------------- | -------------------------------------------------------------- |
+| Widget                                 | Componente React, uma função que retorna JSX                   |
+| `State` e `setState`                   | `useState` mantém valores e solicita atualização do componente |
+| `TextEditingController`                | Valor do campo ligado ao estado com `value` e `onChange`       |
+| `ChangeNotifier` / `ListenableBuilder` | Consultas reativas `useLiveQuery` para os dados persistidos    |
+| `Navigator` e rotas                    | React Router e URLs navegáveis                                 |
+| `sqflite` / Drift                      | Dexie sobre IndexedDB, usando tabelas e índices em vez de SQL  |
+| `ThemeData`                            | Tokens CSS, Tailwind e componentes compartilhados              |
+| `Form` e validadores                   | Formulário HTML, validações nativas e schemas Zod              |
+| `Future`                               | `Promise`, com `async` e `await`                               |
+| `flutter build web`                    | `npm run build`, gerando `dist`                                |
+| `pubspec.yaml` e lock                  | `package.json` e `package-lock.json`                           |
 
 ## Caminho de uma alteração
 

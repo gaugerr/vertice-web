@@ -1,7 +1,7 @@
-import {defineConfig} from 'vitest/config';
+import { defineConfig } from 'vitest/config';
 import react from '@vitejs/plugin-react';
 import tailwindcss from '@tailwindcss/vite';
-import {VitePWA} from 'vite-plugin-pwa';
+import { VitePWA } from 'vite-plugin-pwa';
 
 export default defineConfig({
   plugins: [
@@ -23,9 +23,14 @@ export default defineConfig({
         theme_color: '#101014',
         background_color: '#101014',
         icons: [
-          {src: '/icons/icon-192.png', sizes: '192x192', type: 'image/png'},
-          {src: '/icons/icon-512.png', sizes: '512x512', type: 'image/png'},
-          {src: '/icons/maskable-512.png', sizes: '512x512', type: 'image/png', purpose: 'maskable'},
+          { src: '/icons/icon-192.png', sizes: '192x192', type: 'image/png' },
+          { src: '/icons/icon-512.png', sizes: '512x512', type: 'image/png' },
+          {
+            src: '/icons/maskable-512.png',
+            sizes: '512x512',
+            type: 'image/png',
+            purpose: 'maskable',
+          },
         ],
       },
       workbox: {
@@ -36,9 +41,13 @@ export default defineConfig({
         navigateFallbackDenylist: [/^\/online\.txt$/, /\/[^/?]+\.[^/?]+$/],
         cleanupOutdatedCaches: true,
       },
-      devOptions: {enabled: false},
+      devOptions: { enabled: false },
     }),
   ],
-  build: {sourcemap: false},
-  test: {environment: 'jsdom', setupFiles: ['./src/test-setup.ts'], include: ['src/**/*.test.{ts,tsx}']},
+  build: { sourcemap: false },
+  test: {
+    environment: 'jsdom',
+    setupFiles: ['./src/test-setup.ts'],
+    include: ['src/**/*.test.{ts,tsx}'],
+  },
 });

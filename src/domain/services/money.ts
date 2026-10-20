@@ -1,7 +1,7 @@
 import Big from 'big.js';
-import type {ShoppingItem} from '../models/shopping';
+import type { ShoppingItem } from '../models/shopping';
 
-const currency = new Intl.NumberFormat('pt-BR', {style: 'currency', currency: 'BRL'});
+const currency = new Intl.NumberFormat('pt-BR', { style: 'currency', currency: 'BRL' });
 export function canonicalDecimal(input: string): string {
   const value = input.trim().replace(',', '.');
   if (value.length > 100 || !/^\d+(?:\.\d+)?$/.test(value)) {
@@ -26,5 +26,9 @@ export function spentCents(items: ShoppingItem[]): number {
   }
   return total;
 }
-export function formatMoney(cents: number): string {return currency.format(cents / 100)}
-export function decimalInput(value: string): string {return value.replace('.', ',')}
+export function formatMoney(cents: number): string {
+  return currency.format(cents / 100);
+}
+export function decimalInput(value: string): string {
+  return value.replace('.', ',');
+}

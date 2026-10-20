@@ -1,4 +1,11 @@
-import type {Category, ItemInput, ListInput, ShoppingItem, ShoppingList, ShoppingSnapshot} from './shopping';
+import type {
+  Category,
+  ItemInput,
+  ListInput,
+  ShoppingItem,
+  ShoppingList,
+  ShoppingSnapshot,
+} from './shopping';
 
 export interface ShoppingRepository {
   getLists(): Promise<ShoppingList[]>;

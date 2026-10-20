@@ -3,8 +3,11 @@ export function today(): string {
   return `${now.getFullYear()}-${String(now.getMonth() + 1).padStart(2, '0')}-${String(now.getDate()).padStart(2, '0')}`;
 }
 export function formatDate(value: string): string {
-  return new Intl.DateTimeFormat('pt-BR', {day: '2-digit', month: 'short', year: 'numeric'})
-    .format(new Date(`${value}T12:00:00`));
+  return new Intl.DateTimeFormat('pt-BR', {
+    day: '2-digit',
+    month: 'short',
+    year: 'numeric',
+  }).format(new Date(`${value}T12:00:00`));
 }
 export function legacyDate(value: number): string {
   const date = new Date(value);
