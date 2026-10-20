@@ -4,10 +4,11 @@ import { DexieShoppingRepository } from './dexie-shopping-repository';
 import { DEFAULT_CATEGORIES } from '../../domain/models/shopping';
 import { encodeBackup, parseBackup } from '../backup/backup';
 import { spentCents } from '../../domain/services/money';
+import Dexie from 'dexie';
 
 let db: VerticeDatabase;
 let repository: DexieShoppingRepository;
-const input = { storeName: 'Mercado', date: '2026-10-19', description: '' };
+const input = { storeName: 'Mercado', date: '2026-10-19', description: '', budgetCents: null };
 beforeEach(() => {
   db = new VerticeDatabase(`test-${crypto.randomUUID()}`);
   repository = new DexieShoppingRepository(db);
@@ -22,6 +23,45 @@ async function seed() {
   return { listId, category, itemId };
 }
 describe('local repository', () => {
+  it('upgrades populated version 1 storage without losing shopping records', async () => {
+    const id = crypto.randomUUID(), categoryId = crypto.randomUUID(), itemId = crypto.randomUUID();
+    const timestamps = { createdAt: '2026-10-19T12:00:00.000Z', updatedAt: '2026-10-19T12:00:00.000Z' };
+    const old = new Dexie(db.name);
+    old.version(1).stores({
+      lists: 'id, updatedAt',
+      categories: 'id, shoppingListId, [shoppingListId+position]',
+      items: 'id, shoppingListId, categoryId, [categoryId+createdAt]',
+    });
+    await old.table('lists').add({ id, storeName: 'Compra existente', date: input.date, description: 'Preservar', ...timestamps });
+    await old.table('categories').add({ id: categoryId, shoppingListId: id, title: 'Essenciais', position: 0, ...timestamps });
+    const item = { id: itemId, shoppingListId: id, categoryId, name: 'Arroz', unitPrice: '20', quantity: '0.5', unit: 'kg', isPurchased: true, ...timestamps };
+    await old.table('items').add(item);
+    old.close();
+    expect(await repository.getList(id)).toMatchObject({ id, description: 'Preservar', budgetCents: null, ...timestamps });
+    expect(await repository.getItemsForList(id)).toEqual([item]);
+    expect(await repository.getCategories(id)).toHaveLength(1);
+  });
+
+  it('changes and removes a list budget independently of metadata, items and other lists', async () => {
+    const first = await seed(), second = await seed();
+    await repository.setListBudget(first.listId, 30000);
+    const otherConnection = new VerticeDatabase(db.name);
+    try {
+      const reopened = new DexieShoppingRepository(otherConnection);
+      expect((await reopened.getList(first.listId))?.budgetCents).toBe(30000);
+      expect((await reopened.getList(second.listId))?.budgetCents).toBeNull();
+      await repository.updateList(first.listId, { ...input, storeName: 'Nome novo', budgetCents: 30000 });
+      await reopened.setListBudget(first.listId, 12000);
+      expect(await repository.getList(first.listId)).toMatchObject({ storeName: 'Nome novo', date: input.date, budgetCents: 12000 });
+      expect(await repository.getItemsForList(first.listId)).toHaveLength(1);
+      for (const value of [0, -1, 1.5, Number.MAX_SAFE_INTEGER + 1])
+        await expect(repository.setListBudget(first.listId, value)).rejects.toThrow();
+      expect((await repository.getList(first.listId))?.budgetCents).toBe(12000);
+      await repository.setListBudget(first.listId, null);
+      expect((await reopened.getList(first.listId))?.budgetCents).toBeNull();
+      await expect(repository.setListBudget(crypto.randomUUID(), 100)).rejects.toThrow('excluída');
+    } finally { otherConnection.close(); }
+  });
   it('saves quick purchase values without overwriting a concurrent rename or uncheck', async () => {
     const { itemId, listId } = await seed();
     await repository.setPurchased(itemId, true);
@@ -178,7 +218,7 @@ describe('local repository', () => {
     expect((await repository.getItemsForCategory(category.id))[0].name).toBe('Arroz');
     expect(await repository.exportSnapshot()).toEqual(original);
   });
-  it('supports empty backup replacement and version 2 round trips', async () => {
+  it('supports empty backup replacement and version 3 round trips', async () => {
     await seed();
     const original = await repository.exportSnapshot();
     expect(parseBackup(encodeBackup(original))).toEqual(original);

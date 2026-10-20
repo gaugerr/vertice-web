@@ -7,6 +7,7 @@ import { Loading, Missing, QueryError } from '../../../shared/ui/Feedback';
 import { formatMoney, spentCents } from '../../../domain/services/money';
 import { AddItemForm } from '../components/AddItemForm';
 import { ItemRow } from '../components/ItemRow';
+import { BudgetPanel } from '../../budget/components/BudgetPanel';
 
 export default function ItemsPage() {
   const { listId = '', id = '' } = useParams();
@@ -21,16 +22,19 @@ export default function ItemsPage() {
     });
   }, []);
   const result = useQuery(async () => {
-    const [list, category, items] = await Promise.all([
+    const [list, category, allItems] = await Promise.all([
       repository.getList(listId),
       repository.getCategory(id),
-      repository.getItemsForCategory(id),
+      repository.getItemsForList(listId),
     ]);
-    return { list, category, items };
+    return {
+      list, category, allItems,
+      items: allItems.filter((item) => item.categoryId === id).sort((a, b) => a.createdAt.localeCompare(b.createdAt)),
+    };
   }, [listId, id]);
   if (result.status === 'loading') return <Loading />;
   if (result.status === 'error') return <QueryError error={result.error} />;
-  const { list, category, items } = result.data;
+  const { list, category, items, allItems } = result.data;
   if (!list || category?.shoppingListId !== listId)
     return <Missing label="Esta categoria não está mais disponível." />;
   const purchased = items.filter((item) => item.isPurchased).length;
@@ -86,6 +90,7 @@ export default function ItemsPage() {
         </div>
       )}
       <aside className={`sticky-total ${purchaseEditors.size ? 'editing-purchase' : ''}`}>
+        <div className="category-total-line">
         <div>
           <span className="eyebrow">TOTAL DA CATEGORIA</span>
           <strong aria-label="Total da categoria">{formatMoney(spentCents(items))}</strong>
@@ -94,6 +99,8 @@ export default function ItemsPage() {
           <Check size={16} aria-hidden="true" />
           {purchased} comprados
         </span>
+        </div>
+        <BudgetPanel list={list} spent={spentCents(allItems)} compact />
       </aside>
     </>
   );

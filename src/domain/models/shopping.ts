@@ -8,6 +8,7 @@ export interface ShoppingList extends Timestamps {
   storeName: string;
   date: string;
   description: string;
+  budgetCents: number | null;
 }
 export interface Category extends Timestamps {
   id: string;
@@ -34,6 +35,7 @@ export interface ListInput {
   storeName: string;
   date: string;
   description: string;
+  budgetCents: number | null;
 }
 export interface ItemInput {
   name: string;

@@ -43,11 +43,11 @@ describe('decimal arithmetic', () => {
   });
   it('validates names, civil dates and positive quantities', () => {
     expect(
-      listInputSchema.parse({ storeName: ' Mercado ', date: '2028-02-29', description: '' })
+      listInputSchema.parse({ storeName: ' Mercado ', date: '2028-02-29', description: '', budgetCents: null })
         .storeName,
     ).toBe('Mercado');
     expect(
-      listInputSchema.safeParse({ storeName: ' ', date: '2026-02-29', description: '' }).success,
+      listInputSchema.safeParse({ storeName: ' ', date: '2026-02-29', description: '', budgetCents: null }).success,
     ).toBe(false);
     expect(
       itemInputSchema.safeParse({ name: 'Arroz', unitPrice: '-1', quantity: '1', unit: 'kg' })

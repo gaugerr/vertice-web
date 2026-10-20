@@ -5,6 +5,7 @@ import { useQuery } from '../../../shared/hooks/useQuery';
 import { Loading, Missing, QueryError } from '../../../shared/ui/Feedback';
 import { formatMoney, spentCents } from '../../../domain/services/money';
 import { formatDate } from '../../../shared/lib/date';
+import { BudgetPanel } from '../../budget/components/BudgetPanel';
 
 export default function CategoriesPage() {
   const { listId = '' } = useParams();
@@ -52,6 +53,7 @@ export default function CategoriesPage() {
           <ShoppingBasket size={32} aria-hidden="true" />
         </span>
       </section>
+      <BudgetPanel list={list} spent={spentCents(items)} />
       <div className="section-heading">
         <div>
           <h2>Por categoria</h2>

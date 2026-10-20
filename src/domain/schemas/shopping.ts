@@ -25,10 +25,12 @@ export const decimalSchema = z
       return z.NEVER;
     }
   });
+export const budgetCentsSchema = z.number().int().positive().max(Number.MAX_SAFE_INTEGER).nullable();
 export const listInputSchema = z.object({
   storeName: nameSchema,
   date: dateSchema,
   description: z.string().max(10000, 'Use até 10.000 caracteres.'),
+  budgetCents: budgetCentsSchema,
 });
 export const purchaseDetailsSchema = z
   .object({

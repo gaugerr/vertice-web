@@ -1,10 +1,11 @@
 import { test, expect, type Page } from '@playwright/test';
 import { writeFile } from 'node:fs/promises';
 
-async function createList(page: Page, name = 'Compra da semana') {
+async function createList(page: Page, name = 'Compra da semana', budget = '') {
   await page.goto('/');
   await page.getByRole('button', { name: 'Nova lista', exact: true }).click();
   await page.getByLabel('Nome da lista', { exact: true }).fill(name);
+  if (budget) await page.getByLabel('Orçamento da compra (R$)', { exact: true }).fill(budget);
   await page.getByRole('button', { name: 'Criar lista', exact: true }).click();
   await page.getByRole('link', { name: `Abrir lista ${name}` }).click();
   await expect(page.getByRole('heading', { name: 'Por categoria' })).toBeVisible();
@@ -129,6 +130,10 @@ test('real offline writes, closing the tab, reopening and exporting records', as
   await page.waitForFunction(() => !!navigator.serviceWorker.controller);
   const route = page.url();
   await context.setOffline(true);
+  await page.getByRole('button', { name: 'Definir orçamento', exact: true }).click();
+  await page.getByLabel('Orçamento da compra (R$)', { exact: true }).fill('7,50');
+  await page.getByRole('button', { name: 'Salvar orçamento', exact: true }).click();
+  await expect(page.getByRole('dialog')).toHaveCount(0);
   await addItem(page, 'Feijão offline');
   await page.getByRole('checkbox', { name: 'Marcar Feijão offline como comprado' }).click();
   const values = page.getByRole('form', { name: 'Valores de Feijão offline' });
@@ -147,6 +152,7 @@ test('real offline writes, closing the tab, reopening and exporting records', as
     reopened.getByRole('checkbox', { name: 'Marcar Feijão offline como comprado' }),
   ).toBeChecked();
   await expect(reopened.getByLabel('Total da categoria', { exact: true })).toHaveText(/8,50/);
+  await expect(reopened.getByLabel('Saldo do orçamento', { exact: true })).toContainText(/Ultrapassou em.*1,00/);
   expect(
     await reopened.evaluate(() =>
       fetch('/online.txt?offline-proof=1', { cache: 'no-store' }).then(
@@ -166,7 +172,8 @@ test('real offline writes, closing the tab, reopening and exporting records', as
   const chunks: Buffer[] = [];
   for await (const chunk of stream!) chunks.push(Buffer.from(chunk));
   const backup = JSON.parse(Buffer.concat(chunks).toString());
-  expect(backup.version).toBe(2);
+  expect(backup.version).toBe(3);
+  expect(backup.lists[0].budgetCents).toBe(750);
   expect(backup.items.map((item: { name: string }) => item.name)).toContain('Feijão offline');
   await reopened.reload();
   await expect(reopened.getByRole('heading', { name: 'Dados e aplicativo' })).toBeVisible();

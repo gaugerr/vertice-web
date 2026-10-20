@@ -14,9 +14,9 @@ const snapshotSchema = z
     items: z.array(itemSchema).max(MAX_ROWS),
   })
   .strict();
-export interface BackupV2 extends ShoppingSnapshot {
+export interface BackupV3 extends ShoppingSnapshot {
   format: 'vertice-backup';
-  version: 2;
+  version: 3;
   exportedAt: string;
 }
 export function validateSnapshot(input: unknown): ShoppingSnapshot {
@@ -111,6 +111,7 @@ function convertLegacy(input: unknown): ShoppingSnapshot {
       ...list,
       id: reference(lists, list.id),
       date: legacyDate(list.date),
+      budgetCents: null,
       ...timestamps,
     })),
     categories: data.categories.map((category, position) => ({
@@ -147,11 +148,25 @@ export function parseBackup(source: string): ShoppingSnapshot {
     .object({ format: z.literal('vertice-backup'), version: z.number().int() })
     .parse(raw);
   if (header.version === 1) return convertLegacy(raw);
-  if (header.version !== 2) throw new Error('Esta versão do backup não é compatível.');
+  if (header.version === 2) {
+    const old = z.object({
+      format: z.literal('vertice-backup'),
+      version: z.literal(2),
+      exportedAt: z.iso.datetime(),
+      ...snapshotSchema.shape,
+      lists: z.array(listSchema.omit({ budgetCents: true })).max(MAX_ROWS),
+    }).strict().parse(raw);
+    return validateSnapshot({
+      lists: old.lists.map((list) => ({ ...list, budgetCents: null })),
+      categories: old.categories,
+      items: old.items,
+    });
+  }
+  if (header.version !== 3) throw new Error('Esta versão do backup não é compatível.');
   const backup = z
     .object({
       format: z.literal('vertice-backup'),
-      version: z.literal(2),
+      version: z.literal(3),
       exportedAt: z.iso.datetime(),
       ...snapshotSchema.shape,
     })
@@ -164,9 +179,9 @@ export function parseBackup(source: string): ShoppingSnapshot {
   });
 }
 export function encodeBackup(data: ShoppingSnapshot): string {
-  const backup: BackupV2 = {
+  const backup: BackupV3 = {
     format: 'vertice-backup',
-    version: 2,
+    version: 3,
     exportedAt: new Date().toISOString(),
     ...validateSnapshot(data),
   };

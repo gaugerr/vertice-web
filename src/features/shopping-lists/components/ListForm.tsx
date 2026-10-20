@@ -7,15 +7,19 @@ import { useMutation } from '../../../shared/hooks/useMutation';
 import { Button } from '../../../shared/ui/Button';
 import { Dialog } from '../../../shared/ui/Dialog';
 import { ErrorMessage } from '../../../shared/ui/Feedback';
+import { BudgetField } from '../../budget/components/BudgetField';
+import { budgetInput, parseBudgetInput } from '../../../domain/services/budget';
 
 export function ListForm({ list, onClose }: { list?: ShoppingList; onClose: () => void }) {
   const [storeName, setStoreName] = useState(list?.storeName ?? '');
   const [date, setDate] = useState(list?.date ?? today());
   const [description, setDescription] = useState(list?.description ?? '');
+  const [budget, setBudget] = useState(() => budgetInput(list?.budgetCents ?? null));
   const mutation = useMutation();
   const dirty =
     storeName !== (list?.storeName ?? '') ||
     description !== (list?.description ?? '') ||
+    budget !== budgetInput(list?.budgetCents ?? null) ||
     date !== (list?.date ?? today());
   useUnsavedChanges(dirty);
   function close() {
@@ -24,8 +28,8 @@ export function ListForm({ list, onClose }: { list?: ShoppingList; onClose: () =
   }
   async function submit(event: FormEvent) {
     event.preventDefault();
-    const input = { storeName, date, description };
     const result = await mutation.run(async () => {
+      const input = { storeName, date, description, budgetCents: parseBudgetInput(budget) };
       if (list) await repository.updateList(list.id, input);
       else await repository.createListWithCategories(input);
     });
@@ -63,6 +67,7 @@ export function ListForm({ list, onClose }: { list?: ShoppingList; onClose: () =
             placeholder="Um lembrete para suas compras"
           />
         </label>
+        <BudgetField value={budget} onChange={setBudget} readOnly={mutation.pending} />
         <p className="field-help">
           As seis categorias de compras serão organizadas automaticamente.
         </p>

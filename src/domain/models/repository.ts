@@ -17,6 +17,7 @@ export interface ShoppingRepository {
   getItemsForCategory(categoryId: string): Promise<ShoppingItem[]>;
   createListWithCategories(input: ListInput): Promise<string>;
   updateList(id: string, input: ListInput): Promise<void>;
+  setListBudget(id: string, budgetCents: number | null): Promise<void>;
   deleteListCascade(id: string): Promise<void>;
   addItem(listId: string, categoryId: string, name: string): Promise<string>;
   updateItem(id: string, input: ItemInput): Promise<void>;

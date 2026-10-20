@@ -11,6 +11,7 @@ import {
   listInputSchema,
   nameSchema,
   purchaseDetailsSchema,
+  budgetCentsSchema,
 } from '../../domain/schemas/shopping';
 import { VerticeDatabase } from '../database/database';
 import { trackWrite } from '../database/writes';
@@ -74,6 +75,13 @@ export class DexieShoppingRepository implements ShoppingRepository {
         await this.db.lists.delete(id);
       }),
     );
+  }
+  async setListBudget(id: string, budgetCents: number | null): Promise<void> {
+    const value = budgetCentsSchema.parse(budgetCents);
+    await trackWrite(async () => {
+      if (!(await this.db.lists.update(id, { budgetCents: value, updatedAt: new Date().toISOString() })))
+        throw new Error('Esta lista foi excluída.');
+    });
   }
   async addItem(listId: string, categoryId: string, name: string): Promise<string> {
     const itemName = nameSchema.parse(name);

@@ -727,12 +727,67 @@ nav a.active {
   border: 1px solid #46634e;
   border-radius: 15px;
   padding: 18px 22px;
-  display: flex;
+  display: block;
   justify-content: space-between;
   align-items: center;
   margin-top: 28px;
   box-shadow: 0 8px 25px #0003;
 }
+.category-total-line {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 12px;
+}
+.budget-panel {
+  --budget-color: #b7edce;
+  margin: 16px 0 24px;
+  padding: 16px;
+  background: #1b1921;
+  border: 1px solid #39333f;
+  border-radius: 14px;
+}
+.budget-heading,
+.budget-amounts {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  flex-wrap: wrap;
+  gap: 8px 12px;
+  font-size: 12px;
+}
+.budget-heading { color: #cfc2df; }
+.budget-heading .button { min-height: 44px; padding: 8px 12px; font-size: 12px; }
+.budget-amounts { margin-top: 12px; color: #c5bfce; }
+.budget-balance { color: var(--budget-color); font-weight: 600; }
+.budget-panel progress {
+  display: block;
+  appearance: none;
+  border: 0;
+  border-radius: 20px;
+  overflow: hidden;
+  width: 100%;
+  height: 6px;
+  margin-top: 12px;
+  background: #ffffff12;
+  accent-color: var(--budget-color);
+}
+.budget-panel progress::-webkit-progress-bar { background: #ffffff12; }
+.budget-panel progress::-webkit-progress-value { background: var(--budget-color); }
+.budget-panel progress::-moz-progress-bar { background: var(--budget-color); }
+.budget-warning { color: var(--budget-color); font-size: 12px; margin-top: 8px; }
+.budget-warning:empty { margin: 0; }
+.budget-near, .budget-reached { --budget-color: #f4ca80; }
+.budget-exceeded { --budget-color: #f0a3aa; }
+.budget-compact {
+  margin: 12px 0 0;
+  padding: 8px 0 0;
+  border: 0;
+  border-top: 1px solid #ffffff18;
+  border-radius: 0;
+  background: transparent;
+}
+.budget-compact .budget-heading, .budget-compact .budget-amounts { font-size: 11px; }
 .sticky-total .eyebrow {
   display: block;
   font-size: 9px;

@@ -23,6 +23,25 @@ const legacy = {
   ],
 };
 describe('backups', () => {
+  it('reads old web backups with no budget and exports the new version without changing IDs', () => {
+    const data = parseBackup(JSON.stringify(legacy));
+    const old = {
+      format: 'vertice-backup', version: 2, exportedAt: new Date().toISOString(), ...data,
+      lists: data.lists.map((list) => ({ id: list.id, storeName: list.storeName, date: list.date, description: list.description, createdAt: list.createdAt, updatedAt: list.updatedAt })),
+    };
+    const imported = parseBackup(JSON.stringify(old));
+    expect(imported).toEqual(data);
+    expect(imported.lists[0].budgetCents).toBeNull();
+    imported.lists[0].budgetCents = 30000;
+    const encoded = encodeBackup(imported);
+    expect(JSON.parse(encoded).version).toBe(3);
+    expect(parseBackup(encoded)).toEqual(imported);
+    for (const budget of [0, -100, 1.5, '30000', Number.MAX_SAFE_INTEGER + 1]) {
+      const invalid = JSON.parse(encoded);
+      invalid.lists[0].budgetCents = budget;
+      expect(() => parseBackup(JSON.stringify(invalid))).toThrow();
+    }
+  });
   it('maps legacy IDs consistently and preserves financial values and local dates', () => {
     const data = parseBackup(JSON.stringify(legacy));
     expect(data.lists[0].id).not.toBe('1');
@@ -30,6 +49,7 @@ describe('backups', () => {
     expect(data.items[0].categoryId).toBe(data.categories[0].id);
     expect(data.items[0]).toMatchObject({ unitPrice: '20', quantity: '0.5', isPurchased: true });
     expect(data.lists[0].date).toBe('2026-10-19');
+    expect(data.lists[0].budgetCents).toBeNull();
     expect(spentCents(data.items)).toBe(1000);
     expect(parseBackup(encodeBackup(data))).toEqual(data);
   });

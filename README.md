@@ -35,6 +35,7 @@ O build está em `dist`. O orçamento de JavaScript de 250 KiB gzip inclui tamb�
 - Inclusão rápida de itens, edição de nome/preço/quantidade/unidade e marcação como comprado.
 - Filtros de itens pendentes e comprados.
 - Totais em reais com aritmética decimal e arredondamento por item.
+- Orçamento opcional por lista, saldo global entre categorias e avisos discretos a partir de 80% do limite.
 - IndexedDB com consultas reativas, transações e atualização entre abas.
 - Exportação e restauração de backups JSON; importação do formato Flutter v1.
 - Manifesto e ícones instaláveis; service worker de produção com cache e atualização por confirmação.
@@ -92,9 +93,15 @@ O navegador pode negar armazenamento persistente, limitar espaço ou apagar dado
 
 ## Backup e migração do Flutter
 
-Em Dados e aplicativo, exporte um JSON e guarde fora do armazenamento do site. O novo formato usa `format: "vertice-backup"`, `version: 2`, `exportedAt`, `lists`, `categories` e `items`.
+Em Dados e aplicativo, exporte um JSON e guarde fora do armazenamento do site. O novo formato usa `format: "vertice-backup"`, `version: 3`, `exportedAt`, `lists`, `categories` e `items`. Cada lista inclui `budgetCents`, um valor em centavos ou `null` quando não há limite.
 
-A importação aceita formatos v1 (Flutter) e v2. Valida até 10 MiB, no máximo 50 mil registros em cada coleção, tipos, duplicatas e relações. Antes de substituir, exibe quantidades e pede confirmação. Toda a substituição é transacional; uma falha não deve deixar um banco parcialmente restaurado.
+A importação aceita formatos v1 (Flutter), v2 (web sem orçamento) e v3. Listas antigas são importadas sem limite. Valida até 10 MiB, no máximo 50 mil registros em cada coleção, tipos, duplicatas e relações. Antes de substituir, exibe quantidades e pede confirmação. Toda a substituição é transacional; uma falha não deve deixar um banco parcialmente restaurado.
+
+## Orçamento da compra
+
+Informe um limite opcional ao criar ou editar uma lista, ou use Definir/Ajustar orçamento durante a compra. Para remover o limite, limpe o campo e salve. O orçamento considera apenas itens marcados como pegos, com preços e quantidades já salvos; filtros e categorias não restringem o gasto global.
+
+A partir de 80% aparece um aviso discreto; em 100%, Limite atingido; acima disso, o valor excedente. Nenhum aviso bloqueia a compra. O banco IndexedDB evolui da versão 1 para 2 mantendo os registros e atribuindo orçamento nulo às listas anteriores. O fluxo funciona offline e atualiza outras abas abertas.
 
 No Flutter, exporte o backup existente e importe o arquivo aqui. Os IDs numéricos antigos são mapeados para UUIDs mantendo referências. Preços e quantidades são preservados como decimais; o estado 0/1 vira booleano. Datas legadas em milissegundos são interpretadas no fuso local do navegador que importa. Confira a data se estiver migrando entre fusos diferentes.
 

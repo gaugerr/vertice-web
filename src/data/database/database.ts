@@ -12,5 +12,8 @@ export class VerticeDatabase extends Dexie {
       categories: 'id, shoppingListId, [shoppingListId+position]',
       items: 'id, shoppingListId, categoryId, [categoryId+createdAt]',
     });
+    this.version(2)
+      .stores({ lists: 'id, updatedAt' })
+      .upgrade((transaction) => transaction.table('lists').toCollection().modify({ budgetCents: null }));
   }
 }
