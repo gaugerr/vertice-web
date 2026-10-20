@@ -28,12 +28,15 @@ export function Dialog({
     const overflow = document.body.style.overflow;
     if (preserveScroll) document.body.style.overflow = 'hidden';
     dialog?.showModal();
-    const target = initialFocusRef?.current ?? dialog?.querySelector<HTMLElement>('input:not([type="hidden"]), textarea, select');
+    const target =
+      initialFocusRef?.current ??
+      dialog?.querySelector<HTMLElement>('input:not([type="hidden"]), textarea, select');
     target?.focus();
     return () => {
       dialog?.close();
       if (preserveScroll) document.body.style.overflow = overflow;
-      if (previous instanceof HTMLElement && previous.isConnected) previous.focus({ preventScroll: preserveScroll });
+      if (previous instanceof HTMLElement && previous.isConnected)
+        previous.focus({ preventScroll: preserveScroll });
       if (preserveScroll) window.scrollTo(position.x, position.y);
     };
   }, [initialFocusRef, preserveScroll]);

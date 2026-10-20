@@ -13,11 +13,20 @@ export function ComparisonProvider({ children }: { children: ReactNode }) {
     // Mount/show/focus before the trusted tap ends, so the mobile keyboard can open.
     flushSync(() => setOpened(true));
   }, []);
-  useEffect(() => { setStorageFailed(!saveComparisonSession(session)); }, [session]);
+  useEffect(() => {
+    setStorageFailed(!saveComparisonSession(session));
+  }, [session]);
   return (
     <OpenComparisonContext.Provider value={open}>
       {children}
-      {opened && <ComparisonDialog session={session} setSession={setSession} storageFailed={storageFailed} onClose={() => setOpened(false)} />}
+      {opened && (
+        <ComparisonDialog
+          session={session}
+          setSession={setSession}
+          storageFailed={storageFailed}
+          onClose={() => setOpened(false)}
+        />
+      )}
     </OpenComparisonContext.Provider>
   );
 }

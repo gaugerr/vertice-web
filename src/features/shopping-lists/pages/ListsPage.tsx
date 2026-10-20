@@ -37,11 +37,11 @@ export default function ListsPage() {
           <p>Um lugar para cada compra.</p>
         </div>
         <div className="section-actions">
-        <ComparisonButton />
-        <Button onClick={() => setCreating(true)}>
-          <Plus size={19} aria-hidden="true" />
-          <span>Nova lista</span>
-        </Button>
+          <ComparisonButton />
+          <Button onClick={() => setCreating(true)}>
+            <Plus size={19} aria-hidden="true" />
+            <span>Nova lista</span>
+          </Button>
         </div>
       </div>
       {result.status === 'loading' ? (

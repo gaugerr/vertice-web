@@ -3,22 +3,42 @@ import { fireEvent, render, screen } from '@testing-library/react';
 import { ComparisonProvider } from './ComparisonProvider';
 import { ComparisonButton } from './ComparisonButton';
 
-beforeEach(() => { sessionStorage.clear(); vi.spyOn(window, 'scrollTo').mockImplementation(() => {}); });
-afterEach(() => { vi.restoreAllMocks(); sessionStorage.clear(); });
-function open() { fireEvent.click(screen.getByRole('button', { name: 'Comparar', exact: true })); }
-function fill(label: string, value: string) { fireEvent.change(screen.getByLabelText(label), { target: { value } }); }
+beforeEach(() => {
+  sessionStorage.clear();
+  vi.spyOn(window, 'scrollTo').mockImplementation(() => {});
+});
+afterEach(() => {
+  vi.restoreAllMocks();
+  sessionStorage.clear();
+});
+function open() {
+  fireEvent.click(screen.getByRole('button', { name: 'Comparar', exact: true }));
+}
+function fill(label: string, value: string) {
+  fireEvent.change(screen.getByLabelText(label), { target: { value } });
+}
 
 describe('comparison panel', () => {
   it('focuses within the opening gesture, calculates live, removes stale results and preserves mode drafts', () => {
-    render(<ComparisonProvider><ComparisonButton /></ComparisonProvider>);
+    render(
+      <ComparisonProvider>
+        <ComparisonButton />
+      </ComparisonProvider>,
+    );
     open();
     expect(screen.getByLabelText('Preço da opção A (R$)')).toHaveFocus();
-    fill('Preço da opção A (R$)', '10,90'); fill('Conteúdo da opção A', '500');
-    fill('Preço da opção B (R$)', '19,90'); fill('Conteúdo da opção B', '1');
+    fill('Preço da opção A (R$)', '10,90');
+    fill('Conteúdo da opção A', '500');
+    fill('Preço da opção B (R$)', '19,90');
+    fill('Conteúdo da opção B', '1');
     fireEvent.change(screen.getByLabelText('Unidade da opção B'), { target: { value: 'kg' } });
-    expect(screen.getByRole('heading', { name: 'Opção B mais barata por quantidade' })).toBeInTheDocument();
+    expect(
+      screen.getByRole('heading', { name: 'Opção B mais barata por quantidade' }),
+    ).toBeInTheDocument();
     fill('Conteúdo da opção B', '0');
-    expect(screen.queryByRole('heading', { name: 'Opção B mais barata por quantidade' })).not.toBeInTheDocument();
+    expect(
+      screen.queryByRole('heading', { name: 'Opção B mais barata por quantidade' }),
+    ).not.toBeInTheDocument();
     fireEvent.blur(screen.getByLabelText('Conteúdo da opção B'));
     expect(screen.getByLabelText('Conteúdo da opção B')).toHaveAttribute('aria-invalid', 'true');
     fill('Conteúdo da opção B', '1');
@@ -35,8 +55,14 @@ describe('comparison panel', () => {
     expect(screen.getByLabelText('Preço da opção A (R$)')).toHaveFocus();
   });
   it('continues in memory and explains reload limitations if session storage is unavailable', () => {
-    vi.spyOn(Storage.prototype, 'setItem').mockImplementation(() => { throw new Error('Blocked'); });
-    render(<ComparisonProvider><ComparisonButton /></ComparisonProvider>);
+    vi.spyOn(Storage.prototype, 'setItem').mockImplementation(() => {
+      throw new Error('Blocked');
+    });
+    render(
+      <ComparisonProvider>
+        <ComparisonButton />
+      </ComparisonProvider>,
+    );
     open();
     expect(screen.getByText(/Uma recarga poderá apagar/)).toBeInTheDocument();
     fill('Preço da opção A (R$)', '10');

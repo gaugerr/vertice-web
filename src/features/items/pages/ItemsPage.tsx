@@ -63,20 +63,20 @@ export default function ItemsPage() {
       </div>
       <AddItemForm listId={listId} categoryId={id} />
       <div className="shopping-tools">
-      <div className="filter-bar" role="group" aria-label="Filtrar itens">
-        {(
-          [
-            ['all', 'Todos'],
-            ['pending', 'Pendentes'],
-            ['purchased', 'Comprados'],
-          ] as const
-        ).map(([value, label]) => (
-          <button key={value} aria-pressed={filter === value} onClick={() => setFilter(value)}>
-            {label}
-          </button>
-        ))}
-      </div>
-      <ComparisonButton />
+        <div className="filter-bar" role="group" aria-label="Filtrar itens">
+          {(
+            [
+              ['all', 'Todos'],
+              ['pending', 'Pendentes'],
+              ['purchased', 'Comprados'],
+            ] as const
+          ).map(([value, label]) => (
+            <button key={value} aria-pressed={filter === value} onClick={() => setFilter(value)}>
+              {label}
+            </button>
+          ))}
+        </div>
+        <ComparisonButton />
       </div>
       {visible.length ? (
         <ul className="items-list">

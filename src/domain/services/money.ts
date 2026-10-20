@@ -28,9 +28,12 @@ export function spentCents(items: ShoppingItem[]): number {
 }
 export function formatMoney(cents: number | bigint): string {
   // Integer currency parts avoid losing the last cent for large, valid budgets.
-  const rounded = typeof cents === 'bigint'
-    ? (cents < 0n ? -cents : cents)
-    : BigInt(new Big(cents).abs().round(0, Big.roundHalfUp).toFixed(0));
+  const rounded =
+    typeof cents === 'bigint'
+      ? cents < 0n
+        ? -cents
+        : cents
+      : BigInt(new Big(cents).abs().round(0, Big.roundHalfUp).toFixed(0));
   const fraction = (rounded % 100n).toString().padStart(2, '0');
   const formatted = currency
     .formatToParts(rounded / 100n)
