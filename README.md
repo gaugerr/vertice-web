@@ -36,6 +36,7 @@ O build está em `dist`. O orçamento de JavaScript de 250 KiB gzip inclui tamb�
 - Filtros de itens pendentes e comprados.
 - Totais em reais com aritmética decimal e arredondamento por item.
 - Orçamento opcional por lista, saldo global entre categorias e avisos discretos a partir de 80% do limite.
+- Comparador offline de duas embalagens por peso, volume ou unidades, com acesso no início e nas categorias.
 - IndexedDB com consultas reativas, transações e atualização entre abas.
 - Exportação e restauração de backups JSON; importação do formato Flutter v1.
 - Manifesto e ícones instaláveis; service worker de produção com cache e atualização por confirmação.
@@ -102,6 +103,14 @@ A importação aceita formatos v1 (Flutter), v2 (web sem orçamento) e v3. Lista
 Informe um limite opcional ao criar ou editar uma lista, ou use Definir/Ajustar orçamento durante a compra. Para remover o limite, limpe o campo e salve. O orçamento considera apenas itens marcados como pegos, com preços e quantidades já salvos; filtros e categorias não restringem o gasto global.
 
 A partir de 80% aparece um aviso discreto; em 100%, Limite atingido; acima disso, o valor excedente. Nenhum aviso bloqueia a compra. O banco IndexedDB evolui da versão 1 para 2 mantendo os registros e atribuindo orçamento nulo às listas anteriores. O fluxo funciona offline e atualiza outras abas abertas.
+
+## Qual compensa?
+
+Use Comparar no início ou dentro de uma categoria. Informe o preço da embalagem e seu conteúdo em duas opções. O resultado compara preço por kg, litro ou unidade, informa empate ou a alternativa mais barata e calcula economia relativa à mais cara. Compara somente preço por quantidade; qualidade, concentração e rendimento ficam a seu critério.
+
+Os cálculos usam decimais exatos e produtos cruzados; o arredondamento ocorre só na apresentação. Peso aceita g/kg, volume aceita ml/L e unidades exigem contagem inteira. Preços devem ser positivos com até duas casas decimais; conteúdo admite até três casas para peso e volume. Use vírgula ou ponto decimal, sem separadores de milhares.
+
+Cada tipo mantém seus próprios campos durante a sessão da aba, inclusive ao fechar o painel, mudar de categoria e recarregar. Limpar comparação apaga somente o tipo atual. A chave versionada do sessionStorage é exclusiva da ferramenta; se o navegador bloquear esse armazenamento, o preenchimento continua em memória e o app informa a limitação. O comparador não grava no IndexedDB, não altera produtos/orçamentos e não entra no backup. Não depende de internet, IA ou serviços externos após o app estar preparado para uso offline.
 
 No Flutter, exporte o backup existente e importe o arquivo aqui. Os IDs numéricos antigos são mapeados para UUIDs mantendo referências. Preços e quantidades são preservados como decimais; o estado 0/1 vira booleano. Datas legadas em milissegundos são interpretadas no fuso local do navegador que importa. Confira a data se estiver migrando entre fusos diferentes.
 

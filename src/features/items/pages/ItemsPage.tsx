@@ -8,6 +8,7 @@ import { formatMoney, spentCents } from '../../../domain/services/money';
 import { AddItemForm } from '../components/AddItemForm';
 import { ItemRow } from '../components/ItemRow';
 import { BudgetPanel } from '../../budget/components/BudgetPanel';
+import { ComparisonButton } from '../../comparator/components/ComparisonButton';
 
 export default function ItemsPage() {
   const { listId = '', id = '' } = useParams();
@@ -61,6 +62,7 @@ export default function ItemsPage() {
         </p>
       </div>
       <AddItemForm listId={listId} categoryId={id} />
+      <div className="shopping-tools">
       <div className="filter-bar" role="group" aria-label="Filtrar itens">
         {(
           [
@@ -73,6 +75,8 @@ export default function ItemsPage() {
             {label}
           </button>
         ))}
+      </div>
+      <ComparisonButton />
       </div>
       {visible.length ? (
         <ul className="items-list">

@@ -6,6 +6,7 @@ import { Button } from '../../../shared/ui/Button';
 import { Loading, QueryError } from '../../../shared/ui/Feedback';
 import { ListForm } from '../components/ListForm';
 import { ListCard } from '../components/ListCard';
+import { ComparisonButton } from '../../comparator/components/ComparisonButton';
 
 export default function ListsPage() {
   const result = useQuery(() => repository.getLists(), []);
@@ -27,7 +28,7 @@ export default function ListsPage() {
           <br className="desktop-break" /> Com você, mesmo sem internet.
         </p>
       </section>
-      <div className="section-heading">
+      <div className="section-heading has-actions">
         <div>
           <h2>
             Minhas listas{' '}
@@ -35,10 +36,13 @@ export default function ListsPage() {
           </h2>
           <p>Um lugar para cada compra.</p>
         </div>
+        <div className="section-actions">
+        <ComparisonButton />
         <Button onClick={() => setCreating(true)}>
           <Plus size={19} aria-hidden="true" />
           <span>Nova lista</span>
         </Button>
+        </div>
       </div>
       {result.status === 'loading' ? (
         <Loading />

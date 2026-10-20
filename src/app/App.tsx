@@ -5,6 +5,7 @@ import { PwaStatus } from '../pwa/components/PwaStatus';
 import { InstallButton } from '../pwa/components/InstallButton';
 import { hasUnsavedChanges } from '../shared/lib/drafts';
 import { hasPendingWrites } from '../data/database/writes';
+import { ComparisonProvider } from '../features/comparator/components/ComparisonProvider';
 
 export default function App() {
   const location = useLocation();
@@ -34,7 +35,7 @@ export default function App() {
     window.scrollTo(0, 0);
   }, [location.pathname]);
   return (
-    <>
+    <ComparisonProvider>
       <a href="#main" className="skip-link">
         Pular para o conteúdo
       </a>
@@ -78,6 +79,6 @@ export default function App() {
           </Link>
         </div>
       </footer>
-    </>
+    </ComparisonProvider>
   );
 }
