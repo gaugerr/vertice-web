@@ -37,18 +37,16 @@ describe('local repository', () => {
       categories: 'id, shoppingListId, [shoppingListId+position]',
       items: 'id, shoppingListId, categoryId, [categoryId+createdAt]',
     });
-    await old
-      .table('lists')
-      .add({
+    const oldLists = old.table('lists');
+    const oldCategories = old.table('categories');
+    await oldLists.add({
         id,
         storeName: 'Compra existente',
         date: input.date,
         description: 'Preservar',
         ...timestamps,
       });
-    await old
-      .table('categories')
-      .add({ id: categoryId, shoppingListId: id, title: 'Essenciais', position: 0, ...timestamps });
+    await oldCategories.add({ id: categoryId, shoppingListId: id, title: 'Essenciais', position: 0, ...timestamps });
     const item = {
       id: itemId,
       shoppingListId: id,

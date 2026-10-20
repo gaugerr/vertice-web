@@ -136,21 +136,18 @@ test('a populated old browser database is upgraded and exported without losing p
       updatedAt: '2026-10-19T12:00:00.000Z',
     };
     const transaction = db.transaction(['lists', 'categories', 'items'], 'readwrite');
-    transaction
-      .objectStore('lists')
-      .put({
+    const oldLists = transaction.objectStore('lists');
+    const oldCategories = transaction.objectStore('categories');
+    const oldItems = transaction.objectStore('items');
+    oldLists.put({
         id: list,
         storeName: 'Compra antiga',
         date: '2026-10-19',
         description: 'Preservada',
         ...timestamps,
       });
-    transaction
-      .objectStore('categories')
-      .put({ id: category, shoppingListId: list, title: 'Essenciais', position: 0, ...timestamps });
-    transaction
-      .objectStore('items')
-      .put({
+    oldCategories.put({ id: category, shoppingListId: list, title: 'Essenciais', position: 0, ...timestamps });
+    oldItems.put({
         id: item,
         shoppingListId: list,
         categoryId: category,
