@@ -114,19 +114,23 @@ test('legacy backup import, invalid backups and empty replacement confirmation',
       },
     ],
   };
-  await page.getByLabel('Arquivo de backup').setInputFiles({
-    name: 'flutter.json',
-    mimeType: 'application/json',
-    buffer: Buffer.from(JSON.stringify(legacy)),
-  });
+  await page
+    .getByLabel('Arquivo de backup')
+    .setInputFiles({
+      name: 'flutter.json',
+      mimeType: 'application/json',
+      buffer: Buffer.from(JSON.stringify(legacy)),
+    });
   await expect(page.getByRole('heading', { name: 'Restaurar backup?' })).toBeVisible();
   await page.getByRole('button', { name: 'Substituir e restaurar' }).click();
   await expect(page.getByText('Backup restaurado.', { exact: true })).toBeVisible();
-  await page.getByLabel('Arquivo de backup').setInputFiles({
-    name: 'invalid.json',
-    mimeType: 'application/json',
-    buffer: Buffer.from('{'),
-  });
+  await page
+    .getByLabel('Arquivo de backup')
+    .setInputFiles({
+      name: 'invalid.json',
+      mimeType: 'application/json',
+      buffer: Buffer.from('{'),
+    });
   await expect(page.getByRole('alert')).toContainText('JSON válido');
   await page.getByRole('link', { name: 'Vértice, minhas listas' }).click();
   await page.getByRole('link', { name: 'Abrir lista Mercado importado' }).click();
@@ -190,7 +194,9 @@ test('PWA update preserves data and failed assets are real 404s', async ({
     const registration = await navigator.serviceWorker.getRegistration();
     await registration?.update();
   });
+  const reloaded = page.waitForEvent('load');
   await page.getByRole('button', { name: /Nova versão disponível/ }).click();
+  await reloaded;
   await expect(
     page.getByRole('heading', { name: 'Preservar na atualização', exact: true }),
   ).toBeVisible();
@@ -217,11 +223,13 @@ test('100 items stay usable in a narrow viewport', async ({ page }, info) => {
       shoppingListId: 1,
     })),
   };
-  await page.getByLabel('Arquivo de backup').setInputFiles({
-    name: '100-items.json',
-    mimeType: 'application/json',
-    buffer: Buffer.from(JSON.stringify(legacy)),
-  });
+  await page
+    .getByLabel('Arquivo de backup')
+    .setInputFiles({
+      name: '100-items.json',
+      mimeType: 'application/json',
+      buffer: Buffer.from(JSON.stringify(legacy)),
+    });
   await page.getByRole('button', { name: 'Substituir e restaurar' }).click();
   await expect(page.getByText('Backup restaurado.', { exact: true })).toBeVisible();
   await page.getByRole('link', { name: 'Vértice, minhas listas' }).click();

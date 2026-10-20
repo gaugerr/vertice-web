@@ -27,7 +27,7 @@ jobs:
               const r = await fetch(base + '/online.txt?t=' + Date.now(), {signal: AbortSignal.timeout(5000)});
               if (r.ok && (await r.text()).trim() === 'vertice-online-v1') {
                 const html = await fetch(base, {cache: 'no-store'}).then(r => r.text());
-                if (html.includes('pwa-first-control-v1')) {ready = true; break;}
+                if (html.includes('pwa-first-control-v2')) {ready = true; break;}
               }
             } catch {}
             await new Promise(resolve => setTimeout(resolve, 5000));

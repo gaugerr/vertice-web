@@ -57,7 +57,7 @@ export function ItemForm({ item, onClose }: { item: ShoppingItem; onClose: () =>
           </label>
           <label>
             Unidade
-            <select value={unit} onChange={(e) => setUnit(e.target.value as Unit)}>
+            <select aria-label="Unidade" value={unit} onChange={(e) => setUnit(e.target.value as Unit)}>
               <option value="un">un</option>
               <option value="kg">kg</option>
               <option value="L">L</option>

@@ -25,6 +25,7 @@ const listeners = new Set<() => void>();
 let prompt: InstallPrompt | undefined;
 let updateSW: ((reloadPage?: boolean) => Promise<void>) | undefined;
 let initialized = false;
+let updateAccepted = false;
 function change(patch: Partial<PwaState>) {
   state = { ...state, ...patch };
   for (const listener of listeners) listener();
@@ -52,6 +53,7 @@ export async function applyUpdate(): Promise<void> {
   )
     return;
   await waitForWrites();
+  updateAccepted = true;
   await updateSW?.(true);
 }
 export function initializePwa(): void {
@@ -70,6 +72,13 @@ export function initializePwa(): void {
     change({ installReady: false });
   });
   if (import.meta.env.PROD && 'serviceWorker' in navigator) {
+    navigator.serviceWorker.addEventListener('controllerchange', () => {
+      change({ offlineReady: true, updateReady: false });
+      if (updateAccepted) {
+        updateAccepted = false;
+        window.location.reload();
+      }
+    });
     updateSW = registerSW({
       immediate: true,
       onOfflineReady: () => change({ offlineReady: true }),
