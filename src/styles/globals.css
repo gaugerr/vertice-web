@@ -694,6 +694,32 @@ nav a.active {
 .purchased .item-total {
   color: #b7edce;
 }
+.purchase-form {
+  margin: 12px 4px 4px;
+  padding-top: 16px;
+  border-top: 1px solid #3f5345;
+  gap: 12px;
+}
+.purchase-fields {
+  display: grid;
+  grid-template-columns: minmax(0, 1.5fr) minmax(0, 1fr) minmax(0, 0.9fr);
+  gap: 8px;
+}
+.purchase-fields label {
+  min-width: 0;
+  font-size: 11px;
+}
+.purchase-fields input,
+.purchase-fields select {
+  min-width: 0;
+  padding-inline: 10px;
+  font-size: 16px;
+}
+.purchase-actions {
+  display: flex;
+  justify-content: flex-end;
+  gap: 8px;
+}
 .sticky-total {
   position: sticky;
   bottom: max(16px, env(safe-area-inset-bottom));

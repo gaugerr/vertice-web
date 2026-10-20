@@ -30,9 +30,8 @@ export const listInputSchema = z.object({
   date: dateSchema,
   description: z.string().max(10000, 'Use até 10.000 caracteres.'),
 });
-export const itemInputSchema = z
+export const purchaseDetailsSchema = z
   .object({
-    name: nameSchema,
     unitPrice: decimalSchema,
     quantity: decimalSchema.refine(
       (v) => new Big(v).gt(0),
@@ -51,6 +50,7 @@ export const itemInputSchema = z
       });
     }
   });
+export const itemInputSchema = purchaseDetailsSchema.safeExtend({ name: nameSchema });
 const timestamps = { createdAt: z.iso.datetime(), updatedAt: z.iso.datetime() };
 export const listSchema = listInputSchema.extend({ id: z.uuid(), ...timestamps }).strict();
 export const categorySchema = z

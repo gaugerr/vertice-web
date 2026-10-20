@@ -1,4 +1,4 @@
-import { useState } from 'react';
+import { useCallback, useState } from 'react';
 import { Link, useParams } from 'react-router-dom';
 import { Check, ListChecks } from 'lucide-react';
 import { repository } from '../../../app/services';
@@ -11,6 +11,15 @@ import { ItemRow } from '../components/ItemRow';
 export default function ItemsPage() {
   const { listId = '', id = '' } = useParams();
   const [filter, setFilter] = useState<'all' | 'pending' | 'purchased'>('all');
+  const [purchaseEditors, setPurchaseEditors] = useState<Set<string>>(() => new Set());
+  const onPurchaseEditingChange = useCallback((itemId: string, editing: boolean) => {
+    setPurchaseEditors((previous) => {
+      const next = new Set(previous);
+      if (editing) next.add(itemId);
+      else next.delete(itemId);
+      return next;
+    });
+  }, []);
   const result = useQuery(async () => {
     const [list, category, items] = await Promise.all([
       repository.getList(listId),
@@ -26,7 +35,10 @@ export default function ItemsPage() {
     return <Missing label="Esta categoria não está mais disponível." />;
   const purchased = items.filter((item) => item.isPurchased).length;
   const visible = items.filter(
-    (item) => filter === 'all' || (filter === 'purchased' ? item.isPurchased : !item.isPurchased),
+    (item) =>
+      purchaseEditors.has(item.id) ||
+      filter === 'all' ||
+      (filter === 'purchased' ? item.isPurchased : !item.isPurchased),
   );
   return (
     <>
@@ -57,7 +69,11 @@ export default function ItemsPage() {
       {visible.length ? (
         <ul className="items-list">
           {visible.map((item) => (
-            <ItemRow key={item.id} item={item} />
+            <ItemRow
+              key={item.id}
+              item={item}
+              onPurchaseEditingChange={onPurchaseEditingChange}
+            />
           ))}
         </ul>
       ) : (

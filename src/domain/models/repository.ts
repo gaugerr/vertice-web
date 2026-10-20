@@ -1,6 +1,7 @@
 import type {
   Category,
   ItemInput,
+  PurchaseDetails,
   ListInput,
   ShoppingItem,
   ShoppingList,
@@ -19,6 +20,7 @@ export interface ShoppingRepository {
   deleteListCascade(id: string): Promise<void>;
   addItem(listId: string, categoryId: string, name: string): Promise<string>;
   updateItem(id: string, input: ItemInput): Promise<void>;
+  updatePurchaseDetails(id: string, input: PurchaseDetails): Promise<void>;
   setPurchased(id: string, purchased: boolean): Promise<void>;
   deleteItem(id: string): Promise<void>;
   exportSnapshot(): Promise<ShoppingSnapshot>;

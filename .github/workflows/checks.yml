@@ -24,8 +24,8 @@ jobs:
           else
             npm install --ignore-scripts --no-audit --no-fund
           fi
-      - name: Format source and commit initial lockfile
-        if: github.event_name == 'push' && github.ref == 'refs/heads/main'
+      - name: Format source and maintain lockfile
+        if: github.event_name == 'push'
         run: |
           npm run format
           git add --update

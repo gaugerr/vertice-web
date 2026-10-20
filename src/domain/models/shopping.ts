@@ -41,6 +41,7 @@ export interface ItemInput {
   quantity: string;
   unit: Unit;
 }
+export type PurchaseDetails = Pick<ItemInput, 'unitPrice' | 'quantity' | 'unit'>;
 export const DEFAULT_CATEGORIES = [
   'Essenciais',
   'Hortifruti',

@@ -9,18 +9,22 @@ import { ErrorMessage } from '../../../shared/ui/Feedback';
 export function AddItemForm({ listId, categoryId }: { listId: string; categoryId: string }) {
   const [name, setName] = useState('');
   const input = useRef<HTMLInputElement>(null);
+  const revision = useRef(0);
   const mutation = useMutation();
   useUnsavedChanges(name.trim().length > 0);
   async function submit(event: FormEvent) {
     event.preventDefault();
-    const result = await mutation.run(() => repository.addItem(listId, categoryId, name));
-    if (result.ok) {
+    // Keep mobile keyboard activation inside the submit gesture, before the write.
+    input.current?.focus({ preventScroll: true });
+    const submittedName = name;
+    const submittedRevision = revision.current;
+    const result = await mutation.run(() => repository.addItem(listId, categoryId, submittedName));
+    if (result.ok && revision.current === submittedRevision) {
       setName('');
-      input.current?.focus();
     }
   }
   return (
-    <form className="add-item-form" onSubmit={submit}>
+    <form className="add-item-form" onSubmit={submit} aria-busy={mutation.pending}>
       <div className="add-item-control">
         <label className="sr-only" htmlFor="new-item">
           Adicionar item
@@ -31,12 +35,23 @@ export function AddItemForm({ listId, categoryId }: { listId: string; categoryId
           value={name}
           required
           maxLength={50}
-          disabled={mutation.pending}
-          onChange={(e) => setName(e.target.value)}
+          enterKeyHint="enter"
+          onChange={(e) => {
+            revision.current += 1;
+            setName(e.target.value);
+          }}
           placeholder="O que você precisa comprar?"
           autoComplete="off"
         />
-        <Button type="submit" aria-label="Adicionar item" disabled={mutation.pending}>
+        <Button
+          type="submit"
+          aria-label="Adicionar item"
+          disabled={mutation.pending}
+          onPointerDown={(event) => {
+            // Tapping + must not move focus from the text field to the button.
+            if (event.isPrimary && event.button === 0) event.preventDefault();
+          }}
+        >
           <Plus size={22} />
         </Button>
       </div>

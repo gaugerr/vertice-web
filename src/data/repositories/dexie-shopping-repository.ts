@@ -2,10 +2,16 @@ import { type ShoppingRepository } from '../../domain/models/repository';
 import {
   DEFAULT_CATEGORIES,
   type ItemInput,
+  type PurchaseDetails,
   type ListInput,
   type ShoppingSnapshot,
 } from '../../domain/models/shopping';
-import { itemInputSchema, listInputSchema, nameSchema } from '../../domain/schemas/shopping';
+import {
+  itemInputSchema,
+  listInputSchema,
+  nameSchema,
+  purchaseDetailsSchema,
+} from '../../domain/schemas/shopping';
 import { VerticeDatabase } from '../database/database';
 import { trackWrite } from '../database/writes';
 import { validateSnapshot } from '../backup/backup';
@@ -101,6 +107,10 @@ export class DexieShoppingRepository implements ShoppingRepository {
   }
   async setPurchased(id: string, isPurchased: boolean): Promise<void> {
     await this.changeItem(id, { isPurchased });
+  }
+  async updatePurchaseDetails(id: string, input: PurchaseDetails): Promise<void> {
+    // Reuse monetary validation while preserving names and checkboxes changed in other tabs.
+    await this.changeItem(id, purchaseDetailsSchema.parse(input));
   }
   private async changeItem(
     id: string,
