@@ -1,5 +1,5 @@
 import { afterEach, beforeEach, describe, expect, it, vi } from 'vitest';
-import { fireEvent, render, screen } from '@testing-library/react';
+import { cleanup, fireEvent, render, screen } from '@testing-library/react';
 import { ComparisonProvider } from './ComparisonProvider';
 import { ComparisonButton } from './ComparisonButton';
 
@@ -8,6 +8,7 @@ beforeEach(() => {
   vi.spyOn(window, 'scrollTo').mockImplementation(() => {});
 });
 afterEach(() => {
+  cleanup();
   vi.restoreAllMocks();
   sessionStorage.clear();
 });

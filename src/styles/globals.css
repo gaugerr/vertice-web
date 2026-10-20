@@ -624,7 +624,8 @@ nav a.active {
   margin-bottom: 0;
 }
 .shopping-tools .filter-bar button {
-  padding-inline: 10px;
+  padding-inline: 6px;
+  font-size: 11px;
 }
 .compare-button {
   min-height: 44px;
