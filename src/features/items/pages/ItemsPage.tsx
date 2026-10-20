@@ -85,7 +85,7 @@ export default function ItemsPage() {
           </p>
         </div>
       )}
-      <aside className="sticky-total">
+      <aside className={`sticky-total ${purchaseEditors.size ? 'editing-purchase' : ''}`}>
         <div>
           <span className="eyebrow">TOTAL DA CATEGORIA</span>
           <strong aria-label="Total da categoria">{formatMoney(spentCents(items))}</strong>

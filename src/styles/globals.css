@@ -738,6 +738,9 @@ nav a.active {
   font-size: 9px;
   color: #9bb7a3;
 }
+.sticky-total.editing-purchase {
+  position: static;
+}
 .sticky-total strong {
   font-size: 27px;
   font-weight: 550;

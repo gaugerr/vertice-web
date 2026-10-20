@@ -55,6 +55,9 @@ test.describe('fast entry with touch input', () => {
     expect(await page.evaluate(() => document.documentElement.scrollWidth <= innerWidth)).toBe(
       true,
     );
+    // The floating total must never cover the price editor or its save action.
+    await expect(page.getByRole('complementary')).toHaveCSS('position', 'static');
+    await form.getByRole('button', { name: 'Salvar valores' }).scrollIntoViewIfNeeded();
     await info.attach('quick-price-mobile', {
       body: await page.screenshot(),
       contentType: 'image/png',
