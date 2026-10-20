@@ -1,45 +1,50 @@
 # Validação da versão 0.1.0
 
-## Resultado
+Publicado em **https://vertice-web-navy.vercel.app**, projeto Vercel `vertice-web`, repositório [gaugerr/vertice-web](https://github.com/gaugerr/vertice-web), branch `main`.
 
-Aplicativo publicado em **https://vertice-web-navy.vercel.app**, projeto Vercel `vertice-web`, equipe `gaugerrs-projects`. O repositório é [gaugerr/vertice-web](https://github.com/gaugerr/vertice-web), branch `main`.
+Código validado: `44a28f945f7f67a5e061ee8938fdc5fde3f9583b`. O registro posterior desta validação altera somente a documentação.
 
-Código validado no commit `b68c0bac01b3a01dbbc22ebe74f394593284a3f2`, que formata a implementação `71ee99b6364c050bffd55103b5530c3e20b4745a`. Alterações posteriores nesta entrega são de documentação.
+## Fluxo rápido no mercado
+
+- Adicionar pelo Enter ou pelo botão + mantém o campo ativo, sem desativá-lo durante a gravação.
+- Texto alterado enquanto o banco salva não é apagado quando a gravação anterior termina.
+- Marcar um item abre preço, quantidade e unidade na própria linha. O preço recebe foco e seleção no mesmo gesto de toque, antes da gravação assíncrona; o campo solicita teclado decimal.
+- Enter no preço ou “Salvar valores” grava os dados e fecha a edição.
+- O filtro “Pendentes” mantém o item visível enquanto seus valores são editados.
+- O total deixa de flutuar durante a edição para não cobrir os campos ou o botão.
+- A marcação é gravada ao tocar no checkbox. Os valores novos só são gravados ao confirmar; fechar com alterações pede confirmação para descartá-las.
+- Salvar valores não sobrescreve nomes ou marcações modificados por outra aba.
 
 ## Checks do código
 
-[Execução 39399340118](https://github.com/gaugerr/vertice-web/actions/runs/39399340118): **success**.
+[Execução na main 39447954682](https://github.com/gaugerr/vertice-web/actions/runs/39447954682): **success**. A mesma revisão passou antes na [branch separada](https://github.com/gaugerr/vertice-web/actions/runs/39447601478).
 
-- Dependências exatas instaladas; `package-lock.json` gerado e versionado.
-- TypeScript estrito: aprovado.
-- ESLint e Prettier: aprovados.
-- Vitest: **25 testes aprovados**, em quatro arquivos.
+- TypeScript estrito, ESLint e Prettier: aprovados.
+- Vitest: **29 testes aprovados**, em cinco arquivos.
 - Build de produção: aprovado.
-- JavaScript total, incluindo módulos sob demanda: **149,2 KiB gzip**, abaixo do orçamento de 250 KiB.
-- Playwright: **10 cenários aprovados e 2 deliberadamente ignorados**, em Chromium e WebKit.
-- Ciclo de instalação/reabertura offline e atualização de service worker executado em Chromium; os dois casos equivalentes não são executados em WebKit.
+- JavaScript total, incluindo módulos sob demanda: **149,9 KiB gzip**, abaixo do orçamento de 250 KiB.
+- Playwright em Chromium e WebKit: **12 cenários aprovados e 2 deliberadamente ignorados**.
+- Instalação/reabertura offline e atualização do service worker são verificadas em Chromium; esses dois casos não são executados em WebKit.
 
-Os testes cobrem aritmética decimal, arredondamento por item, isolamento entre listas, validações, rollback, exclusão em cascata, backups, restauração vazia, conversão do Flutter e preservação da ordem dos itens importados.
+Os testes incluem foco com toque simulado, seleção integral do preço, inclusão contínua por Enter e +, salvamento com quantidade fracionária, filtros, acesso ao botão de salvar sem sobreposição e recarga. Também cobrem falhas de armazenamento, preservação de rascunhos, edição concorrente, cálculos, backups, importação do Flutter, múltiplas abas e rolagem entre 100 itens.
 
-No navegador: criação e edição, quantidades fracionárias, preço, checkbox, recarga direta de rotas, foco dos diálogos, exclusão, importação/exportação, duas abas e rolagem até o último de 100 itens. O teste offline bloqueia a rede de verdade, cria dados, fecha a aba, reabre e exporta os registros. O teste de atualização aguarda a recarga efetiva e verifica que os dados continuam presentes.
-
-[Pacote compilado](https://github.com/gaugerr/vertice-web/actions/runs/39399340118/artifacts/12254825933). É um site estático: deve ser servido por HTTP/HTTPS, não aberto diretamente como arquivo local.
+[Pacote compilado validado](https://github.com/gaugerr/vertice-web/actions/runs/39447601478/artifacts/12276677922). Deve ser servido por HTTP/HTTPS, não aberto como arquivo local.
 
 ## Checks do endereço público
 
-[Execução 39399586366](https://github.com/gaugerr/vertice-web/actions/runs/39399586366): **success**.
+[Execução 39448256326](https://github.com/gaugerr/vertice-web/actions/runs/39448256326): **success**.
 
-- HTTPS público confirmado, sem sessão de login da Vercel.
-- Manifesto em modo standalone e service worker JavaScript confirmado.
-- Service worker com `Cache-Control: no-store`.
-- Asset inexistente retorna 404, sem receber HTML da SPA.
-- Fluxos de interface executados contra a URL da Vercel: **9 cenários aprovados e 1 ignorado**.
-- O ciclo de atualização sintética é exclusivo do servidor de testes local; a navegação, persistência offline, backups, múltiplas abas e lista de 100 itens também foram verificados no site publicado.
+- Aguardou a identificação desta versão no HTML público.
+- HTTPS, manifesto standalone, service worker JavaScript e política de cache conferidos.
+- Asset inexistente retorna 404.
+- **11 cenários aprovados e 1 ignorado** contra o endereço da Vercel.
+- Inclui tocar no checkbox, digitar o preço selecionado, salvar valores offline, fechar a aba, reabrir e conferir os valores e o total.
+- O teste de atualização sintética é exclusivo do servidor local de testes.
 
 ## Limites da validação
 
-As verificações automatizadas não medem a GPU, o teclado virtual ou a instalação em um celular físico. Instalação e experiência no iPhone físico ainda precisam ser conferidas no aparelho.
+Toque, foco e seleção foram verificados em navegadores automatizados. A abertura e permanência do teclado virtual, desempenho e instalação em celulares físicos ainda precisam ser conferidos no aparelho.
 
-O ambiente local não consegue acessar o registry npm pelo proxy; os checks completos foram executados no GitHub Actions. O código e o lockfile exatos estão disponíveis no repositório, e o build validado foi baixado para `dist` no workspace.
+O ambiente local bloqueou o download das dependências pelo proxy. Os checks completos rodaram no GitHub Actions; o código, o lockfile e o build validado estão disponíveis no workspace.
 
-Esta versão funciona localmente, sem login, controle de compradores ou sincronização em nuvem.
+O aplicativo continua local, sem login, controle de compradores ou sincronização em nuvem.
