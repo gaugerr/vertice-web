@@ -103,7 +103,8 @@ function convertLegacy(input: unknown): ShoppingSnapshot {
     if (!value) throw new Error('O backup contém referência inexistente.');
     return value;
   };
-  const now = new Date().toISOString();
+  const importedAt = Date.now();
+  const now = new Date(importedAt).toISOString();
   const timestamps = { createdAt: now, updatedAt: now };
   return validateSnapshot({
     lists: data.lists.map((list) => ({
@@ -119,7 +120,7 @@ function convertLegacy(input: unknown): ShoppingSnapshot {
       position,
       ...timestamps,
     })),
-    items: data.items.map(({ price, quantity, isPurchased, ...item }) => ({
+    items: data.items.map(({ price, quantity, isPurchased, ...item }, index) => ({
       ...item,
       id: reference(items, item.id),
       shoppingListId: reference(lists, item.shoppingListId),
@@ -128,6 +129,8 @@ function convertLegacy(input: unknown): ShoppingSnapshot {
       quantity: new Big(String(quantity)).toFixed(),
       isPurchased: isPurchased === 1,
       ...timestamps,
+      // Legacy records have no creation time; keep their original sequence.
+      createdAt: new Date(importedAt - data.items.length + index + 1).toISOString(),
     })),
   });
 }

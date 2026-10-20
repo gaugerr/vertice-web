@@ -626,8 +626,6 @@ nav a.active {
   border: 1px solid #302a3b;
   border-radius: 12px;
   padding: 10px 12px;
-  content-visibility: auto;
-  contain-intrinsic-size: auto 84px;
 }
 .item-row.purchased {
   background: #18201c;

@@ -235,8 +235,9 @@ test('100 items stay usable in a narrow viewport', async ({ page }, info) => {
     .getByRole('link')
     .filter({ has: page.getByRole('heading', { name: 'Essenciais', exact: true }) })
     .click();
+  await expect(page.getByRole('heading', { name: 'Produto 1', exact: true })).toBeInViewport();
   await page.getByRole('heading', { name: 'Produto 100', exact: true }).scrollIntoViewIfNeeded();
-  await expect(page.getByRole('heading', { name: 'Produto 100', exact: true })).toBeVisible();
+  await expect(page.getByRole('heading', { name: 'Produto 100', exact: true })).toBeInViewport();
   expect(await page.evaluate(() => document.documentElement.scrollWidth <= innerWidth)).toBe(true);
   await info.attach('100-items-mobile', {
     body: await page.screenshot(),

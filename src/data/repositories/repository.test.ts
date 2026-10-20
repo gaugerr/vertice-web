@@ -22,6 +22,21 @@ async function seed() {
   return { listId, category, itemId };
 }
 describe('local repository', () => {
+  it('keeps the original Flutter item order after import', async () => {
+    const data = parseBackup(JSON.stringify({
+      format: 'vertice-backup', version: 1,
+      lists: [{id: 1, storeName: 'Mercado', date: 1792454400000, description: ''}],
+      categories: [{id: 1, title: 'Essenciais', shoppingListId: 1}],
+      items: ['Arroz', 'Feijão', 'Café'].map((name, index) => ({
+        id: index + 1, name, price: 0, quantity: 1, unit: 'un',
+        isPurchased: 0, categoryId: 1, shoppingListId: 1,
+      })),
+    }));
+    await repository.replaceSnapshot(data);
+    expect((await repository.getItemsForCategory(data.categories[0].id)).map(item => item.name))
+      .toEqual(['Arroz', 'Feijão', 'Café']);
+  });
+
   it('creates the list and exactly six ordered categories atomically', async () => {
     const listId = await repository.createListWithCategories(input);
     expect((await repository.getCategories(listId)).map((c) => c.title)).toEqual(
