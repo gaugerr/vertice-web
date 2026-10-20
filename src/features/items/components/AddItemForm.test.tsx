@@ -19,12 +19,12 @@ describe('continuous item entry', () => {
     input.focus();
     fireEvent.change(input, { target: { value: 'Arroz' } });
     fireEvent.submit(input.closest('form')!);
-    expect(input).toBeFocused();
+    expect(input).toHaveFocus();
     expect(input).toBeEnabled();
     fireEvent.change(input, { target: { value: 'Feijão' } });
     await act(async () => finish('saved'));
     expect(input).toHaveValue('Feijão');
-    expect(input).toBeFocused();
+    expect(input).toHaveFocus();
     expect(repository.addItem).toHaveBeenLastCalledWith('list', 'category', 'Arroz');
   });
 
@@ -48,7 +48,7 @@ describe('continuous item entry', () => {
     screen.getByText('Outro campo').focus();
     await act(async () => finish('saved'));
     expect(input).toHaveValue('');
-    expect(screen.getByText('Outro campo')).toBeFocused();
+    expect(screen.getByText('Outro campo')).toHaveFocus();
   });
 
   it('preserves the name and keyboard focus when storage fails', async () => {
@@ -59,7 +59,7 @@ describe('continuous item entry', () => {
     fireEvent.submit(input.closest('form')!);
     await waitFor(() => expect(screen.getByRole('alert')).toHaveTextContent('Sem espaço'));
     expect(input).toHaveValue('Leite');
-    expect(input).toBeFocused();
+    expect(input).toHaveFocus();
     expect(input).toBeEnabled();
   });
 });
