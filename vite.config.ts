@@ -35,6 +35,7 @@ export default defineConfig({
       },
       workbox: {
         cacheId: 'vertice-web',
+        clientsClaim: true,
         globPatterns: ['**/*.{js,css,html,svg,png,ico,woff2}'],
         globIgnores: ['**/online.txt'],
         navigateFallback: '/index.html',

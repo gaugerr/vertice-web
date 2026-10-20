@@ -19,6 +19,7 @@ export function Dialog({
     const dialog = ref.current;
     const previous = document.activeElement;
     dialog?.showModal();
+    dialog?.querySelector<HTMLElement>('input:not([type="hidden"]), textarea, select')?.focus();
     return () => {
       dialog?.close();
       if (previous instanceof HTMLElement && previous.isConnected) previous.focus();

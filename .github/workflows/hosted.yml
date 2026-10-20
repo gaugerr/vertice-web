@@ -1,0 +1,66 @@
+name: Hosted PWA checks
+on:
+  push:
+    paths: [.github/workflows/hosted.yml]
+  workflow_dispatch:
+permissions:
+  contents: read
+jobs:
+  hosted:
+    runs-on: ubuntu-latest
+    timeout-minutes: 12
+    env:
+      VERTICE_BASE_URL: https://vertice-web-navy.vercel.app
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-node@v4
+        with:
+          node-version-file: .nvmrc
+      - name: Wait for public PWA and verify real hosting
+        run: |
+          node --input-type=module <<'JS'
+          import assert from 'node:assert/strict';
+          const base = process.env.VERTICE_BASE_URL;
+          let ready = false;
+          for (let attempt = 0; attempt < 40; attempt++) {
+            try {
+              const r = await fetch(base + '/online.txt?t=' + Date.now(), {signal: AbortSignal.timeout(5000)});
+              if (r.ok && (await r.text()).trim() === 'vertice-online-v1') {
+                const html = await fetch(base, {cache: 'no-store'}).then(r => r.text());
+                if (html.includes('pwa-first-control-v1')) {ready = true; break;}
+              }
+            } catch {}
+            await new Promise(resolve => setTimeout(resolve, 5000));
+          }
+          assert(ready, 'Public PWA is not available');
+          const html = await fetch(base);
+          assert.equal(html.status, 200);
+          const manifest = await fetch(base + '/manifest.webmanifest').then(r => r.json());
+          assert.equal(manifest.display, 'standalone');
+          const sw = await fetch(base + '/sw.js');
+          assert.equal(sw.status, 200);
+          assert.match(sw.headers.get('content-type'), /javascript/);
+          assert.match(sw.headers.get('cache-control'), /no-store/);
+          const missing = await fetch(base + '/assets/does-not-exist.js');
+          assert.equal(missing.status, 404);
+          console.log('Public HTTPS, manifest, JavaScript worker, cache policy and asset 404 verified');
+          JS
+      - run: npm ci --ignore-scripts --no-audit --no-fund
+      - run: npx playwright install --with-deps chromium webkit
+      - name: Exercise the published application
+        run: |
+          cat > playwright.hosted.config.ts <<'TS'
+          import config from './playwright.config';
+          config.use = {...config.use, baseURL: process.env.VERTICE_BASE_URL};
+          delete config.webServer;
+          export default config;
+          TS
+          npx playwright test --config playwright.hosted.config.ts --grep-invert 'PWA update'
+      - uses: actions/upload-artifact@v4
+        if: always()
+        with:
+          name: hosted-browser-results
+          path: |
+            playwright-report/
+            test-results/
+          retention-days: 7
