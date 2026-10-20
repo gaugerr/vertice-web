@@ -27,7 +27,12 @@ export function spentCents(items: ShoppingItem[]): number {
   return total;
 }
 export function formatMoney(cents: number): string {
-  return currency.format(cents / 100);
+  // Integer currency parts avoid losing the last cent for large, valid budgets.
+  const rounded = BigInt(new Big(cents).abs().round(0, Big.roundHalfUp).toFixed(0));
+  const fraction = (rounded % 100n).toString().padStart(2, '0');
+  const formatted = currency.formatToParts(rounded / 100n)
+    .map((part) => part.type === 'fraction' ? fraction : part.value).join('');
+  return cents < 0 ? `-${formatted}` : formatted;
 }
 export function decimalInput(value: string): string {
   return value.replace('.', ',');
