@@ -9,7 +9,10 @@ describe('continuous item entry', () => {
   it('keeps focus during storage and preserves text typed before the write finishes', async () => {
     let finish!: (id: string) => void;
     vi.mocked(repository.addItem).mockImplementationOnce(
-      () => new Promise((resolve) => { finish = resolve; }),
+      () =>
+        new Promise((resolve) => {
+          finish = resolve;
+        }),
     );
     render(<AddItemForm listId="list" categoryId="category" />);
     const input = screen.getByRole('textbox');
@@ -28,9 +31,17 @@ describe('continuous item entry', () => {
   it('clears a committed name without moving focus back after the user leaves', async () => {
     let finish!: (id: string) => void;
     vi.mocked(repository.addItem).mockImplementationOnce(
-      () => new Promise((resolve) => { finish = resolve; }),
+      () =>
+        new Promise((resolve) => {
+          finish = resolve;
+        }),
     );
-    render(<><AddItemForm listId="list" categoryId="category" /><button>Outro campo</button></>);
+    render(
+      <>
+        <AddItemForm listId="list" categoryId="category" />
+        <button>Outro campo</button>
+      </>,
+    );
     const input = screen.getByRole('textbox');
     fireEvent.change(input, { target: { value: 'Café' } });
     fireEvent.submit(input.closest('form')!);

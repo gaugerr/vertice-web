@@ -26,18 +26,31 @@ describe('local repository', () => {
     const { itemId, listId } = await seed();
     await repository.setPurchased(itemId, true);
     await repository.updateItem(itemId, {
-      name: 'Arroz integral', unitPrice: '3', quantity: '1', unit: 'un',
+      name: 'Arroz integral',
+      unitPrice: '3',
+      quantity: '1',
+      unit: 'un',
     });
     await repository.setPurchased(itemId, false);
     await repository.updatePurchaseDetails(itemId, {
-      unitPrice: '12,50', quantity: '0,5', unit: 'kg',
+      unitPrice: '12,50',
+      quantity: '0,5',
+      unit: 'kg',
     });
     expect((await repository.getItemsForList(listId))[0]).toMatchObject({
-      name: 'Arroz integral', unitPrice: '12.5', quantity: '0.5', unit: 'kg', isPurchased: false,
+      name: 'Arroz integral',
+      unitPrice: '12.5',
+      quantity: '0.5',
+      unit: 'kg',
+      isPurchased: false,
     });
-    await expect(repository.updatePurchaseDetails(itemId, {
-      unitPrice: '99', quantity: '0', unit: 'kg',
-    })).rejects.toThrow();
+    await expect(
+      repository.updatePurchaseDetails(itemId, {
+        unitPrice: '99',
+        quantity: '0',
+        unit: 'kg',
+      }),
+    ).rejects.toThrow();
     expect((await repository.getItemsForList(listId))[0].unitPrice).toBe('12.5');
   });
   it('keeps the original Flutter item order after import', async () => {

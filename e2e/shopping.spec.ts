@@ -21,7 +21,9 @@ async function addItem(page: Page, name: string) {
 test.describe('fast entry with touch input', () => {
   test.use({ hasTouch: true });
 
-  test('continuous names and a selected decimal price directly from the checkbox', async ({ page }, info) => {
+  test('continuous names and a selected decimal price directly from the checkbox', async ({
+    page,
+  }, info) => {
     await createList(page);
     const input = page.getByRole('textbox', { name: 'Adicionar item', exact: true });
     await input.fill('Arroz rápido');
@@ -43,13 +45,20 @@ test.describe('fast entry with touch input', () => {
     const form = page.getByRole('form', { name: 'Valores de Arroz rápido' });
     const price = form.getByLabel('Preço por un (R$)', { exact: true });
     await expect(price).toBeFocused();
-    expect(await price.evaluate((el: HTMLInputElement) => [el.selectionStart, el.selectionEnd])).toEqual([0, 1]);
+    expect(
+      await price.evaluate((el: HTMLInputElement) => [el.selectionStart, el.selectionEnd]),
+    ).toEqual([0, 1]);
     await page.keyboard.type('12,50');
     await expect(price).toHaveValue('12,50');
     await form.getByLabel('Quantidade', { exact: true }).fill('0,5');
     await form.getByLabel('Unidade', { exact: true }).selectOption('kg');
-    expect(await page.evaluate(() => document.documentElement.scrollWidth <= innerWidth)).toBe(true);
-    await info.attach('quick-price-mobile', { body: await page.screenshot(), contentType: 'image/png' });
+    expect(await page.evaluate(() => document.documentElement.scrollWidth <= innerWidth)).toBe(
+      true,
+    );
+    await info.attach('quick-price-mobile', {
+      body: await page.screenshot(),
+      contentType: 'image/png',
+    });
     await form.getByLabel('Preço por kg (R$)', { exact: true }).press('Enter');
     await expect(form).toHaveCount(0);
     await expect(page.getByRole('heading', { name: 'Arroz rápido', exact: true })).toHaveCount(0);
@@ -65,7 +74,9 @@ test.describe('fast entry with touch input', () => {
     const savedPrice = page.getByLabel('Preço por kg (R$)', { exact: true });
     await expect(savedPrice).toHaveValue('12,5');
     await expect(savedPrice).toBeFocused();
-    expect(await savedPrice.evaluate((el: HTMLInputElement) => [el.selectionStart, el.selectionEnd])).toEqual([0, 4]);
+    expect(
+      await savedPrice.evaluate((el: HTMLInputElement) => [el.selectionStart, el.selectionEnd]),
+    ).toEqual([0, 4]);
     await page.getByRole('button', { name: 'Fechar', exact: true }).tap();
   });
 });
@@ -130,7 +141,9 @@ test('real offline writes, closing the tab, reopening and exporting records', as
   await expect(
     reopened.getByRole('heading', { name: 'Feijão offline', exact: true }),
   ).toBeVisible();
-  await expect(reopened.getByRole('checkbox', { name: 'Marcar Feijão offline como comprado' })).toBeChecked();
+  await expect(
+    reopened.getByRole('checkbox', { name: 'Marcar Feijão offline como comprado' }),
+  ).toBeChecked();
   await expect(reopened.getByLabel('Total da categoria', { exact: true })).toHaveText(/8,50/);
   expect(
     await reopened.evaluate(() =>

@@ -69,11 +69,7 @@ export default function ItemsPage() {
       {visible.length ? (
         <ul className="items-list">
           {visible.map((item) => (
-            <ItemRow
-              key={item.id}
-              item={item}
-              onPurchaseEditingChange={onPurchaseEditingChange}
-            />
+            <ItemRow key={item.id} item={item} onPurchaseEditingChange={onPurchaseEditingChange} />
           ))}
         </ul>
       ) : (
