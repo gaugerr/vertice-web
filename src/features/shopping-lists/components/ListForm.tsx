@@ -25,9 +25,10 @@ export function ListForm({ list, onClose }: { list?: ShoppingList; onClose: () =
   async function submit(event: FormEvent) {
     event.preventDefault();
     const input = { storeName, date, description };
-    const result = await mutation.run(() =>
-      list ? repository.updateList(list.id, input) : repository.createListWithCategories(input),
-    );
+    const result = await mutation.run(async () => {
+      if (list) await repository.updateList(list.id, input);
+      else await repository.createListWithCategories(input);
+    });
     if (result.ok) onClose();
   }
   return (
