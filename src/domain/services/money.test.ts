@@ -42,7 +42,9 @@ describe('decimal arithmetic', () => {
     ).toThrow();
   });
   it('formats every cent of a large budget and retains fractional unit-price rounding', () => {
-    expect(formatMoney(Number.MAX_SAFE_INTEGER).replace(/\s/g, ' ')).toBe('R$ 90.071.992.547.409,91');
+    expect(formatMoney(Number.MAX_SAFE_INTEGER).replace(/\s/g, ' ')).toBe(
+      'R$ 90.071.992.547.409,91',
+    );
     expect(formatMoney(0.5).replace(/\s/g, ' ')).toBe('R$ 0,01');
     expect(formatMoney(-1250).replace(/\s/g, ' ')).toBe('-R$ 12,50');
   });
