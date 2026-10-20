@@ -1,36 +1,45 @@
-# Estado de validação
+# Validação da versão 0.1.0
 
-## Implementação local
+## Resultado
 
-Código de domínio, banco, interface, backups, configuração PWA, testes e documentação foram escritos em projeto independente.
+Aplicativo publicado em **https://vertice-web-navy.vercel.app**, projeto Vercel `vertice-web`, equipe `gaugerrs-projects`. O repositório é [gaugerr/vertice-web](https://github.com/gaugerr/vertice-web), branch `main`.
 
-## Verificações efetivamente executadas
+Código validado no commit `b68c0bac01b3a01dbbc22ebe74f394593284a3f2`, que formata a implementação `71ee99b6364c050bffd55103b5530c3e20b4745a`. Alterações posteriores nesta entrega são de documentação.
 
-- Parsing dos arquivos JSON de configuração.
-- Parsing JavaScript dos scripts Node e configuração ESLint com `node --check`.
-- Parsing de 45 arquivos JavaScript/TypeScript/TSX pelo parser Babel já instalado no ambiente; 193 importações verificadas, com caminhos relativos existentes e pacotes declarados.
+## Checks do código
 
-## Bloqueios deste ambiente
+[Execução 39399340118](https://github.com/gaugerr/vertice-web/actions/runs/39399340118): **success**.
 
-O proxy de saída em `proxy:8080` está indisponível: a tentativa de acessar o registry npm retorna `Failed to connect to proxy port 8080`. O ambiente não possui as dependências React/TypeScript/Vite em cache. A integração GitHub permite editar repositórios existentes, mas não criar um repositório novo.
+- Dependências exatas instaladas; `package-lock.json` gerado e versionado.
+- TypeScript estrito: aprovado.
+- ESLint e Prettier: aprovados.
+- Vitest: **25 testes aprovados**, em quatro arquivos.
+- Build de produção: aprovado.
+- JavaScript total, incluindo módulos sob demanda: **149,2 KiB gzip**, abaixo do orçamento de 250 KiB.
+- Playwright: **10 cenários aprovados e 2 deliberadamente ignorados**, em Chromium e WebKit.
+- Ciclo de instalação/reabertura offline e atualização de service worker executado em Chromium; os dois casos equivalentes não são executados em WebKit.
 
-Por isso ainda não foram executados: instalação de dependências, geração de lockfile, formatação, TypeScript, ESLint, testes unitários, build, testes Playwright e medição de tamanho. Não há resultado de aprovação para esses checks nesta revisão.
+Os testes cobrem aritmética decimal, arredondamento por item, isolamento entre listas, validações, rollback, exclusão em cascata, backups, restauração vazia, conversão do Flutter e preservação da ordem dos itens importados.
 
-## Próxima validação executável
+No navegador: criação e edição, quantidades fracionárias, preço, checkbox, recarga direta de rotas, foco dos diálogos, exclusão, importação/exportação, duas abas e rolagem até o último de 100 itens. O teste offline bloqueia a rede de verdade, cria dados, fecha a aba, reabre e exporta os registros. O teste de atualização aguarda a recarga efetiva e verifica que os dados continuam presentes.
 
-Em um ambiente com acesso ao registry:
+[Pacote compilado](https://github.com/gaugerr/vertice-web/actions/runs/39399340118/artifacts/12254825933). É um site estático: deve ser servido por HTTP/HTTPS, não aberto diretamente como arquivo local.
 
-```sh
-npm install --ignore-scripts --no-audit --no-fund
-npm run format
-npm run typecheck
-npm run lint
-npm test
-npm run build
-npx playwright install --with-deps chromium webkit
-npm run test:e2e
-```
+## Checks do endereço público
 
-Versionar o `package-lock.json` gerado; a partir daí usar `npm ci`. Corrigir qualquer falha antes de considerar o aplicativo pronto. Depois atualizar este documento com os resultados reais e o tamanho medido do build.
+[Execução 39399586366](https://github.com/gaugerr/vertice-web/actions/runs/39399586366): **success**.
 
-Instalação, teclado virtual e fluidez em celulares físicos Android/iPhone continuam exigindo validação nos aparelhos, mesmo após testes automatizados aprovados.
+- HTTPS público confirmado, sem sessão de login da Vercel.
+- Manifesto em modo standalone e service worker JavaScript confirmado.
+- Service worker com `Cache-Control: no-store`.
+- Asset inexistente retorna 404, sem receber HTML da SPA.
+- Fluxos de interface executados contra a URL da Vercel: **9 cenários aprovados e 1 ignorado**.
+- O ciclo de atualização sintética é exclusivo do servidor de testes local; a navegação, persistência offline, backups, múltiplas abas e lista de 100 itens também foram verificados no site publicado.
+
+## Limites da validação
+
+As verificações automatizadas não medem a GPU, o teclado virtual ou a instalação em um celular físico. Instalação e experiência no iPhone físico ainda precisam ser conferidas no aparelho.
+
+O ambiente local não consegue acessar o registry npm pelo proxy; os checks completos foram executados no GitHub Actions. O código e o lockfile exatos estão disponíveis no repositório, e o build validado foi baixado para `dist` no workspace.
+
+Esta versão funciona localmente, sem login, controle de compradores ou sincronização em nuvem.
