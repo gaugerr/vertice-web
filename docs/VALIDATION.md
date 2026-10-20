@@ -1,50 +1,53 @@
-# Validação da versão 0.1.0
+# Validação da versão 0.1.0 — orçamento por lista
 
-Publicado em **https://vertice-web-navy.vercel.app**, projeto Vercel `vertice-web`, repositório [gaugerr/vertice-web](https://github.com/gaugerr/vertice-web), branch `main`.
+Publicado em **https://vertice-web-navy.vercel.app**, projeto Vercel `vertice-web`, repositório [gaugerr/vertice-web](https://github.com/gaugerr/vertice-web).
 
-Código validado: `44a28f945f7f67a5e061ee8938fdc5fde3f9583b`. O registro posterior desta validação altera somente a documentação.
+Código validado e publicado na `main`: `6dd9af431b2784a5aad411a004707cd5e1f8c744`. O registro posterior desta validação altera somente a documentação. Desenvolvimento isolado na branch `feat/list-budget`.
 
-## Fluxo rápido no mercado
+## Comportamento entregue
 
-- Adicionar pelo Enter ou pelo botão + mantém o campo ativo, sem desativá-lo durante a gravação.
-- Texto alterado enquanto o banco salva não é apagado quando a gravação anterior termina.
-- Marcar um item abre preço, quantidade e unidade na própria linha. O preço recebe foco e seleção no mesmo gesto de toque, antes da gravação assíncrona; o campo solicita teclado decimal.
-- Enter no preço ou “Salvar valores” grava os dados e fecha a edição.
-- O filtro “Pendentes” mantém o item visível enquanto seus valores são editados.
-- O total deixa de flutuar durante a edição para não cobrir os campos ou o botão.
-- A marcação é gravada ao tocar no checkbox. Os valores novos só são gravados ao confirmar; fechar com alterações pede confirmação para descartá-las.
-- Salvar valores não sobrescreve nomes ou marcações modificados por outra aba.
+- Orçamento opcional ao criar ou editar a lista; ajuste rápido no resumo e dentro das categorias. Limpar o campo e salvar remove o limite.
+- O gasto considera apenas itens marcados como pegos, com preços e quantidades já salvos. O saldo é da lista inteira, independentemente de categoria ou filtro.
+- Aviso discreto a partir de 80%, indicação de limite atingido em 100% e valor excedente acima disso. A barra para em 100%; nenhum aviso bloqueia a compra.
+- Valores positivos, até duas casas decimais, guardados em centavos inteiros. A apresentação monetária preserva o último centavo mesmo em valores altos.
+- Atualização entre abas, preservação de rascunhos e erros de gravação sem perda do valor digitado.
+- Fluxo rápido de inclusão e foco no preço preservado. O total permanece sem flutuação durante a edição dos valores para não cobrir os controles.
+
+## Migração e backups
+
+- IndexedDB `vertice_web` atualizado da versão Dexie 1 para 2, preenchendo orçamento nulo nas listas existentes.
+- Migração testada com banco antigo populado, preservando listas, categorias, identificadores, compras, datas, preços e quantidades.
+- Exportação JSON na versão 3, incluindo `budgetCents` em cada lista.
+- Importação dos formatos Flutter v1, web v2 e web v3; versões anteriores recebem orçamento nulo.
+- Dados inválidos são rejeitados antes da restauração; as operações continuam transacionais.
 
 ## Checks do código
 
-[Execução na main 39447954682](https://github.com/gaugerr/vertice-web/actions/runs/39447954682): **success**. A mesma revisão passou antes na [branch separada](https://github.com/gaugerr/vertice-web/actions/runs/39447601478).
+[Execução 39467907950](https://github.com/gaugerr/vertice-web/actions/runs/39467907950): **success**.
 
 - TypeScript estrito, ESLint e Prettier: aprovados.
-- Vitest: **29 testes aprovados**, em cinco arquivos.
+- Vitest: **43 testes aprovados**, em sete arquivos.
 - Build de produção: aprovado.
-- JavaScript total, incluindo módulos sob demanda: **149,9 KiB gzip**, abaixo do orçamento de 250 KiB.
-- Playwright em Chromium e WebKit: **12 cenários aprovados e 2 deliberadamente ignorados**.
+- JavaScript total, incluindo módulos sob demanda: **151,0 KiB gzip**, abaixo do orçamento de 250 KiB.
+- Playwright em Chromium e WebKit: **16 cenários aprovados e 2 deliberadamente ignorados**.
 - Instalação/reabertura offline e atualização do service worker são verificadas em Chromium; esses dois casos não são executados em WebKit.
 
-Os testes incluem foco com toque simulado, seleção integral do preço, inclusão contínua por Enter e +, salvamento com quantidade fracionária, filtros, acesso ao botão de salvar sem sobreposição e recarga. Também cobrem falhas de armazenamento, preservação de rascunhos, edição concorrente, cálculos, backups, importação do Flutter, múltiplas abas e rolagem entre 100 itens.
+Cobertura: fronteiras de 80% e 100%, excesso, decimais e limites seguros; isolamento entre listas; edição independente de metadados; migração real de IndexedDB antigo; compatibilidade dos backups; foco por toque; filtros; duas abas; quantidades fracionárias; rolagem entre 100 produtos; falhas de armazenamento e proteção de rascunhos.
 
-[Pacote compilado validado](https://github.com/gaugerr/vertice-web/actions/runs/39447601478/artifacts/12276677922). Deve ser servido por HTTP/HTTPS, não aberto como arquivo local.
+[Pacote compilado validado](https://github.com/gaugerr/vertice-web/actions/runs/39467907950/artifacts/12285088384). Deve ser servido por HTTP/HTTPS.
 
 ## Checks do endereço público
 
-[Execução 39448256326](https://github.com/gaugerr/vertice-web/actions/runs/39448256326): **success**.
+[Execução 39468192831](https://github.com/gaugerr/vertice-web/actions/runs/39468192831): **success**.
 
-- Aguardou a identificação desta versão no HTML público.
-- HTTPS, manifesto standalone, service worker JavaScript e política de cache conferidos.
-- Asset inexistente retorna 404.
-- **11 cenários aprovados e 1 ignorado** contra o endereço da Vercel.
-- Inclui tocar no checkbox, digitar o preço selecionado, salvar valores offline, fechar a aba, reabrir e conferir os valores e o total.
+- Identificação da versão de orçamento confirmada no HTML público.
+- HTTPS, manifesto standalone, service worker JavaScript e cache conferidos; asset inexistente retorna 404.
+- **15 cenários aprovados e 1 ignorado** no endereço da Vercel.
+- Inclui definir limite e salvar produtos offline, fechar a aba, reabrir e conferir orçamento, excesso, itens e backup exportado.
 - O teste de atualização sintética é exclusivo do servidor local de testes.
 
-## Limites da validação
+## Limites
 
-Toque, foco e seleção foram verificados em navegadores automatizados. A abertura e permanência do teclado virtual, desempenho e instalação em celulares físicos ainda precisam ser conferidos no aparelho.
+Foco e toque foram verificados em navegadores automatizados, com revisão de capturas em largura de celular. Teclado virtual, desempenho e instalação em aparelhos físicos não são comprovados por esses testes.
 
-O ambiente local bloqueou o download das dependências pelo proxy. Os checks completos rodaram no GitHub Actions; o código, o lockfile e o build validado estão disponíveis no workspace.
-
-O aplicativo continua local, sem login, controle de compradores ou sincronização em nuvem.
+Os checks completos rodaram no GitHub Actions; código, lockfile e build validado estão disponíveis no workspace. O aplicativo continua local, sem login, controle de compradores ou sincronização em nuvem.
