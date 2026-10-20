@@ -16,11 +16,14 @@ export function BudgetForm({ list, onClose }: { list: ShoppingList; onClose: () 
   const dirty = value !== original;
   useUnsavedChanges(dirty);
   function close() {
-    if (!mutation.pending && (!dirty || window.confirm('Descartar o orçamento não salvo?'))) onClose();
+    if (!mutation.pending && (!dirty || window.confirm('Descartar o orçamento não salvo?')))
+      onClose();
   }
   async function submit(event: FormEvent) {
     event.preventDefault();
-    const result = await mutation.run(() => repository.setListBudget(list.id, parseBudgetInput(value)));
+    const result = await mutation.run(() =>
+      repository.setListBudget(list.id, parseBudgetInput(value)),
+    );
     if (result.ok) onClose();
   }
   return (
@@ -29,8 +32,12 @@ export function BudgetForm({ list, onClose }: { list: ShoppingList; onClose: () 
         <BudgetField value={value} onChange={setValue} readOnly={mutation.pending} />
         <ErrorMessage message={mutation.error} />
         <div className="dialog-actions">
-          <Button variant="secondary" onClick={close} disabled={mutation.pending}>Cancelar</Button>
-          <Button type="submit" disabled={mutation.pending}>{mutation.pending ? 'Salvando…' : 'Salvar orçamento'}</Button>
+          <Button variant="secondary" onClick={close} disabled={mutation.pending}>
+            Cancelar
+          </Button>
+          <Button type="submit" disabled={mutation.pending}>
+            {mutation.pending ? 'Salvando…' : 'Salvar orçamento'}
+          </Button>
         </div>
       </form>
     </Dialog>

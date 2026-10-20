@@ -16,8 +16,12 @@ describe('list budgets', () => {
     expect(budgetInput(30050)).toBe('300,50');
   });
   it.each([
-    [0, 'normal', 10000], [7999, 'normal', 2001], [8000, 'near', 2000],
-    [9999, 'near', 1], [10000, 'reached', 0], [10001, 'exceeded', -1],
+    [0, 'normal', 10000],
+    [7999, 'normal', 2001],
+    [8000, 'near', 2000],
+    [9999, 'near', 1],
+    [10000, 'reached', 0],
+    [10001, 'exceeded', -1],
   ])('uses the exact status for %i cents spent', (spent, status, remainingCents) => {
     const summary = budgetSummary(10000, spent);
     expect(summary).toMatchObject({ status, remainingCents });
@@ -29,7 +33,10 @@ describe('list budgets', () => {
       { unitPrice: '10', quantity: '0.5', isPurchased: true },
       { unitPrice: '999', quantity: '1', isPurchased: false },
     ] as ShoppingItem[];
-    expect(budgetSummary(1000, spentCents(items))).toMatchObject({ remainingCents: 500, status: 'normal' });
+    expect(budgetSummary(1000, spentCents(items))).toMatchObject({
+      remainingCents: 500,
+      status: 'normal',
+    });
   });
   it('compares large threshold values without overflowing integer multiplication', () => {
     const budget = Number.MAX_SAFE_INTEGER;

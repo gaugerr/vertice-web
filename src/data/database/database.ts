@@ -14,6 +14,8 @@ export class VerticeDatabase extends Dexie {
     });
     this.version(2)
       .stores({ lists: 'id, updatedAt' })
-      .upgrade((transaction) => transaction.table('lists').toCollection().modify({ budgetCents: null }));
+      .upgrade((transaction) =>
+        transaction.table('lists').toCollection().modify({ budgetCents: null }),
+      );
   }
 }

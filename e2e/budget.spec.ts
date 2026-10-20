@@ -1,7 +1,10 @@
 import { test, expect, type Page } from '@playwright/test';
 
 async function openCategory(page: Page, name: string) {
-  await page.getByRole('link').filter({ has: page.getByRole('heading', { name, exact: true }) }).click();
+  await page
+    .getByRole('link')
+    .filter({ has: page.getByRole('heading', { name, exact: true }) })
+    .click();
 }
 
 async function purchase(page: Page, name: string, price: string) {
@@ -19,24 +22,33 @@ async function purchase(page: Page, name: string, price: string) {
   await expect(values).toHaveCount(0);
 }
 
-test('budget spans categories and filters, warns without blocking, and updates between tabs', async ({ page, context }, info) => {
+test('budget spans categories and filters, warns without blocking, and updates between tabs', async ({
+  page,
+  context,
+}, info) => {
   await page.goto('/');
   await page.getByRole('button', { name: 'Nova lista', exact: true }).click();
   await page.getByLabel('Nome da lista', { exact: true }).fill('Compra com orçamento');
   await page.getByLabel('Orçamento da compra (R$)', { exact: true }).fill('100,00');
   await page.getByRole('button', { name: 'Criar lista', exact: true }).click();
   await page.getByRole('link', { name: 'Abrir lista Compra com orçamento', exact: true }).click();
-  await expect(page.getByLabel('Saldo do orçamento', { exact: true })).toContainText(/Restam.*100,00/);
+  await expect(page.getByLabel('Saldo do orçamento', { exact: true })).toContainText(
+    /Restam.*100,00/,
+  );
   await openCategory(page, 'Essenciais');
   await purchase(page, 'Arroz', '80');
   await expect(page.getByText('Orçamento perto do limite', { exact: true })).toBeVisible();
-  await expect(page.getByLabel('Saldo do orçamento', { exact: true })).toContainText(/Restam.*20,00/);
+  await expect(page.getByLabel('Saldo do orçamento', { exact: true })).toContainText(
+    /Restam.*20,00/,
+  );
   await page.getByRole('button', { name: 'Pendentes', exact: true }).click();
   await expect(page.getByRole('heading', { name: 'Arroz', exact: true })).toHaveCount(0);
   await expect(page.getByLabel('Gasto da lista', { exact: true })).toContainText('80,00');
   await page.getByRole('button', { name: 'Todos', exact: true }).click();
   await page.getByRole('checkbox', { name: 'Marcar Arroz como comprado', exact: true }).click();
-  await expect(page.getByLabel('Saldo do orçamento', { exact: true })).toContainText(/Restam.*100,00/);
+  await expect(page.getByLabel('Saldo do orçamento', { exact: true })).toContainText(
+    /Restam.*100,00/,
+  );
   await page.getByRole('checkbox', { name: 'Marcar Arroz como comprado', exact: true }).click();
   await page.getByRole('button', { name: 'Salvar valores', exact: true }).click();
   await expect(page.getByRole('form', { name: 'Valores de Arroz' })).toHaveCount(0);
@@ -47,12 +59,22 @@ test('budget spans categories and filters, warns without blocking, and updates b
   await purchase(page, 'Tomate', '25');
   await expect(page.getByLabel('Total da categoria', { exact: true })).toContainText('25,00');
   await expect(page.getByLabel('Gasto da lista', { exact: true })).toContainText('105,00');
-  await expect(page.getByLabel('Saldo do orçamento', { exact: true })).toContainText(/Ultrapassou em.*5,00/);
-  await expect(page.getByRole('progressbar', { name: 'Orçamento utilizado' })).toHaveAttribute('value', '100');
+  await expect(page.getByLabel('Saldo do orçamento', { exact: true })).toContainText(
+    /Ultrapassou em.*5,00/,
+  );
+  await expect(page.getByRole('progressbar', { name: 'Orçamento utilizado' })).toHaveAttribute(
+    'value',
+    '100',
+  );
   await expect(page.getByRole('dialog')).toHaveCount(0);
   expect(await page.evaluate(() => document.documentElement.scrollWidth <= innerWidth)).toBe(true);
-  await page.getByRole('button', { name: 'Ajustar orçamento', exact: true }).scrollIntoViewIfNeeded();
-  await info.attach('budget-on-mobile', { body: await page.screenshot(), contentType: 'image/png' });
+  await page
+    .getByRole('button', { name: 'Ajustar orçamento', exact: true })
+    .scrollIntoViewIfNeeded();
+  await info.attach('budget-on-mobile', {
+    body: await page.screenshot(),
+    contentType: 'image/png',
+  });
 
   const other = await context.newPage();
   await other.goto(page.url());
@@ -60,7 +82,9 @@ test('budget spans categories and filters, warns without blocking, and updates b
   await page.getByRole('button', { name: 'Ajustar orçamento', exact: true }).click();
   const input = page.getByLabel('Orçamento da compra (R$)', { exact: true });
   await expect(input).toBeFocused();
-  expect(await input.evaluate((el: HTMLInputElement) => [el.selectionStart, el.selectionEnd])).toEqual([0, 6]);
+  expect(
+    await input.evaluate((el: HTMLInputElement) => [el.selectionStart, el.selectionEnd]),
+  ).toEqual([0, 6]);
   await input.fill('0');
   await page.getByRole('button', { name: 'Salvar orçamento', exact: true }).click();
   await expect(page.getByRole('alert')).toContainText('maior que zero');
@@ -80,11 +104,15 @@ test('budget spans categories and filters, warns without blocking, and updates b
   await expect(page.getByLabel('Total da lista', { exact: true })).toContainText('105,00');
 });
 
-test('a populated old browser database is upgraded and exported without losing purchases', async ({ page }) => {
+test('a populated old browser database is upgraded and exported without losing purchases', async ({
+  page,
+}) => {
   // Open a same-origin text resource before any application code creates the database.
   await page.goto('/online.txt');
   const ids = await page.evaluate(async () => {
-    const list = crypto.randomUUID(), category = crypto.randomUUID(), item = crypto.randomUUID();
+    const list = crypto.randomUUID(),
+      category = crypto.randomUUID(),
+      item = crypto.randomUUID();
     const db = await new Promise<IDBDatabase>((resolve, reject) => {
       // Dexie version 1 uses native IndexedDB version 10.
       const request = indexedDB.open('vertice_web', 10);
@@ -103,11 +131,36 @@ test('a populated old browser database is upgraded and exported without losing p
       request.onsuccess = () => resolve(request.result);
       request.onerror = () => reject(request.error);
     });
-    const timestamps = { createdAt: '2026-10-19T12:00:00.000Z', updatedAt: '2026-10-19T12:00:00.000Z' };
+    const timestamps = {
+      createdAt: '2026-10-19T12:00:00.000Z',
+      updatedAt: '2026-10-19T12:00:00.000Z',
+    };
     const transaction = db.transaction(['lists', 'categories', 'items'], 'readwrite');
-    transaction.objectStore('lists').put({ id: list, storeName: 'Compra antiga', date: '2026-10-19', description: 'Preservada', ...timestamps });
-    transaction.objectStore('categories').put({ id: category, shoppingListId: list, title: 'Essenciais', position: 0, ...timestamps });
-    transaction.objectStore('items').put({ id: item, shoppingListId: list, categoryId: category, name: 'Arroz antigo', unitPrice: '20', quantity: '0.5', unit: 'kg', isPurchased: true, ...timestamps });
+    transaction
+      .objectStore('lists')
+      .put({
+        id: list,
+        storeName: 'Compra antiga',
+        date: '2026-10-19',
+        description: 'Preservada',
+        ...timestamps,
+      });
+    transaction
+      .objectStore('categories')
+      .put({ id: category, shoppingListId: list, title: 'Essenciais', position: 0, ...timestamps });
+    transaction
+      .objectStore('items')
+      .put({
+        id: item,
+        shoppingListId: list,
+        categoryId: category,
+        name: 'Arroz antigo',
+        unitPrice: '20',
+        quantity: '0.5',
+        unit: 'kg',
+        isPurchased: true,
+        ...timestamps,
+      });
     await new Promise<void>((resolve, reject) => {
       transaction.oncomplete = () => resolve();
       transaction.onabort = () => reject(transaction.error);
@@ -122,7 +175,9 @@ test('a populated old browser database is upgraded and exported without losing p
   await page.getByRole('button', { name: 'Definir orçamento', exact: true }).click();
   await page.getByLabel('Orçamento da compra (R$)', { exact: true }).fill('20');
   await page.getByRole('button', { name: 'Salvar orçamento', exact: true }).click();
-  await expect(page.getByLabel('Saldo do orçamento', { exact: true })).toContainText(/Restam.*10,00/);
+  await expect(page.getByLabel('Saldo do orçamento', { exact: true })).toContainText(
+    /Restam.*10,00/,
+  );
   await page.getByRole('link', { name: 'Dados e aplicativo', exact: true }).click();
   const download = page.waitForEvent('download');
   await page.getByRole('button', { name: 'Exportar backup', exact: true }).click();
@@ -131,6 +186,10 @@ test('a populated old browser database is upgraded and exported without losing p
   for await (const chunk of stream!) chunks.push(Buffer.from(chunk));
   const backup = JSON.parse(Buffer.concat(chunks).toString());
   expect(backup.version).toBe(3);
-  expect(backup.lists[0]).toMatchObject({ id: ids.list, description: 'Preservada', budgetCents: 2000 });
+  expect(backup.lists[0]).toMatchObject({
+    id: ids.list,
+    description: 'Preservada',
+    budgetCents: 2000,
+  });
   expect(backup.items[0]).toMatchObject({ id: ids.item, isPurchased: true, quantity: '0.5' });
 });

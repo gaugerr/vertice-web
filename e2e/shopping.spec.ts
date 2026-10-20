@@ -152,7 +152,9 @@ test('real offline writes, closing the tab, reopening and exporting records', as
     reopened.getByRole('checkbox', { name: 'Marcar Feijão offline como comprado' }),
   ).toBeChecked();
   await expect(reopened.getByLabel('Total da categoria', { exact: true })).toHaveText(/8,50/);
-  await expect(reopened.getByLabel('Saldo do orçamento', { exact: true })).toContainText(/Ultrapassou em.*1,00/);
+  await expect(reopened.getByLabel('Saldo do orçamento', { exact: true })).toContainText(
+    /Ultrapassou em.*1,00/,
+  );
   expect(
     await reopened.evaluate(() =>
       fetch('/online.txt?offline-proof=1', { cache: 'no-store' }).then(

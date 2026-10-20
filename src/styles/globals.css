@@ -756,10 +756,22 @@ nav a.active {
   gap: 8px 12px;
   font-size: 12px;
 }
-.budget-heading { color: #cfc2df; }
-.budget-heading .button { min-height: 44px; padding: 8px 12px; font-size: 12px; }
-.budget-amounts { margin-top: 12px; color: #c5bfce; }
-.budget-balance { color: var(--budget-color); font-weight: 600; }
+.budget-heading {
+  color: #cfc2df;
+}
+.budget-heading .button {
+  min-height: 44px;
+  padding: 8px 12px;
+  font-size: 12px;
+}
+.budget-amounts {
+  margin-top: 12px;
+  color: #c5bfce;
+}
+.budget-balance {
+  color: var(--budget-color);
+  font-weight: 600;
+}
 .budget-panel progress {
   display: block;
   appearance: none;
@@ -772,13 +784,30 @@ nav a.active {
   background: #ffffff12;
   accent-color: var(--budget-color);
 }
-.budget-panel progress::-webkit-progress-bar { background: #ffffff12; }
-.budget-panel progress::-webkit-progress-value { background: var(--budget-color); }
-.budget-panel progress::-moz-progress-bar { background: var(--budget-color); }
-.budget-warning { color: var(--budget-color); font-size: 12px; margin-top: 8px; }
-.budget-warning:empty { margin: 0; }
-.budget-near, .budget-reached { --budget-color: #f4ca80; }
-.budget-exceeded { --budget-color: #f0a3aa; }
+.budget-panel progress::-webkit-progress-bar {
+  background: #ffffff12;
+}
+.budget-panel progress::-webkit-progress-value {
+  background: var(--budget-color);
+}
+.budget-panel progress::-moz-progress-bar {
+  background: var(--budget-color);
+}
+.budget-warning {
+  color: var(--budget-color);
+  font-size: 12px;
+  margin-top: 8px;
+}
+.budget-warning:empty {
+  margin: 0;
+}
+.budget-near,
+.budget-reached {
+  --budget-color: #f4ca80;
+}
+.budget-exceeded {
+  --budget-color: #f0a3aa;
+}
 .budget-compact {
   margin: 12px 0 0;
   padding: 8px 0 0;
@@ -787,7 +816,10 @@ nav a.active {
   border-radius: 0;
   background: transparent;
 }
-.budget-compact .budget-heading, .budget-compact .budget-amounts { font-size: 11px; }
+.budget-compact .budget-heading,
+.budget-compact .budget-amounts {
+  font-size: 11px;
+}
 .sticky-total .eyebrow {
   display: block;
   font-size: 9px;

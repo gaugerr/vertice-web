@@ -6,10 +6,18 @@ import { Button } from '../../../shared/ui/Button';
 import { BudgetForm } from './BudgetForm';
 
 const messages: Record<BudgetStatus, string> = {
-  none: '', normal: '', near: 'Orçamento perto do limite', reached: 'Limite atingido', exceeded: 'Orçamento ultrapassado',
+  none: '',
+  normal: '',
+  near: 'Orçamento perto do limite',
+  reached: 'Limite atingido',
+  exceeded: 'Orçamento ultrapassado',
 };
 
-export function BudgetPanel({ list, spent, compact = false }: {
+export function BudgetPanel({
+  list,
+  spent,
+  compact = false,
+}: {
   list: ShoppingList;
   spent: number;
   compact?: boolean;
@@ -23,7 +31,11 @@ export function BudgetPanel({ list, spent, compact = false }: {
       aria-label="Orçamento da lista"
     >
       <div className="budget-heading">
-        <span>{list.budgetCents === null ? 'Sem orçamento definido' : `Limite da lista · ${formatMoney(list.budgetCents)}`}</span>
+        <span>
+          {list.budgetCents === null
+            ? 'Sem orçamento definido'
+            : `Limite da lista · ${formatMoney(list.budgetCents)}`}
+        </span>
         <Button variant="secondary" onClick={() => setEditing(true)}>
           {list.budgetCents === null ? 'Definir orçamento' : 'Ajustar orçamento'}
         </Button>
@@ -31,9 +43,15 @@ export function BudgetPanel({ list, spent, compact = false }: {
       {list.budgetCents !== null && remaining !== null && (
         <>
           <div className="budget-amounts">
-            <span>Gasto na lista <span aria-label="Gasto da lista">{formatMoney(spent)}</span></span>
+            <span>
+              Gasto na lista <span aria-label="Gasto da lista">{formatMoney(spent)}</span>
+            </span>
             <span className="budget-balance" aria-label="Saldo do orçamento">
-              {remaining < 0 ? `Ultrapassou em ${formatMoney(-remaining)}` : remaining === 0 ? `Saldo ${formatMoney(0)}` : `Restam ${formatMoney(remaining)}`}
+              {remaining < 0
+                ? `Ultrapassou em ${formatMoney(-remaining)}`
+                : remaining === 0
+                  ? `Saldo ${formatMoney(0)}`
+                  : `Restam ${formatMoney(remaining)}`}
             </span>
           </div>
           <progress
@@ -44,7 +62,9 @@ export function BudgetPanel({ list, spent, compact = false }: {
           />
         </>
       )}
-      <p className="budget-warning" role="status" aria-live="polite" aria-atomic="true">{messages[summary.status]}</p>
+      <p className="budget-warning" role="status" aria-live="polite" aria-atomic="true">
+        {messages[summary.status]}
+      </p>
       {editing && <BudgetForm list={list} onClose={() => setEditing(false)} />}
     </section>
   );

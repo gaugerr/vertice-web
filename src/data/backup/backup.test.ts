@@ -26,8 +26,18 @@ describe('backups', () => {
   it('reads old web backups with no budget and exports the new version without changing IDs', () => {
     const data = parseBackup(JSON.stringify(legacy));
     const old = {
-      format: 'vertice-backup', version: 2, exportedAt: new Date().toISOString(), ...data,
-      lists: data.lists.map((list) => ({ id: list.id, storeName: list.storeName, date: list.date, description: list.description, createdAt: list.createdAt, updatedAt: list.updatedAt })),
+      format: 'vertice-backup',
+      version: 2,
+      exportedAt: new Date().toISOString(),
+      ...data,
+      lists: data.lists.map((list) => ({
+        id: list.id,
+        storeName: list.storeName,
+        date: list.date,
+        description: list.description,
+        createdAt: list.createdAt,
+        updatedAt: list.updatedAt,
+      })),
     };
     const imported = parseBackup(JSON.stringify(old));
     expect(imported).toEqual(data);

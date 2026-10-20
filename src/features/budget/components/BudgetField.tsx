@@ -1,6 +1,10 @@
 import { useId } from 'react';
 
-export function BudgetField({ value, onChange, readOnly = false }: {
+export function BudgetField({
+  value,
+  onChange,
+  readOnly = false,
+}: {
   value: string;
   onChange: (value: string) => void;
   readOnly?: boolean;
@@ -22,7 +26,9 @@ export function BudgetField({ value, onChange, readOnly = false }: {
         onChange={(event) => onChange(event.target.value)}
         placeholder="Ex.: 300,00"
       />
-      <span id={helpId} className="field-help">Deixe em branco para ficar sem limite. Use até duas casas decimais.</span>
+      <span id={helpId} className="field-help">
+        Deixe em branco para ficar sem limite. Use até duas casas decimais.
+      </span>
     </label>
   );
 }

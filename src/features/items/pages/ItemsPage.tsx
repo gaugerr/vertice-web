@@ -28,8 +28,12 @@ export default function ItemsPage() {
       repository.getItemsForList(listId),
     ]);
     return {
-      list, category, allItems,
-      items: allItems.filter((item) => item.categoryId === id).sort((a, b) => a.createdAt.localeCompare(b.createdAt)),
+      list,
+      category,
+      allItems,
+      items: allItems
+        .filter((item) => item.categoryId === id)
+        .sort((a, b) => a.createdAt.localeCompare(b.createdAt)),
     };
   }, [listId, id]);
   if (result.status === 'loading') return <Loading />;
@@ -91,14 +95,14 @@ export default function ItemsPage() {
       )}
       <aside className={`sticky-total ${purchaseEditors.size ? 'editing-purchase' : ''}`}>
         <div className="category-total-line">
-        <div>
-          <span className="eyebrow">TOTAL DA CATEGORIA</span>
-          <strong aria-label="Total da categoria">{formatMoney(spentCents(items))}</strong>
-        </div>
-        <span className="total-count">
-          <Check size={16} aria-hidden="true" />
-          {purchased} comprados
-        </span>
+          <div>
+            <span className="eyebrow">TOTAL DA CATEGORIA</span>
+            <strong aria-label="Total da categoria">{formatMoney(spentCents(items))}</strong>
+          </div>
+          <span className="total-count">
+            <Check size={16} aria-hidden="true" />
+            {purchased} comprados
+          </span>
         </div>
         <BudgetPanel list={list} spent={spentCents(allItems)} compact />
       </aside>

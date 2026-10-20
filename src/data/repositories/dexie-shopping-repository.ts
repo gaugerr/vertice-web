@@ -79,7 +79,12 @@ export class DexieShoppingRepository implements ShoppingRepository {
   async setListBudget(id: string, budgetCents: number | null): Promise<void> {
     const value = budgetCentsSchema.parse(budgetCents);
     await trackWrite(async () => {
-      if (!(await this.db.lists.update(id, { budgetCents: value, updatedAt: new Date().toISOString() })))
+      if (
+        !(await this.db.lists.update(id, {
+          budgetCents: value,
+          updatedAt: new Date().toISOString(),
+        }))
+      )
         throw new Error('Esta lista foi excluída.');
     });
   }

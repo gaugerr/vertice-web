@@ -149,13 +149,16 @@ export function parseBackup(source: string): ShoppingSnapshot {
     .parse(raw);
   if (header.version === 1) return convertLegacy(raw);
   if (header.version === 2) {
-    const old = z.object({
-      format: z.literal('vertice-backup'),
-      version: z.literal(2),
-      exportedAt: z.iso.datetime(),
-      ...snapshotSchema.shape,
-      lists: z.array(listSchema.omit({ budgetCents: true })).max(MAX_ROWS),
-    }).strict().parse(raw);
+    const old = z
+      .object({
+        format: z.literal('vertice-backup'),
+        version: z.literal(2),
+        exportedAt: z.iso.datetime(),
+        ...snapshotSchema.shape,
+        lists: z.array(listSchema.omit({ budgetCents: true })).max(MAX_ROWS),
+      })
+      .strict()
+      .parse(raw);
     return validateSnapshot({
       lists: old.lists.map((list) => ({ ...list, budgetCents: null })),
       categories: old.categories,

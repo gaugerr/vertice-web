@@ -25,7 +25,12 @@ export const decimalSchema = z
       return z.NEVER;
     }
   });
-export const budgetCentsSchema = z.number().int().positive().max(Number.MAX_SAFE_INTEGER).nullable();
+export const budgetCentsSchema = z
+  .number()
+  .int()
+  .positive()
+  .max(Number.MAX_SAFE_INTEGER)
+  .nullable();
 export const listInputSchema = z.object({
   storeName: nameSchema,
   date: dateSchema,

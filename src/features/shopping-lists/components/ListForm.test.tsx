@@ -17,7 +17,9 @@ describe('list creation form', () => {
     fireEvent.change(screen.getByLabelText('Nome da lista'), {
       target: { value: 'Compra da semana' },
     });
-    fireEvent.change(screen.getByLabelText('Orçamento da compra (R$)'), { target: { value: '300,00' } });
+    fireEvent.change(screen.getByLabelText('Orçamento da compra (R$)'), {
+      target: { value: '300,00' },
+    });
     const submit = screen.getByRole('button', { name: 'Criar lista' });
     fireEvent.click(submit);
     fireEvent.click(submit);

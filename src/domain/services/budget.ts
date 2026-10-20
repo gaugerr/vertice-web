@@ -6,9 +6,12 @@ export function parseBudgetInput(input: string): number | null {
   const value = input.trim().replace(',', '.');
   if (!value) return null;
   if (value.length > 100 || !/^\d+(?:\.\d{1,2})?$/.test(value))
-    throw new Error('Informe um orçamento válido, com até duas casas decimais, sem separador de milhares.');
+    throw new Error(
+      'Informe um orçamento válido, com até duas casas decimais, sem separador de milhares.',
+    );
   const cents = new Big(value).times(100);
-  if (cents.lte(0)) throw new Error('O orçamento deve ser maior que zero. Deixe em branco para remover o limite.');
+  if (cents.lte(0))
+    throw new Error('O orçamento deve ser maior que zero. Deixe em branco para remover o limite.');
   if (cents.gt(Number.MAX_SAFE_INTEGER)) throw new Error('O orçamento excede o limite permitido.');
   return cents.toNumber();
 }
@@ -18,8 +21,7 @@ export function budgetInput(cents: number | null): string {
 }
 
 export function budgetSummary(budgetCents: number | null, spentCents: number) {
-  if (!Number.isSafeInteger(spentCents) || spentCents < 0)
-    throw new Error('Total gasto inválido.');
+  if (!Number.isSafeInteger(spentCents) || spentCents < 0) throw new Error('Total gasto inválido.');
   if (budgetCents === null)
     return { status: 'none' as BudgetStatus, remainingCents: null, progressPercent: 0 };
   if (!Number.isSafeInteger(budgetCents) || budgetCents <= 0)
