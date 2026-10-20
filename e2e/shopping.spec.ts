@@ -30,7 +30,10 @@ test('shopping CRUD, direct routes, money and accessible form focus', async ({ p
   await page.getByLabel('Preço por kg (R$)', { exact: true }).fill('20,00');
   await page.getByRole('button', { name: 'Salvar item' }).click();
   await expect(page.getByLabel('Total da categoria', { exact: true })).toHaveText(/0,00/);
-  await page.getByRole('checkbox', { name: 'Marcar Arroz como comprado' }).check();
+  // The checkbox reflects the committed IndexedDB write, not an optimistic DOM toggle.
+  const purchased = page.getByRole('checkbox', { name: 'Marcar Arroz como comprado' });
+  await purchased.click();
+  await expect(purchased).toBeChecked();
   await expect(page.getByLabel('Total da categoria', { exact: true })).toHaveText(/10,00/);
   const route = page.url();
   await page.reload();
@@ -114,19 +117,23 @@ test('legacy backup import, invalid backups and empty replacement confirmation',
       },
     ],
   };
-  await page.getByLabel('Arquivo de backup').setInputFiles({
-    name: 'flutter.json',
-    mimeType: 'application/json',
-    buffer: Buffer.from(JSON.stringify(legacy)),
-  });
+  await page
+    .getByLabel('Arquivo de backup')
+    .setInputFiles({
+      name: 'flutter.json',
+      mimeType: 'application/json',
+      buffer: Buffer.from(JSON.stringify(legacy)),
+    });
   await expect(page.getByRole('heading', { name: 'Restaurar backup?' })).toBeVisible();
   await page.getByRole('button', { name: 'Substituir e restaurar' }).click();
   await expect(page.getByText('Backup restaurado.', { exact: true })).toBeVisible();
-  await page.getByLabel('Arquivo de backup').setInputFiles({
-    name: 'invalid.json',
-    mimeType: 'application/json',
-    buffer: Buffer.from('{'),
-  });
+  await page
+    .getByLabel('Arquivo de backup')
+    .setInputFiles({
+      name: 'invalid.json',
+      mimeType: 'application/json',
+      buffer: Buffer.from('{'),
+    });
   await expect(page.getByRole('alert')).toContainText('JSON válido');
   await page.getByRole('link', { name: 'Vértice, minhas listas' }).click();
   await page.getByRole('link', { name: 'Abrir lista Mercado importado' }).click();
@@ -219,11 +226,13 @@ test('100 items stay usable in a narrow viewport', async ({ page }, info) => {
       shoppingListId: 1,
     })),
   };
-  await page.getByLabel('Arquivo de backup').setInputFiles({
-    name: '100-items.json',
-    mimeType: 'application/json',
-    buffer: Buffer.from(JSON.stringify(legacy)),
-  });
+  await page
+    .getByLabel('Arquivo de backup')
+    .setInputFiles({
+      name: '100-items.json',
+      mimeType: 'application/json',
+      buffer: Buffer.from(JSON.stringify(legacy)),
+    });
   await page.getByRole('button', { name: 'Substituir e restaurar' }).click();
   await expect(page.getByText('Backup restaurado.', { exact: true })).toBeVisible();
   await page.getByRole('link', { name: 'Vértice, minhas listas' }).click();

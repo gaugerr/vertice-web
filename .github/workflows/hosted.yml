@@ -1,18 +1,23 @@
 name: Hosted PWA checks
 on:
-  push:
-    paths: [.github/workflows/hosted.yml]
+  workflow_run:
+    workflows: [Web checks]
+    types: [completed]
+    branches: [main]
   workflow_dispatch:
 permissions:
   contents: read
 jobs:
   hosted:
+    if: github.event_name == 'workflow_dispatch' || (github.event.workflow_run.conclusion == 'success' && github.event.workflow_run.event == 'push')
     runs-on: ubuntu-latest
     timeout-minutes: 12
     env:
       VERTICE_BASE_URL: https://vertice-web-navy.vercel.app
     steps:
       - uses: actions/checkout@v4
+        with:
+          ref: ${{ github.event.workflow_run.head_sha || github.sha }}
       - uses: actions/setup-node@v4
         with:
           node-version-file: .nvmrc
