@@ -40,13 +40,19 @@ describe('local repository', () => {
     const oldLists = old.table('lists');
     const oldCategories = old.table('categories');
     await oldLists.add({
-        id,
-        storeName: 'Compra existente',
-        date: input.date,
-        description: 'Preservar',
-        ...timestamps,
-      });
-    await oldCategories.add({ id: categoryId, shoppingListId: id, title: 'Essenciais', position: 0, ...timestamps });
+      id,
+      storeName: 'Compra existente',
+      date: input.date,
+      description: 'Preservar',
+      ...timestamps,
+    });
+    await oldCategories.add({
+      id: categoryId,
+      shoppingListId: id,
+      title: 'Essenciais',
+      position: 0,
+      ...timestamps,
+    });
     const item = {
       id: itemId,
       shoppingListId: id,

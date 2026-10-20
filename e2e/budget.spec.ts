@@ -140,24 +140,30 @@ test('a populated old browser database is upgraded and exported without losing p
     const oldCategories = transaction.objectStore('categories');
     const oldItems = transaction.objectStore('items');
     oldLists.put({
-        id: list,
-        storeName: 'Compra antiga',
-        date: '2026-10-19',
-        description: 'Preservada',
-        ...timestamps,
-      });
-    oldCategories.put({ id: category, shoppingListId: list, title: 'Essenciais', position: 0, ...timestamps });
+      id: list,
+      storeName: 'Compra antiga',
+      date: '2026-10-19',
+      description: 'Preservada',
+      ...timestamps,
+    });
+    oldCategories.put({
+      id: category,
+      shoppingListId: list,
+      title: 'Essenciais',
+      position: 0,
+      ...timestamps,
+    });
     oldItems.put({
-        id: item,
-        shoppingListId: list,
-        categoryId: category,
-        name: 'Arroz antigo',
-        unitPrice: '20',
-        quantity: '0.5',
-        unit: 'kg',
-        isPurchased: true,
-        ...timestamps,
-      });
+      id: item,
+      shoppingListId: list,
+      categoryId: category,
+      name: 'Arroz antigo',
+      unitPrice: '20',
+      quantity: '0.5',
+      unit: 'kg',
+      isPurchased: true,
+      ...timestamps,
+    });
     await new Promise<void>((resolve, reject) => {
       transaction.oncomplete = () => resolve();
       transaction.onabort = () => reject(transaction.error);
