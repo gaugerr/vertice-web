@@ -44,12 +44,10 @@ beforeEach(async () => {
     toFake: ['Date', 'setInterval', 'clearInterval', 'setTimeout', 'clearTimeout'],
   });
   vi.setSystemTime(new Date('2026-10-21T12:00:00Z'));
-  mocks.getSession
-    .mockReset()
-    .mockResolvedValue({
-      data: { session: { access_token: 'auth-token', user: { id: uid, email: account.email } } },
-      error: null,
-    });
+  mocks.getSession.mockReset().mockResolvedValue({
+    data: { session: { access_token: 'auth-token', user: { id: uid, email: account.email } } },
+    error: null,
+  });
   mocks.onAuthStateChange.mockReset().mockImplementation((fn) => {
     callback = fn;
     return { data: { subscription: { unsubscribe: vi.fn() } } };
@@ -58,23 +56,19 @@ beforeEach(async () => {
     callback('SIGNED_OUT', null);
     return { error: null };
   });
-  mocks.call
-    .mockReset()
-    .mockImplementation(async () => ({
-      status: 'active',
-      lease: 'signed',
-      serverTime: Math.floor(Date.now() / 1000),
-    }));
-  mocks.verify
-    .mockReset()
-    .mockImplementation(async () => ({
-      uid,
-      email: account.email,
-      licenseId: 'license',
-      version: 1,
-      issuedAt: Date.now(),
-      expiresAt: Date.now() + 604800000,
-    }));
+  mocks.call.mockReset().mockImplementation(async () => ({
+    status: 'active',
+    lease: 'signed',
+    serverTime: Math.floor(Date.now() / 1000),
+  }));
+  mocks.verify.mockReset().mockImplementation(async () => ({
+    uid,
+    email: account.email,
+    licenseId: 'license',
+    version: 1,
+    issuedAt: Date.now(),
+    expiresAt: Date.now() + 604800000,
+  }));
   controller = (await import('./controller')).accessController;
 });
 afterEach(() => {
