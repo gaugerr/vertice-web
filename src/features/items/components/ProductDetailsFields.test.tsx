@@ -74,10 +74,7 @@ describe('product detail fields in quick purchasing', () => {
     fill(/^Embalagem/, '0');
     fireEvent.click(screen.getByRole('button', { name: 'Salvar valores' }));
     await waitFor(() =>
-      expect(screen.getByLabelText(/^Embalagem/)).toHaveAttribute(
-        'aria-invalid',
-        'true',
-      ),
+      expect(screen.getByLabelText(/^Embalagem/)).toHaveAttribute('aria-invalid', 'true'),
     );
     expect(repository.updatePurchaseDetails).not.toHaveBeenCalled();
     fill(/^Embalagem/, '500');

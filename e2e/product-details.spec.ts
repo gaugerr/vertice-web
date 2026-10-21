@@ -82,15 +82,21 @@ test('optional quick entry, automatic names, completed copies and independent cl
     const quantity = await form.getByLabel('Quantidade', { exact: true }).boundingBox();
     const unit = await form.getByLabel('Unidade', { exact: true }).boundingBox();
     const amount = await form.getByLabel('Embalagem', { exact: true }).boundingBox();
-    const packageUnit = await form.getByLabel('Unidade da embalagem', { exact: true }).boundingBox();
+    const packageUnit = await form
+      .getByLabel('Unidade da embalagem', { exact: true })
+      .boundingBox();
     expect(Math.abs(price!.y - quantity!.y)).toBeLessThan(1);
     expect(Math.abs(price!.y - unit!.y)).toBeLessThan(1);
     expect(Math.abs(amount!.y - packageUnit!.y)).toBeLessThan(1);
     expect(Math.abs(amount!.height - packageUnit!.height)).toBeLessThan(1);
     const close = await form.getByRole('button', { name: 'Fechar', exact: true }).boundingBox();
-    const save = await form.getByRole('button', { name: 'Salvar valores', exact: true }).boundingBox();
+    const save = await form
+      .getByRole('button', { name: 'Salvar valores', exact: true })
+      .boundingBox();
     expect(Math.abs(close!.width - save!.width)).toBeLessThan(1);
-    expect(await page.evaluate(() => document.documentElement.scrollWidth <= innerWidth)).toBe(true);
+    expect(await page.evaluate(() => document.documentElement.scrollWidth <= innerWidth)).toBe(
+      true,
+    );
     await form.scrollIntoViewIfNeeded();
     await info.attach(`product-details-mobile-${width}`, {
       body: await page.screenshot(),
