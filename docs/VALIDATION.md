@@ -1,64 +1,64 @@
-# Validação — comparador de embalagens
+# Validação — finalização e cópia de compras
 
 Publicado em **https://vertice-web-navy.vercel.app**, projeto Vercel `vertice-web`, repositório [gaugerr/vertice-web](https://github.com/gaugerr/vertice-web).
 
-Código validado e publicado na `main`: `193bbaed34f5e4d96e3e255bb2b78de97b573bde`. O registro posterior desta validação altera somente a documentação. Desenvolvimento isolado na branch `feat/package-comparator`.
+Código validado e publicado na `main`: `3d52ed33049ab892a8be476a1f033da9391fbf0a`. Desenvolvimento isolado em `feat/list-completion`. O registro posterior desta validação altera somente a documentação.
 
 ## Comportamento entregue
 
-- Botão **Comparar** na página das listas e dentro das categorias, próximo aos filtros.
-- Janela **Qual compensa?** com duas opções fixas, A e B, e modos Peso (g/kg), Volume (ml/L) e Unidades.
-- Resultado automático com preços por kg, L ou unidade, opção mais barata, economia normalizada e percentual em relação à opção mais cara.
-- Comparação por produtos cruzados exatos; arredondamento apenas na apresentação. Diferenças inferiores a um centavo ou 0,1% são explicitadas, sem falso empate.
-- Valores positivos, preço com até duas casas decimais e conteúdo com até três. Quantidades por unidade exigem números inteiros.
-- Primeiro preço recebe foco ao abrir por toque; Enter percorre os campos. Janela ajustada ao visualViewport, com rolagem interna e sem transbordamento horizontal em 320 px.
-- Fechar preserva a rolagem da compra, os campos ainda não salvos e o foco do botão de abertura.
-- Cada modo mantém seu próprio rascunho no sessionStorage da aba. Fechar a janela, mudar de categoria ou recarregar a mesma aba preserva os campos.
-- Limpar afeta apenas o modo atual. Armazenamento bloqueado mantém o cálculo em memória e apresenta aviso discreto.
-- Uso totalmente local e offline após o carregamento/cache inicial do PWA. Sem chamadas de API ou dependência de inteligência artificial.
+- Finalização no resumo geral, com total, contagens, orçamento, mercado opcional e data local editável.
+- Revisão recebe foco no resumo; os campos opcionais não são focados automaticamente.
+- Exige pelo menos um produto comprado e preço maior que zero em todos os comprados. Produtos não comprados permanecem identificados, sem entrar no total.
+- Compras finalizadas ficam separadas das listas em andamento e somente para consulta.
+- Reabertura preserva os dados e libera correções. Finalizar novamente atualiza a mesma compra, sem criar outro registro.
+- Cópia nos cartões e no resumo: nova lista independente com categorias/produtos, quantidades/unidades preservadas, preços zerados e todos os itens desmarcados.
+- Nome, data, descrição e orçamento da cópia são editáveis. Mercado e informações de finalização não são copiados.
+- Funciona offline após o carregamento/cache inicial do PWA.
 
-## Proteção dos dados existentes
+## Integridade e compatibilidade
 
-- O comparador não grava no banco financeiro. Um teste compara o conteúdo real do IndexedDB antes e depois do uso, exigindo igualdade.
-- Sem migração nova: banco Dexie permanece na versão 2 e backup JSON na versão 3.
-- Listas, orçamento, compras, categorias, importação e exportação continuam nos fluxos existentes.
-- Rascunhos do comparador ficam exclusivamente na chave `vertice:package-comparator:v1`. Dados inválidos são descartados apenas nesse espaço.
-- A economia exibida usa uma quantidade de referência comum; não representa um lançamento financeiro ou o total de uma compra.
+- Estado verificado no repositório, dentro das transações de escrita; uma aba antiga não pode alterar uma compra finalizada.
+- Revisão consistente de listas, categorias e produtos. Mudanças em outra aba exigem nova conferência; a confirmação compara os registros dentro da transação.
+- Revisão não depende exclusivamente de timestamps: alterações dentro do mesmo milissegundo também são detectadas.
+- Confirmação duplicada é impedida na interface e duas confirmações concorrentes são serializadas no banco.
+- Cópias são atômicas, com identificadores e relações novos; falha de armazenamento não deixa registros parciais.
+- Rascunhos de preço e metadados permanecem visíveis se outra aba finalizar a compra; gravação fica bloqueada.
+- Dexie evolui de v2 para v3, preservando banco anterior e inicializando as listas existentes em andamento.
+- Backup JSON v4 inclui estado, mercado e datas; importação v1 Flutter e v2/v3 web preservada com schemas das versões antigas.
+- Restauração continua transacional e rejeita finalizações incoerentes antes de substituir os dados.
+- Sem nova dependência, API, login ou sincronização.
 
 ## Checks do código
 
-[Execução na main 39516074316](https://github.com/gaugerr/vertice-web/actions/runs/39516074316): **success**.
+[Execução na main 39521359472](https://github.com/gaugerr/vertice-web/actions/runs/39521359472): **success**.
 
-[Execução final da branch 39515736922](https://github.com/gaugerr/vertice-web/actions/runs/39515736922): **success**.
+[Execução final da branch 39520966034](https://github.com/gaugerr/vertice-web/actions/runs/39520966034): **success**.
 
 - TypeScript estrito, ESLint e Prettier: aprovados.
-- Vitest: **70 testes aprovados**, em dez arquivos.
+- Vitest: **91 testes aprovados**, em **12 arquivos**.
 - Build de produção: aprovado.
-- JavaScript total, incluindo módulos sob demanda: **154,8 KiB gzip**, abaixo do orçamento de 250 KiB.
-- Playwright em Chromium e WebKit: **23 cenários aprovados e 3 deliberadamente ignorados**.
-- Os três casos ignorados em WebKit são os fluxos de instalação/reabertura offline existente, atualização do service worker e comparador após recarga offline; esses fluxos são executados em Chromium.
+- JavaScript total, incluindo módulos sob demanda: **158,0 KiB gzip**, abaixo do limite de 250 KiB.
+- Playwright em Chromium e WebKit: **32 cenários aprovados e 4 deliberadamente ignorados**.
+- Os quatro cenários ignorados são os ciclos offline/service worker no WebKit; esses cenários são executados no Chromium.
 
-Cobertura nova: unidades mistas, empates exatos, diferenças escondidas pelo arredondamento, valores normalizados elevados, economia inferior a um centavo, rejeição de valores inválidos, foco por toque, sequência de Enter, largura de 320 px, rascunhos por modo e categoria, recarga, armazenamento bloqueado, isolamento do IndexedDB e preservação de valores ainda não salvos.
+Cobertura: migração real de bancos antigos, total com quantidades fracionárias, orçamento excedido, preços ausentes, leitura de compras fechadas, reabertura/correção, cópia de listas abertas/fechadas/vazias, rollback em falhas, conflito de revisão, duas confirmações concorrentes, rascunhos em três abas, cópia independente, recarga offline e restauração de backup v4.
 
-A suíte também mantém a cobertura anterior de orçamento, migração de banco antigo, compatibilidade dos backups, filtros, múltiplas abas e compra rápida.
+As suítes anteriores de compra rápida, orçamento, importação Flutter e comparador também passaram. Um caso novo detectou e verificou a correção de uma mudança de layout ao fechar o comparador vazio: a validação no blur não desloca mais botões/seletores durante o clique.
 
-[Pacote compilado validado](https://github.com/gaugerr/vertice-web/actions/runs/39516074316/artifacts/12307797618). Deve ser servido por HTTP/HTTPS.
+[Pacote compilado validado](https://github.com/gaugerr/vertice-web/actions/runs/39521359472/artifacts/12310869514). Deve ser servido por HTTP/HTTPS.
 
 ## Checks do endereço público
 
-[Execução 39516344913](https://github.com/gaugerr/vertice-web/actions/runs/39516344913): **success**.
+[Execução 39521612834](https://github.com/gaugerr/vertice-web/actions/runs/39521612834): **success**.
 
-- Identificação da versão `pwa-package-comparator-v1-production` confirmada no HTML público.
-- HTTPS, manifesto standalone, service worker JavaScript e cache conferidos; asset inexistente retorna 404.
-- **22 cenários aprovados e 2 deliberadamente ignorados** no endereço da Vercel.
-- Comparador exercitado sem conexão, com recarga da mesma aba e rascunhos preservados.
-- Fluxos existentes de compra e orçamento também executados na aplicação publicada.
+- Versão de finalização identificada no HTML público.
+- HTTPS, manifesto standalone, service worker JavaScript, política de cache e resposta 404 de asset inexistente verificados.
+- **31 cenários aprovados e 3 deliberadamente ignorados** na aplicação publicada.
+- Finalização, consulta, correção, cópia, conflito entre abas e uso offline exercitados no endereço da Vercel.
 - O teste de atualização sintética do service worker é exclusivo do servidor local de testes.
 
 ## Limites
 
-Foco e toque foram verificados em navegadores automatizados, com revisão de capturas em largura de celular. Teclado virtual, desempenho e instalação em aparelhos físicos não são comprovados por esses testes.
+Foco e interação foram verificados em navegadores automatizados, com revisão de capturas em largura de celular. Teclado virtual, instalação e desempenho em aparelhos físicos não são comprovados por esses testes.
 
-Rascunhos são temporários e não constituem histórico ou backup. A comparação pressupõe produtos equivalentes; qualidade, concentração e rendimento podem mudar a decisão.
-
-Os checks completos rodaram no GitHub Actions; código, lockfile e build validado estão disponíveis no workspace. O aplicativo continua local, sem login, controle de compradores ou sincronização em nuvem.
+Histórico de preços por produto, marca e conteúdo da embalagem ficam para uma próxima etapa. O registro desta entrega é a compra finalizada, com seus produtos e valores locais. Não há controle de compradores ou cópia automática em nuvem; exportar o backup continua sendo necessário para guardar os dados fora do navegador.
