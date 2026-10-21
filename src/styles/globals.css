@@ -1434,7 +1434,9 @@ dialog > p {
   border-radius: 8px;
   overflow: hidden;
 }
-.item-suggestions li + li { border-top: 1px solid #ffffff0a; }
+.item-suggestions li + li {
+  border-top: 1px solid #ffffff0a;
+}
 .item-suggestions button {
   display: flex;
   align-items: center;
@@ -1450,8 +1452,12 @@ dialog > p {
   font-size: 12px;
 }
 .item-suggestions button:hover:not(:disabled),
-.item-suggestions button:focus-visible { background: #b39aff15; }
-.item-suggestions button:focus-visible { outline-offset: -2px; }
+.item-suggestions button:focus-visible {
+  background: #b39aff15;
+}
+.item-suggestions button:focus-visible {
+  outline-offset: -2px;
+}
 .item-suggestions button span {
   min-width: 0;
   overflow: hidden;

@@ -1,4 +1,9 @@
-import { recentSuggestions, suggestionKey, type ItemSuggestion, type SuggestedProduct } from '../../domain/services/item-suggestions';
+import {
+  recentSuggestions,
+  suggestionKey,
+  type ItemSuggestion,
+  type SuggestedProduct,
+} from '../../domain/services/item-suggestions';
 import Big from 'big.js';
 import { productIdentity, type PriceReference } from '../../domain/services/price-history';
 import { type ShoppingRepository } from '../../domain/models/repository';
@@ -34,35 +39,75 @@ export class DexieShoppingRepository implements ShoppingRepository {
   constructor(private db: VerticeDatabase) {}
   async getCompletedItemSuggestions(excludeListId: string): Promise<ItemSuggestion[]> {
     return this.db.transaction('r', this.db.lists, this.db.items, async () => {
-      const lists = (await this.db.lists.where('status').equals('completed').toArray())
-        .filter((list) => list.id !== excludeListId && list.purchaseDate && list.completedAt);
-      const items = await this.db.items.where('shoppingListId').anyOf(lists.map((list) => list.id)).toArray();
+      const lists = (await this.db.lists.where('status').equals('completed').toArray()).filter(
+        (list) => list.id !== excludeListId && list.purchaseDate && list.completedAt,
+      );
+      const items = await this.db.items
+        .where('shoppingListId')
+        .anyOf(lists.map((list) => list.id))
+        .toArray();
       const byId = new Map(lists.map((list) => [list.id, list]));
       const candidates: ItemSuggestion[] = [];
       for (const item of items) {
         const list = byId.get(item.shoppingListId);
         if (!list || !item.isPurchased || !new Big(item.unitPrice).gt(0)) continue;
-        candidates.push({ name: item.name, brand: item.brand, packageContent: item.packageContent, unit: item.unit, itemId: item.id, purchaseDate: list.purchaseDate!, completedAt: list.completedAt!, updatedAt: item.updatedAt });
+        candidates.push({
+          name: item.name,
+          brand: item.brand,
+          packageContent: item.packageContent,
+          unit: item.unit,
+          itemId: item.id,
+          purchaseDate: list.purchaseDate!,
+          completedAt: list.completedAt!,
+          updatedAt: item.updatedAt,
+        });
       }
       return recentSuggestions(candidates);
     });
   }
-  async addSuggestedItem(listId: string, categoryId: string, product: SuggestedProduct): Promise<string> {
-    const data = itemInputSchema.parse({ name: product.name, brand: product.brand, packageContent: product.packageContent, unit: product.unit, unitPrice: '0', quantity: '1' });
-    const details = { ...data, brand: data.brand ?? null, packageContent: data.packageContent ?? null };
+  async addSuggestedItem(
+    listId: string,
+    categoryId: string,
+    product: SuggestedProduct,
+  ): Promise<string> {
+    const data = itemInputSchema.parse({
+      name: product.name,
+      brand: product.brand,
+      packageContent: product.packageContent,
+      unit: product.unit,
+      unitPrice: '0',
+      quantity: '1',
+    });
+    const details = {
+      ...data,
+      brand: data.brand ?? null,
+      packageContent: data.packageContent ?? null,
+    };
     const key = suggestionKey(details);
     if (!key) throw new Error('Essa sugestão não é válida.');
     const id = crypto.randomUUID();
-    await trackWrite(() => this.db.transaction('rw', this.db.lists, this.db.categories, this.db.items, async () => {
-      await this.requireList(listId, true);
-      const category = await this.db.categories.get(categoryId);
-      if (category?.shoppingListId !== listId) throw new Error('Esta categoria não pertence à lista.');
-      const existing = await this.db.items.where('shoppingListId').equals(listId).toArray();
-      if (existing.some((item) => suggestionKey(item) === key)) throw new Error('Esse produto já está na lista.');
-      const now = new Date().toISOString();
-      await this.db.items.add({ ...details, id, shoppingListId: listId, categoryId, isPurchased: false, createdAt: now, updatedAt: now });
-      await this.db.lists.update(listId, { updatedAt: now });
-    }));
+    await trackWrite(() =>
+      this.db.transaction('rw', this.db.lists, this.db.categories, this.db.items, async () => {
+        await this.requireList(listId, true);
+        const category = await this.db.categories.get(categoryId);
+        if (category?.shoppingListId !== listId)
+          throw new Error('Esta categoria não pertence à lista.');
+        const existing = await this.db.items.where('shoppingListId').equals(listId).toArray();
+        if (existing.some((item) => suggestionKey(item) === key))
+          throw new Error('Esse produto já está na lista.');
+        const now = new Date().toISOString();
+        await this.db.items.add({
+          ...details,
+          id,
+          shoppingListId: listId,
+          categoryId,
+          isPurchased: false,
+          createdAt: now,
+          updatedAt: now,
+        });
+        await this.db.lists.update(listId, { updatedAt: now });
+      }),
+    );
     return id;
   }
   async getCompletedPriceReferences(excludeListId: string): Promise<PriceReference[]> {

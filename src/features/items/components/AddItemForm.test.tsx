@@ -3,7 +3,14 @@ import { describe, expect, it, vi } from 'vitest';
 import { AddItemForm } from './AddItemForm';
 import { repository } from '../../../app/services';
 
-vi.mock('../../../app/services', () => ({ repository: { addItem: vi.fn(), addSuggestedItem: vi.fn(), getCompletedItemSuggestions: vi.fn().mockResolvedValue([]), getItemsForList: vi.fn().mockResolvedValue([]) } }));
+vi.mock('../../../app/services', () => ({
+  repository: {
+    addItem: vi.fn(),
+    addSuggestedItem: vi.fn(),
+    getCompletedItemSuggestions: vi.fn().mockResolvedValue([]),
+    getItemsForList: vi.fn().mockResolvedValue([]),
+  },
+}));
 
 describe('continuous item entry', () => {
   it('keeps focus during storage and preserves text typed before the write finishes', async () => {

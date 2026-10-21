@@ -27,9 +27,16 @@ export function productIdentity(
   if (!allowIncomplete && (!brand.data || !content.data)) return null;
   const amount = content.data?.amount;
   const unit = content.data?.unit;
-  const dimension =
-    !unit ? null : unit === 'g' || unit === 'kg' ? 'mass' : unit === 'ml' || unit === 'L' ? 'volume' : 'count';
-  const normalizedAmount = amount ? new Big(amount).times(unit === 'kg' || unit === 'L' ? 1000 : 1).toFixed() : null;
+  const dimension = !unit
+    ? null
+    : unit === 'g' || unit === 'kg'
+      ? 'mass'
+      : unit === 'ml' || unit === 'L'
+        ? 'volume'
+        : 'count';
+  const normalizedAmount = amount
+    ? new Big(amount).times(unit === 'kg' || unit === 'L' ? 1000 : 1).toFixed()
+    : null;
   return JSON.stringify([
     normalizeProductText(name.data),
     brand.data ? normalizeProductText(brand.data) : null,

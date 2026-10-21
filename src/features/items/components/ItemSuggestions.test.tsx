@@ -3,12 +3,38 @@ import { afterEach, beforeEach, describe, expect, it, vi } from 'vitest';
 import { AddItemForm } from './AddItemForm';
 import { repository } from '../../../app/services';
 import type { ItemSuggestion } from '../../../domain/services/item-suggestions';
-vi.mock('../../../app/services', () => ({ repository: { addItem: vi.fn(), addSuggestedItem: vi.fn(), getCompletedItemSuggestions: vi.fn(), getItemsForList: vi.fn() } }));
-const suggestions: ItemSuggestion[] = ['Melitta', 'Pilão', 'Outra'].map((brand, index) => ({ name: 'Café', brand, packageContent: { amount: '500', unit: 'g' }, unit: 'un', itemId: String(index), purchaseDate: '2026-10-12', completedAt: '2026-10-12T12:00:00.000Z', updatedAt: '2026-10-12T11:00:00.000Z' }));
-beforeEach(() => { vi.resetAllMocks(); vi.mocked(repository.getCompletedItemSuggestions).mockResolvedValue(suggestions); vi.mocked(repository.getItemsForList).mockResolvedValue([]); vi.mocked(repository.addItem).mockResolvedValue('manual'); });
+vi.mock('../../../app/services', () => ({
+  repository: {
+    addItem: vi.fn(),
+    addSuggestedItem: vi.fn(),
+    getCompletedItemSuggestions: vi.fn(),
+    getItemsForList: vi.fn(),
+  },
+}));
+const suggestions: ItemSuggestion[] = ['Melitta', 'Pilão', 'Outra'].map((brand, index) => ({
+  name: 'Café',
+  brand,
+  packageContent: { amount: '500', unit: 'g' },
+  unit: 'un',
+  itemId: String(index),
+  purchaseDate: '2026-10-12',
+  completedAt: '2026-10-12T12:00:00.000Z',
+  updatedAt: '2026-10-12T11:00:00.000Z',
+}));
+beforeEach(() => {
+  vi.resetAllMocks();
+  vi.mocked(repository.getCompletedItemSuggestions).mockResolvedValue(suggestions);
+  vi.mocked(repository.getItemsForList).mockResolvedValue([]);
+  vi.mocked(repository.addItem).mockResolvedValue('manual');
+});
 afterEach(cleanup);
 async function mount() {
-  const view = render(<><AddItemForm listId="list" categoryId="category" /><button>Outro campo</button></>);
+  const view = render(
+    <>
+      <AddItemForm listId="list" categoryId="category" />
+      <button>Outro campo</button>
+    </>,
+  );
   const input = screen.getByRole('textbox');
   input.focus();
   fireEvent.change(input, { target: { value: 'ca' } });
@@ -39,13 +65,22 @@ describe('compact suggestion interaction', () => {
   });
   it('locks suggestion writes, preserves new typing and never restores focus after leaving', async () => {
     let finish!: (id: string) => void;
-    vi.mocked(repository.addSuggestedItem).mockImplementationOnce(() => new Promise((resolve) => { finish = resolve; }));
+    vi.mocked(repository.addSuggestedItem).mockImplementationOnce(
+      () =>
+        new Promise((resolve) => {
+          finish = resolve;
+        }),
+    );
     const { input } = await mount();
-    fireEvent.click(screen.getByRole('button', { name: 'Adicionar Café · Melitta · 500 g', exact: true }));
+    fireEvent.click(
+      screen.getByRole('button', { name: 'Adicionar Café · Melitta · 500 g', exact: true }),
+    );
     expect(input).toHaveFocus();
     expect(input).toBeEnabled();
     expect(screen.getByRole('button', { name: 'Adicionar item', exact: true })).toBeDisabled();
-    expect(screen.getByRole('button', { name: 'Adicionar Café · Pilão · 500 g', exact: true })).toBeDisabled();
+    expect(
+      screen.getByRole('button', { name: 'Adicionar Café · Pilão · 500 g', exact: true }),
+    ).toBeDisabled();
     fireEvent.change(input, { target: { value: 'Arroz' } });
     screen.getByRole('button', { name: 'Outro campo' }).focus();
     await act(async () => finish('suggested'));
@@ -57,7 +92,9 @@ describe('compact suggestion interaction', () => {
   it('preserves the prefix after failure and hides suggestions when the list becomes read-only', async () => {
     vi.mocked(repository.addSuggestedItem).mockRejectedValueOnce(new Error('Sem espaço'));
     const { input, rerender } = await mount();
-    fireEvent.click(screen.getByRole('button', { name: 'Adicionar Café · Melitta · 500 g', exact: true }));
+    fireEvent.click(
+      screen.getByRole('button', { name: 'Adicionar Café · Melitta · 500 g', exact: true }),
+    );
     await screen.findByRole('alert');
     expect(input).toHaveValue('ca');
     expect(input).toHaveFocus();
@@ -76,6 +113,8 @@ describe('compact suggestion interaction', () => {
     expect(screen.queryByRole('list')).not.toBeInTheDocument();
     expect(screen.queryByRole('alert')).not.toBeInTheDocument();
     fireEvent.submit(input.closest('form')!);
-    await waitFor(() => expect(repository.addItem).toHaveBeenCalledWith('list', 'category', 'Café'));
+    await waitFor(() =>
+      expect(repository.addItem).toHaveBeenCalledWith('list', 'category', 'Café'),
+    );
   });
 });
