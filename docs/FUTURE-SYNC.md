@@ -1,6 +1,6 @@
 # Evolução para Supabase e acesso comercial
 
-Este documento descreve uma etapa futura. Não há autenticação, pagamentos, fila de sincronização ou SDK Supabase nesta versão.
+Este documento descreve a futura sincronização das compras e integração de pagamentos. O acesso Google, as licenças manuais e a autorização offline já estão implementados na branch `feat/google-access`; veja [a configuração atual](access/SETUP.md). Ainda não há pagamento automático nem fila de sincronização das compras.
 
 ## Fluxo pretendido
 
@@ -18,11 +18,11 @@ A gravação do registro e da operação pendente deverá ser atômica. O envio 
 ## Decisões necessárias nessa etapa
 
 - Política de conflito para edições em aparelhos diferentes, com versões do servidor. Horário do cliente sozinho não define qual alteração vence.
-- Separação dos bancos ou das chaves por usuário. Trocar ou sair da conta não pode expor dados de outra pessoa.
-- Oferta explícita de vincular/importar os registros locais sem conta ao primeiro login.
+- Preservar a separação por usuário já implementada ao adicionar transporte de dados para a nuvem.
+- Preservar a confirmação e o registro recuperável da transferência local já implementados.
 - Cursor e versões para baixar mudanças e exclusões com segurança.
 - Estados de interface: salvo localmente, pendente, enviando, confirmado e erro. Conectado à internet não significa sincronizado.
-- Expiração da sessão offline e regras comerciais para dispositivos previamente autorizados.
+- Preservar a distinção atual entre licença vitalícia e autorização offline assinada de até sete dias.
 
 Não há garantia de sincronização com o aplicativo fechado, principalmente em iOS. O caminho obrigatório será sincronizar enquanto aberto e ao retomar/focar/recuperar conexão. Service worker e Background Sync serão apenas melhorias opcionais conforme suporte.
 
