@@ -1,4 +1,4 @@
-import { useState, type FormEvent } from 'react';
+import { useRef, useState, type FormEvent } from 'react';
 import type { ListReview } from '../../../domain/models/shopping';
 import { unpricedPurchasedItems } from '../../../domain/services/completion';
 import { formatMoney } from '../../../domain/services/money';
@@ -24,6 +24,7 @@ export function CompletionDialog({ listId, onClose }: { listId: string; onClose:
 }
 
 function CompletionForm({ review, onClose }: { review: ListReview; onClose: () => void }) {
+  const summary = useRef<HTMLDivElement>(null);
   const [initial] = useState(() => ({
     marketName: review.list.marketName ?? '',
     purchaseDate: review.list.purchaseDate ?? today(),
@@ -65,12 +66,12 @@ function CompletionForm({ review, onClose }: { review: ListReview; onClose: () =
     if (result.ok) onClose();
   }
   return (
-    <Dialog title="Finalizar compra" onClose={close} busy={mutation.pending} preserveScroll>
+    <Dialog title="Finalizar compra" onClose={close} busy={mutation.pending} preserveScroll initialFocusRef={summary}>
       <form className="form-stack completion-form" onSubmit={submit}>
         <p>
           Confira os valores salvos de <strong>{review.list.storeName}</strong>.
         </p>
-        <div className="completion-summary">
+        <div className="completion-summary" ref={summary} tabIndex={-1} aria-label="Resumo da compra">
           <span>Total da compra</span>
           <strong aria-label="Total para finalizar">{formatMoney(review.totalCents)}</strong>
           <span>

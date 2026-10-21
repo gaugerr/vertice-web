@@ -68,6 +68,7 @@ describe('purchase review', () => {
     );
     const close = vi.fn();
     render(<CompletionDialog listId={review.list.id} onClose={close} />);
+    expect(screen.getByLabelText('Resumo da compra')).toHaveFocus();
     fireEvent.change(screen.getByLabelText(/Mercado/), { target: { value: 'Meu mercado' } });
     const button = screen.getByRole('button', { name: 'Confirmar finalização' });
     fireEvent.click(button);

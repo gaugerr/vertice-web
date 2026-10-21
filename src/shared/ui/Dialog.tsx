@@ -15,7 +15,7 @@ export function Dialog({
   onClose: () => void;
   children: ReactNode;
   busy?: boolean;
-  initialFocusRef?: RefObject<HTMLInputElement | null>;
+  initialFocusRef?: RefObject<HTMLElement | null>;
   preserveScroll?: boolean;
   className?: string;
 }) {
