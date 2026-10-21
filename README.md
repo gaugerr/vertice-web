@@ -167,3 +167,9 @@ O projeto não inclui login do comprador e não usa Supabase. O plano da hospeda
 ## Para quem vem do Flutter
 
 Veja [FLUTTER-TO-WEB.md](docs/FLUTTER-TO-WEB.md). A evolução para nuvem está descrita em [FUTURE-SYNC.md](docs/FUTURE-SYNC.md).
+
+### Referência do último preço
+
+Nos formulários rápido e de edição, produtos com nome, marca e embalagem completos podem mostrar a última compra compatível: preço por unidade de cobrança, mercado, data e diferença em relação ao preço digitado. A referência considera somente itens comprados de outras listas finalizadas. Reabrir ou excluir uma compra retira seus preços; copiar uma lista não cria histórico. O histórico é derivado dos dados existentes e acompanha a restauração do backup v5, sem nova tabela ou migração.
+
+Nome e marca ignoram caixa, espaços extras e representação Unicode; não há aproximação de nomes. Embalagens equivalentes em g/kg ou ml/L coincidem, mas tamanhos diferentes e unidades de cobrança diferentes permanecem separados. A seleção prioriza data da compra, finalização, atualização do item e identificador. Funciona offline e não altera os totais, o preço digitado ou o foco do teclado.

@@ -1,3 +1,4 @@
+import { LastPriceReference } from './LastPriceReference';
 import { useState, type FormEvent, type RefObject } from 'react';
 import type { ShoppingItem, Unit } from '../../../domain/models/shopping';
 import { repository } from '../../../app/services';
@@ -116,6 +117,7 @@ export function PurchaseForm({
           </select>
         </label>
       </div>
+      <LastPriceReference listId={item.shoppingListId} name={item.name} unit={unit} unitPrice={unitPrice} details={details} />
       <ProductDetailsFields
         details={details}
         name={item.name}

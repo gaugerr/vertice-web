@@ -5,7 +5,7 @@ import type { ShoppingItem } from '../../../domain/models/shopping';
 import { PurchaseForm } from './PurchaseForm';
 import { repository } from '../../../app/services';
 
-vi.mock('../../../app/services', () => ({ repository: { updatePurchaseDetails: vi.fn() } }));
+vi.mock('../../../app/services', () => ({ repository: { updatePurchaseDetails: vi.fn(), getCompletedPriceReferences: vi.fn().mockResolvedValue([]) } }));
 const item: ShoppingItem = {
   id: 'item',
   shoppingListId: 'list',

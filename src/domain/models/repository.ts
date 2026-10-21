@@ -1,3 +1,4 @@
+import type { PriceReference } from '../services/price-history';
 import type {
   Category,
   ItemInput,
@@ -11,6 +12,7 @@ import type {
 } from './shopping';
 
 export interface ShoppingRepository {
+  getCompletedPriceReferences(excludeListId: string): Promise<PriceReference[]>;
   getLists(): Promise<ShoppingList[]>;
   getListSummaries(): Promise<{ list: ShoppingList; totalCents: number }[]>;
   getList(id: string): Promise<ShoppingList | undefined>;

@@ -1402,3 +1402,22 @@ dialog > p {
     scroll-behavior: auto !important;
   }
 }
+
+.price-reference {
+  min-width: 0;
+  padding: 10px 12px;
+  border-left: 2px solid #8c7aa8;
+  border-radius: 0 8px 8px 0;
+  background: #ffffff05;
+  color: #d8cde5;
+  font-size: 12px;
+  line-height: 1.6;
+  overflow-wrap: anywhere;
+}
+.price-reference-source,
+.price-reference-unavailable {
+  color: #a19cab;
+  font-size: 11px;
+}
+.price-reference-higher { color: #ffb1a6; }
+.price-reference-lower { color: #b7edce; }
