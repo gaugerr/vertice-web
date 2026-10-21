@@ -209,9 +209,16 @@ test('concurrent review changes require confirmation and another tab keeps its u
   await expect(form.getByText(/Seus valores digitados continuam aqui/)).toBeVisible();
   await expect(second.getByRole('checkbox', { name: 'Marcar Café como comprado' })).toBeDisabled();
   await expect(page.getByLabel('Total da lista', { exact: true })).toContainText('15,00');
-  await expect(metadata.getByLabel('Nome da lista', { exact: true })).toHaveValue('Rascunho preservado');
-  await expect(metadata.getByLabel('Nome da lista', { exact: true })).toHaveAttribute('readonly', '');
-  await expect(metadata.getByRole('button', { name: 'Salvar alterações', exact: true })).toBeDisabled();
+  await expect(metadata.getByLabel('Nome da lista', { exact: true })).toHaveValue(
+    'Rascunho preservado',
+  );
+  await expect(metadata.getByLabel('Nome da lista', { exact: true })).toHaveAttribute(
+    'readonly',
+    '',
+  );
+  await expect(
+    metadata.getByRole('button', { name: 'Salvar alterações', exact: true }),
+  ).toBeDisabled();
 });
 
 test('copies an active list from its overview without overwriting the source', async ({ page }) => {
@@ -265,13 +272,11 @@ test('finalizes and copies offline, survives reload and restores a v4 backup', a
     'active',
     'completed',
   ]);
-  await page
-    .getByLabel('Arquivo de backup')
-    .setInputFiles({
-      name: 'v4.json',
-      mimeType: 'application/json',
-      buffer: Buffer.from(JSON.stringify(backup)),
-    });
+  await page.getByLabel('Arquivo de backup').setInputFiles({
+    name: 'v4.json',
+    mimeType: 'application/json',
+    buffer: Buffer.from(JSON.stringify(backup)),
+  });
   await page.getByRole('button', { name: 'Substituir e restaurar', exact: true }).click();
   await expect(page.getByText('Backup restaurado.', { exact: true })).toBeVisible();
   await page.goto(overview);

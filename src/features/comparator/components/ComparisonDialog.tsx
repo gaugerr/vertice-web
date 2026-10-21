@@ -99,7 +99,8 @@ export function ComparisonDialog({
   }
   function touch(event: FocusEvent<HTMLInputElement>, key: string) {
     // A blur must not move the button/select between pointer-down and pointer-up.
-    if (event.relatedTarget instanceof HTMLElement && event.relatedTarget.closest('button, select')) return;
+    if (event.relatedTarget instanceof HTMLElement && event.relatedTarget.closest('button, select'))
+      return;
     setTouched((previous) => ({ ...previous, [key]: true }));
   }
 

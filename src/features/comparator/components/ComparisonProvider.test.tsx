@@ -21,7 +21,11 @@ function fill(label: string, value: string) {
 
 describe('comparison panel', () => {
   it('does not move a close button by inserting errors during a pointer focus change', () => {
-    render(<ComparisonProvider><ComparisonButton /></ComparisonProvider>);
+    render(
+      <ComparisonProvider>
+        <ComparisonButton />
+      </ComparisonProvider>,
+    );
     open();
     const input = screen.getByLabelText('Preço da opção A (R$)');
     const close = screen.getByRole('button', { name: 'Fechar comparador' });
