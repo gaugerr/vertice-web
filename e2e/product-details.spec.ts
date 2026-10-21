@@ -107,6 +107,13 @@ test('optional quick entry, automatic names, completed copies and independent cl
   await page.getByLabel(/^Conteúdo por embalagem/).fill('');
   await page.getByRole('button', { name: 'Salvar item', exact: true }).click();
   await expect(page.getByRole('heading', { name: 'Café', exact: true })).toBeVisible();
+  await page.getByRole('button', { name: 'Editar Café', exact: true }).click();
+  const longName = 'a'.repeat(50), longBrand = 'b'.repeat(50);
+  await page.getByLabel('Nome do item', { exact: true }).fill(longName);
+  await productFields(page.getByRole('dialog'), '0,5', 'kg', longBrand);
+  await page.getByRole('button', { name: 'Salvar item', exact: true }).click();
+  await expect(page.getByRole('heading', { name: `${longName} · ${longBrand} · 0,5 kg`, exact: true })).toBeVisible();
+  expect(await page.evaluate(() => document.documentElement.scrollWidth <= innerWidth)).toBe(true);
   await page.goto(overview);
   await expect(page.getByText('Compra finalizada', { exact: true })).toBeVisible();
   await expect(page.getByText(/Café · Marca X · 500 g/)).toBeVisible();
@@ -217,11 +224,13 @@ test('metadata persists offline and in v5 backup restoration, including complete
     brand: 'Marca X',
     packageContent: { amount: '500', unit: 'g' },
   });
-  await page.getByLabel('Arquivo de backup').setInputFiles({
-    name: 'v5.json',
-    mimeType: 'application/json',
-    buffer: Buffer.from(JSON.stringify(backup)),
-  });
+  await page
+    .getByLabel('Arquivo de backup')
+    .setInputFiles({
+      name: 'v5.json',
+      mimeType: 'application/json',
+      buffer: Buffer.from(JSON.stringify(backup)),
+    });
   await page.getByRole('button', { name: 'Substituir e restaurar', exact: true }).click();
   await expect(page.getByText('Backup restaurado.', { exact: true })).toBeVisible();
   await page.goto(overview);

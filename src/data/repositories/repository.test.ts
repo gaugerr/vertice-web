@@ -265,7 +265,7 @@ describe('local repository', () => {
     expect((await repository.getItemsForCategory(category.id))[0].name).toBe('Arroz');
     expect(await repository.exportSnapshot()).toEqual(original);
   });
-  it('supports empty backup replacement and version 3 round trips', async () => {
+  it('supports empty backup replacement and current-format round trips', async () => {
     await seed();
     const original = await repository.exportSnapshot();
     expect(parseBackup(encodeBackup(original))).toEqual(original);

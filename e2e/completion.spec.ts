@@ -237,7 +237,7 @@ test('copies an active list from its overview without overwriting the source', a
   await expect(page.getByRole('button', { name: 'Finalizar compra', exact: true })).toBeVisible();
 });
 
-test('finalizes and copies offline, survives reload and restores a v4 backup', async ({
+test('finalizes and copies offline, survives reload and restores the latest backup', async ({
   page,
   context,
   browserName,
