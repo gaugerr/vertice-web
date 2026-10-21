@@ -18,7 +18,7 @@ for (const kind of ['owner', 'buyer', 'other', 'unknown']) {
   });
   if (error) throw error;
   const uid = data.user.id;
-  const sql = `insert into auth.identities(provider_id,user_id,identity_data,provider) values ('${uid}','${uid}','${JSON.stringify({ email, email_verified: true, sub: uid })}','google');`;
+  const sql = `insert into auth.identities(provider_id,user_id,identity_data,provider,created_at,updated_at) values ('${uid}','${uid}','${JSON.stringify({ email, email_verified: true, sub: uid })}','google',now(),now());`;
   execFileSync(
     'docker',
     [
