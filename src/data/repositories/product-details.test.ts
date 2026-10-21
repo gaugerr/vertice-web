@@ -121,13 +121,11 @@ describe('stored product details', () => {
       categoryId = crypto.randomUUID(),
       itemId = crypto.randomUUID();
     const old = new Dexie(db.name);
-    old
-      .version(3)
-      .stores({
-        lists: 'id, updatedAt, status',
-        categories: 'id, shoppingListId, [shoppingListId+position]',
-        items: 'id, shoppingListId, categoryId, [categoryId+createdAt]',
-      });
+    old.version(3).stores({
+      lists: 'id, updatedAt, status',
+      categories: 'id, shoppingListId, [shoppingListId+position]',
+      items: 'id, shoppingListId, categoryId, [categoryId+createdAt]',
+    });
     const times = { createdAt: '2026-10-20T12:00:00.000Z', updatedAt: '2026-10-20T12:00:00.000Z' };
     const list = {
       ...listInput,

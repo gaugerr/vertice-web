@@ -217,13 +217,11 @@ test('metadata persists offline and in v5 backup restoration, including complete
     brand: 'Marca X',
     packageContent: { amount: '500', unit: 'g' },
   });
-  await page
-    .getByLabel('Arquivo de backup')
-    .setInputFiles({
-      name: 'v5.json',
-      mimeType: 'application/json',
-      buffer: Buffer.from(JSON.stringify(backup)),
-    });
+  await page.getByLabel('Arquivo de backup').setInputFiles({
+    name: 'v5.json',
+    mimeType: 'application/json',
+    buffer: Buffer.from(JSON.stringify(backup)),
+  });
   await page.getByRole('button', { name: 'Substituir e restaurar', exact: true }).click();
   await expect(page.getByText('Backup restaurado.', { exact: true })).toBeVisible();
   await page.goto(overview);
