@@ -173,3 +173,11 @@ Veja [FLUTTER-TO-WEB.md](docs/FLUTTER-TO-WEB.md). A evolução para nuvem está 
 Nos formulários rápido e de edição, produtos com nome, marca e embalagem completos podem mostrar a última compra compatível: preço por unidade de cobrança, mercado, data e diferença em relação ao preço digitado. A referência considera somente itens comprados de outras listas finalizadas. Reabrir ou excluir uma compra retira seus preços; copiar uma lista não cria histórico. O histórico é derivado dos dados existentes e acompanha a restauração do backup v5, sem nova tabela ou migração.
 
 Nome e marca ignoram caixa, espaços extras e representação Unicode; não há aproximação de nomes. Embalagens equivalentes em g/kg ou ml/L coincidem, mas tamanhos diferentes e unidades de cobrança diferentes permanecem separados. A seleção prioriza data da compra, finalização, atualização do item e identificador. Funciona offline e não altera os totais, o preço digitado ou o foco do teclado.
+
+### Sugestões compactas ao adicionar
+
+Após dois caracteres, o campo de adicionar pode mostrar até três linhas de produtos de compras finalizadas, incluindo itens sem marca ou embalagem. A busca usa o início do nome e ignora acentos, caixa e espaços extras. Combinações equivalentes são deduplicadas; produtos já presentes em qualquer categoria da lista ficam ocultos, mantendo variantes diferentes disponíveis.
+
+Tocar numa sugestão copia nome, marca, embalagem e unidade de cobrança para a categoria aberta, com quantidade 1, preço zero e estado não comprado. Enter no campo e o botão + continuam adicionando somente o texto digitado. O teclado mantém o foco durante o salvamento; textos novos não são apagados por operações anteriores. Escape fecha as sugestões, e Tab permite escolher uma opção pelo teclado. A conferência de duplicados acontece dentro da transação, protegendo contra adições simultâneas de outra aba.
+
+As sugestões funcionam offline, acompanham finalização, reabertura, exclusão e restauração de compras e reutilizam banco v4/backup v5. Não há consulta ao banco a cada tecla nem preenchimento automático de preços.

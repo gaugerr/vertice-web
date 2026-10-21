@@ -13,23 +13,26 @@ export interface PriceReference {
   marketName: string | null;
 }
 export type ProductIdentity = Pick<ShoppingItem, 'name' | 'brand' | 'packageContent' | 'unit'>;
-const normalize = (value: string) =>
+export const normalizeProductText = (value: string) =>
   value.normalize('NFC').trim().replace(/\s+/gu, ' ').toLocaleLowerCase('pt-BR');
 
-export function productIdentity(input: ProductIdentity): string | null {
+export function productIdentity(
+  input: ProductIdentity,
+  { allowIncomplete = false }: { allowIncomplete?: boolean } = {},
+): string | null {
   const name = nameSchema.safeParse(input.name);
   const brand = brandSchema.safeParse(input.brand);
-  const content = packageContentSchema.safeParse(input.packageContent);
-  if (!name.success || !brand.success || !brand.data || !content.success) return null;
-  const { amount, unit } = content.data;
+  const content = packageContentSchema.nullable().safeParse(input.packageContent);
+  if (!name.success || !brand.success || !content.success) return null;
+  if (!allowIncomplete && (!brand.data || !content.data)) return null;
+  const amount = content.data?.amount;
+  const unit = content.data?.unit;
   const dimension =
-    unit === 'g' || unit === 'kg' ? 'mass' : unit === 'ml' || unit === 'L' ? 'volume' : 'count';
-  const normalizedAmount = new Big(amount)
-    .times(unit === 'kg' || unit === 'L' ? 1000 : 1)
-    .toFixed();
+    !unit ? null : unit === 'g' || unit === 'kg' ? 'mass' : unit === 'ml' || unit === 'L' ? 'volume' : 'count';
+  const normalizedAmount = amount ? new Big(amount).times(unit === 'kg' || unit === 'L' ? 1000 : 1).toFixed() : null;
   return JSON.stringify([
-    normalize(name.data),
-    normalize(brand.data),
+    normalizeProductText(name.data),
+    brand.data ? normalizeProductText(brand.data) : null,
     dimension,
     normalizedAmount,
     input.unit,

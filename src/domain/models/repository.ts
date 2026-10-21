@@ -1,3 +1,4 @@
+import type { ItemSuggestion, SuggestedProduct } from '../services/item-suggestions';
 import type { PriceReference } from '../services/price-history';
 import type {
   Category,
@@ -12,6 +13,8 @@ import type {
 } from './shopping';
 
 export interface ShoppingRepository {
+  getCompletedItemSuggestions(excludeListId: string): Promise<ItemSuggestion[]>;
+  addSuggestedItem(listId: string, categoryId: string, product: SuggestedProduct): Promise<string>;
   getCompletedPriceReferences(excludeListId: string): Promise<PriceReference[]>;
   getLists(): Promise<ShoppingList[]>;
   getListSummaries(): Promise<{ list: ShoppingList; totalCents: number }[]>;

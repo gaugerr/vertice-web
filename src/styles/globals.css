@@ -1425,3 +1425,36 @@ dialog > p {
 .price-reference-lower {
   color: #b7edce;
 }
+
+.item-suggestions {
+  list-style: none;
+  margin: 6px 0 0;
+  padding: 0;
+  border: 1px solid #ffffff10;
+  border-radius: 8px;
+  overflow: hidden;
+}
+.item-suggestions li + li { border-top: 1px solid #ffffff0a; }
+.item-suggestions button {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 8px;
+  width: 100%;
+  height: 44px;
+  padding: 8px 10px;
+  border: 0;
+  background: #ffffff03;
+  color: #d8cde5;
+  text-align: left;
+  font-size: 12px;
+}
+.item-suggestions button:hover:not(:disabled),
+.item-suggestions button:focus-visible { background: #b39aff15; }
+.item-suggestions button:focus-visible { outline-offset: -2px; }
+.item-suggestions button span {
+  min-width: 0;
+  overflow: hidden;
+  white-space: nowrap;
+  text-overflow: ellipsis;
+}
