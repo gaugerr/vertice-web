@@ -254,13 +254,11 @@ test('finalizes and copies offline, survives reload and restores a v4 backup', a
     'active',
     'completed',
   ]);
-  await page
-    .getByLabel('Arquivo de backup')
-    .setInputFiles({
-      name: 'v4.json',
-      mimeType: 'application/json',
-      buffer: Buffer.from(JSON.stringify(backup)),
-    });
+  await page.getByLabel('Arquivo de backup').setInputFiles({
+    name: 'v4.json',
+    mimeType: 'application/json',
+    buffer: Buffer.from(JSON.stringify(backup)),
+  });
   await page.getByRole('button', { name: 'Substituir e restaurar', exact: true }).click();
   await expect(page.getByText('Backup restaurado.', { exact: true })).toBeVisible();
   await page.goto(overview);

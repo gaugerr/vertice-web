@@ -10,8 +10,16 @@ import { Dialog } from '../../../shared/ui/Dialog';
 import { ErrorMessage } from '../../../shared/ui/Feedback';
 import { formatMoney } from '../../../domain/services/money';
 
-export function ListCard({ list, totalCents, onEdit, onCopy }: {
-  list: ShoppingList; totalCents: number; onEdit: (list: ShoppingList) => void; onCopy: (list: ShoppingList) => void;
+export function ListCard({
+  list,
+  totalCents,
+  onEdit,
+  onCopy,
+}: {
+  list: ShoppingList;
+  totalCents: number;
+  onEdit: (list: ShoppingList) => void;
+  onCopy: (list: ShoppingList) => void;
 }) {
   const [deleting, setDeleting] = useState(false);
   const completed = list.status === 'completed';
@@ -34,7 +42,12 @@ export function ListCard({ list, totalCents, onEdit, onCopy }: {
           <ArrowUpRight size={20} className="muted" aria-hidden="true" />
         </div>
         <h2>{list.storeName}</h2>
-        {completed ? <p className="completed-card-total"><span className="completion-badge">Finalizada</span><strong>{formatMoney(totalCents)}</strong></p> : null}
+        {completed ? (
+          <p className="completed-card-total">
+            <span className="completion-badge">Finalizada</span>
+            <strong>{formatMoney(totalCents)}</strong>
+          </p>
+        ) : null}
         <p className="description">
           {list.description || 'Tudo o que você precisa, em um só lugar.'}
         </p>
@@ -45,14 +58,22 @@ export function ListCard({ list, totalCents, onEdit, onCopy }: {
         </span>
       </Link>
       <div className="card-actions">
-        {!completed ? <Button
+        {!completed ? (
+          <Button
+            variant="icon"
+            aria-label={`Editar lista ${list.storeName}`}
+            onClick={() => onEdit(list)}
+          >
+            <Pencil size={16} />
+          </Button>
+        ) : null}
+        <Button
           variant="icon"
-          aria-label={`Editar lista ${list.storeName}`}
-          onClick={() => onEdit(list)}
+          aria-label={`Copiar lista ${list.storeName}`}
+          onClick={() => onCopy(list)}
         >
-          <Pencil size={16} />
-        </Button> : null}
-        <Button variant="icon" aria-label={`Copiar lista ${list.storeName}`} onClick={() => onCopy(list)}><Copy size={16} /></Button>
+          <Copy size={16} />
+        </Button>
         <Button
           variant="icon"
           aria-label={`Excluir lista ${list.storeName}`}
@@ -63,7 +84,10 @@ export function ListCard({ list, totalCents, onEdit, onCopy }: {
       </div>
       {deleting && (
         <Dialog title="Excluir lista?" onClose={() => setDeleting(false)} busy={mutation.pending}>
-          <p>“{list.storeName}” e todos os seus itens serão excluídos deste aparelho.{completed ? ' O registro desta compra finalizada também será removido.' : ''}</p>
+          <p>
+            “{list.storeName}” e todos os seus itens serão excluídos deste aparelho.
+            {completed ? ' O registro desta compra finalizada também será removido.' : ''}
+          </p>
           <ErrorMessage message={mutation.error} />
           <div className="dialog-actions">
             <Button
