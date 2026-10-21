@@ -99,7 +99,8 @@ async function copyLegacy(owner: string, destination: VerticeDatabase, authorize
           const existing = await snapshot(destination);
           const occupied =
             existing.lists.length + existing.categories.length + existing.items.length > 0;
-          // Digest is computed outside IndexedDB transaction to avoid auto-commit.
+          // The source digest is computed before the transaction; recovery checks use
+          // Dexie.waitFor to keep it alive while Web Crypto verifies the prior copy.
           // A receipt allows recovery but never replacement of subsequently edited data.
           if (occupied && (!receipt || receipt.owner !== owner))
             throw new Error(
@@ -119,7 +120,6 @@ async function copyLegacy(owner: string, destination: VerticeDatabase, authorize
             id: claimId,
             owner,
             digest,
-            fingerprint: '',
           });
         },
       );

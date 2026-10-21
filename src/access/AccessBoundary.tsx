@@ -18,7 +18,16 @@ export function AccessBoundary({ children }: { children: ReactNode }) {
   useEffect(() => {
     if (!mounted && state.phase === 'active' && state.account) setMounted(state.account);
   }, [mounted, state]);
-  if (!mounted) return <AccessScreen />;
+  if (!mounted)
+    return (
+      <AccessScreen
+        onExport={
+          state.account && accessController.canExport(state.account.uid)
+            ? () => exportAccount(state.account!)
+            : undefined
+        }
+      />
+    );
   const allowed = state.account?.uid === mounted.uid && state.phase === 'active';
   return (
     <AccountTree
@@ -95,7 +104,12 @@ function AccountTree({
     if (!accessController.canExport(account.uid))
       throw new Error('Entre novamente com a mesma conta para exportar.');
     await waitForWrites();
-    downloadBackup(encodeBackup(await new DexieShoppingRepository(db).exportSnapshot()));
+    if (!accessController.canExport(account.uid))
+      throw new Error('A conta mudou. Entre novamente para exportar.');
+    const snapshot = await new DexieShoppingRepository(db).exportSnapshot();
+    if (!accessController.canExport(account.uid))
+      throw new Error('A conta mudou. Entre novamente para exportar.');
+    downloadBackup(encodeBackup(snapshot));
   }
   return (
     <RepositoryProvider value={repository} scope={scope}>
@@ -172,4 +186,20 @@ function BlockingOverlay({ children }: { children: ReactNode }) {
       {children}
     </dialog>
   );
+}
+
+async function exportAccount(account: Account) {
+  await waitForWrites();
+  if (!accessController.canExport(account.uid))
+    throw new Error('Entre novamente com a mesma conta para exportar.');
+  const project = new URL(accessConfig.url).hostname.split('.')[0];
+  const db = new VerticeDatabase(accountDatabaseName(project, account.uid));
+  try {
+    const snapshot = await new DexieShoppingRepository(db).exportSnapshot();
+    if (!accessController.canExport(account.uid))
+      throw new Error('A conta mudou. Entre novamente para exportar.');
+    downloadBackup(encodeBackup(snapshot));
+  } finally {
+    db.close();
+  }
 }

@@ -54,6 +54,11 @@ export function AccessScreen({
         <p role="status">O login está em preparação. A versão pública continua disponível.</p>
       )}
       <div className="access-actions">
+        {state.phase === 'active' && !frozen && (
+          <Link className="button button-primary" to="/">
+            Abrir minhas listas
+          </Link>
+        )}
         <Button disabled={busy || !accessConfigured} onClick={() => void run(signIn)}>
           Entrar com Google
         </Button>

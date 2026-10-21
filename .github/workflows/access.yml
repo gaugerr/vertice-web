@@ -34,14 +34,18 @@ jobs:
         run: |
           npx --yes supabase@2.54.11 functions serve --env-file .secrets/license.env > /tmp/vertice-functions.log 2>&1 &
           node tools/access-browser-state.mjs
-      - run: npm run build
+      - id: build_access
+        run: npm run build
       - run: npx playwright install --with-deps chromium webkit
       - name: Existing purchasing suite with an authenticated local customer
         env:
           ACCESS_INTEGRATION: '1'
         run: npm run test:e2e
       - name: Login, license and offline integration
-        run: npx playwright test --config playwright.access.config.ts
+        if: ${{ !cancelled() && steps.build_access.outcome == 'success' }}
+        env:
+          PLAYWRIGHT_HTML_OUTPUT_DIR: playwright-report-access
+        run: npx playwright test --config playwright.access.config.ts --output=test-results-access
       - uses: actions/upload-artifact@v4
         if: always()
         with:
@@ -49,6 +53,8 @@ jobs:
           path: |
             playwright-report/
             test-results/
+            playwright-report-access/
+            test-results-access/
           retention-days: 7
       - name: Stop isolated services
         if: always()

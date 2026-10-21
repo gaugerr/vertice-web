@@ -82,3 +82,20 @@ describe('confirmed legacy migration', () => {
     expect(await destination.lists.count()).toBe(1);
   });
 });
+
+it('detects source changes during copy and recovers without losing the newer source', async () => {
+  const id = await seed();
+  const original = destination.transaction.bind(destination);
+  const intercept = vi.spyOn(destination, 'transaction').mockImplementationOnce(
+    (...args: Parameters<typeof destination.transaction>) =>
+      original(...args).then(async (result) => {
+        await source.lists.update(id, { storeName: 'Alteração em outra aba' });
+        return result;
+      }) as ReturnType<typeof destination.transaction>,
+  );
+  await expect(migrateLegacy('owner', destination, () => true)).rejects.toThrow('mudaram durante');
+  intercept.mockRestore();
+  await migrateLegacy('owner', destination, () => true);
+  expect((await destination.lists.get(id))?.storeName).toBe('Alteração em outra aba');
+  expect(await inspectLegacy('owner', destination)).toBeNull();
+});

@@ -173,3 +173,14 @@ describe('access lifecycle', () => {
     expect(controller.canExport(uid)).toBe(false);
   });
 });
+
+it('does not interrupt active input when another tab renews the same account lease', async () => {
+  await start();
+  const value = localStorage.getItem('test:access:lease')!;
+  window.dispatchEvent(new StorageEvent('storage', { key: 'test:access:lease', newValue: value }));
+  expect(controller.snapshot().phase).toBe('active');
+  expect(controller.canUse(uid)).toBe(true);
+  await Promise.resolve();
+  await Promise.resolve();
+  expect(controller.snapshot().phase).toBe('active');
+});

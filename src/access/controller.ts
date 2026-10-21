@@ -137,10 +137,10 @@ async function performRefresh() {
     }
     if (response.status !== 'active' || !response.lease || !Number.isFinite(response.serverTime))
       throw new Error('Resposta inválida.');
-    const lease = await verifyLease(response.lease, state.account!, config());
-    if (requestGeneration !== generation) return;
     if (Math.abs(Date.now() - response.serverTime! * 1000) > 60000)
       throw new Error('Ajuste a data e hora do aparelho para validar o acesso.');
+    const lease = await verifyLease(response.lease, state.account!, config());
+    if (requestGeneration !== generation) return;
     const account = { uid, email: lease.email };
     highWater = Date.now();
     baseline = { wall: highWater, monotonic: performance.now() };
@@ -240,7 +240,15 @@ export const accessController = {
     };
     const storage = (event: StorageEvent) => {
       if (event.key === cacheKey) {
-        emit({ phase: 'loading' });
+        let sameAccount = false;
+        try {
+          sameAccount = JSON.parse(event.newValue ?? 'null')?.account?.uid === state.account?.uid;
+        } catch {
+          /* invalid cache must block */
+        }
+        // A verified renewal for the same identity must not open a modal or steal
+        // the keyboard from another tab. Switches and logout freeze immediately.
+        if (!sameAccount || !usable()) emit({ phase: 'loading' });
         void restoreCache();
       }
     };

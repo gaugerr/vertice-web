@@ -10,3 +10,6 @@ test-results/
 
 .secrets/
 .env*.local
+
+playwright-report-access/
+test-results-access/
