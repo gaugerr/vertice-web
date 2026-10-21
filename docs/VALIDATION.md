@@ -1,64 +1,65 @@
-# Validação — finalização e cópia de compras
+# Validação — marca, embalagem e nome automático
 
 Publicado em **https://vertice-web-navy.vercel.app**, projeto Vercel `vertice-web`, repositório [gaugerr/vertice-web](https://github.com/gaugerr/vertice-web).
 
-Código validado e publicado na `main`: `3d52ed33049ab892a8be476a1f033da9391fbf0a`. Desenvolvimento isolado em `feat/list-completion`. O registro posterior desta validação altera somente a documentação.
+Código validado e publicado na main: `2b09e4c5c183c329221c30629bdf1d20257f2867`. Desenvolvimento em `feat/product-details`. O registro posterior altera somente a documentação.
 
 ## Comportamento entregue
 
-- Finalização no resumo geral, com total, contagens, orçamento, mercado opcional e data local editável.
-- Revisão recebe foco no resumo; os campos opcionais não são focados automaticamente.
-- Exige pelo menos um produto comprado e preço maior que zero em todos os comprados. Produtos não comprados permanecem identificados, sem entrar no total.
-- Compras finalizadas ficam separadas das listas em andamento e somente para consulta.
-- Reabertura preserva os dados e libera correções. Finalizar novamente atualiza a mesma compra, sem criar outro registro.
-- Cópia nos cartões e no resumo: nova lista independente com categorias/produtos, quantidades/unidades preservadas, preços zerados e todos os itens desmarcados.
-- Nome, data, descrição e orçamento da cópia são editáveis. Mercado e informações de finalização não são copiados.
-- Funciona offline após o carregamento/cache inicial do PWA.
+- Marca e conteúdo por embalagem ficam visíveis e opcionais nos formulários rápido e completo.
+- Marcar como comprado continua selecionando o preço; Enter permite salvar sem preencher os detalhes.
+- Conteúdo aceita g, kg, ml, L ou un. Peso/volume admitem até três casas decimais; contagem exige valor inteiro positivo.
+- Nome base, marca e conteúdo são armazenados separadamente. A apresentação usa, por exemplo, Café · Marca X · 500 g.
+- Prévia local durante a edição; nome da lista muda somente após gravação bem-sucedida.
+- Limpar marca ou conteúdo remove apenas o detalhe escolhido.
+- Cópias preservam marca e embalagem, zerando preços e desmarcando produtos. Alterações na cópia não modificam a origem.
+- Quantidade comprada e tamanho da embalagem são independentes. Nenhum novo campo altera o total ou converte cobranças por kg/L.
+- Apresentação consistente em produtos, prévias de categoria, revisão de preços ausentes, controles acessíveis e confirmação de exclusão.
+- Operações funcionam offline após o cache inicial do PWA.
 
 ## Integridade e compatibilidade
 
-- Estado verificado no repositório, dentro das transações de escrita; uma aba antiga não pode alterar uma compra finalizada.
-- Revisão consistente de listas, categorias e produtos. Mudanças em outra aba exigem nova conferência; a confirmação compara os registros dentro da transação.
-- Revisão não depende exclusivamente de timestamps: alterações dentro do mesmo milissegundo também são detectadas.
-- Confirmação duplicada é impedida na interface e duas confirmações concorrentes são serializadas no banco.
-- Cópias são atômicas, com identificadores e relações novos; falha de armazenamento não deixa registros parciais.
-- Rascunhos de preço e metadados permanecem visíveis se outra aba finalizar a compra; gravação fica bloqueada.
-- Dexie evolui de v2 para v3, preservando banco anterior e inicializando as listas existentes em andamento.
-- Backup JSON v4 inclui estado, mercado e datas; importação v1 Flutter e v2/v3 web preservada com schemas das versões antigas.
-- Restauração continua transacional e rejeita finalizações incoerentes antes de substituir os dados.
-- Sem nova dependência, API, login ou sincronização.
+- Atualizações omitem os detalhes não editados, preservando alterações feitas em outra aba.
+- Preço, quantidade e detalhes alterados são gravados em uma única transação; falhas não deixam alterações parciais.
+- Compras finalizadas continuam protegidas no repositório. Rascunhos permanecem visíveis e ficam bloqueados se outra aba finalizar a compra.
+- A revisão da finalização inclui marca e conteúdo, detectando alterações mesmo sem mudança de preço ou timestamp.
+- Migração Dexie v3 → v4 inicializa os campos nulos, preservando registros, valores e compras finalizadas.
+- Backup JSON v5 preserva os detalhes; leitores v1 Flutter e v2/v3/v4 web utilizam o formato antigo dos itens e recebem detalhes nulos.
+- Nomes antigos não são interpretados para deduzir marcas ou tamanhos.
+- Restauração permanece transacional e valida os novos dados antes de substituir o banco.
+- Sem novas dependências, tabelas, APIs ou serviços externos.
 
 ## Checks do código
 
-[Execução na main 39521359472](https://github.com/gaugerr/vertice-web/actions/runs/39521359472): **success**.
+[Execução na main 39526018439](https://github.com/gaugerr/vertice-web/actions/runs/39526018439): **success**.
 
-[Execução final da branch 39520966034](https://github.com/gaugerr/vertice-web/actions/runs/39520966034): **success**.
+[Execução final da branch 39525601892](https://github.com/gaugerr/vertice-web/actions/runs/39525601892): **success**.
 
 - TypeScript estrito, ESLint e Prettier: aprovados.
-- Vitest: **91 testes aprovados**, em **12 arquivos**.
+- Vitest: **107 testes aprovados**, em **15 arquivos**.
 - Build de produção: aprovado.
-- JavaScript total, incluindo módulos sob demanda: **158,0 KiB gzip**, abaixo do limite de 250 KiB.
-- Playwright em Chromium e WebKit: **32 cenários aprovados e 4 deliberadamente ignorados**.
-- Os quatro cenários ignorados são os ciclos offline/service worker no WebKit; esses cenários são executados no Chromium.
+- JavaScript total, incluindo módulos sob demanda: **159,2 KiB gzip**, abaixo do limite de 250 KiB.
+- Playwright em Chromium e WebKit: **39 cenários aprovados e 5 deliberadamente ignorados**.
+- Os casos ignorados são ciclos offline/service worker no WebKit, executados em Chromium.
 
-Cobertura: migração real de bancos antigos, total com quantidades fracionárias, orçamento excedido, preços ausentes, leitura de compras fechadas, reabertura/correção, cópia de listas abertas/fechadas/vazias, rollback em falhas, conflito de revisão, duas confirmações concorrentes, rascunhos em três abas, cópia independente, recarga offline e restauração de backup v4.
+Cobertura nova: nomes combinados sem reescrever o nome base, normalização decimal, limites de marca, contagens inteiras, limpeza independente, invariância dos totais, campos preservados em falhas, omissão de metadados não editados, migração de banco v3 populado com compra finalizada, importação v4 e exportação/restauração v5, cópias independentes, conflito de revisão e nomes longos em 320 px.
 
-As suítes anteriores de compra rápida, orçamento, importação Flutter e comparador também passaram. Um caso novo detectou e verificou a correção de uma mudança de layout ao fechar o comparador vazio: a validação no blur não desloca mais botões/seletores durante o clique.
+As suítes anteriores de compra rápida, orçamento, comparador, finalização e backups também passaram.
 
-[Pacote compilado validado](https://github.com/gaugerr/vertice-web/actions/runs/39521359472/artifacts/12310869514). Deve ser servido por HTTP/HTTPS.
+[Pacote compilado validado](https://github.com/gaugerr/vertice-web/actions/runs/39526018439/artifacts/12313191840). Deve ser servido por HTTP/HTTPS.
 
 ## Checks do endereço público
 
-[Execução 39521612834](https://github.com/gaugerr/vertice-web/actions/runs/39521612834): **success**.
+[Execução 39526367547](https://github.com/gaugerr/vertice-web/actions/runs/39526367547): **success**.
 
-- Versão de finalização identificada no HTML público.
-- HTTPS, manifesto standalone, service worker JavaScript, política de cache e resposta 404 de asset inexistente verificados.
-- **31 cenários aprovados e 3 deliberadamente ignorados** na aplicação publicada.
-- Finalização, consulta, correção, cópia, conflito entre abas e uso offline exercitados no endereço da Vercel.
-- O teste de atualização sintética do service worker é exclusivo do servidor local de testes.
+- Versão de detalhes dos produtos identificada no HTML público.
+- HTTPS, manifesto standalone, JavaScript do service worker, cache e resposta 404 de asset inexistente verificados.
+- **38 cenários aprovados e 4 deliberadamente ignorados** no endereço publicado.
+- Inclui salvar detalhes offline, recarregar, finalizar, restaurar backup e copiar mantendo os dados.
+- O cenário de atualização sintética do service worker é exclusivo do servidor local de testes.
 
 ## Limites
 
 Foco e interação foram verificados em navegadores automatizados, com revisão de capturas em largura de celular. Teclado virtual, instalação e desempenho em aparelhos físicos não são comprovados por esses testes.
 
-Histórico de preços por produto, marca e conteúdo da embalagem ficam para uma próxima etapa. O registro desta entrega é a compra finalizada, com seus produtos e valores locais. Não há controle de compradores ou cópia automática em nuvem; exportar o backup continua sendo necessário para guardar os dados fora do navegador.
+Histórico de preços, identificação de produtos entre compras e avisos automáticos de comparação ficam para a próxima etapa. Os dados continuam locais, sem sincronização em nuvem; exporte backups para guardá-los fora do armazenamento do navegador.
