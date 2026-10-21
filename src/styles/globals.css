@@ -937,7 +937,9 @@ nav a.active {
   font-size: 12px;
   overflow-wrap: anywhere;
 }
-.item-delete-label { overflow-wrap: anywhere; }
+.item-delete-label {
+  overflow-wrap: anywhere;
+}
 .sticky-total {
   position: sticky;
   bottom: max(16px, env(safe-area-inset-bottom));
