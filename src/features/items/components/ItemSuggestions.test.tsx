@@ -73,13 +73,13 @@ describe('compact suggestion interaction', () => {
     );
     const { input } = await mount();
     fireEvent.click(
-      screen.getByRole('button', { name: 'Adicionar Café · Melitta · 500 g', exact: true }),
+      screen.getByRole('button', { name: 'Adicionar Café · Melitta · 500 g' }),
     );
     expect(input).toHaveFocus();
     expect(input).toBeEnabled();
-    expect(screen.getByRole('button', { name: 'Adicionar item', exact: true })).toBeDisabled();
+    expect(screen.getByRole('button', { name: 'Adicionar item' })).toBeDisabled();
     expect(
-      screen.getByRole('button', { name: 'Adicionar Café · Pilão · 500 g', exact: true }),
+      screen.getByRole('button', { name: 'Adicionar Café · Pilão · 500 g' }),
     ).toBeDisabled();
     fireEvent.change(input, { target: { value: 'Arroz' } });
     screen.getByRole('button', { name: 'Outro campo' }).focus();
@@ -93,7 +93,7 @@ describe('compact suggestion interaction', () => {
     vi.mocked(repository.addSuggestedItem).mockRejectedValueOnce(new Error('Sem espaço'));
     const { input, rerender } = await mount();
     fireEvent.click(
-      screen.getByRole('button', { name: 'Adicionar Café · Melitta · 500 g', exact: true }),
+      screen.getByRole('button', { name: 'Adicionar Café · Melitta · 500 g' }),
     );
     await screen.findByRole('alert');
     expect(input).toHaveValue('ca');
