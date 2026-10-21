@@ -3,6 +3,7 @@ import {
   useRef,
   useState,
   type Dispatch,
+  type FocusEvent,
   type KeyboardEvent,
   type SetStateAction,
 } from 'react';
@@ -96,6 +97,11 @@ export function ComparisonDialog({
     setTouched({});
     first.current?.focus();
   }
+  function touch(event: FocusEvent<HTMLInputElement>, key: string) {
+    // A blur must not move the button/select between pointer-down and pointer-up.
+    if (event.relatedTarget instanceof HTMLElement && event.relatedTarget.closest('button, select')) return;
+    setTouched((previous) => ({ ...previous, [key]: true }));
+  }
 
   return (
     <Dialog
@@ -145,7 +151,7 @@ export function ComparisonDialog({
                     placeholder="Ex.: 10,90"
                     onChange={(event) => update(index, 'price', event.target.value)}
                     onFocus={(event) => event.currentTarget.select()}
-                    onBlur={() => setTouched((previous) => ({ ...previous, [priceKey]: true }))}
+                    onBlur={(event) => touch(event, priceKey)}
                     onKeyDown={(event) => enter(event, index * 2)}
                   />
                   {priceError && (
@@ -170,7 +176,7 @@ export function ComparisonDialog({
                       placeholder={mode === 'units' ? 'Ex.: 12' : 'Ex.: 500'}
                       onChange={(event) => update(index, 'content', event.target.value)}
                       onFocus={(event) => event.currentTarget.select()}
-                      onBlur={() => setTouched((previous) => ({ ...previous, [contentKey]: true }))}
+                      onBlur={(event) => touch(event, contentKey)}
                       onKeyDown={(event) => enter(event, index * 2 + 1)}
                     />
                     {contentError && (

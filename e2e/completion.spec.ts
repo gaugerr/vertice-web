@@ -67,7 +67,7 @@ test('finish, consult, reopen, correct and copy the same purchase on a narrow sc
   const { overview } = await seed(page);
   const dialog = await openReview(page);
   await expect(dialog.getByLabel('Total para finalizar', { exact: true })).toContainText('10,00');
-  await expect(dialog.getByText('1 comprados · 1 não comprados', { exact: true })).toBeVisible();
+  await expect(dialog.getByText('Comprados: 1 · Não comprados: 1', { exact: true })).toBeVisible();
   await expect(dialog.getByText(/Os produtos não comprados continuarão/)).toBeVisible();
   await expect(dialog.getByLabel('Saldo do orçamento', { exact: true })).toContainText(
     /Ultrapassou em.*2,00/,
@@ -89,6 +89,7 @@ test('finish, consult, reopen, correct and copy the same purchase on a narrow sc
   await expect(page.getByText('Não comprado', { exact: true })).toBeVisible();
   await page.getByRole('button', { name: 'Comparar', exact: true }).click();
   await page.getByRole('button', { name: 'Fechar comparador', exact: true }).click();
+  await expect(page.getByRole('dialog')).toHaveCount(0);
   await page.getByRole('link', { name: '← Compra teste', exact: true }).click();
   await page.getByRole('button', { name: 'Reabrir compra', exact: true }).click();
   await page.getByRole('button', { name: 'Cancelar', exact: true }).click();
@@ -176,6 +177,10 @@ test('concurrent review changes require confirmation and another tab keeps its u
   const { category } = await seed(page);
   const second = await context.newPage();
   await second.goto(category);
+  const metadata = await context.newPage();
+  await metadata.goto('/');
+  await metadata.getByRole('button', { name: 'Editar lista Compra teste', exact: true }).click();
+  await metadata.getByLabel('Nome da lista', { exact: true }).fill('Rascunho preservado');
   const review = await openReview(page);
   await second.getByRole('button', { name: 'Editar Café', exact: true }).click();
   await second.getByLabel('Preço por kg (R$)', { exact: true }).fill('30');
@@ -185,8 +190,11 @@ test('concurrent review changes require confirmation and another tab keeps its u
   await expect(
     review.getByRole('button', { name: 'Confirmar finalização', exact: true }),
   ).toBeVisible();
-  await second.getByRole('checkbox', { name: 'Marcar Café como comprado' }).uncheck();
-  await second.getByRole('checkbox', { name: 'Marcar Café como comprado' }).check();
+  const checked = second.getByRole('checkbox', { name: 'Marcar Café como comprado' });
+  await checked.click();
+  await expect(checked).not.toBeChecked();
+  await checked.click();
+  await expect(checked).toBeChecked();
   const form = second.getByRole('form', { name: 'Valores de Café' });
   await form.getByLabel('Preço por kg (R$)', { exact: true }).fill('99');
   // Checkbox toggles are real writes; acknowledge their new revision first.
@@ -201,6 +209,9 @@ test('concurrent review changes require confirmation and another tab keeps its u
   await expect(form.getByText(/Seus valores digitados continuam aqui/)).toBeVisible();
   await expect(second.getByRole('checkbox', { name: 'Marcar Café como comprado' })).toBeDisabled();
   await expect(page.getByLabel('Total da lista', { exact: true })).toContainText('15,00');
+  await expect(metadata.getByLabel('Nome da lista', { exact: true })).toHaveValue('Rascunho preservado');
+  await expect(metadata.getByLabel('Nome da lista', { exact: true })).toHaveAttribute('readonly', '');
+  await expect(metadata.getByRole('button', { name: 'Salvar alterações', exact: true })).toBeDisabled();
 });
 
 test('copies an active list from its overview without overwriting the source', async ({ page }) => {
@@ -254,11 +265,13 @@ test('finalizes and copies offline, survives reload and restores a v4 backup', a
     'active',
     'completed',
   ]);
-  await page.getByLabel('Arquivo de backup').setInputFiles({
-    name: 'v4.json',
-    mimeType: 'application/json',
-    buffer: Buffer.from(JSON.stringify(backup)),
-  });
+  await page
+    .getByLabel('Arquivo de backup')
+    .setInputFiles({
+      name: 'v4.json',
+      mimeType: 'application/json',
+      buffer: Buffer.from(JSON.stringify(backup)),
+    });
   await page.getByRole('button', { name: 'Substituir e restaurar', exact: true }).click();
   await expect(page.getByText('Backup restaurado.', { exact: true })).toBeVisible();
   await page.goto(overview);

@@ -99,12 +99,12 @@ export default function ItemsPage() {
         <div className="empty-state compact">
           <ListChecks size={36} aria-hidden="true" />
           <h2>
-            {items.length ? 'Nenhum item neste filtro' : 'O primeiro item está por sua conta'}
+            {items.length ? 'Nenhum item neste filtro' : list.status === 'completed' ? 'Nenhum produto nesta categoria' : 'O primeiro item está por sua conta'}
           </h2>
           <p>
             {items.length
               ? 'Escolha outro filtro para ver os produtos.'
-              : 'Digite o nome acima e pressione Enter para começar.'}
+              : list.status === 'completed' ? 'Esta compra finalizada não possui produtos nesta categoria.' : 'Digite o nome acima e pressione Enter para começar.'}
           </p>
         </div>
       )}

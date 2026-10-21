@@ -20,6 +20,16 @@ function fill(label: string, value: string) {
 }
 
 describe('comparison panel', () => {
+  it('does not move a close button by inserting errors during a pointer focus change', () => {
+    render(<ComparisonProvider><ComparisonButton /></ComparisonProvider>);
+    open();
+    const input = screen.getByLabelText('Preço da opção A (R$)');
+    const close = screen.getByRole('button', { name: 'Fechar comparador' });
+    fireEvent.blur(input, { relatedTarget: close });
+    expect(input).toHaveAttribute('aria-invalid', 'false');
+    fireEvent.click(close);
+    expect(screen.queryByRole('dialog')).not.toBeInTheDocument();
+  });
   it('focuses within the opening gesture, calculates live, removes stale results and preserves mode drafts', () => {
     render(
       <ComparisonProvider>

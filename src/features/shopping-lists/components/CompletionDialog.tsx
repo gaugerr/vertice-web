@@ -74,7 +74,7 @@ function CompletionForm({ review, onClose }: { review: ListReview; onClose: () =
           <span>Total da compra</span>
           <strong aria-label="Total para finalizar">{formatMoney(review.totalCents)}</strong>
           <span>
-            {review.purchasedCount} comprados · {review.pendingCount} não comprados
+            Comprados: {review.purchasedCount} · Não comprados: {review.pendingCount}
           </span>
         </div>
         <BudgetPanel list={review.list} spent={review.totalCents} readOnly />

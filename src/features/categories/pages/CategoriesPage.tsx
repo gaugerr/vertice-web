@@ -95,7 +95,7 @@ export default function CategoriesPage() {
                       .slice(0, 4)
                       .map((item) => item.name)
                       .join(' · ')
-                  : 'Adicione os primeiros itens'}
+                  : list.status === 'completed' ? 'Nenhum produto nesta compra' : 'Adicione os primeiros itens'}
                 {group.length > 4 ? ` · +${group.length - 4}` : ''}
               </p>
               <div className="category-footer">
