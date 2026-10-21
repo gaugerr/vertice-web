@@ -110,6 +110,7 @@ async function performRefresh() {
   emit({ busy: true });
   try {
     const { data, error } = await getClient().auth.getSession();
+    if (requestGeneration !== generation) return;
     if (error) throw error;
     const session = data.session;
     if (!session) {
@@ -191,6 +192,10 @@ export const accessController = {
     lastAttempt = Date.now();
     inFlight = performRefresh().finally(() => {
       inFlight = null;
+      if (state.phase === 'loading')
+        queueMicrotask(() => {
+          void this.refresh(true);
+        });
     });
     return inFlight;
   },

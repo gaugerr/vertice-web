@@ -1,3 +1,5 @@
+import { hasUnsavedChanges } from '../shared/lib/drafts';
+import { waitForWrites } from '../data/database/writes';
 import { createClient } from '@supabase/supabase-js';
 import { accessConfig, accessConfigured } from './config';
 let client: ReturnType<typeof createClient> | null = null;
@@ -42,7 +44,16 @@ export function safeReturnPath(value: string | null): string {
   }
 }
 export async function signIn() {
-  await import('../data/database/writes').then((m) => m.waitForWrites());
+  if (
+    hasUnsavedChanges() &&
+    !window.confirm('Entrar com Google sai desta tela e descarta a edição não salva. Continuar?')
+  )
+    return;
+  await waitForWrites();
+  sessionStorage.setItem(
+    'vertice:auth:return',
+    safeReturnPath(window.location.pathname + window.location.search),
+  );
   const { error } = await getClient().auth.signInWithOAuth({
     provider: 'google',
     options: {

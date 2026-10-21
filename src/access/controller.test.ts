@@ -128,6 +128,25 @@ describe('access lifecycle', () => {
     expect(controller.canUse(uid)).toBe(false);
     expect(controller.snapshot().phase).toBe('signedout');
   });
+  it('cannot restore a logged-out account from a stale getSession response', async () => {
+    await start();
+    let finish!: (value: unknown) => void;
+    mocks.getSession.mockImplementationOnce(
+      () =>
+        new Promise((resolve) => {
+          finish = resolve;
+        }),
+    );
+    const pending = controller.refresh(true);
+    await controller.logout();
+    finish({
+      data: { session: { access_token: 'stale', user: { id: uid, email: account.email } } },
+      error: null,
+    });
+    await pending;
+    expect(controller.snapshot().phase).toBe('signedout');
+    expect(controller.canUse(uid)).toBe(false);
+  });
   it('freezes old-account operations immediately when another tab changes the cached account', async () => {
     await start();
     mocks.verify.mockImplementationOnce(async () => ({

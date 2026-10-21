@@ -4,6 +4,7 @@ import { getClient, callAccess } from './client';
 import { useAccess } from './use-access';
 import { AccessScreen } from './AccessScreen';
 import { Button } from '../shared/ui/Button';
+import { trackWrite } from '../data/database/writes';
 import { useUnsavedChanges } from '../shared/lib/drafts';
 interface License {
   id: string;
@@ -20,12 +21,14 @@ interface Event {
 }
 export default function AdminPage() {
   const state = useAccess();
+  const uid = state.account?.uid;
   const [rows, setRows] = useState<License[]>([]);
   const [search, setSearch] = useState('');
   const [query, setQuery] = useState('');
   const [page, setPage] = useState(0);
   const [more, setMore] = useState(false);
-  const [authorized, setAuthorized] = useState(false);
+  const [authorizedUid, setAuthorizedUid] = useState<string | null>(null);
+  const authorized = Boolean(uid && authorizedUid === uid);
   const [email, setEmail] = useState('');
   const [reference, setReference] = useState('');
   const [error, setError] = useState('');
@@ -51,22 +54,21 @@ export default function AdminPage() {
       if (seq === generation.current) {
         setRows(data.licenses.slice(0, 20));
         setMore(data.hasMore);
-        setAuthorized(true);
+        setAuthorizedUid(uid ?? null);
       }
     } catch (e) {
       if (seq === generation.current) {
         setRows([]);
-        setAuthorized(false);
+        setAuthorizedUid(null);
         setError(e instanceof Error ? e.message : 'Falha ao consultar.');
       }
     } finally {
       if (seq === generation.current) setPending(false);
     }
-  }, [request, query, page]);
-  const uid = state.account?.uid;
+  }, [request, query, page, uid]);
   useEffect(() => {
     generation.current++;
-    setAuthorized(false);
+    setAuthorizedUid(null);
     setRows([]);
     setEvents(null);
     if (uid) void load();
@@ -75,7 +77,7 @@ export default function AdminPage() {
     setPending(true);
     setError('');
     try {
-      await request(input);
+      await trackWrite(() => request(input));
       setEmail('');
       setReference('');
       await load();

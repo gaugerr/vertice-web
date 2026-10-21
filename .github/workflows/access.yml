@@ -12,6 +12,8 @@ jobs:
   supabase:
     runs-on: ubuntu-latest
     timeout-minutes: 25
+    env:
+      SUPABASE_INTERNAL_IMAGE_REGISTRY: docker.io
     steps:
       - uses: actions/checkout@v4
       - uses: actions/setup-node@v4
@@ -21,7 +23,7 @@ jobs:
       - run: npx --yes supabase@2.54.11 --help
       - run: npx --yes supabase@2.54.11 start --help
       - name: Start isolated Supabase
-        run: npx --yes supabase@2.54.11 start --exclude studio,imgproxy,inbucket,storage-api,realtime,postgres-meta,logflare,vector,supavisor
+        run: npx --yes supabase@2.54.11 start --exclude studio,imgproxy,mailpit,storage-api,realtime,postgres-meta,logflare,vector,supavisor
       - run: npx --yes supabase@2.54.11 test db
       - name: Generate ephemeral signing key and local identities
         run: |
