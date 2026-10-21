@@ -72,15 +72,11 @@ describe('compact suggestion interaction', () => {
         }),
     );
     const { input } = await mount();
-    fireEvent.click(
-      screen.getByRole('button', { name: 'Adicionar Café · Melitta · 500 g' }),
-    );
+    fireEvent.click(screen.getByRole('button', { name: 'Adicionar Café · Melitta · 500 g' }));
     expect(input).toHaveFocus();
     expect(input).toBeEnabled();
     expect(screen.getByRole('button', { name: 'Adicionar item' })).toBeDisabled();
-    expect(
-      screen.getByRole('button', { name: 'Adicionar Café · Pilão · 500 g' }),
-    ).toBeDisabled();
+    expect(screen.getByRole('button', { name: 'Adicionar Café · Pilão · 500 g' })).toBeDisabled();
     fireEvent.change(input, { target: { value: 'Arroz' } });
     screen.getByRole('button', { name: 'Outro campo' }).focus();
     await act(async () => finish('suggested'));
@@ -92,9 +88,7 @@ describe('compact suggestion interaction', () => {
   it('preserves the prefix after failure and hides suggestions when the list becomes read-only', async () => {
     vi.mocked(repository.addSuggestedItem).mockRejectedValueOnce(new Error('Sem espaço'));
     const { input, rerender } = await mount();
-    fireEvent.click(
-      screen.getByRole('button', { name: 'Adicionar Café · Melitta · 500 g' }),
-    );
+    fireEvent.click(screen.getByRole('button', { name: 'Adicionar Café · Melitta · 500 g' }));
     await screen.findByRole('alert');
     expect(input).toHaveValue('ca');
     expect(input).toHaveFocus();
