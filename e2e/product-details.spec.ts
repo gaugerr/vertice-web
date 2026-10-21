@@ -221,7 +221,9 @@ test('metadata persists offline and in v5 backup restoration, including complete
   await productFields(form, '500', 'g', 'Marca X');
   await form.getByRole('button', { name: 'Salvar valores', exact: true }).click();
   await expect(page.getByRole('form', { name: /^Valores de/ })).toHaveCount(0);
-  await expect(page.getByRole('heading', { name: 'Café · Marca X · 500 g', exact: true })).toBeVisible();
+  await expect(
+    page.getByRole('heading', { name: 'Café · Marca X · 500 g', exact: true }),
+  ).toBeVisible();
   await page.reload();
   await expect(
     page.getByRole('heading', { name: 'Café · Marca X · 500 g', exact: true }),
