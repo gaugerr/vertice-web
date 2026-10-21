@@ -115,7 +115,17 @@ test('a populated old browser database is upgraded and exported without losing p
       item = crypto.randomUUID();
     const db = await new Promise<IDBDatabase>((resolve, reject) => {
       // Dexie version 1 uses native IndexedDB version 10.
-      const request = indexedDB.open('vertice_web', 10);
+      const leaseKey = Object.keys(localStorage).find(
+        (key) => key.startsWith('vertice:access:') && key.endsWith(':lease'),
+      );
+      const cached = leaseKey
+        ? (JSON.parse(localStorage.getItem(leaseKey)!) as { account: { uid: string } })
+        : null;
+      const project = leaseKey
+        ? new URL(leaseKey.slice('vertice:access:'.length, -':lease'.length)).hostname.split('.')[0]
+        : '';
+      const databaseName = cached ? `vertice_web_${project}_${cached.account.uid}` : 'vertice_web';
+      const request = indexedDB.open(databaseName, 10);
       request.onupgradeneeded = () => {
         const database = request.result;
         const lists = database.createObjectStore('lists', { keyPath: 'id' });

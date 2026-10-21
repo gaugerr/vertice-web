@@ -1,6 +1,6 @@
 import { useRef, useState, type ChangeEvent } from 'react';
 import { Download, FileJson, Upload } from 'lucide-react';
-import { repository } from '../../../app/services';
+import { useRepository } from '../../../app/repository-context';
 import {
   downloadBackup,
   encodeBackup,
@@ -16,6 +16,7 @@ import { Dialog } from '../../../shared/ui/Dialog';
 import { ErrorMessage } from '../../../shared/ui/Feedback';
 
 export function BackupPanel() {
+  const repository = useRepository();
   const [snapshot, setSnapshot] = useState<ShoppingSnapshot | null>(null);
   const [filename, setFilename] = useState('');
   const [fileError, setFileError] = useState('');

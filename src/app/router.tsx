@@ -1,5 +1,5 @@
 import { createBrowserRouter } from 'react-router-dom';
-import App from './App';
+import Root from './Root';
 import ListsPage from '../features/shopping-lists/pages/ListsPage';
 import CategoriesPage from '../features/categories/pages/CategoriesPage';
 import ItemsPage from '../features/items/pages/ItemsPage';
@@ -9,8 +9,24 @@ import { RouteError } from '../shared/ui/RouteError';
 
 export const router = createBrowserRouter([
   {
+    path: '/login',
+    lazy: async () => ({ Component: (await import('../access/LoginPage')).default }),
+  },
+  {
+    path: '/auth/callback',
+    lazy: async () => ({ Component: (await import('../access/CallbackPage')).default }),
+  },
+  {
+    path: '/privacy',
+    lazy: async () => ({ Component: (await import('../access/PrivacyPage')).default }),
+  },
+  {
+    path: '/admin',
+    lazy: async () => ({ Component: (await import('../access/AdminPage')).default }),
+  },
+  {
     path: '/',
-    Component: App,
+    Component: Root,
     errorElement: <RouteError />,
     children: [
       { index: true, Component: ListsPage },

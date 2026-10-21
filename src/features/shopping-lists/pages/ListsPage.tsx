@@ -2,7 +2,7 @@ import { useState } from 'react';
 import { useNavigate } from 'react-router-dom';
 import type { ShoppingList } from '../../../domain/models/shopping';
 import { Plus, ShoppingBasket, ArrowRight } from 'lucide-react';
-import { repository } from '../../../app/services';
+import { useRepository } from '../../../app/repository-context';
 import { useQuery } from '../../../shared/hooks/useQuery';
 import { Button } from '../../../shared/ui/Button';
 import { Loading, QueryError } from '../../../shared/ui/Feedback';
@@ -11,6 +11,7 @@ import { ListCard } from '../components/ListCard';
 import { ComparisonButton } from '../../comparator/components/ComparisonButton';
 
 export default function ListsPage() {
+  const repository = useRepository();
   const result = useQuery(() => repository.getListSummaries(), []);
   const [creating, setCreating] = useState(false);
   const [dialog, setDialog] = useState<{ kind: 'edit' | 'copy'; source: ShoppingList } | null>(

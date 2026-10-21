@@ -1,7 +1,7 @@
 import { useCallback, useState } from 'react';
 import { Link, useParams } from 'react-router-dom';
 import { Check, ListChecks } from 'lucide-react';
-import { repository } from '../../../app/services';
+import { useRepository } from '../../../app/repository-context';
 import { useQuery } from '../../../shared/hooks/useQuery';
 import { Loading, Missing, QueryError } from '../../../shared/ui/Feedback';
 import { formatMoney, spentCents } from '../../../domain/services/money';
@@ -11,6 +11,7 @@ import { BudgetPanel } from '../../budget/components/BudgetPanel';
 import { ComparisonButton } from '../../comparator/components/ComparisonButton';
 
 export default function ItemsPage() {
+  const repository = useRepository();
   const { listId = '', id = '' } = useParams();
   const [filter, setFilter] = useState<'all' | 'pending' | 'purchased'>('all');
   const [purchaseEditors, setPurchaseEditors] = useState<Set<string>>(() => new Set());

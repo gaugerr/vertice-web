@@ -9,6 +9,9 @@ export default defineConfig({
   reporter: [['list'], ['html', { open: 'never' }]],
   use: {
     actionTimeout: 10000,
+    ...(process.env.ACCESS_INTEGRATION === '1'
+      ? { storageState: '.secrets/browser-state.json' }
+      : {}),
     baseURL: 'http://127.0.0.1:4173',
     trace: 'retain-on-failure',
     screenshot: 'only-on-failure',

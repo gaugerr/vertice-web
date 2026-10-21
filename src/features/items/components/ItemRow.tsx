@@ -2,7 +2,7 @@ import { memo, useRef, useState } from 'react';
 import { flushSync } from 'react-dom';
 import { Pencil, Trash2 } from 'lucide-react';
 import type { ShoppingItem } from '../../../domain/models/shopping';
-import { repository } from '../../../app/services';
+import { useRepository } from '../../../app/repository-context';
 import { decimalInput, formatMoney, lineCents } from '../../../domain/services/money';
 import { useMutation } from '../../../shared/hooks/useMutation';
 import { Button } from '../../../shared/ui/Button';
@@ -21,6 +21,7 @@ export const ItemRow = memo(function ItemRow({
   onPurchaseEditingChange: (id: string, editing: boolean) => void;
   readOnly?: boolean;
 }) {
+  const repository = useRepository();
   const [editing, setEditing] = useState(false);
   const [deleting, setDeleting] = useState(false);
   const [purchasing, setPurchasing] = useState(false);

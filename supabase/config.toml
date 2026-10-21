@@ -1,0 +1,40 @@
+project_id = "vertice_access_test"
+[api]
+enabled = true
+port = 54321
+schemas = ["public", "graphql_public"]
+extra_search_path = ["public", "extensions"]
+max_rows = 1000
+[db]
+port = 54322
+shadow_port = 54320
+major_version = 17
+[studio]
+enabled = false
+[inbucket]
+enabled = false
+[storage]
+enabled = false
+[auth]
+enabled = true
+site_url = "http://127.0.0.1:4173"
+additional_redirect_urls = ["http://127.0.0.1:4173/auth/callback"]
+jwt_expiry = 3600
+enable_signup = true
+enable_anonymous_sign_ins = false
+[auth.email]
+# Local integration fixtures only. Production uses Google exclusively.
+enable_signup = true
+enable_confirmations = false
+[edge_runtime]
+enabled = true
+policy = "per_worker"
+inspector_port = 8083
+[analytics]
+enabled = false
+[functions.license-check]
+verify_jwt = false
+import_map = "./functions/deno.json"
+[functions.license-admin]
+verify_jwt = false
+import_map = "./functions/deno.json"
