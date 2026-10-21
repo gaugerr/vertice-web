@@ -65,17 +65,21 @@ export const completionInputSchema = z.object({
   purchaseDate: dateSchema,
   marketName: z.string().trim().min(1).max(50).nullable(),
 });
-export const listSchema = listV3Schema.extend({
-  status: z.enum(['active', 'completed']),
-  completedAt: z.iso.datetime().nullable(),
-  purchaseDate: dateSchema.nullable(),
-  marketName: z.string().trim().min(1).max(50).nullable(),
-}).superRefine((list, ctx) => {
-  if ((list.status === 'active' && list.completedAt !== null) ||
-      (list.status === 'completed' && (!list.completedAt || !list.purchaseDate))) {
-    ctx.addIssue({ code: 'custom', message: 'Estado de finalização inválido.' });
-  }
-});
+export const listSchema = listV3Schema
+  .extend({
+    status: z.enum(['active', 'completed']),
+    completedAt: z.iso.datetime().nullable(),
+    purchaseDate: dateSchema.nullable(),
+    marketName: z.string().trim().min(1).max(50).nullable(),
+  })
+  .superRefine((list, ctx) => {
+    if (
+      (list.status === 'active' && list.completedAt !== null) ||
+      (list.status === 'completed' && (!list.completedAt || !list.purchaseDate))
+    ) {
+      ctx.addIssue({ code: 'custom', message: 'Estado de finalização inválido.' });
+    }
+  });
 export const categorySchema = z
   .object({
     id: z.uuid(),

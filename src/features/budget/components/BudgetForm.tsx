@@ -31,7 +31,9 @@ export function BudgetForm({ list, onClose }: { list: ShoppingList; onClose: () 
   return (
     <Dialog title="Orçamento da compra" onClose={close} busy={mutation.pending}>
       <form className="form-stack" onSubmit={submit}>
-        {readOnly ? <p role="status">Esta compra foi finalizada. Reabra a compra para fazer alterações.</p> : null}
+        {readOnly ? (
+          <p role="status">Esta compra foi finalizada. Reabra a compra para fazer alterações.</p>
+        ) : null}
         <BudgetField value={value} onChange={setValue} readOnly={mutation.pending || readOnly} />
         <ErrorMessage message={mutation.error} />
         <div className="dialog-actions">

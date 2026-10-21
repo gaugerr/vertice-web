@@ -1,7 +1,13 @@
 import { z } from 'zod';
 import Big from 'big.js';
 import type { ShoppingSnapshot } from '../../domain/models/shopping';
-import { categorySchema, itemSchema, listSchema, listV3Schema, nameSchema } from '../../domain/schemas/shopping';
+import {
+  categorySchema,
+  itemSchema,
+  listSchema,
+  listV3Schema,
+  nameSchema,
+} from '../../domain/schemas/shopping';
 import { ACTIVE_PURCHASE } from '../../domain/models/shopping';
 import { assertCompletable } from '../../domain/services/completion';
 import { legacyDate } from '../../shared/lib/date';
@@ -173,12 +179,21 @@ export function parseBackup(source: string): ShoppingSnapshot {
     });
   }
   if (header.version === 3) {
-    const old = z.object({
-      format: z.literal('vertice-backup'), version: z.literal(3), exportedAt: z.iso.datetime(),
-      ...snapshotSchema.shape, lists: z.array(listV3Schema).max(MAX_ROWS),
-    }).strict().parse(raw);
-    return validateSnapshot({ lists: old.lists.map((list) => ({ ...list, ...ACTIVE_PURCHASE })),
-      categories: old.categories, items: old.items });
+    const old = z
+      .object({
+        format: z.literal('vertice-backup'),
+        version: z.literal(3),
+        exportedAt: z.iso.datetime(),
+        ...snapshotSchema.shape,
+        lists: z.array(listV3Schema).max(MAX_ROWS),
+      })
+      .strict()
+      .parse(raw);
+    return validateSnapshot({
+      lists: old.lists.map((list) => ({ ...list, ...ACTIVE_PURCHASE })),
+      categories: old.categories,
+      items: old.items,
+    });
   }
   if (header.version !== 4) throw new Error('Esta versão do backup não é compatível.');
   const backup = z

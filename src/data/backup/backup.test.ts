@@ -71,21 +71,45 @@ describe('backups', () => {
   });
   it('imports the frozen v3 shape and round trips completed purchases in v4', () => {
     const data = parseBackup(JSON.stringify(legacy));
-    const old = { format: 'vertice-backup', version: 3, exportedAt: new Date().toISOString(), ...data,
-      lists: data.lists.map((list) => ({ id: list.id, storeName: list.storeName, date: list.date,
-        description: list.description, budgetCents: list.budgetCents, createdAt: list.createdAt, updatedAt: list.updatedAt })),
+    const old = {
+      format: 'vertice-backup',
+      version: 3,
+      exportedAt: new Date().toISOString(),
+      ...data,
+      lists: data.lists.map((list) => ({
+        id: list.id,
+        storeName: list.storeName,
+        date: list.date,
+        description: list.description,
+        budgetCents: list.budgetCents,
+        createdAt: list.createdAt,
+        updatedAt: list.updatedAt,
+      })),
     };
     const imported = parseBackup(JSON.stringify(old));
     expect(imported).toEqual(data);
-    Object.assign(imported.lists[0], { status: 'completed', completedAt: '2026-10-21T12:00:00.000Z', purchaseDate: '2026-10-20', marketName: 'Mercado A' });
+    Object.assign(imported.lists[0], {
+      status: 'completed',
+      completedAt: '2026-10-21T12:00:00.000Z',
+      purchaseDate: '2026-10-20',
+      marketName: 'Mercado A',
+    });
     expect(parseBackup(encodeBackup(imported))).toEqual(imported);
-    for (const patch of [{ completedAt: null }, { purchaseDate: null }, { status: 'unknown' }, { marketName: 'x'.repeat(51) }]) {
-      const invalid = structuredClone(imported); Object.assign(invalid.lists[0], patch);
+    for (const patch of [
+      { completedAt: null },
+      { purchaseDate: null },
+      { status: 'unknown' },
+      { marketName: 'x'.repeat(51) },
+    ]) {
+      const invalid = structuredClone(imported);
+      Object.assign(invalid.lists[0], patch);
       expect(() => encodeBackup(invalid)).toThrow();
     }
-    const empty = structuredClone(imported); empty.items = [];
+    const empty = structuredClone(imported);
+    empty.items = [];
     expect(() => encodeBackup(empty)).toThrow();
-    const zero = structuredClone(imported); zero.items[0].unitPrice = '0';
+    const zero = structuredClone(imported);
+    zero.items[0].unitPrice = '0';
     expect(() => encodeBackup(zero)).toThrow();
   });
   it('rejects duplicates, orphan rows and category/list mismatches', () => {

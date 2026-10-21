@@ -38,9 +38,11 @@ export function BudgetPanel({
             ? 'Sem orçamento definido'
             : `Limite da lista · ${formatMoney(list.budgetCents)}`}
         </span>
-        {!readOnly && list.status !== 'completed' ? <Button variant="secondary" onClick={() => setEditing(true)}>
-          {list.budgetCents === null ? 'Definir orçamento' : 'Ajustar orçamento'}
-        </Button> : null}
+        {!readOnly && list.status !== 'completed' ? (
+          <Button variant="secondary" onClick={() => setEditing(true)}>
+            {list.budgetCents === null ? 'Definir orçamento' : 'Ajustar orçamento'}
+          </Button>
+        ) : null}
       </div>
       {list.budgetCents !== null && remaining !== null && (
         <>

@@ -48,7 +48,8 @@ export default function CategoriesPage() {
           <span className="eyebrow">TOTAL DA LISTA</span>
           <strong aria-label="Total da lista">{formatMoney(spentCents(items))}</strong>
           <p>
-            {purchased} de {items.length} itens comprados{list.status === 'completed' ? ` · ${items.length - purchased} não comprados` : ''}
+            {purchased} de {items.length} itens comprados
+            {list.status === 'completed' ? ` · ${items.length - purchased} não comprados` : ''}
           </p>
         </div>
         <span className="summary-icon">
@@ -62,7 +63,10 @@ export default function CategoriesPage() {
           <h2>Por categoria</h2>
           <p>Organize cada parte das suas compras.</p>
         </div>
-        <div className="section-actions"><span className="count-badge">{categories.length}</span><ComparisonButton /></div>
+        <div className="section-actions">
+          <span className="count-badge">{categories.length}</span>
+          <ComparisonButton />
+        </div>
       </div>
       <div className="categories-grid">
         {categories.map((category, index) => {

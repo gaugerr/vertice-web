@@ -6,7 +6,15 @@ import { useUnsavedChanges } from '../../../shared/lib/drafts';
 import { Button } from '../../../shared/ui/Button';
 import { ErrorMessage } from '../../../shared/ui/Feedback';
 
-export function AddItemForm({ listId, categoryId, readOnly = false }: { listId: string; categoryId: string; readOnly?: boolean }) {
+export function AddItemForm({
+  listId,
+  categoryId,
+  readOnly = false,
+}: {
+  listId: string;
+  categoryId: string;
+  readOnly?: boolean;
+}) {
   const [name, setName] = useState('');
   const input = useRef<HTMLInputElement>(null);
   const revision = useRef(0);

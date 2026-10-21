@@ -10,18 +10,23 @@ async function createList(page: Page, name = 'Compra teste') {
   return page.url();
 }
 async function enterCategory(page: Page) {
-  await page.getByRole('link').filter({ has: page.getByRole('heading', { name: 'Essenciais', exact: true }) }).click();
+  await page
+    .getByRole('link')
+    .filter({ has: page.getByRole('heading', { name: 'Essenciais', exact: true }) })
+    .click();
 }
 async function addItem(page: Page, name: string) {
   const input = page.getByRole('textbox', { name: 'Adicionar item', exact: true });
-  await input.fill(name); await input.press('Enter');
+  await input.fill(name);
+  await input.press('Enter');
   await expect(input).toHaveValue('');
   await expect(page.getByRole('heading', { name, exact: true })).toBeVisible();
 }
 async function seed(page: Page) {
   const overview = await createList(page);
   await enterCategory(page);
-  await addItem(page, 'Café'); await addItem(page, 'Feijão');
+  await addItem(page, 'Café');
+  await addItem(page, 'Feijão');
   await page.getByRole('checkbox', { name: 'Marcar Café como comprado' }).click();
   const form = page.getByRole('form', { name: 'Valores de Café' });
   await form.getByLabel('Preço por un (R$)', { exact: true }).fill('20');
@@ -55,14 +60,18 @@ async function exportBackup(page: Page) {
   return JSON.parse(Buffer.concat(chunks).toString());
 }
 
-test('finish, consult, reopen, correct and copy the same purchase on a narrow screen', async ({ page }, info) => {
+test('finish, consult, reopen, correct and copy the same purchase on a narrow screen', async ({
+  page,
+}, info) => {
   await page.setViewportSize({ width: 320, height: 740 });
   const { overview } = await seed(page);
   const dialog = await openReview(page);
   await expect(dialog.getByLabel('Total para finalizar', { exact: true })).toContainText('10,00');
   await expect(dialog.getByText('1 comprados · 1 não comprados', { exact: true })).toBeVisible();
   await expect(dialog.getByText(/Os produtos não comprados continuarão/)).toBeVisible();
-  await expect(dialog.getByLabel('Saldo do orçamento', { exact: true })).toContainText(/Ultrapassou em.*2,00/);
+  await expect(dialog.getByLabel('Saldo do orçamento', { exact: true })).toContainText(
+    /Ultrapassou em.*2,00/,
+  );
   await dialog.getByLabel(/Mercado/).fill('Mercado A');
   await dialog.getByLabel('Data da compra', { exact: true }).fill('2026-10-20');
   expect(await page.evaluate(() => document.documentElement.scrollWidth <= innerWidth)).toBe(true);
@@ -98,14 +107,21 @@ test('finish, consult, reopen, correct and copy the same purchase on a narrow sc
   await corrected.getByRole('button', { name: 'Confirmar finalização', exact: true }).click();
   await expect(page.getByLabel('Total da lista', { exact: true })).toContainText('5,00');
   await page.getByRole('link', { name: 'Vértice, minhas listas', exact: true }).click();
-  await expect(page.getByRole('link', { name: 'Abrir lista Compra teste', exact: true })).toHaveCount(0);
+  await expect(
+    page.getByRole('link', { name: 'Abrir lista Compra teste', exact: true }),
+  ).toHaveCount(0);
   await page.getByRole('button', { name: 'Finalizadas', exact: true }).click();
-  await expect(page.getByRole('link', { name: 'Abrir lista Compra teste', exact: true })).toContainText('5,00');
+  await expect(
+    page.getByRole('link', { name: 'Abrir lista Compra teste', exact: true }),
+  ).toContainText('5,00');
   await page.getByRole('button', { name: 'Copiar lista Compra teste', exact: true }).click();
   await page.getByLabel('Nome da lista', { exact: true }).fill('Próxima compra');
   await page.getByLabel('Orçamento da compra (R$)', { exact: true }).fill('');
   const prompts: string[] = [];
-  page.on('dialog', async (d) => { prompts.push(d.message()); await d.dismiss(); });
+  page.on('dialog', async (d) => {
+    prompts.push(d.message());
+    await d.dismiss();
+  });
   await page.getByRole('button', { name: 'Criar cópia', exact: true }).click();
   await expect(page.getByRole('heading', { name: 'Próxima compra', exact: true })).toBeVisible();
   expect(page.url()).not.toBe(overview);
@@ -113,7 +129,10 @@ test('finish, consult, reopen, correct and copy the same purchase on a narrow sc
   await expect(page.getByLabel('Total da lista', { exact: true })).toContainText('0,00');
   await expect(page.getByText('Sem orçamento definido', { exact: true })).toBeVisible();
   await enterCategory(page);
-  for (const box of await page.getByRole('checkbox').all()) { await expect(box).not.toBeChecked(); await expect(box).toBeEnabled(); }
+  for (const box of await page.getByRole('checkbox').all()) {
+    await expect(box).not.toBeChecked();
+    await expect(box).toBeEnabled();
+  }
   await page.getByRole('button', { name: 'Editar Café', exact: true }).click();
   await expect(page.getByLabel('Quantidade', { exact: true })).toHaveValue('0,5');
   await expect(page.getByLabel('Unidade', { exact: true })).toHaveValue('kg');
@@ -126,39 +145,54 @@ test('finish, consult, reopen, correct and copy the same purchase on a narrow sc
   expect(backup.items).toHaveLength(4);
 });
 
-test('rejects empty/unpriced completion and cancellation preserves the active list', async ({ page }) => {
+test('rejects empty/unpriced completion and cancellation preserves the active list', async ({
+  page,
+}) => {
   await createList(page);
   const empty = await openReview(page);
-  await expect(empty.getByRole('button', { name: 'Confirmar finalização', exact: true })).toBeDisabled();
+  await expect(
+    empty.getByRole('button', { name: 'Confirmar finalização', exact: true }),
+  ).toBeDisabled();
   await empty.getByRole('button', { name: 'Continuar comprando', exact: true }).click();
-  await enterCategory(page); await addItem(page, 'Sem preço');
+  await enterCategory(page);
+  await addItem(page, 'Sem preço');
   await page.getByRole('checkbox', { name: 'Marcar Sem preço como comprado' }).click();
   await page.getByRole('button', { name: 'Fechar', exact: true }).click();
   await page.getByRole('link', { name: '← Compra teste', exact: true }).click();
   const unpriced = await openReview(page);
   await expect(unpriced.getByRole('alert')).toContainText('Sem preço · Essenciais');
-  await expect(unpriced.getByRole('button', { name: 'Confirmar finalização', exact: true })).toBeDisabled();
+  await expect(
+    unpriced.getByRole('button', { name: 'Confirmar finalização', exact: true }),
+  ).toBeDisabled();
   await unpriced.getByRole('button', { name: 'Continuar comprando', exact: true }).click();
   await expect(page.getByRole('button', { name: 'Finalizar compra', exact: true })).toBeFocused();
   await expect(page.getByRole('button', { name: 'Reabrir compra', exact: true })).toHaveCount(0);
 });
 
-test('concurrent review changes require confirmation and another tab keeps its unsaved price', async ({ page, context }) => {
+test('concurrent review changes require confirmation and another tab keeps its unsaved price', async ({
+  page,
+  context,
+}) => {
   const { category } = await seed(page);
-  const second = await context.newPage(); await second.goto(category);
+  const second = await context.newPage();
+  await second.goto(category);
   const review = await openReview(page);
   await second.getByRole('button', { name: 'Editar Café', exact: true }).click();
   await second.getByLabel('Preço por kg (R$)', { exact: true }).fill('30');
   await second.getByRole('button', { name: 'Salvar item', exact: true }).click();
   await expect(review.getByLabel('Total para finalizar', { exact: true })).toContainText('15,00');
   await review.getByRole('button', { name: 'Conferir resumo atualizado', exact: true }).click();
-  await expect(review.getByRole('button', { name: 'Confirmar finalização', exact: true })).toBeVisible();
+  await expect(
+    review.getByRole('button', { name: 'Confirmar finalização', exact: true }),
+  ).toBeVisible();
   await second.getByRole('checkbox', { name: 'Marcar Café como comprado' }).uncheck();
   await second.getByRole('checkbox', { name: 'Marcar Café como comprado' }).check();
   const form = second.getByRole('form', { name: 'Valores de Café' });
   await form.getByLabel('Preço por kg (R$)', { exact: true }).fill('99');
   // Checkbox toggles are real writes; acknowledge their new revision first.
-  await expect(review.getByRole('button', { name: 'Conferir resumo atualizado', exact: true })).toBeVisible();
+  await expect(
+    review.getByRole('button', { name: 'Conferir resumo atualizado', exact: true }),
+  ).toBeVisible();
   await review.getByRole('button', { name: 'Conferir resumo atualizado', exact: true }).click();
   await review.getByRole('button', { name: 'Confirmar finalização', exact: true }).click();
   await expect(page.getByText('Compra finalizada', { exact: true })).toBeVisible();
@@ -172,16 +206,24 @@ test('concurrent review changes require confirmation and another tab keeps its u
 test('copies an active list from its overview without overwriting the source', async ({ page }) => {
   const { overview } = await seed(page);
   await page.getByRole('button', { name: 'Copiar lista', exact: true }).click();
-  await expect(page.getByLabel('Nome da lista', { exact: true })).toHaveValue('Compra teste — cópia');
+  await expect(page.getByLabel('Nome da lista', { exact: true })).toHaveValue(
+    'Compra teste — cópia',
+  );
   await page.getByRole('button', { name: 'Criar cópia', exact: true }).click();
-  await expect(page.getByRole('heading', { name: 'Compra teste — cópia', exact: true })).toBeVisible();
+  await expect(
+    page.getByRole('heading', { name: 'Compra teste — cópia', exact: true }),
+  ).toBeVisible();
   await expect(page.getByLabel('Total da lista', { exact: true })).toContainText('0,00');
   await page.goto(overview);
   await expect(page.getByLabel('Total da lista', { exact: true })).toContainText('10,00');
   await expect(page.getByRole('button', { name: 'Finalizar compra', exact: true })).toBeVisible();
 });
 
-test('finalizes and copies offline, survives reload and restores a v4 backup', async ({ page, context, browserName }) => {
+test('finalizes and copies offline, survives reload and restores a v4 backup', async ({
+  page,
+  context,
+  browserName,
+}) => {
   test.skip(browserName !== 'chromium', 'Offline service worker lifecycle is tested in Chromium.');
   const { overview } = await seed(page);
   await expect(page.getByText('Pronto para usar offline', { exact: true })).toBeVisible();
@@ -192,14 +234,33 @@ test('finalizes and copies offline, survives reload and restores a v4 backup', a
   await expect(page.getByText('Compra finalizada', { exact: true })).toBeVisible();
   await page.getByRole('button', { name: 'Copiar lista', exact: true }).click();
   await page.getByRole('button', { name: 'Criar cópia', exact: true }).click();
-  await expect(page.getByRole('heading', { name: 'Compra teste — cópia', exact: true })).toBeVisible();
-  const copyUrl = page.url(); await page.reload();
+  await expect(
+    page.getByRole('heading', { name: 'Compra teste — cópia', exact: true }),
+  ).toBeVisible();
+  const copyUrl = page.url();
+  await page.reload();
   await expect(page.getByLabel('Total da lista', { exact: true })).toContainText('0,00');
-  expect(await page.evaluate(() => fetch('/online.txt?completion-proof=1', { cache: 'no-store' }).then(() => true, () => false))).toBe(false);
+  expect(
+    await page.evaluate(() =>
+      fetch('/online.txt?completion-proof=1', { cache: 'no-store' }).then(
+        () => true,
+        () => false,
+      ),
+    ),
+  ).toBe(false);
   const backup = await exportBackup(page);
   expect(backup.version).toBe(4);
-  expect(backup.lists.map((l: { status: string }) => l.status).sort()).toEqual(['active', 'completed']);
-  await page.getByLabel('Arquivo de backup').setInputFiles({ name: 'v4.json', mimeType: 'application/json', buffer: Buffer.from(JSON.stringify(backup)) });
+  expect(backup.lists.map((l: { status: string }) => l.status).sort()).toEqual([
+    'active',
+    'completed',
+  ]);
+  await page
+    .getByLabel('Arquivo de backup')
+    .setInputFiles({
+      name: 'v4.json',
+      mimeType: 'application/json',
+      buffer: Buffer.from(JSON.stringify(backup)),
+    });
   await page.getByRole('button', { name: 'Substituir e restaurar', exact: true }).click();
   await expect(page.getByText('Backup restaurado.', { exact: true })).toBeVisible();
   await page.goto(overview);

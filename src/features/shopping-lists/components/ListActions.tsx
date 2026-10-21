@@ -35,27 +35,67 @@ export function ListActions({ list }: { list: ShoppingList }) {
     <section className="list-lifecycle" aria-label="Ações da compra">
       {completed ? (
         <div className="completion-banner" role="status">
-          <strong><Check size={18} aria-hidden="true" /> Compra finalizada</strong>
-          <span>{list.purchaseDate ? formatDate(list.purchaseDate) : ''}{list.marketName ? ` · ${list.marketName}` : ''}</span>
+          <strong>
+            <Check size={18} aria-hidden="true" /> Compra finalizada
+          </strong>
+          <span>
+            {list.purchaseDate ? formatDate(list.purchaseDate) : ''}
+            {list.marketName ? ` · ${list.marketName}` : ''}
+          </span>
           <p>Somente para consulta. Reabra a compra se precisar corrigir algum dado.</p>
         </div>
       ) : null}
       <div className="list-action-buttons">
         {completed ? (
-          <Button variant="secondary" onClick={() => setAction('reopen')}><RotateCcw size={17} aria-hidden="true" /> Reabrir compra</Button>
-        ) : <Button onClick={finish}><Check size={17} aria-hidden="true" /> Finalizar compra</Button>}
-        <Button variant="secondary" onClick={() => setAction('copy')}><Copy size={17} aria-hidden="true" /> Copiar lista</Button>
+          <Button variant="secondary" onClick={() => setAction('reopen')}>
+            <RotateCcw size={17} aria-hidden="true" /> Reabrir compra
+          </Button>
+        ) : (
+          <Button onClick={finish}>
+            <Check size={17} aria-hidden="true" /> Finalizar compra
+          </Button>
+        )}
+        <Button variant="secondary" onClick={() => setAction('copy')}>
+          <Copy size={17} aria-hidden="true" /> Copiar lista
+        </Button>
       </div>
-      {notice ? <p role="status" className="field-help">{notice}</p> : null}
-      {action === 'finish' ? <CompletionDialog listId={list.id} onClose={() => setAction(null)} /> : null}
-      {action === 'copy' ? <ListForm copySource={list} onClose={() => setAction(null)} onCreated={(id) => { setAction(null); navigate(`/lists/${id}`); }} /> : null}
+      {notice ? (
+        <p role="status" className="field-help">
+          {notice}
+        </p>
+      ) : null}
+      {action === 'finish' ? (
+        <CompletionDialog listId={list.id} onClose={() => setAction(null)} />
+      ) : null}
+      {action === 'copy' ? (
+        <ListForm
+          copySource={list}
+          onClose={() => setAction(null)}
+          onCreated={(id) => {
+            setAction(null);
+            navigate(`/lists/${id}`);
+          }}
+        />
+      ) : null}
       {action === 'reopen' ? (
-        <Dialog title="Reabrir compra?" onClose={() => setAction(null)} busy={mutation.pending} preserveScroll>
-          <p>Os produtos e valores serão mantidos. Você poderá corrigir os dados e finalizar esta mesma compra novamente.</p>
+        <Dialog
+          title="Reabrir compra?"
+          onClose={() => setAction(null)}
+          busy={mutation.pending}
+          preserveScroll
+        >
+          <p>
+            Os produtos e valores serão mantidos. Você poderá corrigir os dados e finalizar esta
+            mesma compra novamente.
+          </p>
           <ErrorMessage message={mutation.error} />
           <div className="dialog-actions">
-            <Button variant="secondary" disabled={mutation.pending} onClick={() => setAction(null)}>Cancelar</Button>
-            <Button disabled={mutation.pending} onClick={reopen}>{mutation.pending ? 'Reabrindo…' : 'Confirmar reabertura'}</Button>
+            <Button variant="secondary" disabled={mutation.pending} onClick={() => setAction(null)}>
+              Cancelar
+            </Button>
+            <Button disabled={mutation.pending} onClick={reopen}>
+              {mutation.pending ? 'Reabrindo…' : 'Confirmar reabertura'}
+            </Button>
           </div>
         </Dialog>
       ) : null}

@@ -67,25 +67,33 @@ export const ItemRow = memo(function ItemRow({
           <p>
             {decimalInput(item.quantity)} {item.unit} × {formatMoney(Number(item.unitPrice) * 100)}
           </p>
-          {readOnly ? <span className="item-purchase-status">{item.isPurchased ? 'Comprado' : 'Não comprado'}</span> : null}
+          {readOnly ? (
+            <span className="item-purchase-status">
+              {item.isPurchased ? 'Comprado' : 'Não comprado'}
+            </span>
+          ) : null}
         </div>
         <strong className="item-total">{formatMoney(lineCents(item))}</strong>
-        {!readOnly ? <Button
-          variant="icon"
-          aria-label={`Editar ${item.name}`}
-          disabled={mutation.pending || purchasing}
-          onClick={() => setEditing(true)}
-        >
-          <Pencil size={16} />
-        </Button> : null}
-        {!readOnly ? <Button
-          variant="icon"
-          aria-label={`Excluir ${item.name}`}
-          disabled={mutation.pending || purchasing}
-          onClick={() => setDeleting(true)}
-        >
-          <Trash2 size={16} />
-        </Button> : null}
+        {!readOnly ? (
+          <Button
+            variant="icon"
+            aria-label={`Editar ${item.name}`}
+            disabled={mutation.pending || purchasing}
+            onClick={() => setEditing(true)}
+          >
+            <Pencil size={16} />
+          </Button>
+        ) : null}
+        {!readOnly ? (
+          <Button
+            variant="icon"
+            aria-label={`Excluir ${item.name}`}
+            disabled={mutation.pending || purchasing}
+            onClick={() => setDeleting(true)}
+          >
+            <Trash2 size={16} />
+          </Button>
+        ) : null}
       </div>
       <ErrorMessage message={mutation.error} />
       {purchasing && (

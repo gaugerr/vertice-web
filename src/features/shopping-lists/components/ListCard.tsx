@@ -36,7 +36,12 @@ export function ListCard({ list, totalCents }: { list: ShoppingList; totalCents:
           <ArrowUpRight size={20} className="muted" aria-hidden="true" />
         </div>
         <h2>{list.storeName}</h2>
-        {completed ? <p className="completed-card-total"><span className="completion-badge">Finalizada</span><strong>{formatMoney(totalCents)}</strong></p> : null}
+        {completed ? (
+          <p className="completed-card-total">
+            <span className="completion-badge">Finalizada</span>
+            <strong>{formatMoney(totalCents)}</strong>
+          </p>
+        ) : null}
         <p className="description">
           {list.description || 'Tudo o que você precisa, em um só lugar.'}
         </p>
@@ -47,14 +52,22 @@ export function ListCard({ list, totalCents }: { list: ShoppingList; totalCents:
         </span>
       </Link>
       <div className="card-actions">
-        {!completed ? <Button
+        {!completed ? (
+          <Button
+            variant="icon"
+            aria-label={`Editar lista ${list.storeName}`}
+            onClick={() => setEditing(true)}
+          >
+            <Pencil size={16} />
+          </Button>
+        ) : null}
+        <Button
           variant="icon"
-          aria-label={`Editar lista ${list.storeName}`}
-          onClick={() => setEditing(true)}
+          aria-label={`Copiar lista ${list.storeName}`}
+          onClick={() => setCopying(true)}
         >
-          <Pencil size={16} />
-        </Button> : null}
-        <Button variant="icon" aria-label={`Copiar lista ${list.storeName}`} onClick={() => setCopying(true)}><Copy size={16} /></Button>
+          <Copy size={16} />
+        </Button>
         <Button
           variant="icon"
           aria-label={`Excluir lista ${list.storeName}`}
@@ -64,10 +77,19 @@ export function ListCard({ list, totalCents }: { list: ShoppingList; totalCents:
         </Button>
       </div>
       {editing && <ListForm list={list} onClose={() => setEditing(false)} />}
-      {copying && <ListForm copySource={list} onClose={() => setCopying(false)} onCreated={(id) => navigate(`/lists/${id}`)} />}
+      {copying && (
+        <ListForm
+          copySource={list}
+          onClose={() => setCopying(false)}
+          onCreated={(id) => navigate(`/lists/${id}`)}
+        />
+      )}
       {deleting && (
         <Dialog title="Excluir lista?" onClose={() => setDeleting(false)} busy={mutation.pending}>
-          <p>“{list.storeName}” e todos os seus itens serão excluídos deste aparelho.{completed ? ' O registro desta compra finalizada também será removido.' : ''}</p>
+          <p>
+            “{list.storeName}” e todos os seus itens serão excluídos deste aparelho.
+            {completed ? ' O registro desta compra finalizada também será removido.' : ''}
+          </p>
           <ErrorMessage message={mutation.error} />
           <div className="dialog-actions">
             <Button

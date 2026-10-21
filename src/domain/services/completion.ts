@@ -16,17 +16,47 @@ export function buildListReview(
 ): ListReview {
   // Explicit fields and deterministic ordering also catch changes within the same millisecond.
   const revision = JSON.stringify([
-    [list.id, list.storeName, list.date, list.description, list.budgetCents, list.status,
-      list.completedAt, list.purchaseDate, list.marketName, list.createdAt, list.updatedAt],
-    [...categories].sort((a, b) => a.id.localeCompare(b.id)).map((c) =>
-      [c.id, c.shoppingListId, c.title, c.position, c.createdAt, c.updatedAt]),
-    [...items].sort((a, b) => a.id.localeCompare(b.id)).map((i) =>
-      [i.id, i.shoppingListId, i.categoryId, i.name, i.unitPrice, i.quantity, i.unit,
-        i.isPurchased, i.createdAt, i.updatedAt]),
+    [
+      list.id,
+      list.storeName,
+      list.date,
+      list.description,
+      list.budgetCents,
+      list.status,
+      list.completedAt,
+      list.purchaseDate,
+      list.marketName,
+      list.createdAt,
+      list.updatedAt,
+    ],
+    [...categories]
+      .sort((a, b) => a.id.localeCompare(b.id))
+      .map((c) => [c.id, c.shoppingListId, c.title, c.position, c.createdAt, c.updatedAt]),
+    [...items]
+      .sort((a, b) => a.id.localeCompare(b.id))
+      .map((i) => [
+        i.id,
+        i.shoppingListId,
+        i.categoryId,
+        i.name,
+        i.unitPrice,
+        i.quantity,
+        i.unit,
+        i.isPurchased,
+        i.createdAt,
+        i.updatedAt,
+      ]),
   ]);
   const purchasedCount = items.filter((item) => item.isPurchased).length;
-  return { list, categories, items, totalCents: spentCents(items), purchasedCount,
-    pendingCount: items.length - purchasedCount, revision };
+  return {
+    list,
+    categories,
+    items,
+    totalCents: spentCents(items),
+    purchasedCount,
+    pendingCount: items.length - purchasedCount,
+    revision,
+  };
 }
 
 export function unpricedPurchasedItems(items: ShoppingItem[]): ShoppingItem[] {

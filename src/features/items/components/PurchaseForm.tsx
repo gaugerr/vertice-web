@@ -58,7 +58,12 @@ export function PurchaseForm({
         }
       }}
     >
-      {readOnly ? <p role="status">Esta compra foi finalizada em outra aba. Seus valores digitados continuam aqui; reabra a compra para salvá-los.</p> : null}
+      {readOnly ? (
+        <p role="status">
+          Esta compra foi finalizada em outra aba. Seus valores digitados continuam aqui; reabra a
+          compra para salvá-los.
+        </p>
+      ) : null}
       <div className="purchase-fields">
         <label>
           Preço por {unit} (R$)

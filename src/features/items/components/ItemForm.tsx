@@ -8,7 +8,15 @@ import { Button } from '../../../shared/ui/Button';
 import { Dialog } from '../../../shared/ui/Dialog';
 import { ErrorMessage } from '../../../shared/ui/Feedback';
 
-export function ItemForm({ item, onClose, readOnly = false }: { item: ShoppingItem; onClose: () => void; readOnly?: boolean }) {
+export function ItemForm({
+  item,
+  onClose,
+  readOnly = false,
+}: {
+  item: ShoppingItem;
+  onClose: () => void;
+  readOnly?: boolean;
+}) {
   const [name, setName] = useState(item.name);
   const [unitPrice, setPrice] = useState(decimalInput(item.unitPrice));
   const [quantity, setQuantity] = useState(decimalInput(item.quantity));
@@ -36,7 +44,12 @@ export function ItemForm({ item, onClose, readOnly = false }: { item: ShoppingIt
   return (
     <Dialog title="Editar item" onClose={close} busy={mutation.pending}>
       <form onSubmit={submit} className="form-stack">
-        {readOnly ? <p role="status">Esta compra foi finalizada. Reabra a compra para salvar as alterações. Seus campos foram preservados.</p> : null}
+        {readOnly ? (
+          <p role="status">
+            Esta compra foi finalizada. Reabra a compra para salvar as alterações. Seus campos foram
+            preservados.
+          </p>
+        ) : null}
         <label>
           Nome do item
           <input

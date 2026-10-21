@@ -21,7 +21,10 @@ describe('quick budget editing', () => {
       date: '2026-10-19',
       description: '',
       budgetCents: 10000,
-      status: 'active', completedAt: null, purchaseDate: null, marketName: null,
+      status: 'active',
+      completedAt: null,
+      purchaseDate: null,
+      marketName: null,
       createdAt: '2026-10-19T12:00:00.000Z',
       updatedAt: '2026-10-19T12:00:00.000Z',
     };
