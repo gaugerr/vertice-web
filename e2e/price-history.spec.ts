@@ -2,6 +2,7 @@ import { test, expect, type Page } from '@playwright/test';
 import { randomUUID } from 'node:crypto';
 
 test.use({ hasTouch: true });
+// Restore ordinary v5 data through the public UI, without seeding internal database tables.
 function fixture() {
   const historical = randomUUID(),
     current = randomUUID();
