@@ -4,7 +4,7 @@ on:
     branches: [feat/google-access]
     paths: [.github/workflows/access-prepare.yml]
 permissions:
-  contents: write
+  contents: read
 jobs:
   prepare:
     runs-on: ubuntu-latest
@@ -13,16 +13,10 @@ jobs:
       - uses: actions/setup-node@v4
         with:
           node-version-file: .nvmrc
-      - run: npm install --save-exact @supabase/supabase-js@2.57.4 jose@6.1.0 --ignore-scripts --no-audit --no-fund
-      - run: npx --yes supabase@2.54.11 --help
-      - run: test -d supabase/migrations || npx --yes supabase@2.54.11 migration new google_licenses
+      - run: npm ci --ignore-scripts --no-audit --no-fund
       - run: |
-          git config user.name 'github-actions[bot]'
-          git config user.email '41898282+github-actions[bot]@users.noreply.github.com'
-          git add package.json package-lock.json supabase/migrations
-          git diff --cached --quiet || git commit -m 'chore: pin access dependencies and generate migration [skip ci]'
-          git push
-      - run: |\n          tar -czf /tmp/access-dependencies.tar.gz node_modules\n          split -b 24000000 /tmp/access-dependencies.tar.gz /tmp/deps-part-
+          tar -czf /tmp/access-dependencies.tar.gz node_modules
+          split -b 24000000 /tmp/access-dependencies.tar.gz /tmp/deps-part-
       - uses: actions/upload-artifact@v4
         with:
           name: access-dependencies-a
