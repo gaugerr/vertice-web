@@ -108,7 +108,8 @@ function CompletionForm({ review, onClose }: { review: ListReview; onClose: () =
             <ul>
               {unpriced.map((item) => (
                 <li key={item.id}>
-                  {formatItemName(item)} · {review.categories.find((c) => c.id === item.categoryId)?.title}
+                  {formatItemName(item)} ·{' '}
+                  {review.categories.find((c) => c.id === item.categoryId)?.title}
                 </li>
               ))}
             </ul>

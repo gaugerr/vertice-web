@@ -92,10 +92,7 @@ export default function CategoriesPage() {
               <h2>{category.title}</h2>
               <p className="category-preview">
                 {group.length
-                  ? group
-                      .slice(0, 4)
-                      .map(formatItemName)
-                      .join(' · ')
+                  ? group.slice(0, 4).map(formatItemName).join(' · ')
                   : list.status === 'completed'
                     ? 'Nenhum produto nesta compra'
                     : 'Adicione os primeiros itens'}

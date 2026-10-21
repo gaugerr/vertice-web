@@ -265,7 +265,9 @@ describe('purchase completion and duplication', () => {
       purchaseDate: null,
       marketName: null,
     });
-    expect(await repo.getItemsForList(id)).toEqual([{ ...product, brand: null, packageContent: null }]);
+    expect(await repo.getItemsForList(id)).toEqual([
+      { ...product, brand: null, packageContent: null },
+    ]);
     expect(await repo.getCategories(id)).toEqual([category]);
     expect((await repo.getListReview(id)).totalCents).toBe(1000);
   });

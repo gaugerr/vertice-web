@@ -28,6 +28,11 @@ export class VerticeDatabase extends Dexie {
       );
     this.version(4)
       .stores({ items: 'id, shoppingListId, categoryId, [categoryId+createdAt]' })
-      .upgrade((transaction) => transaction.table('items').toCollection().modify({ ...EMPTY_PRODUCT_DETAILS }));
+      .upgrade((transaction) =>
+        transaction
+          .table('items')
+          .toCollection()
+          .modify({ ...EMPTY_PRODUCT_DETAILS }),
+      );
   }
 }

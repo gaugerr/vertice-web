@@ -48,7 +48,8 @@ beforeEach(() => {
         quantity: '0.5',
         unit: 'kg',
         isPurchased: true,
-        brand: null, packageContent: null,
+        brand: null,
+        packageContent: null,
       },
     ],
   );

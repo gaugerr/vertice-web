@@ -200,11 +200,21 @@ export function parseBackup(source: string): ShoppingSnapshot {
     });
   }
   if (header.version === 4) {
-    const old = z.object({ format: z.literal('vertice-backup'), version: z.literal(4),
-      exportedAt: z.iso.datetime(), ...snapshotSchema.shape, items: z.array(itemV4Schema).max(MAX_ROWS),
-    }).strict().parse(raw);
-    return validateSnapshot({ lists: old.lists, categories: old.categories,
-      items: old.items.map((item) => ({ ...item, ...EMPTY_PRODUCT_DETAILS })) });
+    const old = z
+      .object({
+        format: z.literal('vertice-backup'),
+        version: z.literal(4),
+        exportedAt: z.iso.datetime(),
+        ...snapshotSchema.shape,
+        items: z.array(itemV4Schema).max(MAX_ROWS),
+      })
+      .strict()
+      .parse(raw);
+    return validateSnapshot({
+      lists: old.lists,
+      categories: old.categories,
+      items: old.items.map((item) => ({ ...item, ...EMPTY_PRODUCT_DETAILS })),
+    });
   }
   if (header.version !== 5) throw new Error('Esta versão do backup não é compatível.');
   const backup = z

@@ -76,7 +76,10 @@ export interface ItemInput {
   brand?: string | null;
   packageContent?: PackageContent | null;
 }
-export type PurchaseDetails = Pick<ItemInput, 'unitPrice' | 'quantity' | 'unit' | 'brand' | 'packageContent'>;
+export type PurchaseDetails = Pick<
+  ItemInput,
+  'unitPrice' | 'quantity' | 'unit' | 'brand' | 'packageContent'
+>;
 export const DEFAULT_CATEGORIES = [
   'Essenciais',
   'Hortifruti',

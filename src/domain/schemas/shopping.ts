@@ -37,17 +37,32 @@ export const listInputSchema = z.object({
   description: z.string().max(10000, 'Use até 10.000 caracteres.'),
   budgetCents: budgetCentsSchema,
 });
-export const brandSchema = z.string().trim().max(50, 'Use até 50 caracteres na marca.')
-  .transform((value) => value || null).nullable();
-export const packageContentSchema = z.object({
-  amount: z.string().max(100).trim().regex(/^\d+(?:[.,]\d{1,3})?$/, 'Use um conteúdo positivo com até três casas decimais.')
-    .transform((value) => canonicalDecimal(value))
-    .refine((value) => new Big(value).gt(0), 'O conteúdo deve ser maior que zero.'),
-  unit: z.enum(['g', 'kg', 'ml', 'L', 'un']),
-}).strict().superRefine((value, ctx) => {
-  if (value.unit === 'un' && !/^\d+$/.test(value.amount))
-    ctx.addIssue({ code: 'custom', path: ['amount'], message: 'Informe uma contagem inteira de unidades.' });
-});
+export const brandSchema = z
+  .string()
+  .trim()
+  .max(50, 'Use até 50 caracteres na marca.')
+  .transform((value) => value || null)
+  .nullable();
+export const packageContentSchema = z
+  .object({
+    amount: z
+      .string()
+      .max(100)
+      .trim()
+      .regex(/^\d+(?:[.,]\d{1,3})?$/, 'Use um conteúdo positivo com até três casas decimais.')
+      .transform((value) => canonicalDecimal(value))
+      .refine((value) => new Big(value).gt(0), 'O conteúdo deve ser maior que zero.'),
+    unit: z.enum(['g', 'kg', 'ml', 'L', 'un']),
+  })
+  .strict()
+  .superRefine((value, ctx) => {
+    if (value.unit === 'un' && !/^\d+$/.test(value.amount))
+      ctx.addIssue({
+        code: 'custom',
+        path: ['amount'],
+        message: 'Informe uma contagem inteira de unidades.',
+      });
+  });
 export const purchaseDetailsSchema = z
   .object({
     unitPrice: decimalSchema,

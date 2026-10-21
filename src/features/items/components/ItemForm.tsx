@@ -29,7 +29,8 @@ export function ItemForm({
     name !== item.name ||
     unitPrice !== decimalInput(item.unitPrice) ||
     quantity !== decimalInput(item.quantity) ||
-    unit !== item.unit || details.dirty;
+    unit !== item.unit ||
+    details.dirty;
   useUnsavedChanges(dirty);
   function close() {
     if (!mutation.pending && (!dirty || window.confirm('Descartar as alterações não salvas?')))
@@ -99,7 +100,11 @@ export function ItemForm({
             onChange={(e) => setPrice(e.target.value)}
           />
         </label>
-        <ProductDetailsFields details={details} name={name} readOnly={mutation.pending || readOnly} />
+        <ProductDetailsFields
+          details={details}
+          name={name}
+          readOnly={mutation.pending || readOnly}
+        />
         <ErrorMessage message={mutation.error} />
         <div className="dialog-actions">
           <Button variant="secondary" disabled={mutation.pending} onClick={close}>

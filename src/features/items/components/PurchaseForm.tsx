@@ -33,7 +33,8 @@ export function PurchaseForm({
   const dirty =
     unitPrice !== decimalInput(original.unitPrice) ||
     quantity !== decimalInput(original.quantity) ||
-    unit !== original.unit || details.dirty;
+    unit !== original.unit ||
+    details.dirty;
   useUnsavedChanges(dirty);
 
   function close() {
@@ -43,7 +44,12 @@ export function PurchaseForm({
     event.preventDefault();
     if (marking || readOnly) return;
     const result = await mutation.run(() =>
-      repository.updatePurchaseDetails(item.id, { unitPrice, quantity, unit, ...details.getPatch() }),
+      repository.updatePurchaseDetails(item.id, {
+        unitPrice,
+        quantity,
+        unit,
+        ...details.getPatch(),
+      }),
     );
     if (result.ok) onClose();
   }
@@ -110,7 +116,11 @@ export function PurchaseForm({
           </select>
         </label>
       </div>
-      <ProductDetailsFields details={details} name={item.name} readOnly={mutation.pending || readOnly} />
+      <ProductDetailsFields
+        details={details}
+        name={item.name}
+        readOnly={mutation.pending || readOnly}
+      />
       <ErrorMessage message={mutation.error} />
       <div className="purchase-actions">
         <Button variant="secondary" disabled={busy} onClick={close}>
