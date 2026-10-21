@@ -174,7 +174,7 @@ test('real offline writes, closing the tab, reopening and exporting records', as
   const chunks: Buffer[] = [];
   for await (const chunk of stream!) chunks.push(Buffer.from(chunk));
   const backup = JSON.parse(Buffer.concat(chunks).toString());
-  expect(backup.version).toBe(3);
+  expect(backup.version).toBe(4);
   expect(backup.lists[0].budgetCents).toBe(750);
   expect(backup.items.map((item: { name: string }) => item.name)).toContain('Feijão offline');
   await reopened.reload();

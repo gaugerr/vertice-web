@@ -34,6 +34,8 @@ O build está em `dist`. O orçamento de JavaScript de 250 KiB gzip inclui tamb�
 - Seis categorias padrão por lista, criadas transacionalmente.
 - Inclusão rápida de itens, edição de nome/preço/quantidade/unidade e marcação como comprado.
 - Filtros de itens pendentes e comprados.
+- Finalização com revisão, consulta das compras anteriores e reabertura para correção.
+- Cópia de listas com produtos desmarcados, quantidades preservadas e preços zerados.
 - Totais em reais com aritmética decimal e arredondamento por item.
 - Orçamento opcional por lista, saldo global entre categorias e avisos discretos a partir de 80% do limite.
 - Comparador offline de duas embalagens por peso, volume ou unidades, com acesso no início e nas categorias.
@@ -67,7 +69,7 @@ As consultas `useLiveQuery` observam as leituras do repositório. Formulários m
 
 ## Dados e cálculos
 
-O banco `vertice_web`, versão 1, contém listas, categorias e itens. As chaves são UUIDs e as relações são verificadas pelo repositório. IndexedDB não tem chaves estrangeiras; criação e exclusão compostas e restauração usam transações explícitas.
+O banco `vertice_web`, versão Dexie 3, contém listas, categorias e itens. As chaves são UUIDs e as relações são verificadas pelo repositório. IndexedDB não tem chaves estrangeiras; criação e exclusão compostas, cópia, finalização e restauração usam transações explícitas.
 
 Preço e quantidade são strings decimais canônicas. `big.js` calcula o produto, arredonda cada linha para centavos usando metade para cima e soma somente os itens comprados. Os cálculos verificam o limite de inteiros seguros. A unidade não altera a fórmula.
 
@@ -94,9 +96,17 @@ O navegador pode negar armazenamento persistente, limitar espaço ou apagar dado
 
 ## Backup e migração do Flutter
 
-Em Dados e aplicativo, exporte um JSON e guarde fora do armazenamento do site. O novo formato usa `format: "vertice-backup"`, `version: 3`, `exportedAt`, `lists`, `categories` e `items`. Cada lista inclui `budgetCents`, um valor em centavos ou `null` quando não há limite.
+Em Dados e aplicativo, exporte um JSON e guarde fora do armazenamento do site. O novo formato usa `format: "vertice-backup"`, `version: 4`, `exportedAt`, `lists`, `categories` e `items`. Cada lista inclui `budgetCents`, um valor em centavos ou `null` quando não há limite, além de estado, mercado opcional e datas da compra/finalização.
 
-A importação aceita formatos v1 (Flutter), v2 (web sem orçamento) e v3. Listas antigas são importadas sem limite. Valida até 10 MiB, no máximo 50 mil registros em cada coleção, tipos, duplicatas e relações. Antes de substituir, exibe quantidades e pede confirmação. Toda a substituição é transacional; uma falha não deve deixar um banco parcialmente restaurado.
+A importação aceita formatos v1 (Flutter), v2 (web sem orçamento), v3 (web com orçamento) e v4. Listas anteriores à v4 são importadas em andamento; v1/v2 recebem orçamento nulo e v3 preserva seu limite. Valida até 10 MiB, no máximo 50 mil registros em cada coleção, tipos, duplicatas, relações e coerência das finalizações. Antes de substituir, exibe quantidades e pede confirmação. Toda a substituição é transacional; uma falha não deve deixar um banco parcialmente restaurado.
+
+## Finalizar e copiar compras
+
+No resumo geral da lista, use **Finalizar compra** para conferir total, produtos comprados/não comprados, orçamento, mercado opcional e data da compra. Pelo menos um produto deve estar comprado e todos os comprados precisam de preço maior que zero. Os não comprados permanecem identificados na lista, sem entrar no total. Apenas dados salvos entram na revisão; mudanças em outra aba exigem nova conferência.
+
+Listas finalizadas ficam na aba **Finalizadas**, somente para consulta. **Reabrir compra** libera correções sem perder os valores; finalizar novamente atualiza a mesma compra, sem duplicar registros. A proteção também existe no repositório, para impedir gravações de abas antigas. O banco Dexie evolui para a versão 3, preservando dados anteriores e marcando as listas existentes como em andamento.
+
+**Copiar lista**, nos cartões e no resumo, cria outra lista independente, aberta, com todos os produtos e categorias, mantendo quantidades/unidades. Preços são zerados e todos os produtos ficam desmarcados. Nome, data, descrição e orçamento podem ser ajustados antes de confirmar. Mercado e dados de finalização não são copiados. Todas essas operações funcionam offline; nenhuma depende de conta ou serviço externo.
 
 ## Orçamento da compra
 

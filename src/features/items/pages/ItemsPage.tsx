@@ -61,7 +61,8 @@ export default function ItemsPage() {
           {purchased} de {items.length} itens no carrinho
         </p>
       </div>
-      <AddItemForm listId={listId} categoryId={id} />
+      {list.status === 'completed' ? <p className="completion-banner" role="status">Compra finalizada · somente para consulta. Volte ao resumo da lista para reabrir e corrigir os dados.</p> : null}
+      <AddItemForm listId={listId} categoryId={id} readOnly={list.status === 'completed'} />
       <div className="shopping-tools">
         <div className="filter-bar" role="group" aria-label="Filtrar itens">
           {(
@@ -81,7 +82,7 @@ export default function ItemsPage() {
       {visible.length ? (
         <ul className="items-list">
           {visible.map((item) => (
-            <ItemRow key={item.id} item={item} onPurchaseEditingChange={onPurchaseEditingChange} />
+            <ItemRow key={item.id} item={item} onPurchaseEditingChange={onPurchaseEditingChange} readOnly={list.status === 'completed'} />
           ))}
         </ul>
       ) : (

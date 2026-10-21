@@ -44,7 +44,7 @@ describe('backups', () => {
     expect(imported.lists[0].budgetCents).toBeNull();
     imported.lists[0].budgetCents = 30000;
     const encoded = encodeBackup(imported);
-    expect(JSON.parse(encoded).version).toBe(3);
+    expect(JSON.parse(encoded).version).toBe(4);
     expect(parseBackup(encoded)).toEqual(imported);
     for (const budget of [0, -100, 1.5, '30000', Number.MAX_SAFE_INTEGER + 1]) {
       const invalid = JSON.parse(encoded);
@@ -68,6 +68,25 @@ describe('backups', () => {
     data.items[0].price = 0.005;
     data.items[0].quantity = 1;
     expect(spentCents(parseBackup(JSON.stringify(data)).items)).toBe(1);
+  });
+  it('imports the frozen v3 shape and round trips completed purchases in v4', () => {
+    const data = parseBackup(JSON.stringify(legacy));
+    const old = { format: 'vertice-backup', version: 3, exportedAt: new Date().toISOString(), ...data,
+      lists: data.lists.map((list) => ({ id: list.id, storeName: list.storeName, date: list.date,
+        description: list.description, budgetCents: list.budgetCents, createdAt: list.createdAt, updatedAt: list.updatedAt })),
+    };
+    const imported = parseBackup(JSON.stringify(old));
+    expect(imported).toEqual(data);
+    Object.assign(imported.lists[0], { status: 'completed', completedAt: '2026-10-21T12:00:00.000Z', purchaseDate: '2026-10-20', marketName: 'Mercado A' });
+    expect(parseBackup(encodeBackup(imported))).toEqual(imported);
+    for (const patch of [{ completedAt: null }, { purchaseDate: null }, { status: 'unknown' }, { marketName: 'x'.repeat(51) }]) {
+      const invalid = structuredClone(imported); Object.assign(invalid.lists[0], patch);
+      expect(() => encodeBackup(invalid)).toThrow();
+    }
+    const empty = structuredClone(imported); empty.items = [];
+    expect(() => encodeBackup(empty)).toThrow();
+    const zero = structuredClone(imported); zero.items[0].unitPrice = '0';
+    expect(() => encodeBackup(zero)).toThrow();
   });
   it('rejects duplicates, orphan rows and category/list mismatches', () => {
     const duplicates = structuredClone(legacy);

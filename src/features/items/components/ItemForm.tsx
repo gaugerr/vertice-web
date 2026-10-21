@@ -8,7 +8,7 @@ import { Button } from '../../../shared/ui/Button';
 import { Dialog } from '../../../shared/ui/Dialog';
 import { ErrorMessage } from '../../../shared/ui/Feedback';
 
-export function ItemForm({ item, onClose }: { item: ShoppingItem; onClose: () => void }) {
+export function ItemForm({ item, onClose, readOnly = false }: { item: ShoppingItem; onClose: () => void; readOnly?: boolean }) {
   const [name, setName] = useState(item.name);
   const [unitPrice, setPrice] = useState(decimalInput(item.unitPrice));
   const [quantity, setQuantity] = useState(decimalInput(item.quantity));
@@ -26,6 +26,7 @@ export function ItemForm({ item, onClose }: { item: ShoppingItem; onClose: () =>
   }
   async function submit(event: FormEvent) {
     event.preventDefault();
+    if (readOnly) return;
     // Editing fields never overwrites purchase state changed in another tab.
     const result = await mutation.run(() =>
       repository.updateItem(item.id, { name, unitPrice, quantity, unit }),
@@ -35,12 +36,14 @@ export function ItemForm({ item, onClose }: { item: ShoppingItem; onClose: () =>
   return (
     <Dialog title="Editar item" onClose={close} busy={mutation.pending}>
       <form onSubmit={submit} className="form-stack">
+        {readOnly ? <p role="status">Esta compra foi finalizada. Reabra a compra para salvar as alterações. Seus campos foram preservados.</p> : null}
         <label>
           Nome do item
           <input
             autoFocus
             required
             maxLength={50}
+            readOnly={mutation.pending || readOnly}
             value={name}
             onChange={(e) => setName(e.target.value)}
           />
@@ -51,6 +54,7 @@ export function ItemForm({ item, onClose }: { item: ShoppingItem; onClose: () =>
             <input
               required
               inputMode="decimal"
+              readOnly={mutation.pending || readOnly}
               value={quantity}
               onChange={(e) => setQuantity(e.target.value)}
             />
@@ -59,6 +63,7 @@ export function ItemForm({ item, onClose }: { item: ShoppingItem; onClose: () =>
             Unidade
             <select
               aria-label="Unidade"
+              disabled={mutation.pending || readOnly}
               value={unit}
               onChange={(e) => setUnit(e.target.value as Unit)}
             >
@@ -73,6 +78,7 @@ export function ItemForm({ item, onClose }: { item: ShoppingItem; onClose: () =>
           <input
             required
             inputMode="decimal"
+            readOnly={mutation.pending || readOnly}
             value={unitPrice}
             onChange={(e) => setPrice(e.target.value)}
           />
@@ -82,7 +88,7 @@ export function ItemForm({ item, onClose }: { item: ShoppingItem; onClose: () =>
           <Button variant="secondary" disabled={mutation.pending} onClick={close}>
             Cancelar
           </Button>
-          <Button type="submit" disabled={mutation.pending}>
+          <Button type="submit" disabled={mutation.pending || readOnly}>
             {mutation.pending ? 'Salvando…' : 'Salvar item'}
           </Button>
         </div>

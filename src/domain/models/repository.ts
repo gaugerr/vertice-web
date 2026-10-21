@@ -6,11 +6,18 @@ import type {
   ShoppingItem,
   ShoppingList,
   ShoppingSnapshot,
+  CompletionInput,
+  ListReview,
 } from './shopping';
 
 export interface ShoppingRepository {
   getLists(): Promise<ShoppingList[]>;
+  getListSummaries(): Promise<{ list: ShoppingList; totalCents: number }[]>;
   getList(id: string): Promise<ShoppingList | undefined>;
+  getListReview(id: string): Promise<ListReview>;
+  completeList(id: string, input: CompletionInput, expectedRevision: string): Promise<void>;
+  reopenList(id: string): Promise<void>;
+  duplicateList(sourceId: string, input: ListInput): Promise<string>;
   getCategories(listId: string): Promise<Category[]>;
   getCategory(id: string): Promise<Category | undefined>;
   getItemsForList(listId: string): Promise<ShoppingItem[]>;

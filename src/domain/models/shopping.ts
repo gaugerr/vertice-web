@@ -9,6 +9,10 @@ export interface ShoppingList extends Timestamps {
   date: string;
   description: string;
   budgetCents: number | null;
+  status: 'active' | 'completed';
+  completedAt: string | null;
+  purchaseDate: string | null;
+  marketName: string | null;
 }
 export interface Category extends Timestamps {
   id: string;
@@ -37,6 +41,25 @@ export interface ListInput {
   description: string;
   budgetCents: number | null;
 }
+export interface CompletionInput {
+  purchaseDate: string;
+  marketName: string | null;
+}
+export interface ListReview {
+  list: ShoppingList;
+  categories: Category[];
+  items: ShoppingItem[];
+  totalCents: number;
+  purchasedCount: number;
+  pendingCount: number;
+  revision: string;
+}
+export const ACTIVE_PURCHASE = {
+  status: 'active' as const,
+  completedAt: null,
+  purchaseDate: null,
+  marketName: null,
+};
 export interface ItemInput {
   name: string;
   unitPrice: string;

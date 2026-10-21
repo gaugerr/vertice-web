@@ -9,8 +9,12 @@ import { ListCard } from '../components/ListCard';
 import { ComparisonButton } from '../../comparator/components/ComparisonButton';
 
 export default function ListsPage() {
-  const result = useQuery(() => repository.getLists(), []);
+  const result = useQuery(() => repository.getListSummaries(), []);
   const [creating, setCreating] = useState(false);
+  const [status, setStatus] = useState<'active' | 'completed'>('active');
+  const visible = result.status === 'ready' ? result.data.filter(({ list }) => list.status === status).sort((a, b) =>
+    status === 'completed' ? (b.list.purchaseDate ?? '').localeCompare(a.list.purchaseDate ?? '') || b.list.updatedAt.localeCompare(a.list.updatedAt) : b.list.updatedAt.localeCompare(a.list.updatedAt),
+  ) : [];
   return (
     <>
       <section className="hero">
@@ -32,7 +36,7 @@ export default function ListsPage() {
         <div>
           <h2>
             Minhas listas{' '}
-            {result.status === 'ready' && <span className="count-badge">{result.data.length}</span>}
+            {result.status === 'ready' && <span className="count-badge">{visible.length}</span>}
           </h2>
           <p>Um lugar para cada compra.</p>
         </div>
@@ -44,19 +48,22 @@ export default function ListsPage() {
           </Button>
         </div>
       </div>
+      <div className="filter-bar list-status-filters" role="group" aria-label="Filtrar listas">
+        <button aria-pressed={status === 'active'} onClick={() => setStatus('active')}>Em andamento</button>
+        <button aria-pressed={status === 'completed'} onClick={() => setStatus('completed')}>Finalizadas</button>
+      </div>
       {result.status === 'loading' ? (
         <Loading />
       ) : result.status === 'error' ? (
         <QueryError error={result.error} />
-      ) : result.data.length === 0 ? (
+      ) : visible.length === 0 ? (
         <div className="empty-state">
           <span className="empty-icon">
             <ShoppingBasket size={36} aria-hidden="true" />
           </span>
-          <h2>Sua próxima compra começa aqui</h2>
+          <h2>{status === 'completed' ? 'Suas compras finalizadas aparecerão aqui' : result.data.length ? 'Nenhuma lista em andamento' : 'Sua próxima compra começa aqui'}</h2>
           <p>
-            Crie uma lista, adicione o que precisa e acompanhe
-            <br className="desktop-break" /> o total enquanto coloca os itens no carrinho.
+            {status === 'completed' ? 'Ao terminar uma compra, finalize a lista para guardar os produtos e valores.' : 'Crie uma lista ou copie uma compra finalizada para começar.'}
           </p>
           <Button onClick={() => setCreating(true)}>
             Criar minha primeira lista <ArrowRight size={17} aria-hidden="true" />
@@ -65,8 +72,8 @@ export default function ListsPage() {
         </div>
       ) : (
         <div className="lists-grid">
-          {result.data.map((list) => (
-            <ListCard key={list.id} list={list} />
+          {visible.map(({ list, totalCents }) => (
+            <ListCard key={list.id} list={list} totalCents={totalCents} />
           ))}
         </div>
       )}

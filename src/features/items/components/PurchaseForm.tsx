@@ -12,11 +12,13 @@ export function PurchaseForm({
   priceInput,
   marking,
   onClose,
+  readOnly = false,
 }: {
   item: ShoppingItem;
   priceInput: RefObject<HTMLInputElement | null>;
   marking: boolean;
   onClose: () => void;
+  readOnly?: boolean;
 }) {
   const [original] = useState(item);
   const [unitPrice, setPrice] = useState(decimalInput(item.unitPrice));
@@ -35,7 +37,7 @@ export function PurchaseForm({
   }
   async function submit(event: FormEvent) {
     event.preventDefault();
-    if (marking) return;
+    if (marking || readOnly) return;
     const result = await mutation.run(() =>
       repository.updatePurchaseDetails(item.id, { unitPrice, quantity, unit }),
     );
@@ -56,6 +58,7 @@ export function PurchaseForm({
         }
       }}
     >
+      {readOnly ? <p role="status">Esta compra foi finalizada em outra aba. Seus valores digitados continuam aqui; reabra a compra para salvá-los.</p> : null}
       <div className="purchase-fields">
         <label>
           Preço por {unit} (R$)
@@ -66,7 +69,7 @@ export function PurchaseForm({
             enterKeyHint="done"
             autoComplete="off"
             maxLength={100}
-            readOnly={mutation.pending}
+            readOnly={mutation.pending || readOnly}
             value={unitPrice}
             onChange={(event) => setPrice(event.target.value)}
           />
@@ -78,7 +81,7 @@ export function PurchaseForm({
             inputMode="decimal"
             enterKeyHint="done"
             maxLength={100}
-            readOnly={mutation.pending}
+            readOnly={mutation.pending || readOnly}
             value={quantity}
             onFocus={(event) => event.currentTarget.select()}
             onChange={(event) => setQuantity(event.target.value)}
@@ -89,7 +92,7 @@ export function PurchaseForm({
           <select
             aria-label="Unidade"
             value={unit}
-            disabled={mutation.pending}
+            disabled={mutation.pending || readOnly}
             onChange={(event) => setUnit(event.target.value as Unit)}
           >
             <option value="un">un</option>
@@ -103,7 +106,7 @@ export function PurchaseForm({
         <Button variant="secondary" disabled={busy} onClick={close}>
           Fechar
         </Button>
-        <Button type="submit" disabled={busy}>
+        <Button type="submit" disabled={busy || readOnly}>
           {mutation.pending ? 'Salvando…' : 'Salvar valores'}
         </Button>
       </div>

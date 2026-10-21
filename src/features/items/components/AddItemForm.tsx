@@ -6,7 +6,7 @@ import { useUnsavedChanges } from '../../../shared/lib/drafts';
 import { Button } from '../../../shared/ui/Button';
 import { ErrorMessage } from '../../../shared/ui/Feedback';
 
-export function AddItemForm({ listId, categoryId }: { listId: string; categoryId: string }) {
+export function AddItemForm({ listId, categoryId, readOnly = false }: { listId: string; categoryId: string; readOnly?: boolean }) {
   const [name, setName] = useState('');
   const input = useRef<HTMLInputElement>(null);
   const revision = useRef(0);
@@ -14,6 +14,7 @@ export function AddItemForm({ listId, categoryId }: { listId: string; categoryId
   useUnsavedChanges(name.trim().length > 0);
   async function submit(event: FormEvent) {
     event.preventDefault();
+    if (readOnly) return;
     // Keep mobile keyboard activation inside the submit gesture, before the write.
     input.current?.focus({ preventScroll: true });
     const submittedName = name;
@@ -23,6 +24,7 @@ export function AddItemForm({ listId, categoryId }: { listId: string; categoryId
       setName('');
     }
   }
+  if (readOnly && !name.trim()) return null;
   return (
     <form className="add-item-form" onSubmit={submit} aria-busy={mutation.pending}>
       <div className="add-item-control">
@@ -35,6 +37,7 @@ export function AddItemForm({ listId, categoryId }: { listId: string; categoryId
           value={name}
           required
           maxLength={50}
+          readOnly={readOnly}
           enterKeyHint="enter"
           onChange={(e) => {
             revision.current += 1;
@@ -46,7 +49,7 @@ export function AddItemForm({ listId, categoryId }: { listId: string; categoryId
         <Button
           type="submit"
           aria-label="Adicionar item"
-          disabled={mutation.pending}
+          disabled={mutation.pending || readOnly}
           onPointerDown={(event) => {
             // Tapping + must not move focus from the text field to the button.
             if (event.isPrimary && event.button === 0) event.preventDefault();

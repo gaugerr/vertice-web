@@ -59,7 +59,23 @@ export const purchaseDetailsSchema = z
   });
 export const itemInputSchema = purchaseDetailsSchema.safeExtend({ name: nameSchema });
 const timestamps = { createdAt: z.iso.datetime(), updatedAt: z.iso.datetime() };
-export const listSchema = listInputSchema.extend({ id: z.uuid(), ...timestamps }).strict();
+// Historical backup shapes stay fixed when the live model evolves.
+export const listV3Schema = listInputSchema.extend({ id: z.uuid(), ...timestamps }).strict();
+export const completionInputSchema = z.object({
+  purchaseDate: dateSchema,
+  marketName: z.string().trim().min(1).max(50).nullable(),
+});
+export const listSchema = listV3Schema.extend({
+  status: z.enum(['active', 'completed']),
+  completedAt: z.iso.datetime().nullable(),
+  purchaseDate: dateSchema.nullable(),
+  marketName: z.string().trim().min(1).max(50).nullable(),
+}).superRefine((list, ctx) => {
+  if ((list.status === 'active' && list.completedAt !== null) ||
+      (list.status === 'completed' && (!list.completedAt || !list.purchaseDate))) {
+    ctx.addIssue({ code: 'custom', message: 'Estado de finalização inválido.' });
+  }
+});
 export const categorySchema = z
   .object({
     id: z.uuid(),

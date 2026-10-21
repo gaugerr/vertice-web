@@ -1,6 +1,8 @@
 import { type ShoppingRepository } from '../../domain/models/repository';
 import {
   DEFAULT_CATEGORIES,
+  ACTIVE_PURCHASE,
+  type CompletionInput,
   type ItemInput,
   type PurchaseDetails,
   type ListInput,
@@ -12,19 +14,87 @@ import {
   nameSchema,
   purchaseDetailsSchema,
   budgetCentsSchema,
+  completionInputSchema,
 } from '../../domain/schemas/shopping';
 import { VerticeDatabase } from '../database/database';
 import { trackWrite } from '../database/writes';
 import { validateSnapshot } from '../backup/backup';
 import { spentCents } from '../../domain/services/money';
+import { assertCompletable, buildListReview, ReviewChangedError } from '../../domain/services/completion';
 
 export class DexieShoppingRepository implements ShoppingRepository {
   constructor(private db: VerticeDatabase) {}
   getLists() {
     return this.db.lists.orderBy('updatedAt').reverse().toArray();
   }
+  async getListSummaries() {
+    return this.db.transaction('r', this.db.lists, this.db.items, async () => {
+      const [lists, items] = await Promise.all([this.getLists(), this.db.items.toArray()]);
+      const grouped = new Map<string, typeof items>();
+      for (const item of items) {
+        const group = grouped.get(item.shoppingListId) ?? [];
+        group.push(item);
+        grouped.set(item.shoppingListId, group);
+      }
+      return lists.map((list) => ({ list, totalCents: spentCents(grouped.get(list.id) ?? []) }));
+    });
+  }
   getList(id: string) {
     return this.db.lists.get(id);
+  }
+  private async requireList(id: string, active = false) {
+    const list = await this.db.lists.get(id);
+    if (!list) throw new Error('Esta lista foi excluída.');
+    if (active && list.status !== 'active')
+      throw new Error('Esta compra foi finalizada. Reabra a compra para fazer alterações.');
+    return list;
+  }
+  async getListReview(id: string) {
+    return this.db.transaction('r', this.db.lists, this.db.categories, this.db.items, async () => {
+      const list = await this.requireList(id);
+      const [categories, items] = await Promise.all([this.getCategories(id), this.getItemsForList(id)]);
+      return buildListReview(list, categories, items);
+    });
+  }
+  async completeList(id: string, input: CompletionInput, expectedRevision: string): Promise<void> {
+    const data = completionInputSchema.parse(input);
+    await trackWrite(() => this.db.transaction('rw', this.db.lists, this.db.categories, this.db.items, async () => {
+      await this.requireList(id, true);
+      const review = await this.getListReview(id);
+      if (review.revision !== expectedRevision) throw new ReviewChangedError();
+      assertCompletable(review.items);
+      const now = new Date().toISOString();
+      await this.db.lists.update(id, { ...data, status: 'completed', completedAt: now, updatedAt: now });
+    }));
+  }
+  async reopenList(id: string): Promise<void> {
+    await trackWrite(() => this.db.transaction('rw', this.db.lists, async () => {
+      const list = await this.requireList(id);
+      if (list.status === 'active') return;
+      await this.db.lists.update(id, { status: 'active', completedAt: null, updatedAt: new Date().toISOString() });
+    }));
+  }
+  async duplicateList(sourceId: string, input: ListInput): Promise<string> {
+    const data = listInputSchema.parse(input);
+    const id = crypto.randomUUID();
+    await trackWrite(() => this.db.transaction('rw', this.db.lists, this.db.categories, this.db.items, async () => {
+      const review = await this.getListReview(sourceId);
+      const now = new Date().toISOString();
+      const timestamps = { createdAt: now, updatedAt: now };
+      const categoryIds = new Map(review.categories.map((category) => [category.id, crypto.randomUUID()]));
+      await this.db.lists.add({ ...data, ...ACTIVE_PURCHASE, id, ...timestamps });
+      await this.db.categories.bulkAdd(review.categories.map((category) => ({
+        ...category, id: categoryIds.get(category.id)!, shoppingListId: id, ...timestamps,
+      })));
+      // A distinct timestamp per row preserves order when all products are copied at once.
+      const ordered = [...review.items].sort((a, b) => a.createdAt.localeCompare(b.createdAt) || a.id.localeCompare(b.id));
+      await this.db.items.bulkAdd(ordered.map((item, index) => ({
+        ...item, id: crypto.randomUUID(), shoppingListId: id, categoryId: categoryIds.get(item.categoryId)!,
+        unitPrice: '0', isPurchased: false, ...timestamps,
+        createdAt: new Date(Date.parse(now) - ordered.length + index + 1).toISOString(),
+      })));
+    }));
+    return id;
   }
   getCategories(listId: string) {
     return this.db.categories.where('shoppingListId').equals(listId).sortBy('position');
@@ -45,7 +115,7 @@ export class DexieShoppingRepository implements ShoppingRepository {
     const now = new Date().toISOString();
     await trackWrite(() =>
       this.db.transaction('rw', this.db.lists, this.db.categories, async () => {
-        await this.db.lists.add({ ...data, id, createdAt: now, updatedAt: now });
+        await this.db.lists.add({ ...data, ...ACTIVE_PURCHASE, id, createdAt: now, updatedAt: now });
         await this.db.categories.bulkAdd(
           DEFAULT_CATEGORIES.map((title, position) => ({
             id: crypto.randomUUID(),
@@ -62,10 +132,10 @@ export class DexieShoppingRepository implements ShoppingRepository {
   }
   async updateList(id: string, input: ListInput): Promise<void> {
     const data = listInputSchema.parse(input);
-    await trackWrite(async () => {
-      if (!(await this.db.lists.update(id, { ...data, updatedAt: new Date().toISOString() })))
-        throw new Error('Esta lista foi excluída.');
-    });
+    await trackWrite(() => this.db.transaction('rw', this.db.lists, async () => {
+      await this.requireList(id, true);
+      await this.db.lists.update(id, { ...data, updatedAt: new Date().toISOString() });
+    }));
   }
   async deleteListCascade(id: string): Promise<void> {
     await trackWrite(() =>
@@ -78,15 +148,10 @@ export class DexieShoppingRepository implements ShoppingRepository {
   }
   async setListBudget(id: string, budgetCents: number | null): Promise<void> {
     const value = budgetCentsSchema.parse(budgetCents);
-    await trackWrite(async () => {
-      if (
-        !(await this.db.lists.update(id, {
-          budgetCents: value,
-          updatedAt: new Date().toISOString(),
-        }))
-      )
-        throw new Error('Esta lista foi excluída.');
-    });
+    await trackWrite(() => this.db.transaction('rw', this.db.lists, async () => {
+      await this.requireList(id, true);
+      await this.db.lists.update(id, { budgetCents: value, updatedAt: new Date().toISOString() });
+    }));
   }
   async addItem(listId: string, categoryId: string, name: string): Promise<string> {
     const itemName = nameSchema.parse(name);
@@ -95,7 +160,8 @@ export class DexieShoppingRepository implements ShoppingRepository {
     await trackWrite(() =>
       this.db.transaction('rw', this.db.lists, this.db.categories, this.db.items, async () => {
         const category = await this.db.categories.get(categoryId);
-        if (category?.shoppingListId !== listId || !(await this.db.lists.get(listId)))
+        await this.requireList(listId, true);
+        if (category?.shoppingListId !== listId)
           throw new Error('Esta categoria não pertence à lista.');
         await this.db.items.add({
           id,
@@ -133,6 +199,7 @@ export class DexieShoppingRepository implements ShoppingRepository {
       this.db.transaction('rw', this.db.lists, this.db.items, async () => {
         const item = await this.db.items.get(id);
         if (!item) throw new Error('Este item foi excluído.');
+        await this.requireList(item.shoppingListId, true);
         const now = new Date().toISOString();
         await this.db.items.update(id, { ...patch, updatedAt: now });
         spentCents(
@@ -148,6 +215,7 @@ export class DexieShoppingRepository implements ShoppingRepository {
       this.db.transaction('rw', this.db.lists, this.db.items, async () => {
         const item = await this.db.items.get(id);
         if (!item) return;
+        await this.requireList(item.shoppingListId, true);
         await this.db.items.delete(id);
         await this.db.lists.update(item.shoppingListId, { updatedAt: new Date().toISOString() });
       }),

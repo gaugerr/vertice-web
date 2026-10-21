@@ -1,7 +1,9 @@
 import { z } from 'zod';
 import Big from 'big.js';
 import type { ShoppingSnapshot } from '../../domain/models/shopping';
-import { categorySchema, itemSchema, listSchema, nameSchema } from '../../domain/schemas/shopping';
+import { categorySchema, itemSchema, listSchema, listV3Schema, nameSchema } from '../../domain/schemas/shopping';
+import { ACTIVE_PURCHASE } from '../../domain/models/shopping';
+import { assertCompletable } from '../../domain/services/completion';
 import { legacyDate } from '../../shared/lib/date';
 import { spentCents } from '../../domain/services/money';
 
@@ -14,9 +16,9 @@ const snapshotSchema = z
     items: z.array(itemSchema).max(MAX_ROWS),
   })
   .strict();
-export interface BackupV3 extends ShoppingSnapshot {
+export interface BackupV4 extends ShoppingSnapshot {
   format: 'vertice-backup';
-  version: 3;
+  version: 4;
   exportedAt: string;
 }
 export function validateSnapshot(input: unknown): ShoppingSnapshot {
@@ -44,6 +46,10 @@ export function validateSnapshot(input: unknown): ShoppingSnapshot {
   }
   // Reject imported totals that the monetary representation cannot safely sum.
   spentCents(data.items);
+  const completedItems = new Map<string, typeof data.items>();
+  for (const list of data.lists) if (list.status === 'completed') completedItems.set(list.id, []);
+  for (const item of data.items) completedItems.get(item.shoppingListId)?.push(item);
+  for (const items of completedItems.values()) assertCompletable(items);
   return data;
 }
 const legacyId = z.number().int().positive().safe();
@@ -112,6 +118,7 @@ function convertLegacy(input: unknown): ShoppingSnapshot {
       id: reference(lists, list.id),
       date: legacyDate(list.date),
       budgetCents: null,
+      ...ACTIVE_PURCHASE,
       ...timestamps,
     })),
     categories: data.categories.map((category, position) => ({
@@ -155,21 +162,29 @@ export function parseBackup(source: string): ShoppingSnapshot {
         version: z.literal(2),
         exportedAt: z.iso.datetime(),
         ...snapshotSchema.shape,
-        lists: z.array(listSchema.omit({ budgetCents: true })).max(MAX_ROWS),
+        lists: z.array(listV3Schema.omit({ budgetCents: true })).max(MAX_ROWS),
       })
       .strict()
       .parse(raw);
     return validateSnapshot({
-      lists: old.lists.map((list) => ({ ...list, budgetCents: null })),
+      lists: old.lists.map((list) => ({ ...list, budgetCents: null, ...ACTIVE_PURCHASE })),
       categories: old.categories,
       items: old.items,
     });
   }
-  if (header.version !== 3) throw new Error('Esta versão do backup não é compatível.');
+  if (header.version === 3) {
+    const old = z.object({
+      format: z.literal('vertice-backup'), version: z.literal(3), exportedAt: z.iso.datetime(),
+      ...snapshotSchema.shape, lists: z.array(listV3Schema).max(MAX_ROWS),
+    }).strict().parse(raw);
+    return validateSnapshot({ lists: old.lists.map((list) => ({ ...list, ...ACTIVE_PURCHASE })),
+      categories: old.categories, items: old.items });
+  }
+  if (header.version !== 4) throw new Error('Esta versão do backup não é compatível.');
   const backup = z
     .object({
       format: z.literal('vertice-backup'),
-      version: z.literal(3),
+      version: z.literal(4),
       exportedAt: z.iso.datetime(),
       ...snapshotSchema.shape,
     })
@@ -182,9 +197,9 @@ export function parseBackup(source: string): ShoppingSnapshot {
   });
 }
 export function encodeBackup(data: ShoppingSnapshot): string {
-  const backup: BackupV3 = {
+  const backup: BackupV4 = {
     format: 'vertice-backup',
-    version: 3,
+    version: 4,
     exportedAt: new Date().toISOString(),
     ...validateSnapshot(data),
   };

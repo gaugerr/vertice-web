@@ -14,9 +14,11 @@ import { PurchaseForm } from './PurchaseForm';
 export const ItemRow = memo(function ItemRow({
   item,
   onPurchaseEditingChange,
+  readOnly = false,
 }: {
   item: ShoppingItem;
   onPurchaseEditingChange: (id: string, editing: boolean) => void;
+  readOnly?: boolean;
 }) {
   const [editing, setEditing] = useState(false);
   const [deleting, setDeleting] = useState(false);
@@ -43,7 +45,7 @@ export const ItemRow = memo(function ItemRow({
           ref={checkbox}
           type="checkbox"
           checked={item.isPurchased}
-          disabled={mutation.pending || purchasing}
+          disabled={mutation.pending || purchasing || readOnly}
           aria-label={`Marcar ${item.name} como comprado`}
           aria-controls={purchasing ? `purchase-${item.id}` : undefined}
           onChange={(event) => {
@@ -65,24 +67,25 @@ export const ItemRow = memo(function ItemRow({
           <p>
             {decimalInput(item.quantity)} {item.unit} × {formatMoney(Number(item.unitPrice) * 100)}
           </p>
+          {readOnly ? <span className="item-purchase-status">{item.isPurchased ? 'Comprado' : 'Não comprado'}</span> : null}
         </div>
         <strong className="item-total">{formatMoney(lineCents(item))}</strong>
-        <Button
+        {!readOnly ? <Button
           variant="icon"
           aria-label={`Editar ${item.name}`}
           disabled={mutation.pending || purchasing}
           onClick={() => setEditing(true)}
         >
           <Pencil size={16} />
-        </Button>
-        <Button
+        </Button> : null}
+        {!readOnly ? <Button
           variant="icon"
           aria-label={`Excluir ${item.name}`}
           disabled={mutation.pending || purchasing}
           onClick={() => setDeleting(true)}
         >
           <Trash2 size={16} />
-        </Button>
+        </Button> : null}
       </div>
       <ErrorMessage message={mutation.error} />
       {purchasing && (
@@ -90,10 +93,11 @@ export const ItemRow = memo(function ItemRow({
           item={item}
           priceInput={priceInput}
           marking={mutation.pending}
+          readOnly={readOnly}
           onClose={closePurchase}
         />
       )}
-      {editing && <ItemForm item={item} onClose={() => setEditing(false)} />}
+      {editing && <ItemForm item={item} readOnly={readOnly} onClose={() => setEditing(false)} />}
       {deleting && (
         <Dialog title="Excluir item?" onClose={() => setDeleting(false)} busy={mutation.pending}>
           <p>Excluir “{item.name}” desta lista?</p>
@@ -106,7 +110,7 @@ export const ItemRow = memo(function ItemRow({
             >
               Cancelar
             </Button>
-            <Button variant="danger" disabled={mutation.pending} onClick={remove}>
+            <Button variant="danger" disabled={mutation.pending || readOnly} onClick={remove}>
               Excluir item
             </Button>
           </div>

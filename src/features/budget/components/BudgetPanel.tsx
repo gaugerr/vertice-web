@@ -17,10 +17,12 @@ export function BudgetPanel({
   list,
   spent,
   compact = false,
+  readOnly = false,
 }: {
   list: ShoppingList;
   spent: number;
   compact?: boolean;
+  readOnly?: boolean;
 }) {
   const [editing, setEditing] = useState(false);
   const summary = budgetSummary(list.budgetCents, spent);
@@ -36,9 +38,9 @@ export function BudgetPanel({
             ? 'Sem orçamento definido'
             : `Limite da lista · ${formatMoney(list.budgetCents)}`}
         </span>
-        <Button variant="secondary" onClick={() => setEditing(true)}>
+        {!readOnly && list.status !== 'completed' ? <Button variant="secondary" onClick={() => setEditing(true)}>
           {list.budgetCents === null ? 'Definir orçamento' : 'Ajustar orçamento'}
-        </Button>
+        </Button> : null}
       </div>
       {list.budgetCents !== null && remaining !== null && (
         <>

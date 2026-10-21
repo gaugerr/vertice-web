@@ -13,6 +13,7 @@ export function BudgetForm({ list, onClose }: { list: ShoppingList; onClose: () 
   const [original] = useState(() => budgetInput(list.budgetCents));
   const [value, setValue] = useState(original);
   const mutation = useMutation();
+  const readOnly = list.status === 'completed';
   const dirty = value !== original;
   useUnsavedChanges(dirty);
   function close() {
@@ -21,6 +22,7 @@ export function BudgetForm({ list, onClose }: { list: ShoppingList; onClose: () 
   }
   async function submit(event: FormEvent) {
     event.preventDefault();
+    if (readOnly) return;
     const result = await mutation.run(() =>
       repository.setListBudget(list.id, parseBudgetInput(value)),
     );
@@ -29,13 +31,14 @@ export function BudgetForm({ list, onClose }: { list: ShoppingList; onClose: () 
   return (
     <Dialog title="Orçamento da compra" onClose={close} busy={mutation.pending}>
       <form className="form-stack" onSubmit={submit}>
-        <BudgetField value={value} onChange={setValue} readOnly={mutation.pending} />
+        {readOnly ? <p role="status">Esta compra foi finalizada. Reabra a compra para fazer alterações.</p> : null}
+        <BudgetField value={value} onChange={setValue} readOnly={mutation.pending || readOnly} />
         <ErrorMessage message={mutation.error} />
         <div className="dialog-actions">
           <Button variant="secondary" onClick={close} disabled={mutation.pending}>
             Cancelar
           </Button>
-          <Button type="submit" disabled={mutation.pending}>
+          <Button type="submit" disabled={mutation.pending || readOnly}>
             {mutation.pending ? 'Salvando…' : 'Salvar orçamento'}
           </Button>
         </div>

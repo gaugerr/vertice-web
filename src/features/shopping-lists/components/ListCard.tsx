@@ -1,6 +1,6 @@
 import { useState } from 'react';
-import { Link } from 'react-router-dom';
-import { ArrowUpRight, CalendarDays, Pencil, ShoppingBag, Trash2 } from 'lucide-react';
+import { Link, useNavigate } from 'react-router-dom';
+import { ArrowUpRight, CalendarDays, Copy, Pencil, ShoppingBag, Trash2 } from 'lucide-react';
 import type { ShoppingList } from '../../../domain/models/shopping';
 import { formatDate } from '../../../shared/lib/date';
 import { repository } from '../../../app/services';
@@ -9,10 +9,14 @@ import { Button } from '../../../shared/ui/Button';
 import { Dialog } from '../../../shared/ui/Dialog';
 import { ErrorMessage } from '../../../shared/ui/Feedback';
 import { ListForm } from './ListForm';
+import { formatMoney } from '../../../domain/services/money';
 
-export function ListCard({ list }: { list: ShoppingList }) {
+export function ListCard({ list, totalCents }: { list: ShoppingList; totalCents: number }) {
   const [editing, setEditing] = useState(false);
   const [deleting, setDeleting] = useState(false);
+  const [copying, setCopying] = useState(false);
+  const navigate = useNavigate();
+  const completed = list.status === 'completed';
   const mutation = useMutation();
   async function remove() {
     const result = await mutation.run(() => repository.deleteListCascade(list.id));
@@ -32,22 +36,25 @@ export function ListCard({ list }: { list: ShoppingList }) {
           <ArrowUpRight size={20} className="muted" aria-hidden="true" />
         </div>
         <h2>{list.storeName}</h2>
+        {completed ? <p className="completed-card-total"><span className="completion-badge">Finalizada</span><strong>{formatMoney(totalCents)}</strong></p> : null}
         <p className="description">
           {list.description || 'Tudo o que você precisa, em um só lugar.'}
         </p>
         <span className="card-date">
           <CalendarDays size={14} aria-hidden="true" />
-          {formatDate(list.date)}
+          {formatDate(completed && list.purchaseDate ? list.purchaseDate : list.date)}
+          {completed && list.marketName ? ` · ${list.marketName}` : ''}
         </span>
       </Link>
       <div className="card-actions">
-        <Button
+        {!completed ? <Button
           variant="icon"
           aria-label={`Editar lista ${list.storeName}`}
           onClick={() => setEditing(true)}
         >
           <Pencil size={16} />
-        </Button>
+        </Button> : null}
+        <Button variant="icon" aria-label={`Copiar lista ${list.storeName}`} onClick={() => setCopying(true)}><Copy size={16} /></Button>
         <Button
           variant="icon"
           aria-label={`Excluir lista ${list.storeName}`}
@@ -57,9 +64,10 @@ export function ListCard({ list }: { list: ShoppingList }) {
         </Button>
       </div>
       {editing && <ListForm list={list} onClose={() => setEditing(false)} />}
+      {copying && <ListForm copySource={list} onClose={() => setCopying(false)} onCreated={(id) => navigate(`/lists/${id}`)} />}
       {deleting && (
         <Dialog title="Excluir lista?" onClose={() => setDeleting(false)} busy={mutation.pending}>
-          <p>“{list.storeName}” e todos os seus itens serão excluídos deste aparelho.</p>
+          <p>“{list.storeName}” e todos os seus itens serão excluídos deste aparelho.{completed ? ' O registro desta compra finalizada também será removido.' : ''}</p>
           <ErrorMessage message={mutation.error} />
           <div className="dialog-actions">
             <Button

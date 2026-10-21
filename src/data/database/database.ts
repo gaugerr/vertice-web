@@ -1,5 +1,6 @@
 import Dexie, { type EntityTable } from 'dexie';
 import type { Category, ShoppingItem, ShoppingList } from '../../domain/models/shopping';
+import { ACTIVE_PURCHASE } from '../../domain/models/shopping';
 
 export class VerticeDatabase extends Dexie {
   lists!: EntityTable<ShoppingList, 'id'>;
@@ -16,6 +17,11 @@ export class VerticeDatabase extends Dexie {
       .stores({ lists: 'id, updatedAt' })
       .upgrade((transaction) =>
         transaction.table('lists').toCollection().modify({ budgetCents: null }),
+      );
+    this.version(3)
+      .stores({ lists: 'id, updatedAt, status' })
+      .upgrade((transaction) =>
+        transaction.table('lists').toCollection().modify({ ...ACTIVE_PURCHASE }),
       );
   }
 }

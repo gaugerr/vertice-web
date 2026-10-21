@@ -6,6 +6,8 @@ import { Loading, Missing, QueryError } from '../../../shared/ui/Feedback';
 import { formatMoney, spentCents } from '../../../domain/services/money';
 import { formatDate } from '../../../shared/lib/date';
 import { BudgetPanel } from '../../budget/components/BudgetPanel';
+import { ListActions } from '../../shopping-lists/components/ListActions';
+import { ComparisonButton } from '../../comparator/components/ComparisonButton';
 
 export default function CategoriesPage() {
   const { listId = '' } = useParams();
@@ -46,7 +48,7 @@ export default function CategoriesPage() {
           <span className="eyebrow">TOTAL DA LISTA</span>
           <strong aria-label="Total da lista">{formatMoney(spentCents(items))}</strong>
           <p>
-            {purchased} de {items.length} itens comprados
+            {purchased} de {items.length} itens comprados{list.status === 'completed' ? ` · ${items.length - purchased} não comprados` : ''}
           </p>
         </div>
         <span className="summary-icon">
@@ -54,12 +56,13 @@ export default function CategoriesPage() {
         </span>
       </section>
       <BudgetPanel list={list} spent={spentCents(items)} />
+      <ListActions list={list} />
       <div className="section-heading">
         <div>
           <h2>Por categoria</h2>
           <p>Organize cada parte das suas compras.</p>
         </div>
-        <span className="count-badge">{categories.length}</span>
+        <div className="section-actions"><span className="count-badge">{categories.length}</span><ComparisonButton /></div>
       </div>
       <div className="categories-grid">
         {categories.map((category, index) => {
