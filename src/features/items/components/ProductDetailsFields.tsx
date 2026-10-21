@@ -40,6 +40,7 @@ export function ProductDetailsFields({
         <label>
           Unidade do conteúdo
           <select
+            aria-label="Unidade do conteúdo"
             value={draft.unit}
             disabled={readOnly}
             onChange={(event) =>

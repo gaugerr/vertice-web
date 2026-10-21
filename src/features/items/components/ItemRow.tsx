@@ -110,7 +110,7 @@ export const ItemRow = memo(function ItemRow({
       {editing && <ItemForm item={item} readOnly={readOnly} onClose={() => setEditing(false)} />}
       {deleting && (
         <Dialog title="Excluir item?" onClose={() => setDeleting(false)} busy={mutation.pending}>
-          <p>Excluir “{displayName}” desta lista?</p>
+          <p className="item-delete-label">Excluir “{displayName}” desta lista?</p>
           <ErrorMessage message={mutation.error} />
           <div className="dialog-actions">
             <Button
