@@ -22,6 +22,13 @@ const legacy = {
     },
   ],
 };
+function withoutProductDetails(items: object[]) {
+  return items.map((item) => {
+    const copy: Record<string, unknown> = { ...item };
+    delete copy.brand; delete copy.packageContent;
+    return copy;
+  });
+}
 describe('backups', () => {
   it('reads old web backups with no budget and exports the new version without changing IDs', () => {
     const data = parseBackup(JSON.stringify(legacy));
@@ -30,6 +37,7 @@ describe('backups', () => {
       version: 2,
       exportedAt: new Date().toISOString(),
       ...data,
+      items: withoutProductDetails(data.items),
       lists: data.lists.map((list) => ({
         id: list.id,
         storeName: list.storeName,
@@ -44,7 +52,7 @@ describe('backups', () => {
     expect(imported.lists[0].budgetCents).toBeNull();
     imported.lists[0].budgetCents = 30000;
     const encoded = encodeBackup(imported);
-    expect(JSON.parse(encoded).version).toBe(4);
+    expect(JSON.parse(encoded).version).toBe(5);
     expect(parseBackup(encoded)).toEqual(imported);
     for (const budget of [0, -100, 1.5, '30000', Number.MAX_SAFE_INTEGER + 1]) {
       const invalid = JSON.parse(encoded);
@@ -69,13 +77,14 @@ describe('backups', () => {
     data.items[0].quantity = 1;
     expect(spentCents(parseBackup(JSON.stringify(data)).items)).toBe(1);
   });
-  it('imports the frozen v3 shape and round trips completed purchases in v4', () => {
+  it('imports the frozen v3 shape and round trips completed purchases in the latest format', () => {
     const data = parseBackup(JSON.stringify(legacy));
     const old = {
       format: 'vertice-backup',
       version: 3,
       exportedAt: new Date().toISOString(),
       ...data,
+      items: withoutProductDetails(data.items),
       lists: data.lists.map((list) => ({
         id: list.id,
         storeName: list.storeName,
@@ -111,6 +120,26 @@ describe('backups', () => {
     const zero = structuredClone(imported);
     zero.items[0].unitPrice = '0';
     expect(() => encodeBackup(zero)).toThrow();
+  });
+  it('imports v4 purchases without guessing details and preserves product details in v5', () => {
+    const data = parseBackup(JSON.stringify(legacy));
+    Object.assign(data.lists[0], { status: 'completed', completedAt: '2026-10-21T12:00:00.000Z', purchaseDate: '2026-10-20', marketName: 'Mercado A' });
+    data.items[0].name = 'Arroz 500 g';
+    const old = { format: 'vertice-backup', version: 4, exportedAt: new Date().toISOString(), ...data,
+      items: withoutProductDetails(data.items) };
+    const imported = parseBackup(JSON.stringify(old));
+    expect(imported).toEqual(data);
+    expect(imported.items[0]).toMatchObject({ name: 'Arroz 500 g', brand: null, packageContent: null });
+    imported.items[0].brand = 'Marca X';
+    imported.items[0].packageContent = { amount: '0.5', unit: 'kg' };
+    const encoded = encodeBackup(imported);
+    expect(JSON.parse(encoded).version).toBe(5);
+    expect(parseBackup(encoded)).toEqual(imported);
+    for (const patch of [{ brand: 'x'.repeat(51) }, { packageContent: { amount: '0', unit: 'g' } },
+      { packageContent: { amount: '1.5', unit: 'un' } }, { packageContent: { amount: '1', unit: 'oz' } }, { packageContent: { unit: 'g' } }]) {
+      const invalid = JSON.parse(encoded); Object.assign(invalid.items[0], patch);
+      expect(() => parseBackup(JSON.stringify(invalid))).toThrow();
+    }
   });
   it('rejects duplicates, orphan rows and category/list mismatches', () => {
     const duplicates = structuredClone(legacy);

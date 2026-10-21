@@ -1,4 +1,10 @@
 export type Unit = 'un' | 'kg' | 'L';
+export type PackageUnit = 'g' | 'kg' | 'ml' | 'L' | 'un';
+export interface PackageContent {
+  amount: string;
+  unit: PackageUnit;
+}
+export const EMPTY_PRODUCT_DETAILS = { brand: null, packageContent: null };
 export interface Timestamps {
   createdAt: string;
   updatedAt: string;
@@ -29,6 +35,8 @@ export interface ShoppingItem extends Timestamps {
   quantity: string;
   unit: Unit;
   isPurchased: boolean;
+  brand: string | null;
+  packageContent: PackageContent | null;
 }
 export interface ShoppingSnapshot {
   lists: ShoppingList[];
@@ -65,8 +73,10 @@ export interface ItemInput {
   unitPrice: string;
   quantity: string;
   unit: Unit;
+  brand?: string | null;
+  packageContent?: PackageContent | null;
 }
-export type PurchaseDetails = Pick<ItemInput, 'unitPrice' | 'quantity' | 'unit'>;
+export type PurchaseDetails = Pick<ItemInput, 'unitPrice' | 'quantity' | 'unit' | 'brand' | 'packageContent'>;
 export const DEFAULT_CATEGORIES = [
   'Essenciais',
   'Hortifruti',

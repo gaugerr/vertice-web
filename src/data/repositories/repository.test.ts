@@ -72,7 +72,7 @@ describe('local repository', () => {
       budgetCents: null,
       ...timestamps,
     });
-    expect(await repository.getItemsForList(id)).toEqual([item]);
+    expect(await repository.getItemsForList(id)).toEqual([{ ...item, brand: null, packageContent: null }]);
     expect(await repository.getCategories(id)).toHaveLength(1);
   });
 

@@ -2,6 +2,7 @@ import { type ShoppingRepository } from '../../domain/models/repository';
 import {
   DEFAULT_CATEGORIES,
   ACTIVE_PURCHASE,
+  EMPTY_PRODUCT_DETAILS,
   type CompletionInput,
   type ItemInput,
   type PurchaseDetails,
@@ -220,6 +221,7 @@ export class DexieShoppingRepository implements ShoppingRepository {
           quantity: '1',
           unit: 'un',
           isPurchased: false,
+          ...EMPTY_PRODUCT_DETAILS,
           createdAt: now,
           updatedAt: now,
         });
@@ -241,8 +243,11 @@ export class DexieShoppingRepository implements ShoppingRepository {
   }
   private async changeItem(
     id: string,
-    patch: Partial<ItemInput> & { isPurchased?: boolean },
+    inputPatch: Partial<ItemInput> & { isPurchased?: boolean },
   ): Promise<void> {
+    const patch = { ...inputPatch };
+    if (patch.brand === undefined) delete patch.brand;
+    if (patch.packageContent === undefined) delete patch.packageContent;
     await trackWrite(() =>
       this.db.transaction('rw', this.db.lists, this.db.items, async () => {
         const item = await this.db.items.get(id);

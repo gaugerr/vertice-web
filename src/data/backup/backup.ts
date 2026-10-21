@@ -4,11 +4,12 @@ import type { ShoppingSnapshot } from '../../domain/models/shopping';
 import {
   categorySchema,
   itemSchema,
+  itemV4Schema,
   listSchema,
   listV3Schema,
   nameSchema,
 } from '../../domain/schemas/shopping';
-import { ACTIVE_PURCHASE } from '../../domain/models/shopping';
+import { ACTIVE_PURCHASE, EMPTY_PRODUCT_DETAILS } from '../../domain/models/shopping';
 import { assertCompletable } from '../../domain/services/completion';
 import { legacyDate } from '../../shared/lib/date';
 import { spentCents } from '../../domain/services/money';
@@ -22,9 +23,9 @@ const snapshotSchema = z
     items: z.array(itemSchema).max(MAX_ROWS),
   })
   .strict();
-export interface BackupV4 extends ShoppingSnapshot {
+export interface BackupV5 extends ShoppingSnapshot {
   format: 'vertice-backup';
-  version: 4;
+  version: 5;
   exportedAt: string;
 }
 export function validateSnapshot(input: unknown): ShoppingSnapshot {
@@ -142,6 +143,7 @@ function convertLegacy(input: unknown): ShoppingSnapshot {
       unitPrice: new Big(String(price)).toFixed(),
       quantity: new Big(String(quantity)).toFixed(),
       isPurchased: isPurchased === 1,
+      ...EMPTY_PRODUCT_DETAILS,
       ...timestamps,
       // Legacy records have no creation time; keep their original sequence.
       createdAt: new Date(importedAt - data.items.length + index + 1).toISOString(),
@@ -169,13 +171,14 @@ export function parseBackup(source: string): ShoppingSnapshot {
         exportedAt: z.iso.datetime(),
         ...snapshotSchema.shape,
         lists: z.array(listV3Schema.omit({ budgetCents: true })).max(MAX_ROWS),
+        items: z.array(itemV4Schema).max(MAX_ROWS),
       })
       .strict()
       .parse(raw);
     return validateSnapshot({
       lists: old.lists.map((list) => ({ ...list, budgetCents: null, ...ACTIVE_PURCHASE })),
       categories: old.categories,
-      items: old.items,
+      items: old.items.map((item) => ({ ...item, ...EMPTY_PRODUCT_DETAILS })),
     });
   }
   if (header.version === 3) {
@@ -186,20 +189,28 @@ export function parseBackup(source: string): ShoppingSnapshot {
         exportedAt: z.iso.datetime(),
         ...snapshotSchema.shape,
         lists: z.array(listV3Schema).max(MAX_ROWS),
+        items: z.array(itemV4Schema).max(MAX_ROWS),
       })
       .strict()
       .parse(raw);
     return validateSnapshot({
       lists: old.lists.map((list) => ({ ...list, ...ACTIVE_PURCHASE })),
       categories: old.categories,
-      items: old.items,
+      items: old.items.map((item) => ({ ...item, ...EMPTY_PRODUCT_DETAILS })),
     });
   }
-  if (header.version !== 4) throw new Error('Esta versão do backup não é compatível.');
+  if (header.version === 4) {
+    const old = z.object({ format: z.literal('vertice-backup'), version: z.literal(4),
+      exportedAt: z.iso.datetime(), ...snapshotSchema.shape, items: z.array(itemV4Schema).max(MAX_ROWS),
+    }).strict().parse(raw);
+    return validateSnapshot({ lists: old.lists, categories: old.categories,
+      items: old.items.map((item) => ({ ...item, ...EMPTY_PRODUCT_DETAILS })) });
+  }
+  if (header.version !== 5) throw new Error('Esta versão do backup não é compatível.');
   const backup = z
     .object({
       format: z.literal('vertice-backup'),
-      version: z.literal(4),
+      version: z.literal(5),
       exportedAt: z.iso.datetime(),
       ...snapshotSchema.shape,
     })
@@ -212,9 +223,9 @@ export function parseBackup(source: string): ShoppingSnapshot {
   });
 }
 export function encodeBackup(data: ShoppingSnapshot): string {
-  const backup: BackupV4 = {
+  const backup: BackupV5 = {
     format: 'vertice-backup',
-    version: 4,
+    version: 5,
     exportedAt: new Date().toISOString(),
     ...validateSnapshot(data),
   };

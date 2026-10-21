@@ -10,6 +10,7 @@ import { Dialog } from '../../../shared/ui/Dialog';
 import { ErrorMessage } from '../../../shared/ui/Feedback';
 import { ItemForm } from './ItemForm';
 import { PurchaseForm } from './PurchaseForm';
+import { formatItemName } from '../../../domain/services/product-details';
 
 export const ItemRow = memo(function ItemRow({
   item,
@@ -26,6 +27,7 @@ export const ItemRow = memo(function ItemRow({
   const priceInput = useRef<HTMLInputElement>(null);
   const checkbox = useRef<HTMLInputElement>(null);
   const mutation = useMutation();
+  const displayName = formatItemName(item);
   function closePurchase() {
     flushSync(() => {
       setPurchasing(false);
@@ -46,7 +48,7 @@ export const ItemRow = memo(function ItemRow({
           type="checkbox"
           checked={item.isPurchased}
           disabled={mutation.pending || purchasing || readOnly}
-          aria-label={`Marcar ${item.name} como comprado`}
+          aria-label={`Marcar ${displayName} como comprado`}
           aria-controls={purchasing ? `purchase-${item.id}` : undefined}
           onChange={(event) => {
             const purchased = event.target.checked;
@@ -63,7 +65,7 @@ export const ItemRow = memo(function ItemRow({
           }}
         />
         <div className="item-copy">
-          <h3>{item.name}</h3>
+          <h3>{displayName}</h3>
           <p>
             {decimalInput(item.quantity)} {item.unit} × {formatMoney(Number(item.unitPrice) * 100)}
           </p>
@@ -77,7 +79,7 @@ export const ItemRow = memo(function ItemRow({
         {!readOnly ? (
           <Button
             variant="icon"
-            aria-label={`Editar ${item.name}`}
+            aria-label={`Editar ${displayName}`}
             disabled={mutation.pending || purchasing}
             onClick={() => setEditing(true)}
           >
@@ -87,7 +89,7 @@ export const ItemRow = memo(function ItemRow({
         {!readOnly ? (
           <Button
             variant="icon"
-            aria-label={`Excluir ${item.name}`}
+            aria-label={`Excluir ${displayName}`}
             disabled={mutation.pending || purchasing}
             onClick={() => setDeleting(true)}
           >
@@ -108,7 +110,7 @@ export const ItemRow = memo(function ItemRow({
       {editing && <ItemForm item={item} readOnly={readOnly} onClose={() => setEditing(false)} />}
       {deleting && (
         <Dialog title="Excluir item?" onClose={() => setDeleting(false)} busy={mutation.pending}>
-          <p>Excluir “{item.name}” desta lista?</p>
+          <p>Excluir “{displayName}” desta lista?</p>
           <ErrorMessage message={mutation.error} />
           <div className="dialog-actions">
             <Button

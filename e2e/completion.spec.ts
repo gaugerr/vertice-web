@@ -140,7 +140,7 @@ test('finish, consult, reopen, correct and copy the same purchase on a narrow sc
   await expect(page.getByLabel('Preço por kg (R$)', { exact: true })).toHaveValue('0');
   await page.getByRole('button', { name: 'Cancelar', exact: true }).click();
   const backup = await exportBackup(page);
-  expect(backup.version).toBe(4);
+  expect(backup.version).toBe(5);
   expect(backup.lists).toHaveLength(2);
   expect(backup.lists.filter((l: { status: string }) => l.status === 'completed')).toHaveLength(1);
   expect(backup.items).toHaveLength(4);
@@ -267,7 +267,7 @@ test('finalizes and copies offline, survives reload and restores a v4 backup', a
     ),
   ).toBe(false);
   const backup = await exportBackup(page);
-  expect(backup.version).toBe(4);
+  expect(backup.version).toBe(5);
   expect(backup.lists.map((l: { status: string }) => l.status).sort()).toEqual([
     'active',
     'completed',

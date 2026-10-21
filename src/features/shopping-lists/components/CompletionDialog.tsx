@@ -11,6 +11,7 @@ import { Dialog } from '../../../shared/ui/Dialog';
 import { Button } from '../../../shared/ui/Button';
 import { ErrorMessage, Loading, QueryError } from '../../../shared/ui/Feedback';
 import { BudgetPanel } from '../../budget/components/BudgetPanel';
+import { formatItemName } from '../../../domain/services/product-details';
 
 export function CompletionDialog({ listId, onClose }: { listId: string; onClose: () => void }) {
   const result = useQuery(() => repository.getListReview(listId), [listId]);
@@ -107,7 +108,7 @@ function CompletionForm({ review, onClose }: { review: ListReview; onClose: () =
             <ul>
               {unpriced.map((item) => (
                 <li key={item.id}>
-                  {item.name} · {review.categories.find((c) => c.id === item.categoryId)?.title}
+                  {formatItemName(item)} · {review.categories.find((c) => c.id === item.categoryId)?.title}
                 </li>
               ))}
             </ul>

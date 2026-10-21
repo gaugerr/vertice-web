@@ -33,6 +33,7 @@ O build está em `dist`. O orçamento de JavaScript de 250 KiB gzip inclui tamb�
 - Listas com nome, data civil e descrição opcional; criação, edição e exclusão.
 - Seis categorias padrão por lista, criadas transacionalmente.
 - Inclusão rápida de itens, edição de nome/preço/quantidade/unidade e marcação como comprado.
+- Marca e conteúdo da embalagem opcionais, nome exibido automaticamente e detalhes preservados nas cópias.
 - Filtros de itens pendentes e comprados.
 - Finalização com revisão, consulta das compras anteriores e reabertura para correção.
 - Cópia de listas com produtos desmarcados, quantidades preservadas e preços zerados.
@@ -69,7 +70,7 @@ As consultas `useLiveQuery` observam as leituras do repositório. Formulários m
 
 ## Dados e cálculos
 
-O banco `vertice_web`, versão Dexie 3, contém listas, categorias e itens. As chaves são UUIDs e as relações são verificadas pelo repositório. IndexedDB não tem chaves estrangeiras; criação e exclusão compostas, cópia, finalização e restauração usam transações explícitas.
+O banco `vertice_web`, versão Dexie 4, contém listas, categorias e itens. As chaves são UUIDs e as relações são verificadas pelo repositório. IndexedDB não tem chaves estrangeiras; criação e exclusão compostas, cópia, finalização e restauração usam transações explícitas.
 
 Preço e quantidade são strings decimais canônicas. `big.js` calcula o produto, arredonda cada linha para centavos usando metade para cima e soma somente os itens comprados. Os cálculos verificam o limite de inteiros seguros. A unidade não altera a fórmula.
 
@@ -96,9 +97,17 @@ O navegador pode negar armazenamento persistente, limitar espaço ou apagar dado
 
 ## Backup e migração do Flutter
 
-Em Dados e aplicativo, exporte um JSON e guarde fora do armazenamento do site. O novo formato usa `format: "vertice-backup"`, `version: 4`, `exportedAt`, `lists`, `categories` e `items`. Cada lista inclui `budgetCents`, um valor em centavos ou `null` quando não há limite, além de estado, mercado opcional e datas da compra/finalização.
+Em Dados e aplicativo, exporte um JSON e guarde fora do armazenamento do site. O novo formato usa `format: "vertice-backup"`, `version: 5`, `exportedAt`, `lists`, `categories` e `items`. Cada lista inclui orçamento, estado, mercado opcional e datas; cada produto inclui marca e conteúdo da embalagem, ambos opcionais.
 
-A importação aceita formatos v1 (Flutter), v2 (web sem orçamento), v3 (web com orçamento) e v4. Listas anteriores à v4 são importadas em andamento; v1/v2 recebem orçamento nulo e v3 preserva seu limite. Valida até 10 MiB, no máximo 50 mil registros em cada coleção, tipos, duplicatas, relações e coerência das finalizações. Antes de substituir, exibe quantidades e pede confirmação. Toda a substituição é transacional; uma falha não deve deixar um banco parcialmente restaurado.
+A importação aceita formatos v1 (Flutter), v2 (web sem orçamento), v3 (web com orçamento), v4 (finalização) e v5 (detalhes dos produtos). Listas anteriores à v4 são importadas em andamento; v1/v2 recebem orçamento nulo e v3 preserva seu limite. Produtos anteriores à v5 recebem marca e embalagem nulas; nenhum detalhe é inferido do nome. Valida até 10 MiB, no máximo 50 mil registros em cada coleção, tipos, duplicatas, relações e coerência das finalizações. Antes de substituir, exibe quantidades e pede confirmação. Toda a substituição é transacional; uma falha não deve deixar um banco parcialmente restaurado.
+
+## Marca e embalagem
+
+Ao marcar um produto, o preço continua selecionado e Enter permite salvar sem preencher os detalhes. Conteúdo por embalagem (g, kg, ml, L ou un) e marca ficam visíveis e são opcionais. A prévia mostra o nome resultante; a lista só muda após salvar. O nome base fica separado: Café, Marca X e 500 g aparecem como **Café · Marca X · 500 g**. Limpar a marca ou o conteúdo remove somente esse detalhe.
+
+A quantidade comprada e o conteúdo de cada embalagem são independentes: três pacotes de 500 g a R$ 18,90 custam R$ 56,70. O conteúdo não multiplica o preço e não altera compras cobradas por kg/L. Peso e volume admitem até três casas decimais; conteúdo em unidades exige contagem inteira positiva. O tamanho é exibido na unidade escolhida, sem conversão automática.
+
+Copiar uma lista preserva marca e embalagem, mas zera preços e desmarca os produtos. Cada cópia pode ser alterada independentemente. Salvar apenas o preço preserva detalhes modificados em outra aba; compras finalizadas continuam exigindo reabertura para edição. A migração Dexie 3 → 4 preserva os produtos existentes com detalhes nulos. O fluxo funciona offline; histórico e avisos automáticos de comparação ficam para uma próxima etapa.
 
 ## Finalizar e copiar compras
 

@@ -6,6 +6,9 @@ import { useMutation } from '../../../shared/hooks/useMutation';
 import { useUnsavedChanges } from '../../../shared/lib/drafts';
 import { Button } from '../../../shared/ui/Button';
 import { ErrorMessage } from '../../../shared/ui/Feedback';
+import { formatItemName } from '../../../domain/services/product-details';
+import { useProductDetailsDraft } from '../hooks/useProductDetailsDraft';
+import { ProductDetailsFields } from './ProductDetailsFields';
 
 export function PurchaseForm({
   item,
@@ -25,11 +28,12 @@ export function PurchaseForm({
   const [quantity, setQuantity] = useState(decimalInput(item.quantity));
   const [unit, setUnit] = useState<Unit>(item.unit);
   const mutation = useMutation();
+  const details = useProductDetailsDraft(item);
   const busy = marking || mutation.pending;
   const dirty =
     unitPrice !== decimalInput(original.unitPrice) ||
     quantity !== decimalInput(original.quantity) ||
-    unit !== original.unit;
+    unit !== original.unit || details.dirty;
   useUnsavedChanges(dirty);
 
   function close() {
@@ -39,7 +43,7 @@ export function PurchaseForm({
     event.preventDefault();
     if (marking || readOnly) return;
     const result = await mutation.run(() =>
-      repository.updatePurchaseDetails(item.id, { unitPrice, quantity, unit }),
+      repository.updatePurchaseDetails(item.id, { unitPrice, quantity, unit, ...details.getPatch() }),
     );
     if (result.ok) onClose();
   }
@@ -48,7 +52,7 @@ export function PurchaseForm({
     <form
       id={`purchase-${item.id}`}
       className="purchase-form form-stack"
-      aria-label={`Valores de ${item.name}`}
+      aria-label={`Valores de ${formatItemName(item)}`}
       aria-busy={busy}
       onSubmit={submit}
       onKeyDown={(event) => {
@@ -106,6 +110,7 @@ export function PurchaseForm({
           </select>
         </label>
       </div>
+      <ProductDetailsFields details={details} name={item.name} readOnly={mutation.pending || readOnly} />
       <ErrorMessage message={mutation.error} />
       <div className="purchase-actions">
         <Button variant="secondary" disabled={busy} onClick={close}>

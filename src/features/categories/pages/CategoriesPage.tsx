@@ -8,6 +8,7 @@ import { formatDate } from '../../../shared/lib/date';
 import { BudgetPanel } from '../../budget/components/BudgetPanel';
 import { ListActions } from '../../shopping-lists/components/ListActions';
 import { ComparisonButton } from '../../comparator/components/ComparisonButton';
+import { formatItemName } from '../../../domain/services/product-details';
 
 export default function CategoriesPage() {
   const { listId = '' } = useParams();
@@ -93,7 +94,7 @@ export default function CategoriesPage() {
                 {group.length
                   ? group
                       .slice(0, 4)
-                      .map((item) => item.name)
+                      .map(formatItemName)
                       .join(' · ')
                   : list.status === 'completed'
                     ? 'Nenhum produto nesta compra'

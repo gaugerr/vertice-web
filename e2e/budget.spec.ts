@@ -188,7 +188,7 @@ test('a populated old browser database is upgraded and exported without losing p
   const chunks: Buffer[] = [];
   for await (const chunk of stream!) chunks.push(Buffer.from(chunk));
   const backup = JSON.parse(Buffer.concat(chunks).toString());
-  expect(backup.version).toBe(4);
+  expect(backup.version).toBe(5);
   expect(backup.lists[0]).toMatchObject({
     id: ids.list,
     description: 'Preservada',

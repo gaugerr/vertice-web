@@ -7,6 +7,8 @@ import { useUnsavedChanges } from '../../../shared/lib/drafts';
 import { Button } from '../../../shared/ui/Button';
 import { Dialog } from '../../../shared/ui/Dialog';
 import { ErrorMessage } from '../../../shared/ui/Feedback';
+import { useProductDetailsDraft } from '../hooks/useProductDetailsDraft';
+import { ProductDetailsFields } from './ProductDetailsFields';
 
 export function ItemForm({
   item,
@@ -22,11 +24,12 @@ export function ItemForm({
   const [quantity, setQuantity] = useState(decimalInput(item.quantity));
   const [unit, setUnit] = useState<Unit>(item.unit);
   const mutation = useMutation();
+  const details = useProductDetailsDraft(item);
   const dirty =
     name !== item.name ||
     unitPrice !== decimalInput(item.unitPrice) ||
     quantity !== decimalInput(item.quantity) ||
-    unit !== item.unit;
+    unit !== item.unit || details.dirty;
   useUnsavedChanges(dirty);
   function close() {
     if (!mutation.pending && (!dirty || window.confirm('Descartar as alterações não salvas?')))
@@ -37,7 +40,7 @@ export function ItemForm({
     if (readOnly) return;
     // Editing fields never overwrites purchase state changed in another tab.
     const result = await mutation.run(() =>
-      repository.updateItem(item.id, { name, unitPrice, quantity, unit }),
+      repository.updateItem(item.id, { name, unitPrice, quantity, unit, ...details.getPatch() }),
     );
     if (result.ok) onClose();
   }
@@ -96,6 +99,7 @@ export function ItemForm({
             onChange={(e) => setPrice(e.target.value)}
           />
         </label>
+        <ProductDetailsFields details={details} name={name} readOnly={mutation.pending || readOnly} />
         <ErrorMessage message={mutation.error} />
         <div className="dialog-actions">
           <Button variant="secondary" disabled={mutation.pending} onClick={close}>

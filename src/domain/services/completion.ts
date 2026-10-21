@@ -39,6 +39,8 @@ export function buildListReview(
         i.shoppingListId,
         i.categoryId,
         i.name,
+        i.brand,
+        i.packageContent ? [i.packageContent.amount, i.packageContent.unit] : null,
         i.unitPrice,
         i.quantity,
         i.unit,
