@@ -95,13 +95,11 @@ function fixture() {
 }
 async function restore(page: Page, backup: ReturnType<typeof fixture>['backup']) {
   await page.goto('/settings');
-  await page
-    .getByLabel('Arquivo de backup')
-    .setInputFiles({
-      name: 'history.json',
-      mimeType: 'application/json',
-      buffer: Buffer.from(JSON.stringify(backup)),
-    });
+  await page.getByLabel('Arquivo de backup').setInputFiles({
+    name: 'history.json',
+    mimeType: 'application/json',
+    buffer: Buffer.from(JSON.stringify(backup)),
+  });
   await page.getByRole('button', { name: 'Substituir e restaurar', exact: true }).click();
   await expect(page.getByText('Backup restaurado.', { exact: true })).toBeVisible();
 }
