@@ -66,12 +66,23 @@ function CompletionForm({ review, onClose }: { review: ListReview; onClose: () =
     if (result.ok) onClose();
   }
   return (
-    <Dialog title="Finalizar compra" onClose={close} busy={mutation.pending} preserveScroll initialFocusRef={summary}>
+    <Dialog
+      title="Finalizar compra"
+      onClose={close}
+      busy={mutation.pending}
+      preserveScroll
+      initialFocusRef={summary}
+    >
       <form className="form-stack completion-form" onSubmit={submit}>
         <p>
           Confira os valores salvos de <strong>{review.list.storeName}</strong>.
         </p>
-        <div className="completion-summary" ref={summary} tabIndex={-1} aria-label="Resumo da compra">
+        <div
+          className="completion-summary"
+          ref={summary}
+          tabIndex={-1}
+          aria-label="Resumo da compra"
+        >
           <span>Total da compra</span>
           <strong aria-label="Total para finalizar">{formatMoney(review.totalCents)}</strong>
           <span>
