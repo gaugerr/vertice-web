@@ -881,7 +881,7 @@ nav a.active {
 .purchased .item-total {
   color: #b7edce;
 }
-.purchase-form {
+.purchase-form.form-stack {
   margin: 12px 4px 4px;
   padding-top: 16px;
   border-top: 1px solid #3f5345;
@@ -889,6 +889,7 @@ nav a.active {
 }
 .purchase-fields {
   display: grid;
+  align-items: end;
   grid-template-columns: minmax(0, 1.5fr) minmax(0, 1fr) minmax(0, 0.9fr);
   gap: 8px;
 }
@@ -903,13 +904,22 @@ nav a.active {
   font-size: 16px;
 }
 .purchase-actions {
-  display: flex;
-  justify-content: flex-end;
+  display: grid;
+  grid-template-columns: repeat(2, minmax(0, 1fr));
   gap: 8px;
 }
-.product-details {
+.product-details.form-stack {
   min-width: 0;
-  gap: 10px;
+  gap: 12px;
+}
+.product-details-title {
+  color: #a19cab;
+  font-size: 11px;
+}
+.product-package-field {
+  display: grid;
+  gap: 8px;
+  min-width: 0;
 }
 .product-content-fields {
   display: grid;
@@ -923,9 +933,6 @@ nav a.active {
 .product-details select {
   min-width: 0;
   font-size: 16px;
-}
-.product-details .field-help {
-  margin: 0;
 }
 .product-name-preview {
   font-size: 12px;

@@ -103,7 +103,7 @@ A importação aceita formatos v1 (Flutter), v2 (web sem orçamento), v3 (web co
 
 ## Marca e embalagem
 
-Ao marcar um produto, o preço continua selecionado e Enter permite salvar sem preencher os detalhes. Conteúdo por embalagem (g, kg, ml, L ou un) e marca ficam visíveis e são opcionais. A prévia mostra o nome resultante; a lista só muda após salvar. O nome base fica separado: Café, Marca X e 500 g aparecem como **Café · Marca X · 500 g**. Limpar a marca ou o conteúdo remove somente esse detalhe.
+Ao marcar um produto, o preço continua selecionado e Enter permite salvar sem preencher os detalhes. Marca e embalagem (g, kg, ml, L ou un) ficam visíveis em “Detalhes opcionais”. A prévia aparece apenas quando algum detalhe está preenchido e mostra o nome resultante; a lista só muda após salvar. O nome base fica separado: Café, Marca X e 500 g aparecem como **Café · Marca X · 500 g**. Limpar a marca ou o conteúdo remove somente esse detalhe.
 
 A quantidade comprada e o conteúdo de cada embalagem são independentes: três pacotes de 500 g a R$ 18,90 custam R$ 56,70. O conteúdo não multiplica o preço e não altera compras cobradas por kg/L. Peso e volume admitem até três casas decimais; conteúdo em unidades exige contagem inteira positiva. O tamanho é exibido na unidade escolhida, sem conversão automática.
 

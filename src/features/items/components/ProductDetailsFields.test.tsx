@@ -41,8 +41,9 @@ describe('product detail fields in quick purchasing', () => {
     );
     const close = vi.fn();
     render(<PurchaseForm item={item} priceInput={createRef()} marking={false} onClose={close} />);
+    expect(screen.queryByLabelText('Prévia do nome')).not.toBeInTheDocument();
     fill(/^Marca/, 'Marca X');
-    fill(/^Conteúdo por embalagem/, '500');
+    fill(/^Embalagem/, '500');
     expect(screen.getByLabelText('Prévia do nome')).toHaveTextContent('Café · Marca X · 500 g');
     fireEvent.click(screen.getByRole('button', { name: 'Salvar valores' }));
     fireEvent.click(screen.getByRole('button', { name: 'Salvando…' }));
@@ -57,7 +58,7 @@ describe('product detail fields in quick purchasing', () => {
     reject(new Error('Sem espaço'));
     await waitFor(() => expect(screen.getByRole('alert')).toHaveTextContent('Sem espaço'));
     expect(screen.getByLabelText(/^Marca/)).toHaveValue('Marca X');
-    expect(screen.getByLabelText(/^Conteúdo por embalagem/)).toHaveValue('500');
+    expect(screen.getByLabelText(/^Embalagem/)).toHaveValue('500');
     expect(close).not.toHaveBeenCalled();
   });
   it('blocks invalid content and removes only the detail explicitly cleared', async () => {
@@ -70,16 +71,16 @@ describe('product detail fields in quick purchasing', () => {
         onClose={vi.fn()}
       />,
     );
-    fill(/^Conteúdo por embalagem/, '0');
+    fill(/^Embalagem/, '0');
     fireEvent.click(screen.getByRole('button', { name: 'Salvar valores' }));
     await waitFor(() =>
-      expect(screen.getByLabelText(/^Conteúdo por embalagem/)).toHaveAttribute(
+      expect(screen.getByLabelText(/^Embalagem/)).toHaveAttribute(
         'aria-invalid',
         'true',
       ),
     );
     expect(repository.updatePurchaseDetails).not.toHaveBeenCalled();
-    fill(/^Conteúdo por embalagem/, '500');
+    fill(/^Embalagem/, '500');
     fill(/^Marca/, '');
     fireEvent.click(screen.getByRole('button', { name: 'Salvar valores' }));
     await waitFor(() => expect(repository.updatePurchaseDetails).toHaveBeenCalledTimes(1));
@@ -99,11 +100,11 @@ describe('product detail fields in quick purchasing', () => {
     };
     const { rerender } = render(<PurchaseForm {...props} />);
     fill(/^Marca/, 'Minha escolha');
-    fill(/^Conteúdo por embalagem/, '1');
+    fill(/^Embalagem/, '1');
     rerender(<PurchaseForm {...props} readOnly />);
     expect(screen.getByLabelText(/^Marca/)).toHaveValue('Minha escolha');
     expect(screen.getByLabelText(/^Marca/)).toHaveAttribute('readonly', '');
-    expect(screen.getByLabelText('Unidade do conteúdo')).toBeDisabled();
+    expect(screen.getByLabelText('Unidade da embalagem')).toBeDisabled();
     expect(screen.getByRole('button', { name: 'Salvar valores' })).toBeDisabled();
   });
 });

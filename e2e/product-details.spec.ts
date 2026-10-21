@@ -29,9 +29,9 @@ async function buy(page: Page, name: string) {
   return form;
 }
 async function productFields(form: Locator, amount: string, unit: string, brand: string) {
-  await form.getByLabel(/^Conteúdo por embalagem/).fill(amount);
-  await form.getByLabel('Unidade do conteúdo', { exact: true }).selectOption(unit);
-  await form.getByLabel('Marca (opcional)', { exact: true }).fill(brand);
+  await form.getByLabel(/^Embalagem/).fill(amount);
+  await form.getByLabel('Unidade da embalagem', { exact: true }).selectOption(unit);
+  await form.getByLabel('Marca', { exact: true }).fill(brand);
 }
 async function exportBackup(page: Page) {
   await page.getByRole('link', { name: 'Dados e aplicativo', exact: true }).click();
@@ -50,7 +50,7 @@ test('optional quick entry, automatic names, completed copies and independent cl
   const { overview } = await create(page);
   await add(page, 'Café');
   let form = await buy(page, 'Café');
-  await expect(form.getByLabel('Marca (opcional)', { exact: true })).toBeVisible();
+  await expect(form.getByLabel('Marca', { exact: true })).toBeVisible();
   await form.getByLabel('Preço por un (R$)', { exact: true }).fill('18,90');
   await form.getByLabel('Preço por un (R$)', { exact: true }).press('Enter');
   await expect(form).toHaveCount(0);
@@ -75,13 +75,28 @@ test('optional quick entry, automatic names, completed copies and independent cl
   await checked.tap();
   await expect(checked).not.toBeChecked();
   form = await buy(page, 'Café · Marca X · 500 g');
-  await expect(form.getByLabel('Marca (opcional)', { exact: true })).toHaveValue('Marca X');
-  expect(await page.evaluate(() => document.documentElement.scrollWidth <= innerWidth)).toBe(true);
-  await form.getByRole('button', { name: 'Salvar valores', exact: true }).tap({ trial: true });
-  await info.attach('product-details-mobile', {
-    body: await page.screenshot(),
-    contentType: 'image/png',
-  });
+  await expect(form.getByLabel('Marca', { exact: true })).toHaveValue('Marca X');
+  for (const width of [390, 320]) {
+    await page.setViewportSize({ width, height: 740 });
+    const price = await form.getByLabel('Preço por un (R$)', { exact: true }).boundingBox();
+    const quantity = await form.getByLabel('Quantidade', { exact: true }).boundingBox();
+    const unit = await form.getByLabel('Unidade', { exact: true }).boundingBox();
+    const amount = await form.getByLabel('Embalagem', { exact: true }).boundingBox();
+    const packageUnit = await form.getByLabel('Unidade da embalagem', { exact: true }).boundingBox();
+    expect(Math.abs(price!.y - quantity!.y)).toBeLessThan(1);
+    expect(Math.abs(price!.y - unit!.y)).toBeLessThan(1);
+    expect(Math.abs(amount!.y - packageUnit!.y)).toBeLessThan(1);
+    expect(Math.abs(amount!.height - packageUnit!.height)).toBeLessThan(1);
+    const close = await form.getByRole('button', { name: 'Fechar', exact: true }).boundingBox();
+    const save = await form.getByRole('button', { name: 'Salvar valores', exact: true }).boundingBox();
+    expect(Math.abs(close!.width - save!.width)).toBeLessThan(1);
+    expect(await page.evaluate(() => document.documentElement.scrollWidth <= innerWidth)).toBe(true);
+    await form.scrollIntoViewIfNeeded();
+    await info.attach(`product-details-mobile-${width}`, {
+      body: await page.screenshot(),
+      contentType: 'image/png',
+    });
+  }
   await form.getByRole('button', { name: 'Salvar valores', exact: true }).tap();
   await page.getByRole('link', { name: '← Produtos', exact: true }).click();
   await expect(page.getByText(/Café · Marca X · 500 g/)).toBeVisible();
@@ -101,10 +116,10 @@ test('optional quick entry, automatic names, completed copies and independent cl
   await page.getByRole('button', { name: 'Editar Café · Marca X · 500 g', exact: true }).click();
   await expect(page.getByLabel('Nome do item', { exact: true })).toHaveValue('Café');
   await expect(page.getByLabel('Preço por un (R$)', { exact: true })).toHaveValue('0');
-  await page.getByLabel('Marca (opcional)', { exact: true }).fill('');
+  await page.getByLabel('Marca', { exact: true }).fill('');
   await page.getByRole('button', { name: 'Salvar item', exact: true }).click();
   await page.getByRole('button', { name: 'Editar Café · 500 g', exact: true }).click();
-  await page.getByLabel(/^Conteúdo por embalagem/).fill('');
+  await page.getByLabel(/^Embalagem/).fill('');
   await page.getByRole('button', { name: 'Salvar item', exact: true }).click();
   await expect(page.getByRole('heading', { name: 'Café', exact: true })).toBeVisible();
   await page.getByRole('button', { name: 'Editar Café', exact: true }).click();
@@ -156,9 +171,9 @@ test('billing by weight/volume stays independent and package counts require whol
   await form.getByLabel('Preço por un (R$)', { exact: true }).fill('10');
   await productFields(form, '1,5', 'un', '');
   await form.getByRole('button', { name: 'Salvar valores', exact: true }).click();
-  await expect(form.getByLabel(/^Conteúdo por embalagem/)).toHaveAttribute('aria-invalid', 'true');
+  await expect(form.getByLabel(/^Embalagem/)).toHaveAttribute('aria-invalid', 'true');
   await expect(form.getByRole('alert')).toContainText('inteira');
-  await form.getByLabel(/^Conteúdo por embalagem/).fill('12');
+  await form.getByLabel(/^Embalagem/).fill('12');
   await form.getByRole('button', { name: 'Salvar valores', exact: true }).click();
   await expect(page.getByRole('heading', { name: 'Ovos · 12 un', exact: true })).toBeVisible();
   await expect(page.getByLabel('Total da categoria', { exact: true })).toContainText('32,00');
@@ -181,7 +196,7 @@ test('price-only save keeps another tab details and finalization detects a metad
   await expect(
     page.getByRole('heading', { name: 'Café · Marca X · 500 g', exact: true }),
   ).toBeVisible();
-  await expect(liveForm.getByLabel('Marca (opcional)', { exact: true })).toHaveValue('');
+  await expect(liveForm.getByLabel('Marca', { exact: true })).toHaveValue('');
   await liveForm.getByRole('button', { name: 'Salvar valores', exact: true }).click();
   await expect(
     page.getByRole('heading', { name: 'Café · Marca X · 500 g', exact: true }),
@@ -192,7 +207,7 @@ test('price-only save keeps another tab details and finalization detects a metad
   await expect(review.getByLabel('Total para finalizar', { exact: true })).toContainText('30,00');
   await expect(second.getByLabel('Total da categoria', { exact: true })).toContainText('30,00');
   await second.getByRole('button', { name: 'Editar Café · Marca X · 500 g', exact: true }).click();
-  await second.getByLabel('Marca (opcional)', { exact: true }).fill('Marca Y');
+  await second.getByLabel('Marca', { exact: true }).fill('Marca Y');
   await second.getByRole('button', { name: 'Salvar item', exact: true }).click();
   await expect(
     review.getByRole('button', { name: 'Conferir resumo atualizado', exact: true }),
