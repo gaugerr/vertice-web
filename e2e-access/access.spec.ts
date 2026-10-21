@@ -76,11 +76,11 @@ test('admin grants a license, buyer claims it, revoke blocks it and reactivation
   expect(license.user_id).toBe(data.users.other.uid);
   expect((await admin({ action: 'revoke', id: license.id })).response.ok).toBe(true);
   await page.goto('/settings');
-  await page.getByRole('button', { name: 'Validar agora' }).click();
-  await expect(page.getByRole('dialog', { name: 'Acesso pausado' })).toBeVisible();
+  // Opening the app already revalidates: revocation may arrive before Settings mounts.
+  await expect(page.getByRole('heading', { name: 'Acesso aguardando liberação' })).toBeVisible();
   expect((await admin({ action: 'reactivate', id: license.id })).response.ok).toBe(true);
   await page.getByRole('button', { name: 'Verificar acesso' }).click();
-  await expect(page.getByRole('dialog', { name: 'Acesso pausado' })).toHaveCount(0);
+  await expect(page.getByRole('heading', { name: 'Dados e aplicativo' })).toBeVisible();
 });
 test('signed offline access survives reload and logout removes the local authorization', async ({
   page,
