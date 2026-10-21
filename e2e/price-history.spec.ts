@@ -3,36 +3,123 @@ import { randomUUID } from 'node:crypto';
 
 test.use({ hasTouch: true });
 function fixture() {
-  const historical = randomUUID(), current = randomUUID();
-  const oldCategory = randomUUID(), currentCategory = randomUUID();
+  const historical = randomUUID(),
+    current = randomUUID();
+  const oldCategory = randomUUID(),
+    currentCategory = randomUUID();
   const now = '2026-10-12T12:00:00.000Z';
-  const list = { date: '2026-10-12', description: '', budgetCents: null, createdAt: now, updatedAt: now };
-  const item = { name: 'Café', brand: 'Marca X', packageContent: { amount: '500', unit: 'g' }, quantity: '3', unit: 'un', createdAt: now, updatedAt: now };
-  return { historical, current, oldCategory, currentCategory, backup: { format: 'vertice-backup', version: 5, exportedAt: now,
-    lists: [
-      { ...list, id: historical, storeName: 'Anterior', status: 'completed', completedAt: now, purchaseDate: '2026-10-12', marketName: 'Mercado X' },
-      { ...list, id: current, storeName: 'Atual', status: 'active', completedAt: null, purchaseDate: null, marketName: null },
-    ],
-    categories: [{ id: oldCategory, shoppingListId: historical, title: 'Essenciais', position: 0, createdAt: now, updatedAt: now }, { id: currentCategory, shoppingListId: current, title: 'Essenciais', position: 0, createdAt: now, updatedAt: now }],
-    items: [ { ...item, id: randomUUID(), shoppingListId: historical, categoryId: oldCategory, unitPrice: '18.9', isPurchased: true }, { ...item, id: randomUUID(), shoppingListId: current, categoryId: currentCategory, unitPrice: '0', isPurchased: false } ],
-  } };
+  const list = {
+    date: '2026-10-12',
+    description: '',
+    budgetCents: null,
+    createdAt: now,
+    updatedAt: now,
+  };
+  const item = {
+    name: 'Café',
+    brand: 'Marca X',
+    packageContent: { amount: '500', unit: 'g' },
+    quantity: '3',
+    unit: 'un',
+    createdAt: now,
+    updatedAt: now,
+  };
+  return {
+    historical,
+    current,
+    oldCategory,
+    currentCategory,
+    backup: {
+      format: 'vertice-backup',
+      version: 5,
+      exportedAt: now,
+      lists: [
+        {
+          ...list,
+          id: historical,
+          storeName: 'Anterior',
+          status: 'completed',
+          completedAt: now,
+          purchaseDate: '2026-10-12',
+          marketName: 'Mercado X',
+        },
+        {
+          ...list,
+          id: current,
+          storeName: 'Atual',
+          status: 'active',
+          completedAt: null,
+          purchaseDate: null,
+          marketName: null,
+        },
+      ],
+      categories: [
+        {
+          id: oldCategory,
+          shoppingListId: historical,
+          title: 'Essenciais',
+          position: 0,
+          createdAt: now,
+          updatedAt: now,
+        },
+        {
+          id: currentCategory,
+          shoppingListId: current,
+          title: 'Essenciais',
+          position: 0,
+          createdAt: now,
+          updatedAt: now,
+        },
+      ],
+      items: [
+        {
+          ...item,
+          id: randomUUID(),
+          shoppingListId: historical,
+          categoryId: oldCategory,
+          unitPrice: '18.9',
+          isPurchased: true,
+        },
+        {
+          ...item,
+          id: randomUUID(),
+          shoppingListId: current,
+          categoryId: currentCategory,
+          unitPrice: '0',
+          isPurchased: false,
+        },
+      ],
+    },
+  };
 }
 async function restore(page: Page, backup: ReturnType<typeof fixture>['backup']) {
   await page.goto('/settings');
-  await page.getByLabel('Arquivo de backup').setInputFiles({ name: 'history.json', mimeType: 'application/json', buffer: Buffer.from(JSON.stringify(backup)) });
+  await page
+    .getByLabel('Arquivo de backup')
+    .setInputFiles({
+      name: 'history.json',
+      mimeType: 'application/json',
+      buffer: Buffer.from(JSON.stringify(backup)),
+    });
   await page.getByRole('button', { name: 'Substituir e restaurar', exact: true }).click();
   await expect(page.getByText('Backup restaurado.', { exact: true })).toBeVisible();
 }
 async function openCurrent(page: Page, data: ReturnType<typeof fixture>) {
   await page.goto(`/lists/${data.current}/categories/${data.currentCategory}`);
-  await page.getByRole('checkbox', { name: 'Marcar Café · Marca X · 500 g como comprado', exact: true }).tap();
+  await page
+    .getByRole('checkbox', { name: 'Marcar Café · Marca X · 500 g como comprado', exact: true })
+    .tap();
   const form = page.getByRole('form', { name: 'Valores de Café · Marca X · 500 g', exact: true });
   await expect(form.getByLabel('Preço por un (R$)', { exact: true })).toBeFocused();
   await expect(form.getByLabel('Preço da última compra')).toContainText('R$ 18,90/un');
   return form;
 }
 
-test('last price follows draft details, preserves fast entry and is available offline', async ({ page, context, browserName }, info) => {
+test('last price follows draft details, preserves fast entry and is available offline', async ({
+  page,
+  context,
+  browserName,
+}, info) => {
   const data = fixture();
   await restore(page, data.backup);
   const form = await openCurrent(page, data);
@@ -64,9 +151,14 @@ test('last price follows draft details, preserves fast entry and is available of
   await form.getByLabel('Unidade da embalagem', { exact: true }).selectOption('g');
   for (const width of [320, 390]) {
     await page.setViewportSize({ width, height: 844 });
-    expect(await page.evaluate(() => document.documentElement.scrollWidth <= innerWidth)).toBe(true);
+    expect(await page.evaluate(() => document.documentElement.scrollWidth <= innerWidth)).toBe(
+      true,
+    );
     await form.scrollIntoViewIfNeeded();
-    await info.attach(`last-price-${width}`, { body: await page.screenshot(), contentType: 'image/png' });
+    await info.attach(`last-price-${width}`, {
+      body: await page.screenshot(),
+      contentType: 'image/png',
+    });
   }
   if (browserName === 'chromium') {
     await expect(page.getByText('Pronto para usar offline', { exact: true })).toBeVisible();
@@ -89,7 +181,10 @@ test('last price follows draft details, preserves fast entry and is available of
   await expect(page.getByLabel('Total da categoria', { exact: true })).toContainText('169,00');
 });
 
-test('another tab reopening, correcting, deleting and restoring history preserves the unsaved current price', async ({ page, context }) => {
+test('another tab reopening, correcting, deleting and restoring history preserves the unsaved current price', async ({
+  page,
+  context,
+}) => {
   const data = fixture();
   await restore(page, data.backup);
   const form = await openCurrent(page, data);
@@ -115,7 +210,10 @@ test('another tab reopening, correcting, deleting and restoring history preserve
   await second.goto('/');
   await second.getByRole('button', { name: 'Finalizadas', exact: true }).click();
   await second.getByRole('button', { name: 'Excluir lista Anterior', exact: true }).click();
-  await second.getByRole('dialog', { name: 'Excluir lista?', exact: true }).getByRole('button', { name: 'Excluir lista', exact: true }).click();
+  await second
+    .getByRole('dialog', { name: 'Excluir lista?', exact: true })
+    .getByRole('button', { name: 'Excluir lista', exact: true })
+    .click();
   await expect(form.getByLabel('Preço da última compra')).toHaveCount(0);
   await expect(price).toHaveValue('20,90');
   await restore(second, data.backup);

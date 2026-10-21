@@ -1419,5 +1419,9 @@ dialog > p {
   color: #a19cab;
   font-size: 11px;
 }
-.price-reference-higher { color: #ffb1a6; }
-.price-reference-lower { color: #b7edce; }
+.price-reference-higher {
+  color: #ffb1a6;
+}
+.price-reference-lower {
+  color: #b7edce;
+}

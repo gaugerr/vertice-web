@@ -5,28 +5,53 @@ import { encodeBackup, parseBackup } from '../backup/backup';
 let db: VerticeDatabase;
 let repo: DexieShoppingRepository;
 const input = { storeName: 'Lista', date: '2026-10-12', description: '', budgetCents: null };
-beforeEach(() => { db = new VerticeDatabase(`history-${crypto.randomUUID()}`); repo = new DexieShoppingRepository(db); });
-afterEach(async () => { await db.delete(); });
+beforeEach(() => {
+  db = new VerticeDatabase(`history-${crypto.randomUUID()}`);
+  repo = new DexieShoppingRepository(db);
+});
+afterEach(async () => {
+  await db.delete();
+});
 async function seed() {
   const list = await repo.createListWithCategories(input);
   const category = (await repo.getCategories(list))[0].id;
   const item = await repo.addItem(list, category, 'Café');
-  await repo.updatePurchaseDetails(item, { unitPrice: '18.9', quantity: '3', unit: 'un', brand: 'Marca X', packageContent: { amount: '500', unit: 'g' } });
+  await repo.updatePurchaseDetails(item, {
+    unitPrice: '18.9',
+    quantity: '3',
+    unit: 'un',
+    brand: 'Marca X',
+    packageContent: { amount: '500', unit: 'g' },
+  });
   await repo.setPurchased(item, true);
   return { list, category, item };
 }
-async function finish(list: string) { await repo.completeList(list, { marketName: 'Mercado X', purchaseDate: input.date }, (await repo.getListReview(list)).revision); }
+async function finish(list: string) {
+  await repo.completeList(
+    list,
+    { marketName: 'Mercado X', purchaseDate: input.date },
+    (await repo.getListReview(list)).revision,
+  );
+}
 describe('completed price references', () => {
   it('includes only purchased complete products in finalized lists and excludes the current list', async () => {
     const { list, category, item } = await seed();
     const pending = await repo.addItem(list, category, 'Café');
-    await repo.updatePurchaseDetails(pending, { unitPrice: '1', quantity: '1', unit: 'un', brand: 'Marca X', packageContent: { amount: '500', unit: 'g' } });
+    await repo.updatePurchaseDetails(pending, {
+      unitPrice: '1',
+      quantity: '1',
+      unit: 'un',
+      brand: 'Marca X',
+      packageContent: { amount: '500', unit: 'g' },
+    });
     const incomplete = await repo.addItem(list, category, 'Arroz');
     await repo.updatePurchaseDetails(incomplete, { unitPrice: '5', quantity: '1', unit: 'un' });
     await repo.setPurchased(incomplete, true);
     expect(await repo.getCompletedPriceReferences('current')).toEqual([]);
     await finish(list);
-    expect(await repo.getCompletedPriceReferences('current')).toMatchObject([{ itemId: item, unitPrice: '18.9', marketName: 'Mercado X', purchaseDate: input.date }]);
+    expect(await repo.getCompletedPriceReferences('current')).toMatchObject([
+      { itemId: item, unitPrice: '18.9', marketName: 'Mercado X', purchaseDate: input.date },
+    ]);
     expect(await repo.getCompletedPriceReferences(list)).toEqual([]);
   });
   it('reopening, refinalizing, copying and deleting never leave duplicate or stale history', async () => {

@@ -13,7 +13,8 @@ export interface PriceReference {
   marketName: string | null;
 }
 export type ProductIdentity = Pick<ShoppingItem, 'name' | 'brand' | 'packageContent' | 'unit'>;
-const normalize = (value: string) => value.normalize('NFC').trim().replace(/\s+/gu, ' ').toLocaleLowerCase('pt-BR');
+const normalize = (value: string) =>
+  value.normalize('NFC').trim().replace(/\s+/gu, ' ').toLocaleLowerCase('pt-BR');
 
 export function productIdentity(input: ProductIdentity): string | null {
   const name = nameSchema.safeParse(input.name);
@@ -21,14 +22,24 @@ export function productIdentity(input: ProductIdentity): string | null {
   const content = packageContentSchema.safeParse(input.packageContent);
   if (!name.success || !brand.success || !brand.data || !content.success) return null;
   const { amount, unit } = content.data;
-  const dimension = unit === 'g' || unit === 'kg' ? 'mass' : unit === 'ml' || unit === 'L' ? 'volume' : 'count';
-  const normalizedAmount = new Big(amount).times(unit === 'kg' || unit === 'L' ? 1000 : 1).toFixed();
-  return JSON.stringify([normalize(name.data), normalize(brand.data), dimension, normalizedAmount, input.unit]);
+  const dimension =
+    unit === 'g' || unit === 'kg' ? 'mass' : unit === 'ml' || unit === 'L' ? 'volume' : 'count';
+  const normalizedAmount = new Big(amount)
+    .times(unit === 'kg' || unit === 'L' ? 1000 : 1)
+    .toFixed();
+  return JSON.stringify([
+    normalize(name.data),
+    normalize(brand.data),
+    dimension,
+    normalizedAmount,
+    input.unit,
+  ]);
 }
 
 export function latestPriceReferences(records: PriceReference[]): Map<string, PriceReference> {
   const result = new Map<string, PriceReference>();
-  const order = (record: PriceReference) => [record.purchaseDate, record.completedAt, record.updatedAt, record.itemId].join('|');
+  const order = (record: PriceReference) =>
+    [record.purchaseDate, record.completedAt, record.updatedAt, record.itemId].join('|');
   for (const record of records) {
     const previous = result.get(record.productKey);
     if (!previous || order(record) > order(previous)) result.set(record.productKey, record);

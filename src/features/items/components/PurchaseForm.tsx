@@ -117,7 +117,13 @@ export function PurchaseForm({
           </select>
         </label>
       </div>
-      <LastPriceReference listId={item.shoppingListId} name={item.name} unit={unit} unitPrice={unitPrice} details={details} />
+      <LastPriceReference
+        listId={item.shoppingListId}
+        name={item.name}
+        unit={unit}
+        unitPrice={unitPrice}
+        details={details}
+      />
       <ProductDetailsFields
         details={details}
         name={item.name}

@@ -33,9 +33,13 @@ export class DexieShoppingRepository implements ShoppingRepository {
   constructor(private db: VerticeDatabase) {}
   async getCompletedPriceReferences(excludeListId: string): Promise<PriceReference[]> {
     return this.db.transaction('r', this.db.lists, this.db.items, async () => {
-      const lists = (await this.db.lists.where('status').equals('completed').toArray())
-        .filter((list) => list.id !== excludeListId && list.purchaseDate && list.completedAt);
-      const items = await this.db.items.where('shoppingListId').anyOf(lists.map((list) => list.id)).toArray();
+      const lists = (await this.db.lists.where('status').equals('completed').toArray()).filter(
+        (list) => list.id !== excludeListId && list.purchaseDate && list.completedAt,
+      );
+      const items = await this.db.items
+        .where('shoppingListId')
+        .anyOf(lists.map((list) => list.id))
+        .toArray();
       const byId = new Map(lists.map((list) => [list.id, list]));
       const records: PriceReference[] = [];
       for (const item of items) {
@@ -43,7 +47,15 @@ export class DexieShoppingRepository implements ShoppingRepository {
         if (!list || !item.isPurchased || !new Big(item.unitPrice).gt(0)) continue;
         const productKey = productIdentity(item);
         if (!productKey) continue;
-        records.push({ productKey, itemId: item.id, unitPrice: item.unitPrice, purchaseDate: list.purchaseDate!, completedAt: list.completedAt!, updatedAt: item.updatedAt, marketName: list.marketName });
+        records.push({
+          productKey,
+          itemId: item.id,
+          unitPrice: item.unitPrice,
+          purchaseDate: list.purchaseDate!,
+          completedAt: list.completedAt!,
+          updatedAt: item.updatedAt,
+          marketName: list.marketName,
+        });
       }
       return records;
     });

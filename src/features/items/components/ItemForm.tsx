@@ -101,7 +101,13 @@ export function ItemForm({
             onChange={(e) => setPrice(e.target.value)}
           />
         </label>
-        <LastPriceReference listId={item.shoppingListId} name={name} unit={unit} unitPrice={unitPrice} details={details} />
+        <LastPriceReference
+          listId={item.shoppingListId}
+          name={name}
+          unit={unit}
+          unitPrice={unitPrice}
+          details={details}
+        />
         <ProductDetailsFields
           details={details}
           name={name}
