@@ -49,3 +49,23 @@ para comparar a correção, não uma confirmação de 45 defeitos de compras dis
 
 As chaves efêmeras de teste só devem ser geradas no runner ou em uma cópia descartável
 do repositório. Nunca publicar a chave pública de teste no lugar da chave de produção.
+
+## Causa reproduzida e verificação da correção (22/10/2026)
+
+O estado autenticado era gerado antes do teste de logout do comprador e reutilizado
+pela suíte de compras depois que essa sessão havia sido encerrada no servidor.
+A validade criptográfica restante do JWT não garantia que a validação de acesso
+aceitaria uma sessão já encerrada.
+
+A reprodução aguarda a resposta do POST de logout, pois o bloqueio local da tela é
+imediato e acontece antes de a requisição terminar. Depois dessa resposta, o token
+da sessão antiga recebe 401 em `license-check`, uma sessão independente da mesma
+conta continua recebendo 200 e um novo login também recebe 200. O token antigo ainda
+não está expirado. A proteção de produção não foi relaxada para fazer testes passarem.
+
+Na [execução completa de confirmação](https://github.com/gaugerr/vertice-web/actions/runs/39874217455),
+os quatro cenários de acesso passaram e os testes de compras tiveram 47 aprovados,
+zero falhas e os mesmos cinco pulos de ciclo offline/service worker no WebKit.
+TypeScript, lint, testes unitários e build também passaram no workflow Web checks.
+A correção muda a preparação e o isolamento dos testes; não altera dados, licenças,
+OAuth, autorização offline, APIs ou chaves de produção.
