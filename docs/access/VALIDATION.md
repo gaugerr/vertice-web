@@ -22,7 +22,6 @@ O proprietário confirmou a configuração do callback e de `ACCESS_ALLOWED_ORIG
 
 O domínio oficial passou a ser `https://use-vertice.vercel.app`. O workflow hospedado agora verifica esse endereço, incluindo a navegação Google com callback da própria origem e o CORS das funções reais do Supabase. A validação anterior no domínio `vertice-web-navy.vercel.app` permanece como registro histórico. A troca de domínio exige configurar Site URL, Redirect URLs e `ACCESS_ALLOWED_ORIGINS`, além de exportar/importar as compras locais entre origens.
 
-
 ## Isolamento das sessões de integração
 
 A preparação de acesso cria identidades sintéticas e guarda suas credenciais em

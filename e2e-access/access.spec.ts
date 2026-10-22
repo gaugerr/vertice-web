@@ -137,12 +137,14 @@ test('logout rejects the old session without invalidating an independent or new 
       await expect(page.getByRole('button', { name: 'Nova lista', exact: true })).toBeVisible();
       const newStatus = (await checkTestLicense(renewed)).status;
       expect(newStatus).toBe(200);
-      console.log(JSON.stringify({
-        oldSessionAfterLogout: oldStatus,
-        independentSession: independentStatus,
-        newLogin: newStatus,
-        oldTokenExpired: false,
-      }));
+      console.log(
+        JSON.stringify({
+          oldSessionAfterLogout: oldStatus,
+          independentSession: independentStatus,
+          newLogin: newStatus,
+          oldTokenExpired: false,
+        }),
+      );
     } finally {
       await closeTestSession(renewed);
     }
