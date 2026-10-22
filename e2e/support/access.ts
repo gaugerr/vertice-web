@@ -122,5 +122,11 @@ export async function signedBrowserState(auth: TestSession) {
 
 export async function closeTestSession(auth: TestSession) {
   const { error } = await auth.client.auth.signOut({ scope: 'local' });
-  if (error) throw new LocalAccessError('Could not close the isolated test session.', error.status);
+  // A browser logout may have already removed this exact session.
+  if (error && error.name !== 'AuthSessionMissingError' && error.code !== 'session_not_found') {
+    throw new LocalAccessError(
+      `Could not close the isolated test session (${error.status ?? 'network'}, ${error.code ?? 'unknown'}).`,
+      error.status,
+    );
+  }
 }

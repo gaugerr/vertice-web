@@ -43,6 +43,7 @@ jobs:
           PLAYWRIGHT_HTML_OUTPUT_DIR: playwright-report-access
         run: npx playwright test --config playwright.access.config.ts --output=test-results-access
       - name: Existing purchasing suite with an authenticated local customer
+        if: ${{ !cancelled() && steps.build_access.outcome == 'success' }}
         env:
           ACCESS_INTEGRATION: '1'
         run: npm run test:e2e

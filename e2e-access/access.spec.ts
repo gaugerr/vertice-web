@@ -117,6 +117,7 @@ test('logout rejects the old session without invalidating an independent or new 
 }) => {
   const original = await enter(page);
   const independent = await signInTestUser();
+  let loggedOut = false;
   try {
     await expect(page.getByRole('button', { name: 'Nova lista', exact: true })).toBeVisible();
     expect((await checkTestLicense(original)).status).toBe(200);
@@ -124,12 +125,14 @@ test('logout rejects the old session without invalidating an independent or new 
     await page.goto('/settings');
     await page.getByRole('button', { name: 'Sair da conta', exact: true }).click();
     await expect(page.getByRole('dialog', { name: 'Acesso pausado' })).toBeVisible();
+    loggedOut = true;
     const claims = JSON.parse(
       Buffer.from(original.session.access_token.split('.')[1], 'base64url').toString(),
     ) as { exp: number };
     expect(claims.exp).toBeGreaterThan(Date.now() / 1000);
     const oldStatus = (await checkTestLicense(original)).status;
     const independentStatus = (await checkTestLicense(independent)).status;
+    console.log(JSON.stringify({ oldSessionAfterLogout: oldStatus, independentSession: independentStatus }));
     expect(oldStatus).toBe(401);
     expect(independentStatus).toBe(200);
     const renewed = await enter(page);
@@ -149,7 +152,7 @@ test('logout rejects the old session without invalidating an independent or new 
       await closeTestSession(renewed);
     }
   } finally {
-    await closeTestSession(original);
+    if (!loggedOut) await closeTestSession(original);
     await closeTestSession(independent);
   }
 });
