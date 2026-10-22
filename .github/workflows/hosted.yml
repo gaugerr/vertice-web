@@ -16,7 +16,7 @@ jobs:
     runs-on: ubuntu-latest
     timeout-minutes: 12
     env:
-      VERTICE_BASE_URL: https://vertice-web-navy.vercel.app
+      VERTICE_BASE_URL: https://use-vertice.vercel.app
     steps:
       - uses: actions/checkout@v4
         with:

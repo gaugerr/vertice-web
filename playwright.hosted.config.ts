@@ -7,7 +7,7 @@ export default defineConfig({
   use: {
     ...config.use,
     storageState: { cookies: [], origins: [] },
-    baseURL: process.env.VERTICE_BASE_URL ?? 'https://vertice-web-navy.vercel.app',
+    baseURL: process.env.VERTICE_BASE_URL ?? 'https://use-vertice.vercel.app',
   },
   webServer: undefined,
 });

@@ -17,3 +17,7 @@ O workflow `Access integration` inicia Supabase local, valida permissões com pg
 A geração de fixtures com senha existe somente nas ferramentas locais de teste. O produto tem apenas o botão de Google; o provedor de Email deve ser desativado no projeto hospedado conforme SETUP.md. O callback Google real permanece uma validação interativa do proprietário.
 
 O proprietário confirmou a configuração do callback e de `ACCESS_ALLOWED_ORIGINS` para `https://vertice-web-navy.vercel.app` e autorizou publicar na `main`. A produção agora compila com acesso obrigatório. A verificação do site publicado testa o bloqueio para visitantes, o callback Google e CORS/autorização das funções sem utilizar contas reais. O login real no domínio principal e a transferência das listas desse domínio continuam sendo validações interativas do proprietário; os dados originais são preservados. Não há sincronização de compras na nuvem.
+
+## Endereço oficial atual
+
+O domínio oficial passou a ser `https://use-vertice.vercel.app`. O workflow hospedado agora verifica esse endereço, incluindo a navegação Google com callback da própria origem e o CORS das funções reais do Supabase. A validação anterior no domínio `vertice-web-navy.vercel.app` permanece como registro histórico. A troca de domínio exige configurar Site URL, Redirect URLs e `ACCESS_ALLOWED_ORIGINS`, além de exportar/importar as compras locais entre origens.
