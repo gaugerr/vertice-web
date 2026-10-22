@@ -10,7 +10,7 @@ concurrency:
   cancel-in-progress: true
 jobs:
   supabase:
-    runs-on: ubuntu-latest
+    runs-on: ubuntu-24.04
     timeout-minutes: 25
     env:
       SUPABASE_INTERNAL_IMAGE_REGISTRY: docker.io
