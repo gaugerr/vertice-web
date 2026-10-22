@@ -46,7 +46,7 @@ O build está em `dist`. O orçamento de JavaScript de 250 KiB gzip inclui tamb�
 - Avisos de conectividade, preparo offline e alterações não salvas.
 - Interface em português, tema escuro, roxo e verde, com layout para celular e desktop.
 
-A branch `feat/google-access` implementa login Google, licenças vitalícias manuais, administração, autorização offline assinada de até sete dias, dados separados por conta e transferência confirmada das listas antigas. A produção permanece no modo `legacy` até a configuração e o primeiro login real serem validados. [Configuração do acesso](docs/access/SETUP.md) · [Primeiro passo no Google](docs/access/GOOGLE.md) · [Validação de segurança](docs/access/VALIDATION.md).
+A `main` inclui login Google, licenças vitalícias manuais, administração, autorização offline assinada de até sete dias, dados separados por conta e transferência confirmada das listas antigas. O build de produção na Vercel exige login e licença; o desenvolvimento local usa `legacy` por padrão. [Configuração do acesso](docs/access/SETUP.md) · [Primeiro passo no Google](docs/access/GOOGLE.md) · [Validação de segurança](docs/access/VALIDATION.md).
 
 Checkout, webhooks de compra e sincronização das compras na nuvem continuam para uma etapa futura. O login atual controla a licença; não faz backup das listas no Supabase.
 
@@ -162,7 +162,7 @@ Importe este repositório como um **projeto novo**. O projeto Flutter e o Docery
 - Instalação: `npm ci`.
 - Build: `node tools/build-vercel.mjs` (configurado em `vercel.json`).
 - Saída: `dist`.
-- O preview de `feat/google-access` recebe a configuração pública do projeto no build. Segredos Google e chave privada de assinatura ficam somente no Supabase. Produção só recebe `VITE_ACCESS_MODE=enforced` depois da validação descrita em SETUP.md.
+- A produção da `main` e o preview de `feat/google-access` recebem a configuração pública do projeto e `VITE_ACCESS_MODE=enforced` no build. Segredos Google e chave privada de assinatura ficam somente no Supabase.
 
 `vercel.json` define as rotas SPA, revalidação de HTML/service worker e cache longo apenas para assets com hash. Verifique no deployment: rota interna abre diretamente, `/assets/inexistente.js` retorna 404, `/sw.js` retorna JavaScript com `no-store`, e `/online.txt` não é substituído por HTML.
 

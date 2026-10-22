@@ -7,6 +7,9 @@ on:
   workflow_dispatch:
 permissions:
   contents: read
+concurrency:
+  group: hosted-production
+  cancel-in-progress: true
 jobs:
   hosted:
     if: github.event_name == 'workflow_dispatch' || (github.event.workflow_run.conclusion == 'success' && github.event.workflow_run.event == 'push')
@@ -32,7 +35,7 @@ jobs:
               const r = await fetch(base + '/online.txt?t=' + Date.now(), {signal: AbortSignal.timeout(5000)});
               if (r.ok && (await r.text()).trim() === 'vertice-online-v1') {
                 const html = await fetch(base, {cache: 'no-store'}).then(r => r.text());
-                if (html.includes('pwa-compact-item-suggestions-v1')) {ready = true; break;}
+                if (html.includes('pwa-google-access-v1')) {ready = true; break;}
               }
             } catch {}
             await new Promise(resolve => setTimeout(resolve, 5000));
@@ -53,14 +56,7 @@ jobs:
       - run: npm ci --ignore-scripts --no-audit --no-fund
       - run: npx playwright install --with-deps chromium webkit
       - name: Exercise the published application
-        run: |
-          cat > playwright.hosted.config.ts <<'TS'
-          import config from './playwright.config';
-          config.use = {...config.use, baseURL: process.env.VERTICE_BASE_URL};
-          delete config.webServer;
-          export default config;
-          TS
-          npx playwright test --config playwright.hosted.config.ts --grep-invert 'PWA update'
+        run: npx playwright test --config playwright.hosted.config.ts
       - uses: actions/upload-artifact@v4
         if: always()
         with:

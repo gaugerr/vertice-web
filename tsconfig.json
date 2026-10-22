@@ -20,6 +20,8 @@
     "src",
     "e2e",
     "e2e-access",
+    "e2e-hosted",
+    "playwright.hosted.config.ts",
     "playwright.access.config.ts",
     "vite.config.ts",
     "playwright.config.ts"
