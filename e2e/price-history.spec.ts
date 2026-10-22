@@ -200,7 +200,7 @@ test('another tab reopening, correcting, deleting and restoring history preserve
   await expect(second.getByLabel('Preço da última compra')).toHaveCount(0);
   await second.getByLabel('Preço por un (R$)', { exact: true }).fill('17,90');
   await second.getByRole('button', { name: 'Salvar item', exact: true }).click();
-  await second.getByRole('link', { name: '← Anterior', exact: true }).click();
+  await second.getByRole('link', { name: 'Anterior', exact: true }).click();
   await second.getByRole('button', { name: 'Finalizar compra', exact: true }).click();
   await second.getByRole('button', { name: 'Confirmar finalização', exact: true }).click();
   await expect(form.getByLabel('Preço da última compra')).toContainText('R$ 17,90/un');

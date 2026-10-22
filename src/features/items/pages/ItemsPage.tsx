@@ -1,9 +1,10 @@
 import { useCallback, useState } from 'react';
-import { Link, useParams } from 'react-router-dom';
+import { useParams } from 'react-router-dom';
 import { Check, ListChecks } from 'lucide-react';
 import { useRepository } from '../../../app/repository-context';
 import { useQuery } from '../../../shared/hooks/useQuery';
 import { Loading, Missing, QueryError } from '../../../shared/ui/Feedback';
+import { BackLink } from '../../../shared/ui/BackLink';
 import { formatMoney, spentCents } from '../../../domain/services/money';
 import { AddItemForm } from '../components/AddItemForm';
 import { ItemRow } from '../components/ItemRow';
@@ -52,9 +53,7 @@ export default function ItemsPage() {
   );
   return (
     <>
-      <Link to={`/lists/${listId}`} className="back-link">
-        ← {list.storeName}
-      </Link>
+      <BackLink to={`/lists/${listId}`}>{list.storeName}</BackLink>
       <div className="page-heading">
         <p className="eyebrow">SUA COMPRA, ITEM A ITEM</p>
         <h1>{category.title}</h1>

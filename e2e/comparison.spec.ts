@@ -164,7 +164,7 @@ test('opening comparison preserves purchase drafts, budget, scroll position and 
   await launch.tap();
   await expect(page.getByLabel('Preço da opção A (R$)', { exact: true })).toHaveValue('10,90');
   await page.getByRole('button', { name: 'Fechar comparador', exact: true }).tap();
-  await page.getByRole('link', { name: '← Mercado comparador', exact: true }).tap();
+  await page.getByRole('link', { name: 'Mercado comparador', exact: true }).tap();
   await page
     .getByRole('link')
     .filter({ has: page.getByRole('heading', { name: 'Hortifruti', exact: true }) })

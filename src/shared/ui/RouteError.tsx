@@ -1,4 +1,5 @@
-import { Link, useRouteError } from 'react-router-dom';
+import { useRouteError } from 'react-router-dom';
+import { BackLink } from './BackLink';
 
 export function RouteError() {
   const error = useRouteError();
@@ -7,9 +8,9 @@ export function RouteError() {
     <main className="main-content state-panel">
       <h1>Não foi possível abrir esta tela</h1>
       <p>Seus registros salvos continuam no aparelho.</p>
-      <Link className="text-link" to="/" reloadDocument>
+      <BackLink to="/" reloadDocument>
         Voltar ao início
-      </Link>
+      </BackLink>
     </main>
   );
 }

@@ -1,17 +1,15 @@
 import { lazy, Suspense } from 'react';
 import { accessConfig } from '../../../access/config';
 const AccountPanel = lazy(() => import('../../../access/AccountPanel'));
-import { Link } from 'react-router-dom';
 import { HardDrive, Smartphone } from 'lucide-react';
 import { BackupPanel } from '../../backup/components/BackupPanel';
 import { InstallButton } from '../../../pwa/components/InstallButton';
+import { BackLink } from '../../../shared/ui/BackLink';
 
 export default function SettingsPage() {
   return (
     <>
-      <Link to="/" className="back-link">
-        ← Minhas listas
-      </Link>
+      <BackLink to="/">Minhas listas</BackLink>
       <div className="page-heading">
         <p className="eyebrow">Vértice</p>
         <h1>Dados e aplicativo</h1>

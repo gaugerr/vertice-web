@@ -35,7 +35,7 @@ async function seed(page: Page) {
   await form.getByRole('button', { name: 'Salvar valores', exact: true }).click();
   await expect(form).toHaveCount(0);
   const category = page.url();
-  await page.getByRole('link', { name: '← Compra teste', exact: true }).click();
+  await page.getByRole('link', { name: 'Compra teste', exact: true }).click();
   return { overview, category };
 }
 async function openReview(page: Page) {
@@ -90,7 +90,7 @@ test('finish, consult, reopen, correct and copy the same purchase on a narrow sc
   await page.getByRole('button', { name: 'Comparar', exact: true }).click();
   await page.getByRole('button', { name: 'Fechar comparador', exact: true }).click();
   await expect(page.getByRole('dialog')).toHaveCount(0);
-  await page.getByRole('link', { name: '← Compra teste', exact: true }).click();
+  await page.getByRole('link', { name: 'Compra teste', exact: true }).click();
   await page.getByRole('button', { name: 'Reabrir compra', exact: true }).click();
   await page.getByRole('button', { name: 'Cancelar', exact: true }).click();
   await expect(page.getByText('Compra finalizada', { exact: true })).toBeVisible();
@@ -101,7 +101,7 @@ test('finish, consult, reopen, correct and copy the same purchase on a narrow sc
   await page.getByRole('button', { name: 'Editar Café', exact: true }).click();
   await page.getByLabel('Preço por kg (R$)', { exact: true }).fill('10');
   await page.getByRole('button', { name: 'Salvar item', exact: true }).click();
-  await page.getByRole('link', { name: '← Compra teste', exact: true }).click();
+  await page.getByRole('link', { name: 'Compra teste', exact: true }).click();
   const corrected = await openReview(page);
   await expect(corrected.getByLabel(/Mercado/)).toHaveValue('Mercado A');
   await expect(corrected.getByLabel('Data da compra', { exact: true })).toHaveValue('2026-10-20');
@@ -159,7 +159,7 @@ test('rejects empty/unpriced completion and cancellation preserves the active li
   await addItem(page, 'Sem preço');
   await page.getByRole('checkbox', { name: 'Marcar Sem preço como comprado' }).click();
   await page.getByRole('button', { name: 'Fechar', exact: true }).click();
-  await page.getByRole('link', { name: '← Compra teste', exact: true }).click();
+  await page.getByRole('link', { name: 'Compra teste', exact: true }).click();
   const unpriced = await openReview(page);
   await expect(unpriced.getByRole('alert')).toContainText('Sem preço · Essenciais');
   await expect(
