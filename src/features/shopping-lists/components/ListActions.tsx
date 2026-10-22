@@ -2,7 +2,7 @@ import { useState } from 'react';
 import { useNavigate } from 'react-router-dom';
 import { Check, Copy, RotateCcw } from 'lucide-react';
 import type { ShoppingList } from '../../../domain/models/shopping';
-import { repository } from '../../../app/services';
+import { useRepository } from '../../../app/repository-context';
 import { useMutation } from '../../../shared/hooks/useMutation';
 import { hasUnsavedChanges } from '../../../shared/lib/drafts';
 import { hasPendingWrites } from '../../../data/database/writes';
@@ -14,6 +14,7 @@ import { CompletionDialog } from './CompletionDialog';
 import { ListForm } from './ListForm';
 
 export function ListActions({ list }: { list: ShoppingList }) {
+  const repository = useRepository();
   const [action, setAction] = useState<'finish' | 'copy' | 'reopen' | null>(null);
   const [notice, setNotice] = useState('');
   const mutation = useMutation();

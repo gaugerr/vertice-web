@@ -87,7 +87,17 @@ test('comparison works without lists, keeps per-mode session drafts and fits a n
 async function purchaseSnapshot(page: Page) {
   return page.evaluate(async () => {
     const db = await new Promise<IDBDatabase>((resolve, reject) => {
-      const request = indexedDB.open('vertice_web');
+      const leaseKey = Object.keys(localStorage).find(
+        (key) => key.startsWith('vertice:access:') && key.endsWith(':lease'),
+      );
+      const cached = leaseKey
+        ? (JSON.parse(localStorage.getItem(leaseKey)!) as { account: { uid: string } })
+        : null;
+      const project = leaseKey
+        ? new URL(leaseKey.slice('vertice:access:'.length, -':lease'.length)).hostname.split('.')[0]
+        : '';
+      const databaseName = cached ? `vertice_web_${project}_${cached.account.uid}` : 'vertice_web';
+      const request = indexedDB.open(databaseName);
       request.onsuccess = () => resolve(request.result);
       request.onerror = () => reject(request.error);
     });

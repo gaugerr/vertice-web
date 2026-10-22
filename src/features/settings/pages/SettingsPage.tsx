@@ -1,3 +1,6 @@
+import { lazy, Suspense } from 'react';
+import { accessConfig } from '../../../access/config';
+const AccountPanel = lazy(() => import('../../../access/AccountPanel'));
 import { Link } from 'react-router-dom';
 import { HardDrive, Smartphone } from 'lucide-react';
 import { BackupPanel } from '../../backup/components/BackupPanel';
@@ -14,6 +17,11 @@ export default function SettingsPage() {
         <h1>Dados e aplicativo</h1>
         <p>Controle suas compras e as suas informações.</p>
       </div>
+      {accessConfig.enforced && (
+        <Suspense fallback={<p>Carregando conta…</p>}>
+          <AccountPanel />
+        </Suspense>
+      )}
       <BackupPanel />
       <section className="settings-card">
         <div className="settings-icon">
@@ -24,9 +32,7 @@ export default function SettingsPage() {
           Suas listas ficam no armazenamento deste navegador. Limpar os dados do site pode apagar os
           registros. Mantenha um backup atualizado.
         </p>
-        <p className="field-help">
-          Esta versão funciona sem conta. Ainda não há sincronização entre aparelhos.
-        </p>
+        <p className="field-help">Ainda não há sincronização das compras entre aparelhos.</p>
       </section>
       <section className="settings-card">
         <div className="settings-icon">

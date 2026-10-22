@@ -1,11 +1,13 @@
 import { useCallback, useEffect, useState, type ReactNode } from 'react';
+import { useAccountScope } from '../../../app/repository-context';
 import { flushSync } from 'react-dom';
 import { loadComparisonSession, saveComparisonSession } from '../session';
 import { OpenComparisonContext } from '../context';
 import { ComparisonDialog } from './ComparisonDialog';
 
 export function ComparisonProvider({ children }: { children: ReactNode }) {
-  const [initial] = useState(loadComparisonSession);
+  const scope = useAccountScope();
+  const [initial] = useState(() => loadComparisonSession(scope));
   const [session, setSession] = useState(initial.session);
   const [storageFailed, setStorageFailed] = useState(initial.failed);
   const [opened, setOpened] = useState(false);
@@ -14,8 +16,8 @@ export function ComparisonProvider({ children }: { children: ReactNode }) {
     flushSync(() => setOpened(true));
   }, []);
   useEffect(() => {
-    setStorageFailed(!saveComparisonSession(session));
-  }, [session]);
+    setStorageFailed(!saveComparisonSession(session, scope));
+  }, [session, scope]);
   return (
     <OpenComparisonContext.Provider value={open}>
       {children}

@@ -2,7 +2,7 @@ import { useRef, useState, type FormEvent } from 'react';
 import type { ListReview } from '../../../domain/models/shopping';
 import { unpricedPurchasedItems } from '../../../domain/services/completion';
 import { formatMoney } from '../../../domain/services/money';
-import { repository } from '../../../app/services';
+import { useRepository } from '../../../app/repository-context';
 import { useQuery } from '../../../shared/hooks/useQuery';
 import { useMutation } from '../../../shared/hooks/useMutation';
 import { useUnsavedChanges } from '../../../shared/lib/drafts';
@@ -14,6 +14,7 @@ import { BudgetPanel } from '../../budget/components/BudgetPanel';
 import { formatItemName } from '../../../domain/services/product-details';
 
 export function CompletionDialog({ listId, onClose }: { listId: string; onClose: () => void }) {
+  const repository = useRepository();
   const result = useQuery(() => repository.getListReview(listId), [listId]);
   if (result.status !== 'ready')
     return (
@@ -25,6 +26,7 @@ export function CompletionDialog({ listId, onClose }: { listId: string; onClose:
 }
 
 function CompletionForm({ review, onClose }: { review: ListReview; onClose: () => void }) {
+  const repository = useRepository();
   const summary = useRef<HTMLDivElement>(null);
   const [initial] = useState(() => ({
     marketName: review.list.marketName ?? '',

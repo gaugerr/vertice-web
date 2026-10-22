@@ -8,7 +8,7 @@ Este projeto é independente do Flutter. Não substitui automaticamente o site j
 
 ## Executar
 
-Use Node 24 LTS e npm. Nenhuma variável de ambiente ou conta de serviço é necessária.
+Use Node 24 LTS e npm. O modo local `legacy` não precisa de conta de serviço. Para testar o acesso obrigatório, configure as variáveis de `.env.example` conforme [SETUP.md](docs/access/SETUP.md).
 
 ```sh
 nvm use
@@ -46,12 +46,16 @@ O build está em `dist`. O orçamento de JavaScript de 250 KiB gzip inclui tamb�
 - Avisos de conectividade, preparo offline e alterações não salvas.
 - Interface em português, tema escuro, roxo e verde, com layout para celular e desktop.
 
-Login, pagamento, controle de compradores e sincronização com Supabase são etapas futuras. Esta versão local não limita o acesso a compradores.
+A branch `feat/google-access` implementa login Google, licenças vitalícias manuais, administração, autorização offline assinada de até sete dias, dados separados por conta e transferência confirmada das listas antigas. A produção permanece no modo `legacy` até a configuração e o primeiro login real serem validados. [Configuração do acesso](docs/access/SETUP.md) · [Primeiro passo no Google](docs/access/GOOGLE.md) · [Validação de segurança](docs/access/VALIDATION.md).
+
+Checkout, webhooks de compra e sincronização das compras na nuvem continuam para uma etapa futura. O login atual controla a licença; não faz backup das listas no Supabase.
 
 ## Organização
 
 ```text
 src/app/                  inicialização, serviços e rotas
+src/access/               login, licença offline, administração e migração por conta
+supabase/                 migrações, funções de servidor e testes de permissões
 src/domain/               entidades, contratos, validações e cálculos
 src/data/database/        versão e índices do IndexedDB
 src/data/repositories/    consultas e operações transacionais
@@ -70,7 +74,7 @@ As consultas `useLiveQuery` observam as leituras do repositório. Formulários m
 
 ## Dados e cálculos
 
-O banco `vertice_web`, versão Dexie 4, contém listas, categorias e itens. As chaves são UUIDs e as relações são verificadas pelo repositório. IndexedDB não tem chaves estrangeiras; criação e exclusão compostas, cópia, finalização e restauração usam transações explícitas.
+O banco está na versão Dexie 5. No modo local mantém o nome `vertice_web`; com acesso obrigatório, cada conta usa `vertice_web_<projeto>_<uid>`, e o banco antigo é preservado como origem da transferência confirmada. Os registros de migração são internos; os backups de compras continuam v5 e não contêm credenciais. Os bancos contêm listas, categorias e itens. As chaves são UUIDs e as relações são verificadas pelo repositório. IndexedDB não tem chaves estrangeiras; criação e exclusão compostas, cópia, finalização e restauração usam transações explícitas.
 
 Preço e quantidade são strings decimais canônicas. `big.js` calcula o produto, arredonda cada linha para centavos usando metade para cima e soma somente os itens comprados. Os cálculos verificam o limite de inteiros seguros. A unidade não altera a fórmula.
 
@@ -85,11 +89,11 @@ npm run build
 npm run preview
 ```
 
-Abra o endereço local com internet e aguarde **Pronto para usar offline**. A partir daí, o aplicativo, as rotas e os recursos estáticos ficam em cache, e as compras são lidas e gravadas no IndexedDB. O primeiro acesso completo precisa de conexão.
+Abra o endereço local com internet e aguarde **Pronto para usar offline**. A partir daí, o aplicativo, as rotas e os recursos estáticos ficam em cache, e as compras são lidas e gravadas no IndexedDB. O primeiro acesso completo precisa de conexão. No modo com licença, também é preciso entrar com Google e obter uma autorização online. A licença é vitalícia; a autorização offline dura até sete dias desde a validação. Expirar essa autorização bloqueia novas alterações e preserva os dados e a edição aberta.
 
 No Chrome, use Instalar Vértice quando o navegador oferecer essa opção, ou o menu de instalação. No iPhone, use Compartilhar → Adicionar à Tela de Início. A instalação no iPhone físico exige validação no aparelho; um teste de WebKit no computador não comprova essa etapa.
 
-`online.txt` não é armazenado pelo service worker. A verificação usa uma requisição sem cache ao abrir/retomar a página e periodicamente enquanto visível. O estado de conexão não bloqueia gravações locais.
+`online.txt` não é armazenado pelo service worker. A verificação usa uma requisição sem cache ao abrir/retomar a página e periodicamente enquanto visível. O estado de conexão, por si só, não bloqueia gravações locais enquanto a autorização offline estiver válida.
 
 Quando uma nova versão estiver instalada e aguardando, aparece uma ação de atualização. O aplicativo solicita confirmação se houver rascunhos e aguarda gravações locais em andamento antes de recarregar. O cache do aplicativo é separado dos registros no IndexedDB.
 
@@ -156,13 +160,13 @@ Importe este repositório como um **projeto novo**. O projeto Flutter e o Docery
 
 - Framework: Vite.
 - Instalação: `npm ci`.
-- Build: `npm run build`.
+- Build: `node tools/build-vercel.mjs` (configurado em `vercel.json`).
 - Saída: `dist`.
-- Nenhum segredo ou variável de ambiente nesta etapa.
+- O preview de `feat/google-access` recebe a configuração pública do projeto no build. Segredos Google e chave privada de assinatura ficam somente no Supabase. Produção só recebe `VITE_ACCESS_MODE=enforced` depois da validação descrita em SETUP.md.
 
 `vercel.json` define as rotas SPA, revalidação de HTML/service worker e cache longo apenas para assets com hash. Verifique no deployment: rota interna abre diretamente, `/assets/inexistente.js` retorna 404, `/sw.js` retorna JavaScript com `no-store`, e `/online.txt` não é substituído por HTML.
 
-O projeto não inclui login do comprador e não usa Supabase. O plano da hospedagem deve ser adequado ao uso comercial antes das vendas.
+A configuração externa do Google, das origens permitidas e da assinatura é necessária para o primeiro login real. O app não oferece um bypass de licença quando essa configuração está incompleta. O plano da hospedagem deve ser adequado ao uso comercial antes das vendas.
 
 ## Para quem vem do Flutter
 
@@ -180,4 +184,4 @@ Após dois caracteres, o campo de adicionar pode mostrar até três linhas de pr
 
 Tocar numa sugestão copia nome, marca, embalagem e unidade de cobrança para a categoria aberta, com quantidade 1, preço zero e estado não comprado. Enter no campo e o botão + continuam adicionando somente o texto digitado. O teclado mantém o foco durante o salvamento; textos novos não são apagados por operações anteriores. Escape fecha as sugestões, e Tab permite escolher uma opção pelo teclado. A conferência de duplicados acontece dentro da transação, protegendo contra adições simultâneas de outra aba.
 
-As sugestões funcionam offline, acompanham finalização, reabertura, exclusão e restauração de compras e reutilizam banco v4/backup v5. Não há consulta ao banco a cada tecla nem preenchimento automático de preços.
+As sugestões funcionam offline, acompanham finalização, reabertura, exclusão e restauração de compras e reutilizam as tabelas de compras e o backup v5. Não há consulta ao banco a cada tecla nem preenchimento automático de preços.

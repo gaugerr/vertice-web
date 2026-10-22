@@ -1,9 +1,10 @@
 import { useMemo } from 'react';
-import { repository } from '../../../app/services';
+import { useRepository } from '../../../app/repository-context';
 import { useQuery } from '../../../shared/hooks/useQuery';
 import { matchSuggestions } from '../../../domain/services/item-suggestions';
 
 export function useItemSuggestions(listId: string, query: string, enabled: boolean) {
+  const repository = useRepository();
   const history = useQuery(
     () => (enabled ? repository.getCompletedItemSuggestions(listId) : Promise.resolve([])),
     [listId, enabled],

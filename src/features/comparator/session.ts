@@ -50,19 +50,29 @@ export function parseComparisonSession(source: string | null): ComparisonSession
     return emptyComparisonSession();
   }
 }
-export function loadComparisonSession(): { session: ComparisonSession; failed: boolean } {
+export function loadComparisonSession(scope = 'legacy'): {
+  session: ComparisonSession;
+  failed: boolean;
+} {
   try {
     return {
-      session: parseComparisonSession(window.sessionStorage.getItem(COMPARISON_SESSION_KEY)),
+      session: parseComparisonSession(
+        window.sessionStorage.getItem(
+          scope === 'legacy' ? COMPARISON_SESSION_KEY : `${COMPARISON_SESSION_KEY}:${scope}`,
+        ),
+      ),
       failed: false,
     };
   } catch {
     return { session: emptyComparisonSession(), failed: true };
   }
 }
-export function saveComparisonSession(session: ComparisonSession): boolean {
+export function saveComparisonSession(session: ComparisonSession, scope = 'legacy'): boolean {
   try {
-    window.sessionStorage.setItem(COMPARISON_SESSION_KEY, JSON.stringify(session));
+    window.sessionStorage.setItem(
+      scope === 'legacy' ? COMPARISON_SESSION_KEY : `${COMPARISON_SESSION_KEY}:${scope}`,
+      JSON.stringify(session),
+    );
     return true;
   } catch {
     return false;

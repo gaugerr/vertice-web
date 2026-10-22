@@ -1,6 +1,6 @@
 import { Link, useParams } from 'react-router-dom';
 import { Check, ChevronRight, Leaf, ShoppingBasket } from 'lucide-react';
-import { repository } from '../../../app/services';
+import { useRepository } from '../../../app/repository-context';
 import { useQuery } from '../../../shared/hooks/useQuery';
 import { Loading, Missing, QueryError } from '../../../shared/ui/Feedback';
 import { formatMoney, spentCents } from '../../../domain/services/money';
@@ -11,6 +11,7 @@ import { ComparisonButton } from '../../comparator/components/ComparisonButton';
 import { formatItemName } from '../../../domain/services/product-details';
 
 export default function CategoriesPage() {
+  const repository = useRepository();
   const { listId = '' } = useParams();
   const result = useQuery(async () => {
     const [list, categories, items] = await Promise.all([

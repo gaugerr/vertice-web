@@ -7,3 +7,9 @@ test-results/
 .env*
 !.env.example
 .vercel/
+
+.secrets/
+.env*.local
+
+playwright-report-access/
+test-results-access/

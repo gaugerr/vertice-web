@@ -1,6 +1,6 @@
 import { useState, type FormEvent } from 'react';
 import { flushSync } from 'react-dom';
-import { repository } from '../../../app/services';
+import { useRepository } from '../../../app/repository-context';
 import type { ShoppingList } from '../../../domain/models/shopping';
 import { today } from '../../../shared/lib/date';
 import { useUnsavedChanges } from '../../../shared/lib/drafts';
@@ -22,6 +22,7 @@ export function ListForm({
   onClose: () => void;
   onCreated?: (id: string) => void;
 }) {
+  const repository = useRepository();
   const [initial] = useState(() => ({
     storeName: copySource
       ? `${copySource.storeName.slice(0, 42)} — cópia`

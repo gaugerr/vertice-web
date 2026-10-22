@@ -1,6 +1,6 @@
 import { useRef, useState, type FormEvent } from 'react';
 import { Plus } from 'lucide-react';
-import { repository } from '../../../app/services';
+import { useRepository } from '../../../app/repository-context';
 import { useMutation } from '../../../shared/hooks/useMutation';
 import { useUnsavedChanges } from '../../../shared/lib/drafts';
 import { Button } from '../../../shared/ui/Button';
@@ -17,6 +17,7 @@ export function AddItemForm({
   categoryId: string;
   readOnly?: boolean;
 }) {
+  const repository = useRepository();
   const [name, setName] = useState('');
   const [focused, setFocused] = useState(false);
   const [dismissed, setDismissed] = useState(false);

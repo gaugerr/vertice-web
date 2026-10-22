@@ -6,6 +6,7 @@ export class VerticeDatabase extends Dexie {
   lists!: EntityTable<ShoppingList, 'id'>;
   categories!: EntityTable<Category, 'id'>;
   items!: EntityTable<ShoppingItem, 'id'>;
+  migrations!: EntityTable<{ id: string; owner: string; digest: string }, 'id'>;
   constructor(name = 'vertice_web') {
     super(name);
     this.version(1).stores({
@@ -26,6 +27,7 @@ export class VerticeDatabase extends Dexie {
           .toCollection()
           .modify({ ...ACTIVE_PURCHASE }),
       );
+    this.version(5).stores({ migrations: 'id' });
     this.version(4)
       .stores({ items: 'id, shoppingListId, categoryId, [categoryId+createdAt]' })
       .upgrade((transaction) =>

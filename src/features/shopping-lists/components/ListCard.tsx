@@ -3,7 +3,7 @@ import { Link } from 'react-router-dom';
 import { ArrowUpRight, CalendarDays, Copy, Pencil, ShoppingBag, Trash2 } from 'lucide-react';
 import type { ShoppingList } from '../../../domain/models/shopping';
 import { formatDate } from '../../../shared/lib/date';
-import { repository } from '../../../app/services';
+import { useRepository } from '../../../app/repository-context';
 import { useMutation } from '../../../shared/hooks/useMutation';
 import { Button } from '../../../shared/ui/Button';
 import { Dialog } from '../../../shared/ui/Dialog';
@@ -21,6 +21,7 @@ export function ListCard({
   onEdit: (list: ShoppingList) => void;
   onCopy: (list: ShoppingList) => void;
 }) {
+  const repository = useRepository();
   const [deleting, setDeleting] = useState(false);
   const completed = list.status === 'completed';
   const mutation = useMutation();

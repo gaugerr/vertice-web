@@ -1,7 +1,7 @@
 import { LastPriceReference } from './LastPriceReference';
 import { useState, type FormEvent } from 'react';
 import type { ShoppingItem, Unit } from '../../../domain/models/shopping';
-import { repository } from '../../../app/services';
+import { useRepository } from '../../../app/repository-context';
 import { decimalInput } from '../../../domain/services/money';
 import { useMutation } from '../../../shared/hooks/useMutation';
 import { useUnsavedChanges } from '../../../shared/lib/drafts';
@@ -20,6 +20,7 @@ export function ItemForm({
   onClose: () => void;
   readOnly?: boolean;
 }) {
+  const repository = useRepository();
   const [name, setName] = useState(item.name);
   const [unitPrice, setPrice] = useState(decimalInput(item.unitPrice));
   const [quantity, setQuantity] = useState(decimalInput(item.quantity));

@@ -1,7 +1,7 @@
 import { useState, type FormEvent } from 'react';
 import type { ShoppingList } from '../../../domain/models/shopping';
 import { budgetInput, parseBudgetInput } from '../../../domain/services/budget';
-import { repository } from '../../../app/services';
+import { useRepository } from '../../../app/repository-context';
 import { useMutation } from '../../../shared/hooks/useMutation';
 import { useUnsavedChanges } from '../../../shared/lib/drafts';
 import { Button } from '../../../shared/ui/Button';
@@ -10,6 +10,7 @@ import { ErrorMessage } from '../../../shared/ui/Feedback';
 import { BudgetField } from './BudgetField';
 
 export function BudgetForm({ list, onClose }: { list: ShoppingList; onClose: () => void }) {
+  const repository = useRepository();
   const [original] = useState(() => budgetInput(list.budgetCents));
   const [value, setValue] = useState(original);
   const mutation = useMutation();
