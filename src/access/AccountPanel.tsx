@@ -38,7 +38,9 @@ export default function AccountPanel() {
         >
           Sair da conta
         </Button>
-        <Link to="/admin">Administrar licenças</Link>
+        {state.phase === 'active' && state.account && state.adminUid === state.account.uid && (
+          <Link to="/admin">Administrar licenças</Link>
+        )}
       </div>
       {state.message && <p role="status">{state.message}</p>}
     </section>

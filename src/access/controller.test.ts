@@ -81,6 +81,27 @@ async function start() {
   await controller.refresh(true);
 }
 describe('access lifecycle', () => {
+  it('shows admin identity only after server confirmation and clears it after role removal or logout', async () => {
+    await start();
+    expect(controller.snapshot().adminUid).toBeNull();
+    const response = {
+      status: 'active',
+      lease: 'signed',
+      serverTime: Math.floor(Date.now() / 1000),
+      admin: true,
+    };
+    mocks.call.mockResolvedValue(response);
+    await controller.refresh(true);
+    expect(controller.snapshot().adminUid).toBe(uid);
+    expect(JSON.parse(localStorage.getItem('test:access:lease')!)).not.toHaveProperty('adminUid');
+    mocks.call.mockResolvedValue({ ...response, admin: false });
+    await controller.refresh(true);
+    expect(controller.snapshot().adminUid).toBeNull();
+    mocks.call.mockResolvedValue(response);
+    await controller.refresh(true);
+    await controller.logout();
+    expect(controller.snapshot().adminUid).toBeNull();
+  });
   it('keeps a verified lease through a network outage and blocks new work at expiry', async () => {
     await start();
     expect(controller.canUse(uid)).toBe(true);
@@ -105,11 +126,18 @@ describe('access lifecycle', () => {
   it('permits a cached offline authorization when the Supabase session cannot refresh', async () => {
     localStorage.setItem(
       'test:access:lease',
-      JSON.stringify({ account, token: 'signed', highWater: Date.now() }),
+      JSON.stringify({
+        account,
+        token: 'signed',
+        highWater: Date.now(),
+        adminUid: uid,
+        admin: true,
+      }),
     );
     mocks.getSession.mockRejectedValue(new TypeError('offline'));
     await start();
     expect(controller.canUse(uid)).toBe(true);
+    expect(controller.snapshot().adminUid).toBeNull();
   });
   it('discards an old in-flight license response after logout', async () => {
     await start();
@@ -148,7 +176,14 @@ describe('access lifecycle', () => {
     expect(controller.canUse(uid)).toBe(false);
   });
   it('freezes old-account operations immediately when another tab changes the cached account', async () => {
+    mocks.call.mockResolvedValue({
+      status: 'active',
+      lease: 'signed',
+      serverTime: Math.floor(Date.now() / 1000),
+      admin: true,
+    });
     await start();
+    expect(controller.snapshot().adminUid).toBe(uid);
     mocks.verify.mockImplementationOnce(async () => ({
       uid: 'other',
       email: 'other@example.com',
@@ -170,6 +205,7 @@ describe('access lifecycle', () => {
     await Promise.resolve();
     await Promise.resolve();
     expect(controller.snapshot().account?.uid).toBe('other');
+    expect(controller.snapshot().adminUid).toBeNull();
     expect(controller.canExport(uid)).toBe(false);
   });
 });

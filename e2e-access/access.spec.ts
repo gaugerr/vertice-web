@@ -63,7 +63,8 @@ test('admin grants a license, buyer claims it, revoke blocks it and reactivation
 }) => {
   const data = await fixture();
   await enter(page, 'owner');
-  await page.goto('/admin');
+  await page.goto('/settings');
+  await page.getByRole('link', { name: 'Administrar licenças' }).click();
   await page.getByLabel('E-mail Google do comprador').fill(data.users.other.email);
   await page.getByLabel('Referência da compra (opcional)').fill('local-fixture-order');
   await page.getByRole('button', { name: 'Liberar acesso', exact: true }).click();
@@ -71,6 +72,9 @@ test('admin grants a license, buyer claims it, revoke blocks it and reactivation
   await expect(row).toContainText('Aguardando primeiro acesso');
   await enter(page, 'other');
   await expect(page.getByRole('button', { name: 'Nova lista' })).toBeVisible();
+  await page.goto('/settings');
+  await expect(page.getByRole('heading', { name: 'Sua conta' })).toBeVisible();
+  await expect(page.getByRole('link', { name: 'Administrar licenças' })).toHaveCount(0);
   const licenses = await admin({ action: 'list', search: data.users.other.email, page: 0 });
   const license = licenses.data.licenses[0];
   expect(license.user_id).toBe(data.users.other.uid);

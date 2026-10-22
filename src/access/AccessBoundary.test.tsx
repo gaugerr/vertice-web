@@ -41,7 +41,14 @@ function Draft() {
   );
 }
 it('keeps a mounted draft inert under a blocking dialog and restores it for the same account', async () => {
-  mocks.state.value = { phase: 'active', account, lease: null, message: '', busy: false };
+  mocks.state.value = {
+    phase: 'active',
+    account,
+    lease: null,
+    message: '',
+    busy: false,
+    adminUid: null,
+  };
   const tree = () => (
     <MemoryRouter>
       <AccessBoundary>
@@ -74,7 +81,14 @@ afterEach(() => {
 it('offers committed-data export after a cold expired start without opening shopping views', () => {
   mocks.inspect.mockClear();
   mocks.canExport.mockReturnValue(true);
-  mocks.state.value = { phase: 'expired', account, lease: null, message: '', busy: false };
+  mocks.state.value = {
+    phase: 'expired',
+    account,
+    lease: null,
+    message: '',
+    busy: false,
+    adminUid: null,
+  };
   render(
     <MemoryRouter>
       <AccessBoundary>
@@ -87,7 +101,14 @@ it('offers committed-data export after a cold expired start without opening shop
   expect(mocks.inspect).not.toHaveBeenCalled();
 });
 it('requires discarding the old draft before mounting another account', async () => {
-  mocks.state.value = { phase: 'active', account, lease: null, message: '', busy: false };
+  mocks.state.value = {
+    phase: 'active',
+    account,
+    lease: null,
+    message: '',
+    busy: false,
+    adminUid: null,
+  };
   const tree = () => (
     <MemoryRouter>
       <AccessBoundary>

@@ -9,6 +9,7 @@ export interface AccessState {
   lease: VerifiedLease | null;
   message: string;
   busy: boolean;
+  adminUid: string | null;
 }
 interface Cache {
   account: Account;
@@ -17,7 +18,14 @@ interface Cache {
 }
 const cacheKey = `${accessNamespace}:lease`;
 const clockKey = `${accessNamespace}:clock`;
-let state: AccessState = { phase: 'loading', account: null, lease: null, message: '', busy: false };
+let state: AccessState = {
+  phase: 'loading',
+  account: null,
+  lease: null,
+  message: '',
+  busy: false,
+  adminUid: null,
+};
 const listeners = new Set<() => void>();
 let started = false;
 let inFlight: Promise<void> | null = null;
@@ -76,6 +84,7 @@ async function restoreCache() {
     activeToken = cache.token;
     emit({
       account: { uid: lease.uid, email: lease.email },
+      adminUid: state.adminUid === lease.uid ? lease.uid : null,
       lease,
       phase: usableUntil(lease.expiresAt, Date.now(), highWater, floor()) ? 'active' : 'expired',
       message: '',
@@ -83,7 +92,7 @@ async function restoreCache() {
   } catch {
     if (seq !== generation) return;
     activeToken = '';
-    emit({ account: null, lease: null, phase: 'signedout', message: '' });
+    emit({ account: null, lease: null, phase: 'signedout', message: '', adminUid: null });
   }
 }
 function invalidate(phase: 'signedout' | 'denied', account: Account | null = null) {
@@ -93,6 +102,7 @@ function invalidate(phase: 'signedout' | 'denied', account: Account | null = nul
   emit({
     phase,
     account,
+    adminUid: null,
     lease: null,
     message:
       phase === 'denied'
@@ -122,14 +132,20 @@ async function performRefresh() {
       generation++;
       activeToken = '';
       storageRemove(cacheKey);
-      emit({ account: { uid, email: session.user.email ?? '' }, lease: null, phase: 'loading' });
+      emit({
+        account: { uid, email: session.user.email ?? '' },
+        lease: null,
+        phase: 'loading',
+        adminUid: null,
+      });
     }
     requestGeneration = generation;
-    const response = await callAccess<{ status: string; lease?: string; serverTime?: number }>(
-      'license-check',
-      {},
-      session.access_token,
-    );
+    const response = await callAccess<{
+      status: string;
+      lease?: string;
+      serverTime?: number;
+      admin?: boolean;
+    }>('license-check', {}, session.access_token);
     if (requestGeneration !== generation) return;
     if (response.status === 'absent' || response.status === 'revoked') {
       invalidate('denied', state.account);
@@ -146,7 +162,13 @@ async function performRefresh() {
     baseline = { wall: highWater, monotonic: performance.now() };
     save({ account, token: response.lease, highWater });
     activeToken = response.lease;
-    emit({ account, lease, phase: 'active', message: '' });
+    emit({
+      account,
+      lease,
+      phase: 'active',
+      message: '',
+      adminUid: response.admin === true ? uid : null,
+    });
   } catch (error) {
     if (requestGeneration !== generation) return;
     if (error instanceof AccessHttpError && (error.status === 401 || error.status === 403)) {
@@ -218,6 +240,7 @@ export const accessController = {
           account: { uid: session.user.id, email: session.user.email ?? '' },
           lease: null,
           phase: 'loading',
+          adminUid: null,
         });
         setTimeout(() => {
           void this.refresh(true);
