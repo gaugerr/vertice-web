@@ -21,6 +21,15 @@ async function enter(page: Page, kind: Parameters<typeof signInTestUser>[0] = 'b
   await page.goto('/');
   return auth;
 }
+async function logout(page: Page, url: string) {
+  const response = page.waitForResponse(
+    (result) =>
+      result.url().startsWith(`${url}/auth/v1/logout`) && result.request().method() === 'POST',
+  );
+  await page.getByRole('button', { name: 'Sair da conta', exact: true }).click();
+  expect((await response).ok()).toBe(true);
+  await expect(page.getByRole('dialog', { name: 'Acesso pausado' })).toBeVisible();
+}
 async function admin(action: unknown) {
   const auth = await signInTestUser('owner');
   try {
@@ -96,7 +105,7 @@ test('signed offline access survives reload and logout removes the local authori
   page,
   context,
 }) => {
-  await enter(page);
+  const auth = await enter(page);
   await expect(page.getByRole('button', { name: 'Nova lista' })).toBeVisible();
   await expect(
     page.getByRole('status').filter({ hasText: 'Pronto para usar offline' }),
@@ -106,8 +115,7 @@ test('signed offline access survives reload and logout removes the local authori
   await expect(page.getByRole('button', { name: 'Nova lista' })).toBeVisible();
   await context.setOffline(false);
   await page.goto('/settings');
-  await page.getByRole('button', { name: 'Sair da conta', exact: true }).click();
-  await expect(page.getByRole('dialog', { name: 'Acesso pausado' })).toBeVisible();
+  await logout(page, auth.fixture.url);
   await page.reload();
   await expect(page.getByRole('button', { name: 'Nova lista' })).toHaveCount(0);
 });
@@ -123,8 +131,7 @@ test('logout rejects the old session without invalidating an independent or new 
     expect((await checkTestLicense(original)).status).toBe(200);
     expect((await checkTestLicense(independent)).status).toBe(200);
     await page.goto('/settings');
-    await page.getByRole('button', { name: 'Sair da conta', exact: true }).click();
-    await expect(page.getByRole('dialog', { name: 'Acesso pausado' })).toBeVisible();
+    await logout(page, original.fixture.url);
     loggedOut = true;
     const claims = JSON.parse(
       Buffer.from(original.session.access_token.split('.')[1], 'base64url').toString(),

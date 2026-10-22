@@ -43,7 +43,10 @@ export async function signInTestUser(kind: UserKind = 'buyer') {
     password: user.password,
   });
   if (error || !data.session || data.user?.id !== user.uid) {
-    throw new LocalAccessError(`Isolated sign-in failed for ${kind}.`, error?.status);
+    throw new LocalAccessError(
+      `Isolated sign-in failed for ${kind} (HTTP ${error?.status ?? 'invalid response'}).`,
+      error?.status,
+    );
   }
   return { fixture, client, session: data.session };
 }
