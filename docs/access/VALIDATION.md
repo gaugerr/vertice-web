@@ -21,3 +21,32 @@ O proprietário confirmou a configuração do callback e de `ACCESS_ALLOWED_ORIG
 ## Endereço oficial atual
 
 O domínio oficial passou a ser `https://use-vertice.vercel.app`. O workflow hospedado agora verifica esse endereço, incluindo a navegação Google com callback da própria origem e o CORS das funções reais do Supabase. A validação anterior no domínio `vertice-web-navy.vercel.app` permanece como registro histórico. A troca de domínio exige configurar Site URL, Redirect URLs e `ACCESS_ALLOWED_ORIGINS`, além de exportar/importar as compras locais entre origens.
+
+
+## Isolamento das sessões de integração
+
+A preparação de acesso cria identidades sintéticas e guarda suas credenciais em
+`.secrets/fixtures.json`, com permissão `0600`. O helper de integração recusa qualquer
+URL diferente de `http://127.0.0.1:54321`; não usa credenciais de produção.
+
+Cada teste de compras abre uma sessão Supabase independente, obtém uma autorização
+assinada válida para `http://127.0.0.1:4173` e verifica a assinatura com a chave
+efêmera do job antes de iniciar o navegador. As abas do mesmo teste compartilham o
+contexto; testes diferentes não compartilham refresh tokens. O encerramento da
+fixture usa apenas logout local dessa sessão. Os testes de acesso também fazem um
+novo login a cada entrada, inclusive para operações administrativas.
+
+`tools/wait-access.mjs` aguarda as funções locais e verifica a assinatura; não cria
+mais um arquivo de estado autenticado para a suíte inteira. O teste de regressão
+compara a validação antes/depois do logout, uma sessão independente e um novo login.
+Nenhum token ou senha é impresso. Traces são desativados nas suítes autenticadas
+para evitar capturar headers e estado de sessão; screenshots e contexto de erros
+continuam disponíveis. O modo local sem autenticação mantém seus traces habituais.
+
+Na investigação inicial, os 45 cenários de compras falhavam também na main anterior.
+Os artefatos mostravam 44 telas de renovação e uma tela de entrada, com 50 respostas
+401 da validação e JWTs ainda dentro da validade. Esse resultado é a linha de base
+para comparar a correção, não uma confirmação de 45 defeitos de compras distintos.
+
+As chaves efêmeras de teste só devem ser geradas no runner ou em uma cópia descartável
+do repositório. Nunca publicar a chave pública de teste no lugar da chave de produção.

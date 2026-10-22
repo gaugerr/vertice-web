@@ -33,7 +33,7 @@ jobs:
       - name: Serve authenticated license functions
         run: |
           npx --yes supabase@2.54.11 functions serve --env-file .secrets/license.env > /tmp/vertice-functions.log 2>&1 &
-          node tools/access-browser-state.mjs
+          node tools/wait-access.mjs
       - id: build_access
         run: npm run build
       - run: npx playwright install --with-deps chromium webkit
