@@ -61,6 +61,8 @@ Nos caminhos abaixo, `src/features/` contém as telas e componentes da funcional
 | Logo reutilizável e identidade visual                       | `src/shared/ui/Brand.tsx`, `src/styles/globals.css`, `public/icons/`                                                                                     |
 | Diálogos, botões, erros e estados vazios comuns             | `src/shared/ui/Dialog.tsx`, `Button.tsx`, `Feedback.tsx`, `RouteError.tsx`                                                                               |
 
+Os controles de voltar usam `src/shared/ui/BackLink.tsx`.
+
 Arquivos citados apenas pelo nome na mesma linha pertencem ao último diretório
 explícito daquela linha. Testes de regras/componentes ficam próximos ao código em
 `*.test.ts`/`*.test.tsx`; fluxos de navegador ficam em `e2e/`.

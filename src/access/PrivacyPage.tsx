@@ -1,4 +1,4 @@
-import { Link } from 'react-router-dom';
+import { BackLink } from '../shared/ui/BackLink';
 export default function PrivacyPage() {
   return (
     <main className="access-page">
@@ -27,7 +27,7 @@ export default function PrivacyPage() {
           sua compra. Revogar uma licença impede novas autorizações, mas um aparelho offline pode
           conservar o acesso pelo prazo já concedido.
         </p>
-        <Link to="/">Voltar ao aplicativo</Link>
+        <BackLink to="/">Voltar ao aplicativo</BackLink>
       </article>
     </main>
   );

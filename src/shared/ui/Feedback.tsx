@@ -1,5 +1,5 @@
 import { CircleAlert, LoaderCircle, ShoppingBasket } from 'lucide-react';
-import { Link } from 'react-router-dom';
+import { BackLink } from './BackLink';
 import { errorMessage } from '../lib/errors';
 import { Button } from './Button';
 
@@ -35,9 +35,7 @@ export function Missing({ label = 'Esta lista não está mais disponível.' }: {
     <div className="state-panel">
       <ShoppingBasket size={36} aria-hidden="true" />
       <h2>{label}</h2>
-      <Link className="text-link" to="/">
-        Voltar às listas
-      </Link>
+      <BackLink to="/">Voltar às listas</BackLink>
     </div>
   );
 }

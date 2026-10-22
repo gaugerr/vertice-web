@@ -1,5 +1,5 @@
 import { useCallback, useEffect, useRef, useState } from 'react';
-import { Link } from 'react-router-dom';
+import { BackLink } from '../shared/ui/BackLink';
 import { getClient, callAccess } from './client';
 import { useAccess } from './use-access';
 import { AccessScreen } from './AccessScreen';
@@ -95,7 +95,7 @@ export default function AdminPage() {
     );
   return (
     <main className="admin-page">
-      <Link to="/">← Minhas listas</Link>
+      <BackLink to="/">Minhas listas</BackLink>
       <h1>Licenças</h1>
       <p>{state.account.email} · Administração online</p>
       {error && <p role="alert">{error}</p>}

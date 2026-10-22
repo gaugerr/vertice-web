@@ -53,7 +53,7 @@ test('budget spans categories and filters, warns without blocking, and updates b
   await page.getByRole('button', { name: 'Salvar valores', exact: true }).click();
   await expect(page.getByRole('form', { name: 'Valores de Arroz' })).toHaveCount(0);
 
-  await page.getByRole('link', { name: '← Compra com orçamento', exact: true }).click();
+  await page.getByRole('link', { name: 'Compra com orçamento', exact: true }).click();
   await expect(page.getByLabel('Total da lista', { exact: true })).toContainText('80,00');
   await openCategory(page, 'Hortifruti');
   await purchase(page, 'Tomate', '25');
@@ -100,7 +100,7 @@ test('budget spans categories and filters, warns without blocking, and updates b
   await page.reload();
   await expect(page.getByRole('button', { name: 'Definir orçamento', exact: true })).toBeVisible();
   await expect(page.getByLabel('Total da categoria', { exact: true })).toContainText('25,00');
-  await page.getByRole('link', { name: '← Compra com orçamento', exact: true }).click();
+  await page.getByRole('link', { name: 'Compra com orçamento', exact: true }).click();
   await expect(page.getByLabel('Total da lista', { exact: true })).toContainText('105,00');
 });
 

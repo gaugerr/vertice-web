@@ -104,7 +104,7 @@ test('optional quick entry, automatic names, completed copies and independent cl
     });
   }
   await form.getByRole('button', { name: 'Salvar valores', exact: true }).tap();
-  await page.getByRole('link', { name: '← Produtos', exact: true }).click();
+  await page.getByRole('link', { name: 'Produtos', exact: true }).click();
   await expect(page.getByText(/Café · Marca X · 500 g/)).toBeVisible();
   await page.getByRole('button', { name: 'Finalizar compra', exact: true }).click();
   await page.getByRole('button', { name: 'Confirmar finalização', exact: true }).click();
@@ -207,7 +207,7 @@ test('price-only save keeps another tab details and finalization detects a metad
   await expect(
     page.getByRole('heading', { name: 'Café · Marca X · 500 g', exact: true }),
   ).toBeVisible();
-  await page.getByRole('link', { name: '← Produtos', exact: true }).click();
+  await page.getByRole('link', { name: 'Produtos', exact: true }).click();
   await page.getByRole('button', { name: 'Finalizar compra', exact: true }).click();
   const review = page.getByRole('dialog');
   await expect(review.getByLabel('Total para finalizar', { exact: true })).toContainText('30,00');
@@ -249,7 +249,7 @@ test('metadata persists offline and in v5 backup restoration, including complete
   await expect(
     page.getByRole('heading', { name: 'Café · Marca X · 500 g', exact: true }),
   ).toBeVisible();
-  await page.getByRole('link', { name: '← Produtos', exact: true }).click();
+  await page.getByRole('link', { name: 'Produtos', exact: true }).click();
   await page.getByRole('button', { name: 'Finalizar compra', exact: true }).click();
   await page.getByRole('button', { name: 'Confirmar finalização', exact: true }).click();
   await expect(page.getByRole('dialog')).toHaveCount(0);

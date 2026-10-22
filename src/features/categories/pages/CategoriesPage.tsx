@@ -3,6 +3,7 @@ import { Check, ChevronRight, Leaf, ShoppingBasket } from 'lucide-react';
 import { useRepository } from '../../../app/repository-context';
 import { useQuery } from '../../../shared/hooks/useQuery';
 import { Loading, Missing, QueryError } from '../../../shared/ui/Feedback';
+import { BackLink } from '../../../shared/ui/BackLink';
 import { formatMoney, spentCents } from '../../../domain/services/money';
 import { formatDate } from '../../../shared/lib/date';
 import { BudgetPanel } from '../../budget/components/BudgetPanel';
@@ -34,9 +35,7 @@ export default function CategoriesPage() {
   const purchased = items.filter((item) => item.isPurchased).length;
   return (
     <>
-      <Link to="/" className="back-link">
-        ← Minhas listas
-      </Link>
+      <BackLink to="/">Minhas listas</BackLink>
       <div className="page-heading">
         <p className="eyebrow">SUA LISTA DE COMPRAS</p>
         <h1>{list.storeName}</h1>
