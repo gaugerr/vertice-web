@@ -213,28 +213,31 @@ textarea {
   align-items: center;
   gap: 12px;
 }
-.brand {
+.brand,
+.brand-logo {
   display: inline-flex;
   align-items: center;
   gap: 10px;
-  font-size: 24px;
-  font-weight: 700;
-  letter-spacing: -0.07em;
+  flex-shrink: 0;
+}
+.brand-logo {
+  font-size: 28px;
+  font-weight: 800;
+  line-height: 1;
+  letter-spacing: -0.065em;
+}
+.brand-name {
+  color: #fff;
+  white-space: nowrap;
 }
 .brand-mark {
-  display: grid;
-  place-items: center;
-  width: 33px;
-  height: 35px;
-  font-size: 24px;
-  font-weight: 800;
-  color: #171020;
-  border-radius: 10px;
-  background: #b39aff;
-  transform: rotate(-7deg);
+  display: block;
+  width: 40px;
+  height: 40px;
+  flex-shrink: 0;
 }
 .brand-dot {
-  color: #b39aff;
+  color: #89e5a7;
 }
 nav {
   display: flex;
@@ -264,23 +267,9 @@ nav a.active {
   padding: 0 32px 64px;
 }
 .hero {
-  padding: 56px 0 46px;
+  padding: 40px 0 32px;
   border-bottom: 1px solid #ffffff0d;
-  margin-bottom: 32px;
-}
-.hero .eyebrow {
-  display: flex;
-  align-items: center;
-  gap: 9px;
-  color: #c7b4ff;
-  margin-bottom: 19px;
-}
-.status-dot {
-  width: 5px;
-  height: 5px;
-  border-radius: 100%;
-  background: #b39aff;
-  box-shadow: 0 0 0 4px #b39aff12;
+  margin-bottom: 24px;
 }
 .hero h1 {
   font-size: clamp(32px, 5.1vw, 49px);
@@ -289,13 +278,7 @@ nav a.active {
   letter-spacing: -0.055em;
 }
 .hero h1 span {
-  color: #aaa2ba;
-}
-.hero p {
-  color: #9792a3;
-  line-height: 1.8;
-  font-size: 13px;
-  margin-top: 20px;
+  color: #c9bbef;
 }
 .section-heading {
   display: flex;
@@ -1153,10 +1136,10 @@ nav a.active {
   flex-wrap: wrap;
 }
 .footer-brand {
-  font-size: 15px;
-  color: #ada3bc;
-  font-weight: 600;
-  letter-spacing: -0.04em;
+  display: inline-flex;
+}
+.footer-brand .brand-logo {
+  font-size: 17px;
 }
 .site-footer a {
   display: grid;
@@ -1299,14 +1282,11 @@ dialog > p {
     padding: 0 20px 36px;
   }
   .hero {
-    padding: 35px 0;
+    padding: 30px 0 26px;
     margin-bottom: 24px;
   }
   .hero h1 {
-    font-size: 34px;
-  }
-  .hero p {
-    font-size: 12px;
+    font-size: clamp(27px, 7.5vw, 36px);
   }
   .lists-grid {
     grid-template-columns: 1fr;
@@ -1351,9 +1331,6 @@ dialog > p {
   .empty-state p {
     font-size: 12px;
   }
-  .desktop-break {
-    display: none;
-  }
   .item-row {
     padding: 8px 5px;
   }
@@ -1391,6 +1368,11 @@ dialog > p {
   }
   .dialog-actions .button {
     flex: 1;
+  }
+}
+@media (max-width: 360px) {
+  .nav-lists-label {
+    display: none;
   }
 }
 @media (prefers-reduced-motion: reduce) {
@@ -1483,6 +1465,9 @@ dialog > p {
   font-size: clamp(1.6rem, 6vw, 2rem);
   line-height: 1.2;
   margin-bottom: 1rem;
+}
+.access-brand {
+  margin-bottom: 1.75rem;
 }
 .access-card p {
   margin: 1rem 0;

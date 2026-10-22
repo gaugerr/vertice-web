@@ -6,6 +6,7 @@ import { InstallButton } from '../pwa/components/InstallButton';
 import { hasUnsavedChanges } from '../shared/lib/drafts';
 import { hasPendingWrites } from '../data/database/writes';
 import { ComparisonProvider } from '../features/comparator/components/ComparisonProvider';
+import { Brand } from '../shared/ui/Brand';
 
 export default function App() {
   const location = useLocation();
@@ -43,15 +44,12 @@ export default function App() {
       <header className="site-header">
         <div className="header-inner">
           <Link to="/" className="brand" aria-label="Vértice, minhas listas">
-            <span className="brand-mark" aria-hidden="true">
-              V
-            </span>
-            <span>Vértice</span>
+            <Brand />
           </Link>
           <nav aria-label="Navegação principal">
-            <NavLink to="/" end>
+            <NavLink to="/" end aria-label="Minhas listas">
               <ShoppingBasket size={17} aria-hidden="true" />
-              <span>Minhas listas</span>
+              <span className="nav-lists-label">Minhas listas</span>
             </NavLink>
             <NavLink to="/settings" aria-label="Dados e aplicativo">
               <Settings2 size={19} aria-hidden="true" />
@@ -65,8 +63,9 @@ export default function App() {
       </main>
       <footer className="site-footer">
         <div>
-          <span className="footer-brand">Vértice</span>
-          <span>Menos imprevistos. Mais clareza.</span>
+          <span className="footer-brand">
+            <Brand showMark={false} />
+          </span>
         </div>
         <div>
           <HardDrive size={14} aria-hidden="true" />

@@ -7,6 +7,7 @@ import { useAccess } from './use-access';
 import { accessConfigured } from './config';
 import { hasPendingWrites } from '../data/database/writes';
 import { hasUnsavedChanges } from '../shared/lib/drafts';
+import { Brand } from '../shared/ui/Brand';
 export function AccessScreen({
   frozen = false,
   onDiscard,
@@ -33,7 +34,9 @@ export function AccessScreen({
   const busy = pending || state.busy;
   return (
     <section className="access-card" aria-labelledby="access-title">
-      <p className="eyebrow">Vértice</p>
+      <div className="access-brand">
+        <Brand />
+      </div>
       <h1 id="access-title">
         {state.phase === 'loading'
           ? 'Verificando acesso…'

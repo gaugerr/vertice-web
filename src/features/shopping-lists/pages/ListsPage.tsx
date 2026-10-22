@@ -37,20 +37,12 @@ export default function ListsPage() {
       : [];
   return (
     <>
-      <section className="hero">
-        <div className="eyebrow">
-          <span className="status-dot" />
-          COMPRAS COM CLAREZA
-        </div>
-        <h1>
-          Planeje melhor.
+      <section className="hero" aria-labelledby="home-title">
+        <h1 id="home-title">
+          Onde suas compras
           <br />
-          <span>Gaste com consciência.</span>
+          <span>encontram o equilíbrio.</span>
         </h1>
-        <p>
-          Suas listas organizadas, do planejamento ao caixa.
-          <br className="desktop-break" /> Com você, mesmo sem internet.
-        </p>
       </section>
       <div className="section-heading has-actions">
         <div>
@@ -58,7 +50,6 @@ export default function ListsPage() {
             Minhas listas{' '}
             {result.status === 'ready' && <span className="count-badge">{visible.length}</span>}
           </h2>
-          <p>Um lugar para cada compra.</p>
         </div>
         <div className="section-actions">
           <ComparisonButton />
