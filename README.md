@@ -1,4 +1,4 @@
-# Vértice Web
+# Vértice
 
 Aplicativo de listas de compras em React, TypeScript, Vite e Tailwind CSS 4. Os dados ficam no IndexedDB, através do Dexie, e o aplicativo foi estruturado para funcionar offline após o primeiro carregamento completo.
 

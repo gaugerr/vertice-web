@@ -18,7 +18,7 @@ export default defineConfig(({ mode }) => {
         includeAssets: ['icons/*'],
         manifest: {
           id: '/',
-          name: 'Vértice · Compras com clareza',
+          name: 'Vértice',
           short_name: 'Vértice',
           description: 'Organize suas compras e acompanhe seus gastos, mesmo offline.',
           lang: 'pt-BR',

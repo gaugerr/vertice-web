@@ -60,7 +60,8 @@ export function BackupPanel() {
       </div>
       <h2>Seus dados, com você</h2>
       <p>
-        Salve uma cópia das suas compras. Você também pode importar um backup do Vértice Flutter.
+        Salve uma cópia das suas compras. Você também pode importar um backup da versão anterior do
+        Vértice.
       </p>
       <div className="backup-actions">
         <Button disabled={mutation.pending} onClick={exportFile}>

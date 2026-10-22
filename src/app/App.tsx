@@ -46,9 +46,7 @@ export default function App() {
             <span className="brand-mark" aria-hidden="true">
               V
             </span>
-            <span>
-              vértice<span className="brand-dot">.</span>
-            </span>
+            <span>Vértice</span>
           </Link>
           <nav aria-label="Navegação principal">
             <NavLink to="/" end>
@@ -67,7 +65,7 @@ export default function App() {
       </main>
       <footer className="site-footer">
         <div>
-          <span className="footer-brand">vértice.</span>
+          <span className="footer-brand">Vértice</span>
           <span>Menos imprevistos. Mais clareza.</span>
         </div>
         <div>

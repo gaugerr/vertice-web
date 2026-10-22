@@ -13,7 +13,7 @@ export default function SettingsPage() {
         ← Minhas listas
       </Link>
       <div className="page-heading">
-        <p className="eyebrow">SEU VÉRTICE</p>
+        <p className="eyebrow">Vértice</p>
         <h1>Dados e aplicativo</h1>
         <p>Controle suas compras e as suas informações.</p>
       </div>
@@ -49,7 +49,7 @@ export default function SettingsPage() {
           aplicativo ou Adicionar à tela inicial.
         </p>
       </section>
-      <p className="version-label">Vértice Web · versão 0.1.0</p>
+      <p className="version-label">Vértice · versão 0.1.0</p>
     </>
   );
 }

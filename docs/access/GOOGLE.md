@@ -5,7 +5,7 @@ Você não precisa comprar domínio nem criar senha para o Vértice. Use a conta
 1. Abra https://console.cloud.google.com/ e crie ou selecione um projeto para o Vértice.
 2. Procure **Google Auth Platform** (ou **APIs e serviços → Tela de consentimento OAuth**, dependendo do painel). Preencha o nome Vértice e os e-mails de suporte/contato solicitados.
 3. Escolha público **Externo**. Enquanto estiver configurando, mantenha em **Teste** e adicione `gustavojosiasg@gmail.com` em **Usuários de teste**. Os futuros compradores só conseguirão entrar depois de publicar o aplicativo OAuth; confirme os requisitos mostrados pelo Google nessa etapa.
-4. Em **Clientes → Criar cliente**, escolha **Aplicativo da Web**. Nome sugerido: `Vértice Web`.
+4. Em **Clientes → Criar cliente**, escolha **Aplicativo da Web**. Nome sugerido: `Vértice`.
 5. Em **URIs de redirecionamento autorizados**, adicione exatamente:
 
    `https://wqutcsjdozcukwxvkbtc.supabase.co/auth/v1/callback`

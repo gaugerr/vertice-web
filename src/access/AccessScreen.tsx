@@ -33,7 +33,7 @@ export function AccessScreen({
   const busy = pending || state.busy;
   return (
     <section className="access-card" aria-labelledby="access-title">
-      <p className="eyebrow">VÉRTICE</p>
+      <p className="eyebrow">Vértice</p>
       <h1 id="access-title">
         {state.phase === 'loading'
           ? 'Verificando acesso…'
