@@ -132,7 +132,9 @@ test('logout rejects the old session without invalidating an independent or new 
     expect(claims.exp).toBeGreaterThan(Date.now() / 1000);
     const oldStatus = (await checkTestLicense(original)).status;
     const independentStatus = (await checkTestLicense(independent)).status;
-    console.log(JSON.stringify({ oldSessionAfterLogout: oldStatus, independentSession: independentStatus }));
+    console.log(
+      JSON.stringify({ oldSessionAfterLogout: oldStatus, independentSession: independentStatus }),
+    );
     expect(oldStatus).toBe(401);
     expect(independentStatus).toBe(200);
     const renewed = await enter(page);
