@@ -1,0 +1,119 @@
+<!doctype html>
+<html lang="pt-BR">
+  <head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1" />
+    <meta name="theme-color" content="#17151c" />
+    <meta name="description" content="O Vértice acompanha suas compras no mercado e ajuda você a organizar o mês com uma planilha financeira. Conheça o combo de lançamento por R$ 19,90." />
+    <meta property="og:title" content="Vértice — da compra ao equilíbrio do mês" />
+    <meta property="og:description" content="App de compras + planilha financeira. Experimente uma compra de exemplo e conheça o kit." />
+    <meta property="og:type" content="website" />
+    <meta property="og:locale" content="pt_BR" />
+    <meta property="og:image" content="https://vertice-kit.pages.dev/social.svg" />
+    <link rel="icon" href="/icon.svg" type="image/svg+xml" />
+    <link rel="stylesheet" href="/styles.css" />
+    <script src="/script.js" defer></script>
+    <title>Vértice — da compra ao equilíbrio do mês</title>
+  </head>
+  <body>
+    <svg class="symbols" xmlns="http://www.w3.org/2000/svg" aria-hidden="true">
+      <symbol id="arrow" viewBox="0 0 24 24"><path d="M5 12h14m-6-6 6 6-6 6" /></symbol>
+      <symbol id="up-right" viewBox="0 0 24 24"><path d="M6 18 18 6M6 6h12v12" /></symbol>
+      <symbol id="check" viewBox="0 0 24 24"><path d="m5 12 4 4L19 6" /></symbol>
+      <symbol id="basket" viewBox="0 0 24 24"><path d="m8 3-5 8m13-8 5 8M2 10h20l-3 10H5L2 10Zm6 4 1 3m7-3-1 3m-3-3v3" /></symbol>
+      <symbol id="sheet" viewBox="0 0 24 24"><path d="M5 3h10l4 4v14H5V3Zm9 0v5h5M8 12h8m-8 4h8m-5-5v7" /></symbol>
+      <symbol id="spark" viewBox="0 0 24 24"><path d="m12 2 2.7 7.3L22 12l-7.3 2.7L12 22l-2.7-7.3L2 12l7.3-2.7L12 2Z" /></symbol>
+      <symbol id="lock" viewBox="0 0 24 24"><path d="M7 10V7a5 5 0 0 1 10 0v3M5 10h14v11H5V10Zm7 4v3" /></symbol>
+      <symbol id="close" viewBox="0 0 24 24"><path d="m6 6 12 12M6 18 18 6" /></symbol>
+    </svg>
+    <a class="skip" href="#conteudo">Pular para o conteúdo</a>
+    <header class="header">
+      <div class="wrap header-inner">
+        <a class="brand" href="#inicio" aria-label="Vértice, início"><img src="/icon.svg" width="38" height="38" alt="" /><span>vértice<span class="brand-dot">.</span></span></a>
+        <nav aria-label="Navegação principal"><a href="#como-funciona">Como funciona</a><a href="#kit">O que vem no kit</a><a href="#duvidas">Dúvidas</a></nav>
+        <a class="app-link" href="https://use-vertice.pages.dev">Já tenho acesso <svg><use href="#up-right" /></svg></a>
+      </div>
+    </header>
+
+    <main id="conteudo">
+      <section class="hero" id="inicio" aria-labelledby="hero-title">
+        <div class="wrap hero-grid">
+          <div class="hero-copy">
+            <div class="eyebrow"><span class="status-dot"></span> UM KIT. DOIS MOMENTOS DO SEU DINHEIRO.</div>
+            <h1 id="hero-title">A compra de hoje.<br />O equilíbrio<br /><em>do seu mês.</em></h1>
+            <p class="hero-description">Saiba o total antes de chegar ao caixa. Depois, acompanhe suas contas, seu orçamento e seus planos em uma planilha feita para a vida real.</p>
+            <div class="hero-actions"><a class="button button-purple" href="#oferta">Conhecer o combo <svg><use href="#arrow" /></svg></a><a class="text-link" href="#seu-mes">Ver a planilha <span>↗</span></a></div>
+            <p class="hero-price"><strong>App + planilha por R$ 19,90</strong><span>Pagamento único · condição de lançamento</span></p>
+            <div class="hero-footnote"><svg><use href="#spark" /></svg><span>Um pequeno hábito. Uma visão maior.</span></div>
+          </div>
+
+          <div class="hero-art">
+            <div class="orbit-word" aria-hidden="true">CLAREZA</div>
+            <div class="receipt-note"><span class="note-arrow" aria-hidden="true">↙</span> Experimente.<br />Toque nos itens.</div>
+            <div class="receipt" id="demo-compra">
+              <div class="receipt-heading"><svg><use href="#basket" /></svg><span>VÉRTICE / MINHA COMPRA</span><span class="receipt-number">Nº 001</span></div>
+              <h2>A lista de sábado<span>Uma compra de exemplo, um total em tempo real.</span></h2>
+              <div class="receipt-column-labels"><span>NO CARRINHO</span><span>VALOR</span></div>
+              <div class="receipt-items">
+                <label class="receipt-item"><input type="checkbox" name="demo-item" value="1249" checked /><span class="item-check" aria-hidden="true"><svg><use href="#check" /></svg></span><span class="item-description">Arroz<span>1 pacote · 5 kg</span></span><span class="item-price">R$ 12,49</span></label>
+                <label class="receipt-item"><input type="checkbox" name="demo-item" value="579" checked /><span class="item-check" aria-hidden="true"><svg><use href="#check" /></svg></span><span class="item-description">Leite<span>1 unidade · 1 L</span></span><span class="item-price">R$ 5,79</span></label>
+                <label class="receipt-item"><input type="checkbox" name="demo-item" value="690" checked /><span class="item-check" aria-hidden="true"><svg><use href="#check" /></svg></span><span class="item-description">Banana<span>1 kg</span></span><span class="item-price">R$ 6,90</span></label>
+                <label class="receipt-item"><input type="checkbox" name="demo-item" value="749" /><span class="item-check" aria-hidden="true"><svg><use href="#check" /></svg></span><span class="item-description">Feijão<span>1 pacote · 1 kg</span></span><span class="item-price">R$ 7,49</span></label>
+                <label class="receipt-item"><input type="checkbox" name="demo-item" value="1890" /><span class="item-check" aria-hidden="true"><svg><use href="#check" /></svg></span><span class="item-description">Café<span>1 pacote · 500 g</span></span><span class="item-price">R$ 18,90</span></label>
+              </div>
+              <div class="receipt-total" aria-live="polite" aria-atomic="true"><span>TOTAL DA COMPRA</span><output id="demo-total">R$ 25,18</output></div>
+              <div class="receipt-budget"><div><span>Seu limite de exemplo</span><strong>R$ 70,00</strong></div><div class="budget-track" role="progressbar" aria-label="Orçamento usado na demonstração" aria-valuemin="0" aria-valuemax="7000" aria-valuenow="2518"><span id="budget-fill"></span></div><p id="demo-remaining">Ainda cabem R$ 44,82 no orçamento.</p></div>
+              <div class="receipt-footer"><span class="barcode" aria-hidden="true"></span><span>MENOS SURPRESA NO CAIXA.<br />MAIS CLAREZA NA COMPRA.</span></div>
+            </div>
+            <div class="art-caption"><span class="tiny-dot"></span> Demonstração ilustrativa · valores fictícios</div>
+            <div class="floating-label"><svg><use href="#check" /></svg><span>Você acompanha.<br /><strong>O total fica à vista.</strong></span></div>
+          </div>
+        </div>
+        <div class="wrap hero-bottom"><span>LISTA NO CELULAR</span><span class="connector" aria-hidden="true"></span><span>COMPRA ACOMPANHADA</span><span class="connector" aria-hidden="true"></span><span>MÊS ORGANIZADO</span><span class="hero-scroll">Role para conhecer <span>↓</span></span></div>
+      </section>
+
+      <section class="routine section-light" id="como-funciona" aria-labelledby="routine-title">
+        <div class="wrap">
+          <div class="section-intro"><p class="eyebrow">NA VIDA REAL</p><h2 id="routine-title">Seu dinheiro não vive<br />em uma tela só.<em> Sua organização pode acompanhar.</em></h2><p>O mercado é uma parte do mês. O Vértice ajuda você a cuidar da compra e enxergar o que vem depois.</p></div>
+          <div class="routine-steps">
+            <article><span class="step-number">01 <svg><use href="#basket" /></svg></span><h3>Antes de sair,<br />uma lista com direção.</h3><p>Organize os produtos por categoria e defina quanto pretende gastar. Leve seu planejamento no celular.</p><span class="step-label">PLANEJAR</span></article>
+            <article><span class="step-number">02 <svg><use href="#check" /></svg></span><h3>No mercado,<br />o total acompanha você.</h3><p>Marque o que colocou no carrinho, informe os valores e acompanhe o orçamento. Compare preços por quantidade quando precisar.</p><span class="step-label">ACOMPANHAR</span></article>
+            <article><span class="step-number">03 <svg><use href="#sheet" /></svg></span><h3>Depois da compra,<br />uma visão do seu mês.</h3><p>Registre o total na categoria Mercado da planilha. Veja suas despesas junto das receitas, contas recorrentes e metas.</p><span class="step-label">ENXERGAR O TODO</span></article>
+          </div>
+          <div class="manual-note"><span aria-hidden="true">↳</span><p><strong>Uma passagem simples, feita por você.</strong> O app e a planilha são ferramentas separadas. O registro do total na planilha é manual.</p></div>
+        </div>
+      </section>
+
+      <section class="month-section section-light" id="seu-mes" aria-labelledby="month-title">
+        <div class="wrap month-grid">
+          <div class="month-copy"><p class="eyebrow">A COMPRA TERMINOU. O MÊS CONTINUA.</p><h2 id="month-title">Do carrinho<br /><em>para o contexto.</em></h2><p>As compras, o aluguel, os planos para depois. Quando você olha para tudo junto, fica mais fácil decidir o próximo passo.</p><ul class="benefit-list"><li><span>01</span><div><h3>O que entra. O que sai. O que sobra.</h3><p>Receitas, despesas e saldo no painel, com quatro gráficos para visualizar seus registros.</p></div></li><li><span>02</span><div><h3>Contas fixas com memória.</h3><p>Cadastre as recorrências e registre novos valores sem substituir o histórico dos reajustes.</p></div></li><li><span>03</span><div><h3>Seu próximo plano ganha espaço.</h3><p>Defina orçamentos por categoria e acompanhe quanto falta para suas metas financeiras.</p></div></li></ul></div>
+          <div class="sheet-scene">
+            <div class="sheet-window" aria-label="Prévia ilustrativa do painel da planilha com dados de demonstração">
+              <div class="window-bar"><span class="window-dots" aria-hidden="true"><i></i><i></i><i></i></span><span>Vértice · Controle Financeiro</span><svg><use href="#sheet" /></svg></div>
+              <div class="sheet-dashboard"><div class="sheet-title"><div><span>SEU MÊS, EM PERSPECTIVA</span><h3>Outubro<span>2026 ▾</span></h3></div><span class="sheet-monogram">v<span>.</span></span></div><div class="sheet-kpis"><div><span>RECEITAS</span><strong>R$ 4.500</strong></div><div><span>DESPESAS</span><strong>R$ 3.426,15</strong></div><div><span>SALDO</span><strong>R$ 1.073,85</strong></div></div><div class="sheet-charts"><div class="chart-donut"><h4>Uma visão dos gastos</h4><div class="donut" aria-hidden="true"><span>seu<br /><strong>mês</strong></span></div><div class="chart-legend"><span><i></i>Contas</span><span><i></i>Mercado</span><span><i></i>Outros</span></div></div><div class="chart-bars"><h4>Seu ritmo no ano</h4><div class="bars" aria-hidden="true"><span style="--bar:45%"></span><span style="--bar:62%"></span><span style="--bar:52%"></span><span style="--bar:81%"></span><span style="--bar:67%"></span><span style="--bar:91%"></span></div><div class="bar-months"><span>Mai</span><span>Jun</span><span>Jul</span><span>Ago</span><span>Set</span><span>Out</span></div><div class="mini-goal"><span>Sua próxima meta</span><div></div><small>Um passo de cada vez.</small></div></div></div><div class="manual-entry"><span class="entry-icon"><svg><use href="#basket" /></svg></span><div><strong>Mercado</strong><span>Exemplo de lançamento manual</span></div><strong id="sheet-purchase">R$ 25,18</strong></div></div>
+              <div class="sheet-tabs"><span class="selected">Dashboard</span><span>Lançamentos</span><span>Orçamento</span><span>Metas</span><span>+</span></div>
+            </div>
+            <div class="sheet-sticker"><svg><use href="#spark" /></svg><span>Clareza para<br /><em>seus próximos planos.</em></span></div>
+            <p class="preview-caption">Visualização ilustrativa. Indicadores do arquivo de demonstração; gráficos e lançamento de exemplo.</p>
+            <div class="manual-demo"><button id="fill-sheet-example" type="button">Preencher este exemplo com o total da lista <span aria-hidden="true">↗</span></button><p id="manual-demo-status" role="status">Simule o registro manual: use o total da lista acima neste exemplo.</p></div>
+          </div>
+        </div>
+      </section>
+
+      <section class="kit-section" id="kit" aria-labelledby="kit-title">
+        <div class="wrap"><div class="kit-heading"><div><p class="eyebrow">CONHEÇA O SEU VÉRTICE</p><h2 id="kit-title">Duas ferramentas.<br /><em>Uma rotina mais clara.</em></h2></div><p>Você recebe o app para acompanhar as compras e a planilha para organizar o mês. Cada um com seu papel, no mesmo kit.</p></div><div class="kit-columns"><article><div class="kit-label"><span>NO BOLSO</span><svg><use href="#basket" /></svg></div><h3>O app de compras</h3><p>Praticidade para levar ao mercado.</p><ul><li>Listas organizadas por categoria</li><li>Total dos itens comprados e orçamento</li><li>Comparador de preço por quantidade</li><li>Histórico de preços de compras finalizadas</li><li>Uso offline após preparo e validação do acesso</li></ul><span class="kit-platform">NO NAVEGADOR · INSTALÁVEL NO CELULAR</span></article><article><div class="kit-label"><span>NO SEU PLANEJAMENTO</span><svg><use href="#sheet" /></svg></div><h3>A planilha financeira</h3><p>Perspectiva para cuidar do mês inteiro.</p><ul><li>Painel financeiro com quatro gráficos</li><li>Receitas, despesas e orçamento por categoria</li><li>Contas recorrentes e histórico de reajustes</li><li>Resumo anual e acompanhamento de metas</li><li>Modelo limpo + demonstração + instruções</li></ul><span class="kit-platform">GOOGLE PLANILHAS E ARQUIVO EXCEL</span></article></div><div class="kit-bottom"><svg><use href="#lock" /></svg><p>Suas compras ficam no aparelho. Sua planilha fica na sua cópia. Guarde backups para preservar seus registros.</p></div></div>
+      </section>
+
+      <section class="offer-section section-light" id="oferta" aria-labelledby="offer-title">
+        <div class="wrap offer-layout"><div class="offer-story"><p class="eyebrow">COMECE PELO PRÓXIMO MERCADO.</p><h2 id="offer-title">Uma compra.<br />Um mês.<br /><em>Um novo hábito.</em></h2><p>Organizar o dinheiro começa com enxergar o que está acontecendo. Leve o Vértice para a sua rotina.</p><div class="offer-seal"><svg><use href="#spark" /></svg><span>SEU KIT PARA<br /><strong>COMEÇAR COM CLAREZA</strong></span></div></div><div class="offer-card"><span class="launch-label"><span class="status-dot"></span> LOTE DE LANÇAMENTO</span><h3>Kit Vértice completo</h3><p class="offer-subtitle">App de compras + planilha financeira</p><p class="price"><span>R$</span>19<span>,90</span></p><p class="price-description">Pagamento único. Sem mensalidade do kit.</p><ul class="offer-includes"><li><svg><use href="#check" /></svg>Acesso vitalício ao app de compras</li><li><svg><use href="#check" /></svg>Planilha financeira para sua própria cópia</li><li><svg><use href="#check" /></svg>Modelo limpo, demonstração e instruções</li></ul><button class="button button-purple purchase-button" type="button">Quero meu Vértice <svg><use href="#arrow" /></svg></button><p class="sales-status"><span class="tiny-dot"></span> Vendas em preparação</p><div class="offer-rule">Condição de lançamento para as <strong>100 primeiras compras aprovadas</strong>. As vendas ainda não estão abertas.</div></div></div>
+      </section>
+
+      <section class="faq-section section-light" id="duvidas" aria-labelledby="faq-title"><div class="wrap faq-layout"><div><p class="eyebrow">ANTES DE COMEÇAR</p><h2 id="faq-title">Tudo mais<br /><em>claro por aqui.</em></h2><p>O essencial para saber se o Vértice combina com a sua rotina.</p></div><div class="faq-list"><details><summary>Preciso pagar uma mensalidade?<span aria-hidden="true">+</span></summary><div>A proposta do kit é pagamento único: acesso vitalício ao app e uma cópia da planilha para você. O valor de R$ 19,90 é a condição prevista para as 100 primeiras compras aprovadas no lançamento.</div></details><details><summary>O app e a planilha são sincronizados?<span aria-hidden="true">+</span></summary><div>São ferramentas separadas. Depois de finalizar a compra no app, você registra manualmente o total na categoria Mercado da planilha. Não há sincronização automática.</div></details><details><summary>Como vou receber o kit e acessar o app?<span aria-hidden="true">+</span></summary><div>No lançamento, a compra incluirá o arquivo da planilha, as instruções de cópia e o acesso ao aplicativo pelo e-mail Google informado. A liberação do app é manual. O canal de entrega e o prazo serão informados antes da abertura das vendas. Esta página ainda não recebe pagamentos.</div></details><details><summary>Posso usar tudo pelo celular?<span aria-hidden="true">+</span></summary><div>O app funciona no navegador e pode ser instalado na tela inicial. A planilha pode ser aberta no Google Planilhas; o painel fica mais legível na horizontal ou em uma tela maior. O modelo também inclui o arquivo Excel.</div></details><details><summary>Preciso de internet para usar o aplicativo?<span aria-hidden="true">+</span></summary><div>O primeiro acesso exige internet, login Google e licença liberada. Depois de preparar o uso offline e validar o acesso, o app funciona sem conexão por até sete dias, quando será necessário renovar a autorização online.</div></details><details><summary>Minhas compras ficam salvas na nuvem?<span aria-hidden="true">+</span></summary><div>As compras ficam no armazenamento do navegador, separadas por conta. Login não faz backup nem sincroniza aparelhos. Exporte backups e mantenha uma cópia segura. Sua planilha é um arquivo separado, na sua própria cópia.</div></details><details><summary>Posso comprar agora? E como funciona o suporte?<span aria-hidden="true">+</span></summary><div>Ainda estamos preparando o lançamento. Antes de abrir as vendas, esta página informará o checkout, o canal de atendimento, o prazo de liberação e as condições de reembolso. Você não precisa informar dados nem fazer pagamentos nesta apresentação.</div></details></div></div></section>
+    </main>
+
+    <footer class="footer"><div class="wrap footer-top"><a class="brand" href="#inicio" aria-label="Vértice, voltar ao início"><img src="/icon.svg" width="36" height="36" alt="" /><span>vértice<span class="brand-dot">.</span></span></a><p>Onde suas compras encontram o equilíbrio.</p><a href="https://use-vertice.pages.dev">Ir para o aplicativo <svg><use href="#up-right" /></svg></a></div><div class="wrap footer-bottom"><span>© 2026 Vértice</span><span>Apresentação de lançamento · vendas ainda não abertas</span><a href="https://use-vertice.pages.dev/privacy">Privacidade</a></div></footer>
+    <div class="mobile-offer" aria-label="Oferta do kit"><div><strong>Kit Vértice</strong><span>R$ 19,90 · pagamento único</span></div><a class="button button-purple" href="#oferta">Ver o kit <svg><use href="#arrow" /></svg></a></div>
+
+    <dialog id="launch-dialog" aria-labelledby="launch-title" aria-describedby="launch-description"><button class="close-dialog" type="button" aria-label="Fechar aviso"><svg><use href="#close" /></svg></button><div class="dialog-icon"><svg><use href="#spark" /></svg></div><p class="eyebrow">QUASE NA SUA ROTINA</p><h2 id="launch-title">Estamos preparando<br /><em>o próximo passo.</em></h2><p id="launch-description">O lançamento do kit por R$ 19,90 está em preparação. Pagamento e entrega ainda serão disponibilizados. Esta página não recebe pedidos nem pagamentos.</p><button class="button button-purple close-dialog-action" type="button">Continuar conhecendo <svg><use href="#arrow" /></svg></button></dialog>
+  </body>
+</html>
