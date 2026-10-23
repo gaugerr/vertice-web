@@ -1,6 +1,8 @@
 import { readFileSync } from 'node:fs';
 export function validateAccess(env) {
   const mode = env.VITE_ACCESS_MODE ?? 'legacy';
+  if (env.CF_PAGES === '1' && mode !== 'enforced')
+    throw new Error('Cloudflare Pages requires enforced access. Use tools/build-cloudflare.mjs.');
   if (!['legacy', 'enforced'].includes(mode)) throw new Error('Invalid VITE_ACCESS_MODE');
   if (mode === 'enforced') {
     if (!/^https?:\/\//.test(env.VITE_SUPABASE_URL ?? '') || !env.VITE_SUPABASE_PUBLISHABLE_KEY)
