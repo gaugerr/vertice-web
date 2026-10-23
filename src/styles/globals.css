@@ -28,6 +28,10 @@ body,
 }
 body {
   margin: 0;
+}
+body,
+dialog,
+textarea {
   /* Keep touch scrolling while preventing pinch zoom from moving the app off-screen. */
   touch-action: pan-x pan-y;
 }
