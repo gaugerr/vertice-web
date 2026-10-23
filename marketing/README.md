@@ -7,8 +7,8 @@ Supabase, coleta de dados ou arquivos pagos do kit no build.
 
 No Cloudflare Pages, projeto `vertice-kit`, repositório `gaugerr/vertice-web`, branch
 `main`, diretório raiz `/marketing`, comando `node build.mjs`, saída `dist`, Node 24.
-Endereço inicial: <https://vertice-kit.pages.dev>. Domínio previsto:
-<https://usevertice.app.br>; o aplicativo permanece separado.
+Produção: <https://usevertice.app.br>. Endereço alternativo:
+<https://vertice-kit.pages.dev>. Aplicativo: <https://app.usevertice.app.br>.
 
 Para gerar os arquivos, execute `node build.mjs` dentro de `marketing/`.
 
