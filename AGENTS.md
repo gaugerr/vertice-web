@@ -150,7 +150,9 @@ Não gerar nem rotacionar chaves ao fazer alterações visuais ou de documentaç
   saída `dist` e Node 24. Rotas/cache: `public/_redirects` e `public/_headers`.
   Configuração, autorização de origem e migração por backup: `docs/CLOUDFLARE.md`.
 - Página de vendas independente em `marketing/`: `index.html`, `styles.css` e
-  `conversion.css`, `script.js` e `site-config.js`. Projeto Pages `vertice-kit`, raiz
+  `conversion.css`, `script.js` e `site-config.js`. Prévias interativas independentes
+  em `interactive-demo.js`/`.css`: estado em memória, dinheiro em centavos inteiros,
+  sem persistência ou sincronização; botão manual copia o total só uma vez. Projeto Pages `vertice-kit`, raiz
   `/marketing`, build `node build.mjs` e saída `dist`. Lista de espera prepara uma
   mensagem ao WhatsApp do proprietário; envio e confirmação são manuais. O site
   não salva contatos nem afirma que houve inscrição automática. Configuração do

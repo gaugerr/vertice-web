@@ -6,6 +6,8 @@ for (const file of [
   'index.html',
   'styles.css',
   'conversion.css',
+  'interactive-demo.css',
+  'interactive-demo.js',
   'script.js',
   'site-config.js',
   'icon.svg',
