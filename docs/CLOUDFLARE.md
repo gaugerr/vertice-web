@@ -1,8 +1,9 @@
 # Hospedagem na Cloudflare Pages
 
-Projeto: `gaugerr/vertice-web`, branch de produção `main`. Nome sugerido:
-`use-vertice`; conferir o subdomínio efetivamente atribuído no painel antes de
-configurar o login. Não comprar domínio nem habilitar recursos pagos nesta etapa.
+Projeto: `gaugerr/vertice-web`, branch de produção `main`, nome `use-vertice`.
+Produção: <https://use-vertice.pages.dev>. A integração Git publica automaticamente
+a `main`; previews automáticos ficam desabilitados. Não comprar domínio nem
+habilitar recursos pagos nesta etapa.
 
 ## Criar o projeto
 
@@ -60,3 +61,13 @@ instalação PWA antiga permanece vinculada ao endereço antigo.
   no Supabase de produção. Não registrar tokens ou estados autenticados.
 
 Somente após concluir esses passos divulgar o endereço como pronto para clientes.
+
+## Publicação inicial verificada
+
+Em 23/10/2026, deploy de produção aprovado pela Cloudflare. Conferência em
+navegador remoto a 390 px: login visível, compras protegidas, largura sem excesso,
+rotas e manifesto HTTP 200, worker/conectividade sem cache e asset ausente HTTP
+404. Google habilitado; as duas funções de licença aceitam CORS da nova origem e
+rejeitam chamadas sem sessão com HTTP 401. O proprietário confirmou os ajustes de
+callback/origem no Supabase; o login completo na conta real deve ser conferido
+pelo proprietário.

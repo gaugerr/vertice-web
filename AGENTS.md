@@ -4,7 +4,7 @@
 
 PWA de listas de compras, pensado para uso rápido no mercado e funcionamento
 offline. Este repositório é `gaugerr/vertice-web`; o app Flutter e o Docery são
-projetos separados. Produção: <https://use-vertice.vercel.app>.
+projetos separados. Produção: <https://use-vertice.pages.dev>.
 
 - **Stack:** React 19, TypeScript, Vite 7, Tailwind CSS 4, React Router 7,
   Dexie/IndexedDB, Zod, big.js e lucide-react. Node 24 e npm; versões no lockfile.
