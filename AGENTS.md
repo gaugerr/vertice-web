@@ -144,6 +144,9 @@ Não gerar nem rotacionar chaves ao fazer alterações visuais ou de documentaç
 - Vercel publica a `main` pelo GitHub. `tools/build-vercel.mjs` impõe acesso protegido
   em produção e no preview `feat/google-access`; o build local padrão é `legacy`.
   Não mudar origem, modo de acesso ou configuração OAuth para uma tarefa visual.
+- Cloudflare Pages usa `tools/build-cloudflare.mjs`, sempre com acesso protegido,
+  saída `dist` e Node 24. Rotas/cache: `public/_redirects` e `public/_headers`.
+  Configuração, autorização de origem e migração por backup: `docs/CLOUDFLARE.md`.
 
 ## Comandos e validação
 

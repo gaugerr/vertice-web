@@ -1,0 +1,62 @@
+# Hospedagem na Cloudflare Pages
+
+Projeto: `gaugerr/vertice-web`, branch de produção `main`. Nome sugerido:
+`use-vertice`; conferir o subdomínio efetivamente atribuído no painel antes de
+configurar o login. Não comprar domínio nem habilitar recursos pagos nesta etapa.
+
+## Criar o projeto
+
+1. Cloudflare → Workers & Pages → Create application → Pages → Connect to Git.
+2. Autorizar o GitHub App somente para `gaugerr/vertice-web`.
+3. Selecionar `main`, diretório raiz `/`, comando de build
+   `node tools/build-cloudflare.mjs` e saída `dist`.
+4. Usar Node 24 (`NODE_VERSION=24`). Instalar pelo `package-lock.json` com npm.
+5. Habilitar deploys de produção. Deixar previews automáticos desabilitados;
+   previews futuros precisam de autorização de origem e callback próprios.
+
+O build mantém acesso obrigatório, URL e chave pública do mesmo Supabase da
+Vercel. Variáveis públicas podem substituir URL/chave; nunca colocar `service_role`,
+segredo Google ou chave privada de assinatura no frontend. A chave pública de
+verificação existente no repositório é preservada. `tools/validate-access.mjs`
+impede builds Pages em modo `legacy`.
+
+## Liberar o endereço no Supabase
+
+Depois de obter a origem HTTPS exata do projeto:
+
+1. Authentication → URL Configuration: adicionar `<origem>/auth/callback` aos
+   Redirect URLs. Preservar os endereços anteriores enquanto forem utilizados.
+2. Quando a migração estiver pronta, definir Site URL como a nova origem.
+3. Edge Functions → Secrets: acrescentar a nova origem, sem barra final, a
+   `ACCESS_ALLOWED_ORIGINS`, separada por vírgula e preservando as demais origens.
+4. O callback do cliente Google continua sendo o endereço do Supabase
+   `https://wqutcsjdozcukwxvkbtc.supabase.co/auth/v1/callback`.
+
+Não usar curingas para contornar CORS ou o callback. Esses ajustes ficam no
+Supabase, não na hospedagem Cloudflare; podem ser feitos pelo painel sem enviar
+credenciais pelo chat.
+
+## Rotas, cache e dados
+
+`public/_headers` mantém `sw.js` e `online.txt` sem cache e assets com nomes
+versionados em cache longo. `public/_redirects` reescreve as rotas reais para o
+HTML do app. O build copia `index.html` para `404.html`, desabilitando o fallback
+SPA implícito da Pages: assets inexistentes retornam HTTP 404. Rotas desconhecidas
+também retornam 404, com o app exibindo a tela apropriada.
+
+As compras são locais e vinculadas à origem do navegador. Antes de trocar de
+endereço, exportar o backup no endereço antigo. No novo, entrar com a mesma conta
+e importar o backup; a restauração substitui as compras já existentes no destino.
+Não apagar dados nem desativar o endereço antigo para forçar a migração. A
+instalação PWA antiga permanece vinculada ao endereço antigo.
+
+## Conferência curta após publicar
+
+- Raiz, `/login`, `/settings`, `/privacy` e callback abrem corretamente.
+- `manifest.webmanifest`, `sw.js` e ícones respondem por HTTPS; worker sem cache.
+- `/assets/does-not-exist.js` responde 404; `online.txt` não usa cache.
+- CORS aceita somente as origens permitidas; OAuth retorna para a nova origem.
+- Login real, licença, backup e uso offline são conferidos sem fixtures de teste
+  no Supabase de produção. Não registrar tokens ou estados autenticados.
+
+Somente após concluir esses passos divulgar o endereço como pronto para clientes.
