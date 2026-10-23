@@ -21,7 +21,8 @@ updateDemo();
 
 document.querySelector('#fill-sheet-example').addEventListener('click', () => {
   sheetPurchase.textContent = totalOutput.textContent;
-  document.querySelector('#manual-demo-status').textContent = `Exemplo preenchido com ${totalOutput.textContent}. Na sua planilha, você digita esse total.`;
+  document.querySelector('#manual-demo-status').textContent =
+    `Exemplo preenchido com ${totalOutput.textContent}. Na sua planilha, você digita esse total.`;
 });
 
 const config = window.VERTICE_MARKETING;
@@ -51,7 +52,9 @@ function updateContactMethod() {
   contactInput.maxLength = isEmail ? 120 : 24;
   contactInput.placeholder = isEmail ? 'voce@exemplo.com' : '(51) 99999-9999';
   contactInput.setCustomValidity('');
-  document.querySelector('#waitlist-contact-label').textContent = isEmail ? 'Seu e-mail' : 'Seu WhatsApp com DDD';
+  document.querySelector('#waitlist-contact-label').textContent = isEmail
+    ? 'Seu e-mail'
+    : 'Seu WhatsApp com DDD';
   document.querySelector('#contact-hint').textContent = isEmail
     ? 'Pode ser o seu contato habitual. O e-mail Google para liberar o app será confirmado na compra.'
     : 'Informe seu número com DDD. A mensagem será enviada ao WhatsApp do Vértice.';
@@ -74,20 +77,30 @@ form.addEventListener('submit', (event) => {
   const name = nameInput.value.trim().replace(/\s+/g, ' ');
   const contactType = form.elements.contactType.value;
   const contact = contactInput.value.trim();
-  nameInput.setCustomValidity(name.length >= 2 ? '' : 'Informe seu nome com pelo menos dois caracteres.');
+  nameInput.setCustomValidity(
+    name.length >= 2 ? '' : 'Informe seu nome com pelo menos dois caracteres.',
+  );
   const digits = contact.replace(/\D/g, '');
   const phoneIsValid = /^\d{10,11}$/.test(digits) || /^55\d{10,11}$/.test(digits);
-  contactInput.setCustomValidity(contactType === 'whatsapp' && !phoneIsValid
-    ? 'Informe um WhatsApp válido com DDD, por exemplo (51) 99999-9999.'
-    : '');
+  contactInput.setCustomValidity(
+    contactType === 'whatsapp' && !phoneIsValid
+      ? 'Informe um WhatsApp válido com DDD, por exemplo (51) 99999-9999.'
+      : '',
+  );
   if (!form.reportValidity()) return;
 
   const opening = config.launchListOpen
-    ? 'Olá! Quero entrar na lista de espera do Kit Vértice e confirmar a condição de lançamento de R$ 19,90, dentro do lote de ' + config.launchSlots + ' compras.'
+    ? 'Olá! Quero entrar na lista de espera do Kit Vértice e confirmar a condição de lançamento de R$ 19,90, dentro do lote de ' +
+      config.launchSlots +
+      ' compras.'
     : 'Olá! Quero saber sobre a próxima disponibilidade do Kit Vértice.';
-  const message = [opening, '', 'Nome: ' + name,
+  const message = [
+    opening,
+    '',
+    'Nome: ' + name,
     (contactType === 'email' ? 'E-mail: ' : 'WhatsApp: ') + contact,
-    '', 'Autorizo contato sobre a lista e o lançamento. Entendo que a reserva depende da confirmação do atendimento e que este cadastro não é uma compra.'
+    '',
+    'Autorizo contato sobre a lista e o lançamento. Entendo que a reserva depende da confirmação do atendimento e que este cadastro não é uma compra.',
   ].join('\n');
   const url = new URL('https://wa.me/' + config.whatsapp);
   url.searchParams.set('text', message);
@@ -107,17 +120,22 @@ document.querySelector('#edit-waitlist').addEventListener('click', () => {
 
 // Transparência ao encerrar o lote: a capacidade é total, não um contador de sobras.
 if (!config.launchListOpen) {
-  document.querySelector('.waitlist-panel-intro').textContent = 'Converse sobre a próxima disponibilidade do kit, sem reserva de preço neste momento.';
-  document.querySelector('#confirmation-message').textContent = 'Envie a mensagem no WhatsApp para conversar sobre a próxima disponibilidade. Este contato não reserva a condição de lançamento.';
-  document.querySelector('.waitlist-promise').textContent = 'O lote de lançamento está encerrado. Fale com a gente para conhecer a próxima disponibilidade.';
-  document.querySelector('.waitlist-conditions').textContent = 'Não há reserva de R$ 19,90 disponível neste momento. Você pode enviar uma mensagem para saber dos próximos passos.';
+  document.querySelector('.waitlist-panel-intro').textContent =
+    'Converse sobre a próxima disponibilidade do kit, sem reserva de preço neste momento.';
+  document.querySelector('#confirmation-message').textContent =
+    'Envie a mensagem no WhatsApp para conversar sobre a próxima disponibilidade. Este contato não reserva a condição de lançamento.';
+  document.querySelector('.waitlist-promise').textContent =
+    'O lote de lançamento está encerrado. Fale com a gente para conhecer a próxima disponibilidade.';
+  document.querySelector('.waitlist-conditions').textContent =
+    'Não há reserva de R$ 19,90 disponível neste momento. Você pode enviar uma mensagem para saber dos próximos passos.';
   document.querySelector('.sales-status').textContent = 'Lote de lançamento encerrado';
   document.querySelector('.launch-capacity').textContent = 'Lote de lançamento encerrado';
   document.querySelector('.reference-price').hidden = true;
   document.querySelector('.price').hidden = true;
   document.querySelector('.price-description').hidden = true;
   document.querySelector('.price-reference-note').hidden = true;
-  document.querySelector('.hero-price').textContent = 'Converse sobre a próxima disponibilidade do kit.';
+  document.querySelector('.hero-price').textContent =
+    'Converse sobre a próxima disponibilidade do kit.';
   document.querySelector('.mobile-offer > div > span').textContent = 'Próxima disponibilidade';
   submitButton.firstChild.textContent = 'Conversar pelo WhatsApp ';
 }
@@ -126,15 +144,21 @@ const mobileOffer = document.querySelector('.mobile-offer');
 const offer = document.querySelector('#lista-de-espera');
 let offerVisible = false;
 let offerHasBeenReached = false;
-const observer = new IntersectionObserver(([entry]) => {
-  offerVisible = entry.isIntersecting;
-  if (offerVisible) offerHasBeenReached = true;
-  refreshMobileOffer();
-}, { threshold: 0.08 });
+const observer = new IntersectionObserver(
+  ([entry]) => {
+    offerVisible = entry.isIntersecting;
+    if (offerVisible) offerHasBeenReached = true;
+    refreshMobileOffer();
+  },
+  { threshold: 0.08 },
+);
 observer.observe(offer);
 
 function refreshMobileOffer() {
-  mobileOffer.classList.toggle('visible', window.scrollY > 650 && !offerVisible && !offerHasBeenReached);
+  mobileOffer.classList.toggle(
+    'visible',
+    window.scrollY > 650 && !offerVisible && !offerHasBeenReached,
+  );
 }
 window.addEventListener('scroll', refreshMobileOffer, { passive: true });
 refreshMobileOffer();
