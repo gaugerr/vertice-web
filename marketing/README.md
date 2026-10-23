@@ -9,7 +9,8 @@ Cloudflare Pages `vertice-kit`: raiz `/marketing`, comando `node build.mjs`, sa�
 
 - `index.html`: página, formulário, 17 perguntas, oferta e placeholders comentados.
 - `styles.css`: identidade visual existente; `conversion.css`: novas seções.
-- `script.js`: recibo, exemplo manual, formulário e chamada ao WhatsApp.
+- `script.js`: formulário e chamada ao WhatsApp.
+- `interactive-demo.js` e `interactive-demo.css`: prévias do app e do painel financeiro.
 - `site-config.js`: telefone, capacidade total do lote e abertura da lista.
 - `media/`: espaços reservados para fotos/GIFs reais, com proporções fixas.
 - `social.png`: imagem social real de marca, PNG 1200×630; fonte `social.svg`.
@@ -50,3 +51,17 @@ a autorização offline precisa de renovação online em até sete dias.
 Os três depoimentos de exemplo estão em um template inerte e não aparecem como
 prova social. As fotos e a demonstração em vídeo são espaços reservados declarados.
 Não publicar os arquivos pagos do kit nem dados pessoais de quem usa o produto.
+
+## Demonstrações interativas
+
+O resumo do app permite abrir categorias, marcar itens, editar preços e orçamento.
+O painel financeiro tem receitas, quatro gastos de exemplo, distribuição por
+categoria, entradas/saídas, comparação com orçamento e formas de pagamento.
+As abas Lançamentos, Orçamento e Metas são editáveis. Os gráficos mostram os
+valores do mês de exemplo, sem inventar histórico. Valores são somados em
+centavos inteiros; entradas inválidas preservam o último resultado válido.
+
+Todo estado existe só na memória da página. Não há envio, persistência, importação
+de compras reais ou alteração dos arquivos pagos. O botão de usar o total da lista
+preenche Mercado uma única vez, simulando o registro manual; não cria sincronização.
+As fotos e o vídeo reais continuam reservados em `media/`.
