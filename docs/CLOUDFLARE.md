@@ -66,8 +66,7 @@ Somente após concluir esses passos divulgar o endereço como pronto para client
 
 Em 23/10/2026, deploy de produção aprovado pela Cloudflare. Conferência em
 navegador remoto a 390 px: login visível, compras protegidas, largura sem excesso,
-rotas e manifesto HTTP 200, worker/conectividade sem cache e asset ausente HTTP
-404. Google habilitado; as duas funções de licença aceitam CORS da nova origem e
+rotas e manifesto HTTP 200, worker/conectividade sem cache e asset ausente HTTP 404. Google habilitado; as duas funções de licença aceitam CORS da nova origem e
 rejeitam chamadas sem sessão com HTTP 401. O proprietário confirmou os ajustes de
 callback/origem no Supabase; o login completo na conta real deve ser conferido
 pelo proprietário.
