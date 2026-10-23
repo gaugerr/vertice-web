@@ -6,22 +6,22 @@ produto, clientes fictícios publicados, números de vendas ou avaliações fabr
 ## Checklist de arquivos reais
 
 - [ ] **GIF/vídeo do app no mercado:** 10–15 segundos, vertical 9:16; ideal 540×960
-  ou 1080×1920. Slot `app-market-demo`, seção `#demonstracao`. Mostrar marcação de
-  produtos, valor e total. Não mostrar notificações, e-mail ou outros dados pessoais.
+      ou 1080×1920. Slot `app-market-demo`, seção `#demonstracao`. Mostrar marcação de
+      produtos, valor e total. Não mostrar notificações, e-mail ou outros dados pessoais.
 - [ ] **Foto do app no celular:** vertical 9:16, WebP/JPG. Slot `app-phone-photo`,
-  seção “O app de compras”.
+      seção “O app de compras”.
 - [ ] **Foto ou captura real da planilha:** horizontal 16:10, ideal 1600×1000,
-  WebP/PNG. Slot `spreadsheet-photo`, seção “A planilha financeira”. Usar o modelo
-  de demonstração ou ocultar dados pessoais. O kit pago não deve virar download público.
+      WebP/PNG. Slot `spreadsheet-photo`, seção “A planilha financeira”. Usar o modelo
+      de demonstração ou ocultar dados pessoais. O kit pago não deve virar download público.
 - [ ] **Prints reais do app:** montagem horizontal 16:10 com lista, orçamento e total.
-  Slot `real-app-screenshots`, seção `#na-vida-real`.
+      Slot `real-app-screenshots`, seção `#na-vida-real`.
 - [ ] **Três depoimentos reais:** texto original curto, autorização de publicação e
-  identificação combinada com o autor. Nome completo, foto e avaliação em estrelas
-  não são necessários. Os três textos de exemplo estão no `<template
-  id="testimonials-placeholder">`, marcados `PLACEHOLDER`, e não são exibidos.
+      identificação combinada com o autor. Nome completo, foto e avaliação em estrelas
+      não são necessários. Os três textos de exemplo estão no `<template
+id="testimonials-placeholder">`, marcados `PLACEHOLDER`, e não são exibidos.
 - [x] **Imagem social:** `social.png`, PNG 1200×630, já criada com tipografia e cores
-  da marca. Fonte vetorial: `social.svg`. Substituir é opcional. Uma eventual nova
-  versão deve manter 1200×630 e o nome `social.png` ou atualizar as metatags.
+      da marca. Fonte vetorial: `social.svg`. Substituir é opcional. Uma eventual nova
+      versão deve manter 1200×630 e o nome `social.png` ou atualizar as metatags.
 
 ## Como substituir uma foto ou GIF
 
@@ -38,8 +38,14 @@ Exemplo de vídeo no lugar da imagem do primeiro slot:
 ```html
 <!-- TROCAR: GIF do app no mercado, 10-15s, vertical -->
 <figure class="media-slot media-slot-portrait" data-media-slot="app-market-demo">
-  <video controls playsinline preload="none" width="540" height="960"
-    aria-label="Demonstração real do app Vértice durante uma compra no mercado">
+  <video
+    controls
+    playsinline
+    preload="none"
+    width="540"
+    height="960"
+    aria-label="Demonstração real do app Vértice durante uma compra no mercado"
+  >
     <source src="/media/app-no-mercado.mp4" type="video/mp4" />
     Seu navegador não suporta este vídeo. Use a lista ilustrativa acima.
   </video>
