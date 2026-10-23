@@ -1,16 +1,15 @@
 import { test, expect, type Page } from '@playwright/test';
-import { readFile } from 'node:fs/promises';
-const origin = 'http://127.0.0.1:4173';
-async function fixture() {
-  return JSON.parse(await readFile('.secrets/fixtures.json', 'utf8')) as {
-    url: string;
-    key: string;
-    users: Record<string, { uid: string; email: string; session: { access_token: string } }>;
-  };
-}
-async function enter(page: Page, kind = 'buyer') {
-  const data = await fixture();
-  const user = data.users[kind];
+import {
+  appOrigin,
+  checkTestLicense,
+  closeTestSession,
+  readLocalFixture,
+  signInTestUser,
+} from '../e2e/support/access';
+async function enter(page: Page, kind: Parameters<typeof signInTestUser>[0] = 'buyer') {
+  const auth = await signInTestUser(kind);
+  const data = auth.fixture;
+  const user = { session: auth.session };
   await page.goto('/login');
   await page.evaluate(
     ({ url, user }) => {
@@ -20,20 +19,34 @@ async function enter(page: Page, kind = 'buyer') {
     { url: data.url, user },
   );
   await page.goto('/');
+  return auth;
+}
+async function logout(page: Page, url: string) {
+  const response = page.waitForResponse(
+    (result) =>
+      result.url().startsWith(`${url}/auth/v1/logout`) && result.request().method() === 'POST',
+  );
+  await page.getByRole('button', { name: 'Sair da conta', exact: true }).click();
+  expect((await response).ok()).toBe(true);
+  await expect(page.getByRole('dialog', { name: 'Acesso pausado' })).toBeVisible();
 }
 async function admin(action: unknown) {
-  const data = await fixture();
-  const response = await fetch(`${data.url}/functions/v1/license-admin`, {
-    method: 'POST',
-    headers: {
-      Origin: origin,
-      Authorization: `Bearer ${data.users.owner.session.access_token}`,
-      apikey: data.key,
-      'Content-Type': 'application/json',
-    },
-    body: JSON.stringify(action),
-  });
-  return { response, data: await response.json() };
+  const auth = await signInTestUser('owner');
+  try {
+    const response = await fetch(`${auth.fixture.url}/functions/v1/license-admin`, {
+      method: 'POST',
+      headers: {
+        Origin: appOrigin,
+        Authorization: `Bearer ${auth.session.access_token}`,
+        apikey: auth.fixture.key,
+        'Content-Type': 'application/json',
+      },
+      body: JSON.stringify(action),
+    });
+    return { response, data: await response.json() };
+  } finally {
+    await closeTestSession(auth);
+  }
 }
 test('a customer without a license is denied and cannot invoke admin or grant itself access', async ({
   page,
@@ -43,11 +56,12 @@ test('a customer without a license is denied and cannot invoke admin or grant it
   await expect(page.getByRole('button', { name: 'Nova lista' })).toHaveCount(0);
   await page.goto('/admin');
   await expect(page.getByRole('alert')).toContainText('Acesso não autorizado');
-  const data = await fixture();
+  const data = await readLocalFixture();
+  const unknown = await signInTestUser('unknown');
   const response = await fetch(`${data.url}/rest/v1/rpc/access_admin`, {
     method: 'POST',
     headers: {
-      Authorization: `Bearer ${data.users.unknown.session.access_token}`,
+      Authorization: `Bearer ${unknown.session.access_token}`,
       apikey: data.key,
       'Content-Type': 'application/json',
     },
@@ -57,11 +71,12 @@ test('a customer without a license is denied and cannot invoke admin or grant it
     }),
   });
   expect(response.ok).toBe(false);
+  await closeTestSession(unknown);
 });
 test('admin grants a license, buyer claims it, revoke blocks it and reactivation restores access', async ({
   page,
 }) => {
-  const data = await fixture();
+  const data = await readLocalFixture();
   await enter(page, 'owner');
   await page.goto('/settings');
   await page.getByRole('link', { name: 'Administrar licenças' }).click();
@@ -90,7 +105,7 @@ test('signed offline access survives reload and logout removes the local authori
   page,
   context,
 }) => {
-  await enter(page);
+  const auth = await enter(page);
   await expect(page.getByRole('button', { name: 'Nova lista' })).toBeVisible();
   await expect(
     page.getByRole('status').filter({ hasText: 'Pronto para usar offline' }),
@@ -100,8 +115,53 @@ test('signed offline access survives reload and logout removes the local authori
   await expect(page.getByRole('button', { name: 'Nova lista' })).toBeVisible();
   await context.setOffline(false);
   await page.goto('/settings');
-  await page.getByRole('button', { name: 'Sair da conta', exact: true }).click();
-  await expect(page.getByRole('dialog', { name: 'Acesso pausado' })).toBeVisible();
+  await logout(page, auth.fixture.url);
   await page.reload();
   await expect(page.getByRole('button', { name: 'Nova lista' })).toHaveCount(0);
+});
+
+test('logout rejects the old session without invalidating an independent or new login', async ({
+  page,
+}) => {
+  const original = await enter(page);
+  const independent = await signInTestUser();
+  let loggedOut = false;
+  try {
+    await expect(page.getByRole('button', { name: 'Nova lista', exact: true })).toBeVisible();
+    expect((await checkTestLicense(original)).status).toBe(200);
+    expect((await checkTestLicense(independent)).status).toBe(200);
+    await page.goto('/settings');
+    await logout(page, original.fixture.url);
+    loggedOut = true;
+    const claims = JSON.parse(
+      Buffer.from(original.session.access_token.split('.')[1], 'base64url').toString(),
+    ) as { exp: number };
+    expect(claims.exp).toBeGreaterThan(Date.now() / 1000);
+    const oldStatus = (await checkTestLicense(original)).status;
+    const independentStatus = (await checkTestLicense(independent)).status;
+    console.log(
+      JSON.stringify({ oldSessionAfterLogout: oldStatus, independentSession: independentStatus }),
+    );
+    expect(oldStatus).toBe(401);
+    expect(independentStatus).toBe(200);
+    const renewed = await enter(page);
+    try {
+      await expect(page.getByRole('button', { name: 'Nova lista', exact: true })).toBeVisible();
+      const newStatus = (await checkTestLicense(renewed)).status;
+      expect(newStatus).toBe(200);
+      console.log(
+        JSON.stringify({
+          oldSessionAfterLogout: oldStatus,
+          independentSession: independentStatus,
+          newLogin: newStatus,
+          oldTokenExpired: false,
+        }),
+      );
+    } finally {
+      await closeTestSession(renewed);
+    }
+  } finally {
+    if (!loggedOut) await closeTestSession(original);
+    await closeTestSession(independent);
+  }
 });

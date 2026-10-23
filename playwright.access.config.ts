@@ -9,5 +9,5 @@ export default defineConfig({
       use: { browserName: 'chromium', viewport: { width: 390, height: 844 } },
     },
   ],
-  use: { ...base.use, storageState: { cookies: [], origins: [] } },
+  use: { ...base.use, storageState: { cookies: [], origins: [] }, trace: 'off' },
 });

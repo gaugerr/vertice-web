@@ -1,4 +1,4 @@
-import { test, expect, type Page } from '@playwright/test';
+import { test, expect, type Page } from './fixtures';
 import { writeFile } from 'node:fs/promises';
 
 async function createList(page: Page, name = 'Compra da semana', budget = '') {

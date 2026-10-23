@@ -1,4 +1,4 @@
-import { test, expect, type Page } from '@playwright/test';
+import { test, expect, type Page } from './fixtures';
 
 async function createList(page: Page, name = 'Compra teste') {
   await page.goto('/');

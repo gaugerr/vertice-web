@@ -35,10 +35,7 @@ for (const kind of ['owner', 'buyer', 'other', 'unknown']) {
     ],
     { input: sql, stdio: ['pipe', 'ignore', 'pipe'] },
   );
-  const client = createClient(url, status.ANON_KEY, { auth: { persistSession: false } });
-  const login = await client.auth.signInWithPassword({ email, password });
-  if (login.error) throw login.error;
-  users[kind] = { uid, email, session: login.data.session };
+  users[kind] = { uid, email, password };
 }
 execFileSync(
   'docker',
@@ -59,7 +56,9 @@ execFileSync(
     stdio: ['pipe', 'ignore', 'pipe'],
   },
 );
-await writeFile('.secrets/fixtures.json', JSON.stringify({ url, key: status.ANON_KEY, users }));
+await writeFile('.secrets/fixtures.json', JSON.stringify({ url, key: status.ANON_KEY, users }), {
+  mode: 0o600,
+});
 await writeFile(
   '.env.local',
   `VITE_ACCESS_MODE=enforced\nVITE_SUPABASE_URL=${url}\nVITE_SUPABASE_PUBLISHABLE_KEY=${status.ANON_KEY}\n`,

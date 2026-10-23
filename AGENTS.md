@@ -167,6 +167,12 @@ Supabase isolado; `hosted.yml` verifica a hospedagem. Runners fixados em Ubuntu 
 por compatibilidade com o Playwright instalado. Nunca apontar fixtures de teste para
 o Supabase de produção. WebKit no CI não comprova instalação em iPhone físico.
 
+Em integração de acesso, `e2e/fixtures.ts` cria uma sessão própria por teste via
+`e2e/support/access.ts`; as abas do mesmo contexto compartilham a sessão. Credenciais
+sintéticas ficam em `.secrets/` e só funcionam no Supabase local. Não reutilizar
+sessões de testes de logout nem salvar estado autenticado/headers em artefatos.
+`tools/wait-access.mjs` valida a prontidão das funções sem persistir uma sessão comum.
+
 Para mudanças pequenas, validar só o necessário; não criar testes que apenas
 espelham texto/estilo. Para dados, dinheiro, acesso ou offline, executar os cenários
 relevantes e preservar cobertura. Conferir telas estreitas, foco e ausência de
