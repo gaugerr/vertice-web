@@ -150,10 +150,18 @@ Não gerar nem rotacionar chaves ao fazer alterações visuais ou de documentaç
   saída `dist` e Node 24. Rotas/cache: `public/_redirects` e `public/_headers`.
   Configuração, autorização de origem e migração por backup: `docs/CLOUDFLARE.md`.
 - Página de vendas independente em `marketing/`: `index.html`, `styles.css` e
-  `script.js`. Projeto Pages `vertice-kit`, raiz `/marketing`, build `node build.mjs`
-  e saída `dist`. Não altera o app nem sua autenticação. A demonstração é fictícia;
-  o preenchimento da planilha é manual. Não publicar os arquivos pagos do kit.
-  Até integrar checkout e entrega reais, manter as vendas sinalizadas em preparação.
+  `conversion.css`, `script.js` e `site-config.js`. Projeto Pages `vertice-kit`, raiz
+  `/marketing`, build `node build.mjs` e saída `dist`. Lista de espera prepara uma
+  mensagem ao WhatsApp do proprietário; envio e confirmação são manuais. O site
+  não salva contatos nem afirma que houve inscrição automática. Configuração do
+  telefone, capacidade total e abertura do lote: `site-config.js`. Não mostrar
+  capacidade total como vagas restantes. R$ 59 é referência após o lançamento;
+  R$ 19,90 é a condição das 100 primeiras compras. Garantia: 7 dias após a entrega.
+  Mídias em `media/` são placeholders; depoimentos de exemplo ficam em template
+  inerte até haver relatos reais. Checklist: `marketing/MIDIAS_E_CONTEUDO.md`.
+  `social.png` é o cartão de compartilhamento 1200×630. Não publicar os arquivos
+  pagos do kit. App/planilha permanecem separados, com registro manual do total.
+  As vendas continuam fechadas até haver checkout, entrega e atendimento definidos.
 
 ## Comandos e validação
 
