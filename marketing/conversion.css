@@ -1,0 +1,103 @@
+/* Novas seções: mantém a paleta, as fontes e o ritmo editorial existentes. */
+[hidden] { display: none !important; }
+.google-access-note { display: flex; align-items: flex-start; gap: 10px; max-width: 440px; font-size: 11px; line-height: 1.8; color: #b7a9c4; margin-top: 23px; }
+.google-access-note svg { width: 16px; height: 16px; margin-top: 3px; color: var(--mint); }
+.demo-section { padding: 80px 0; background: #1d1924; border-top: 1px solid var(--line); }
+.demo-layout { display: grid; grid-template-columns: 1fr 1fr; align-items: center; gap: 90px; }
+.demo-copy h2, .proof-heading h2, .waitlist-copy h2 { font-size: 48px; font-weight: 500; line-height: 1.12; letter-spacing: -1.9px; margin: 23px 0; }
+.demo-copy h2 em, .proof-heading h2 em, .waitlist-copy h2 em { color: #c3abdf; }
+.demo-copy > p:not(.eyebrow) { color: #c0b2cb; font-size: 14px; line-height: 1.9; max-width: 410px; }
+.demo-copy > .demo-honesty { margin-top: 20px; font-size: 12px; color: #a99ab7; }
+.demo-copy .text-link { margin-top: 24px; }
+.demo-media { display: flex; justify-content: center; }
+.media-slot { margin: 0; width: 100%; min-width: 0; }
+.media-slot img, .media-slot video { width: 100%; height: auto; display: block; border-radius: 9px; object-fit: cover; }
+.media-slot-portrait { max-width: 260px; }
+.media-slot-portrait img, .media-slot-portrait video { aspect-ratio: 9 / 16; }
+.media-slot-landscape img { aspect-ratio: 16 / 10; }
+.media-slot figcaption { display: grid; gap: 6px; margin-top: 13px; color: #b7a5c6; font-size: 11px; line-height: 1.7; }
+.media-slot figcaption > span { font-size: 8px; letter-spacing: .12em; color: #9c86af; }
+.kit-columns .media-slot { margin-top: 25px; }
+.kit-columns .media-slot-portrait { max-width: 180px; }
+.kit-columns .media-slot-landscape { max-width: 430px; }
+.proof-section { background: #211b29; padding: 80px 0; border-top: 1px solid var(--line); }
+.proof-heading { display: grid; grid-template-columns: 1.3fr 1fr; align-items: end; gap: 85px; }
+.proof-heading h2 { margin-bottom: 0; }
+.proof-heading > p { color: #b5a5c2; font-size: 13px; line-height: 1.9; max-width: 340px; }
+.proof-print { margin: 38px auto 0; max-width: 690px; }
+.testimonial-grid { display: grid; grid-template-columns: repeat(3, minmax(0, 1fr)); gap: 24px; margin-top: 35px; }
+.testimonial-card { margin: 0; padding: 25px; border: 1px solid var(--line); border-radius: 8px; background: #26202f; }
+.testimonial-card > span { font-size: 10px; color: var(--purple); }
+.testimonial-card blockquote { margin: 22px 0; font-family: Georgia, serif; font-size: 21px; line-height: 1.5; }
+.testimonial-card figcaption { font-size: 10px; line-height: 1.7; color: #b8a7c4; }
+.reference-price { font-size: 15px; color: #baa7c9; margin-top: 22px; }
+.reference-price del { text-decoration-thickness: 1px; }
+.offer-card .price { margin-top: 5px; }
+.price-reference-note { color: #a692b6; font-size: 9px; line-height: 1.7; margin-top: 10px; }
+.launch-capacity { display: grid; gap: 8px; padding: 15px 0; margin-top: 18px; border-block: 1px solid var(--line); }
+.launch-capacity strong { color: var(--mint); font-size: 13px; font-weight: 500; }
+.launch-capacity > span { color: #bfaccc; font-size: 11px; line-height: 1.6; }
+.offer-google-note { margin: 0 0 22px; color: #c0abd0; font-size: 11px; line-height: 1.8; }
+.guarantee { display: flex; gap: 15px; margin-top: 23px; padding-top: 23px; border-top: 1px solid var(--line); align-items: flex-start; }
+.guarantee-seal { width: 54px; height: 63px; flex: 0 0 54px; border: 1px solid #bde9c74a; border-radius: 22px 22px 28px 28px; color: var(--mint); font-size: 27px; text-align: center; padding-top: 6px; line-height: 1; }
+.guarantee-seal small { display: block; font-size: 7px; letter-spacing: .15em; margin-top: 6px; }
+.guarantee strong { font-size: 12px; color: var(--mint); font-weight: 500; }
+.guarantee p { color: #bca6ca; font-size: 10px; line-height: 1.9; margin-top: 8px; }
+.waitlist-section { background: #19151f; padding: 95px 0; scroll-margin-top: 90px; }
+.waitlist-layout { display: grid; grid-template-columns: 1fr 1fr; gap: 95px; align-items: start; }
+.waitlist-copy > p:not(.eyebrow) { color: #b9aac4; font-size: 14px; line-height: 1.9; margin-top: 20px; max-width: 410px; }
+.waitlist-copy > .waitlist-promise { color: #e6ddef; font-size: 19px; line-height: 1.6; }
+.waitlist-promise strong { color: var(--mint); font-weight: 500; white-space: nowrap; }
+.waitlist-copy > .waitlist-conditions { color: #a492b3; font-size: 11px; }
+.waitlist-panel { background: #251d2e; padding: 32px; border: 1px solid #574366; border-radius: 10px; min-width: 0; }
+.waitlist-panel form > label:not(.waitlist-consent) { display: block; font-size: 12px; line-height: 1.7; margin-bottom: 9px; color: #e3d5ed; }
+.waitlist-panel input[type='text'], .waitlist-panel input[type='email'], .waitlist-panel input[type='tel'] { display: block; width: 100%; min-width: 0; border: 1px solid #655172; border-radius: 6px; padding: 15px; background: #19141f; color: #f5edfb; font-size: 16px; line-height: 1.4; min-height: 52px; }
+.waitlist-panel input::placeholder { color: #95829f; }
+.waitlist-panel input:focus { outline: 2px solid var(--purple); outline-offset: 2px; }
+.contact-method { border: 0; padding: 0; margin: 24px 0 17px; display: flex; gap: 20px; flex-wrap: wrap; }
+.contact-method legend { font-size: 12px; line-height: 1.7; margin-bottom: 8px; color: #d9c8e4; }
+.contact-method label { display: inline-flex; gap: 9px; align-items: center; min-height: 38px; font-size: 13px; cursor: pointer; }
+.contact-method input, .waitlist-consent input { accent-color: var(--purple); width: 18px; height: 18px; flex: 0 0 18px; }
+.field-hint { font-size: 10px; line-height: 1.8; color: #b09abe; margin-top: 11px; }
+.waitlist-consent { display: flex; gap: 10px; align-items: flex-start; font-size: 11px; color: #d1bddf; line-height: 1.8; margin: 22px 0; cursor: pointer; }
+.waitlist-consent input { margin: 3px 0 0; }
+#waitlist-submit { width: 100%; justify-content: space-between; font-size: 12px; gap: 15px; }
+#waitlist-submit:disabled { opacity: .55; }
+.waitlist-privacy { font-size: 10px; line-height: 1.9; color: #a690b4; margin-top: 18px; }
+.form-error { margin-top: 12px; color: #e6b1c3; font-size: 12px; line-height: 1.7; }
+.waitlist-confirmation h3 { font-size: 26px; font-weight: 500; letter-spacing: -.8px; line-height: 1.2; margin-top: 22px; }
+.waitlist-confirmation > p:not(.field-hint) { color: #c5afd2; font-size: 13px; line-height: 1.9; margin-top: 18px; }
+.confirmation-icon { color: var(--mint); display: grid; place-items: center; width: 54px; height: 54px; border: 1px solid #bde9c74a; border-radius: 50%; font-size: 28px; }
+.waitlist-confirmation .button { width: 100%; margin-top: 25px; font-size: 13px; gap: 12px; }
+.edit-waitlist { min-height: 44px; background: transparent; border: 0; padding: 12px 0; color: #cdb2df; font-size: 12px; text-decoration: underline; text-underline-offset: 4px; margin-top: 12px; }
+.faq-cta { display: inline-flex; gap: 10px; align-items: center; min-height: 44px; font-size: 12px; color: #765387; margin-top: 24px; border-bottom: 1px solid #76538766; }
+@media (max-width: 900px) {
+  .demo-layout, .proof-heading, .waitlist-layout { gap: 40px; }
+  .demo-copy h2, .proof-heading h2, .waitlist-copy h2 { font-size: 39px; }
+  .waitlist-panel { padding: 25px; }
+  .offer-layout { align-items: start; }
+}
+@media (max-width: 680px) {
+  .demo-section, .proof-section { padding: 60px 0; }
+  .demo-layout, .proof-heading, .waitlist-layout { grid-template-columns: 1fr; gap: 31px; }
+  .demo-copy h2, .proof-heading h2, .waitlist-copy h2 { font-size: 36px; letter-spacing: -1.3px; }
+  .demo-copy > p:not(.eyebrow), .proof-heading > p { max-width: 100%; font-size: 13px; }
+  .media-slot-portrait { max-width: 230px; }
+  .demo-media { padding-top: 4px; }
+  .kit-columns .media-slot-portrait { max-width: 160px; }
+  .media-slot figcaption { font-size: 10px; }
+  .proof-print { margin-top: 28px; }
+  .testimonial-grid { grid-template-columns: 1fr; }
+  .waitlist-section { padding: 65px 0; }
+  .waitlist-copy > .waitlist-promise { font-size: 18px; }
+  .waitlist-copy > p:not(.eyebrow) { max-width: 100%; font-size: 13px; }
+  .waitlist-copy > .waitlist-conditions { font-size: 11px; }
+  .waitlist-panel { padding: 27px 23px; }
+  .offer-card .price { margin-top: 5px; }
+  .mobile-offer > .button { font-size: 10px; gap: 10px; }
+  .mobile-offer > div > span { max-width: 145px; line-height: 1.5; }
+}
+
+.direct-whatsapp{font-size:11px;line-height:1.8;color:#bba5c8;margin-top:20px}.direct-whatsapp a{text-decoration:underline;text-underline-offset:4px;color:#d5bde7}
+
+.waitlist-panel{scroll-margin-top:100px}.waitlist-panel-title{font-size:23px;font-weight:500;letter-spacing:-.5px;line-height:1.3}.waitlist-panel-intro{font-size:11px;line-height:1.8;color:#baa5c7;margin:12px 0 23px}
