@@ -115,23 +115,80 @@
           <div class="hero-art live-app-art">
             <div class="preview-label"><span class="tiny-dot"></span> EXPERIMENTE O VÉRTICE</div>
             <div class="app-preview" id="demo-compra" aria-label="Demonstração interativa do app">
-              <div class="app-preview-header"><span class="preview-brand"><img src="/icon.svg" alt="" width="30" height="30" />vértice<span>.</span></span><span>Minhas listas</span></div>
+              <div class="app-preview-header">
+                <span class="preview-brand"
+                  ><img src="/icon.svg" alt="" width="30" height="30" />vértice<span>.</span></span
+                ><span>Minhas listas</span>
+              </div>
               <div class="app-preview-body">
-                <button type="button" class="preview-back" id="app-back" hidden>← Voltar para categorias</button>
+                <button type="button" class="preview-back" id="app-back" hidden>
+                  ← Voltar para categorias
+                </button>
                 <p class="preview-eyebrow">SUA LISTA DE COMPRAS</p>
-                <h2>Mercado da semana</h2><p class="preview-muted">Uma lista de exemplo. Pode mexer à vontade.</p>
-                <div class="app-total-card"><div><span class="preview-eyebrow">TOTAL DA LISTA</span><output id="demo-total">R$ 25,18</output><p id="app-count">3 de 5 itens comprados</p></div><svg aria-hidden="true"><use href="#basket" /></svg></div>
-                <div class="app-budget"><label for="app-budget-input">Orçamento de exemplo <span>R$</span><input id="app-budget-input" type="text" inputmode="decimal" value="70,00" maxlength="12" data-app-money="budget" /></label><progress id="app-budget-progress" max="7000" value="2518" aria-label="Orçamento utilizado"></progress><p id="demo-remaining" role="status">Ainda cabem R$ 44,82.</p></div>
-                <div id="app-categories"><div class="preview-section-heading"><h3>Por categoria</h3><span>Toque para abrir ↘</span></div><div class="app-category-grid">
-                <button type="button" class="app-category" data-category="essenciais"><span class="app-category-icon">◇</span><strong>Essenciais</strong><span>Arroz, leite, feijão e café</span><small data-category-count="essenciais"></small><b aria-hidden="true">›</b></button>
-                <button type="button" class="app-category" data-category="hortifruti"><span class="app-category-icon mint">♧</span><strong>Hortifruti</strong><span>Frutas para a semana</span><small data-category-count="hortifruti"></small><b aria-hidden="true">›</b></button>
-                </div><button class="preview-button full" id="show-app-items" type="button">Experimentar a lista <span aria-hidden="true">→</span></button></div>
-                <div id="app-items-view" hidden><h3 id="app-items-title">Todos os itens</h3><p class="preview-muted">Marque o que comprou e altere os preços (R$).</p><div id="app-items"></div></div>
+                <h2>Mercado da semana</h2>
+                <p class="preview-muted">Uma lista de exemplo. Pode mexer à vontade.</p>
+                <div class="app-total-card">
+                  <div>
+                    <span class="preview-eyebrow">TOTAL DA LISTA</span
+                    ><output id="demo-total">R$ 25,18</output>
+                    <p id="app-count">3 de 5 itens comprados</p>
+                  </div>
+                  <svg aria-hidden="true"><use href="#basket" /></svg>
+                </div>
+                <div class="app-budget">
+                  <label for="app-budget-input"
+                    >Orçamento de exemplo <span>R$</span
+                    ><input
+                      id="app-budget-input"
+                      type="text"
+                      inputmode="decimal"
+                      value="70,00"
+                      maxlength="12"
+                      data-app-money="budget" /></label
+                  ><progress
+                    id="app-budget-progress"
+                    max="7000"
+                    value="2518"
+                    aria-label="Orçamento utilizado"
+                  ></progress>
+                  <p id="demo-remaining" role="status">Ainda cabem R$ 44,82.</p>
+                </div>
+                <div id="app-categories">
+                  <div class="preview-section-heading">
+                    <h3>Por categoria</h3>
+                    <span>Toque para abrir ↘</span>
+                  </div>
+                  <div class="app-category-grid">
+                    <button type="button" class="app-category" data-category="essenciais">
+                      <span class="app-category-icon">◇</span><strong>Essenciais</strong
+                      ><span>Arroz, leite, feijão e café</span
+                      ><small data-category-count="essenciais"></small><b aria-hidden="true">›</b>
+                    </button>
+                    <button type="button" class="app-category" data-category="hortifruti">
+                      <span class="app-category-icon mint">♧</span><strong>Hortifruti</strong
+                      ><span>Frutas para a semana</span
+                      ><small data-category-count="hortifruti"></small><b aria-hidden="true">›</b>
+                    </button>
+                  </div>
+                  <button class="preview-button full" id="show-app-items" type="button">
+                    Experimentar a lista <span aria-hidden="true">→</span>
+                  </button>
+                </div>
+                <div id="app-items-view" hidden>
+                  <h3 id="app-items-title">Todos os itens</h3>
+                  <p class="preview-muted">Marque o que comprou e altere os preços (R$).</p>
+                  <div id="app-items"></div>
+                </div>
                 <p id="app-input-error" class="demo-error" role="status"></p>
-                <button type="button" class="preview-reset" id="reset-app">↺ Recomeçar exemplo</button>
+                <button type="button" class="preview-reset" id="reset-app">
+                  ↺ Recomeçar exemplo
+                </button>
               </div>
             </div>
-            <p class="interactive-caption">Prévia simplificada, com o visual do app.<br />Dados de exemplo, sem salvar suas compras.</p>
+            <p class="interactive-caption">
+              Prévia simplificada, com o visual do app.<br />Dados de exemplo, sem salvar suas
+              compras.
+            </p>
           </div>
         </div>
         <div class="wrap hero-bottom">
@@ -242,28 +299,439 @@
 
       <section class="finance-section" id="seu-mes" aria-labelledby="month-title">
         <div class="wrap">
-          <div class="finance-intro"><div><p class="eyebrow">A PLANILHA FINANCEIRA</p><h2 id="month-title">O seu mês.<br /><em>Do seu jeito.</em></h2></div><div><p>Quanto sobra quando você enxerga tudo junto? Troque os valores abaixo e descubra. Os gráficos acompanham cada mudança.</p><p class="preview-muted">Esta prévia simplificada reproduz o visual da planilha do kit. No arquivo completo, você registra lançamentos, acompanha o histórico e organiza suas categorias.</p></div></div>
+          <div class="finance-intro">
+            <div>
+              <p class="eyebrow">A PLANILHA FINANCEIRA</p>
+              <h2 id="month-title">O seu mês.<br /><em>Do seu jeito.</em></h2>
+            </div>
+            <div>
+              <p>
+                Quanto sobra quando você enxerga tudo junto? Troque os valores abaixo e descubra. Os
+                gráficos acompanham cada mudança.
+              </p>
+              <p class="preview-muted">
+                Esta prévia simplificada reproduz o visual da planilha do kit. No arquivo completo,
+                você registra lançamentos, acompanha o histórico e organiza suas categorias.
+              </p>
+            </div>
+          </div>
           <div class="finance-preview" id="finance-preview">
-            <div class="finance-top"><div><span class="preview-brand">vértice<span>.</span></span><h3>seu mês em equilíbrio</h3><span class="preview-muted">Mês de exemplo · valores editáveis</span></div><button type="button" class="preview-reset" id="reset-finance">↺ Restaurar exemplo</button></div>
-            <div class="finance-tabs" role="tablist" aria-label="Áreas da demonstração financeira"><button type="button" role="tab" id="tab-dashboard" aria-controls="panel-dashboard" aria-selected="true" tabindex="0" data-finance-tab="dashboard">Dashboard</button><button type="button" role="tab" id="tab-entries" aria-controls="panel-entries" aria-selected="false" tabindex="-1" data-finance-tab="entries">Lançamentos</button><button type="button" role="tab" id="tab-budget" aria-controls="panel-budget" aria-selected="false" tabindex="-1" data-finance-tab="budget">Orçamento</button><button type="button" role="tab" id="tab-goals" aria-controls="panel-goals" aria-selected="false" tabindex="-1" data-finance-tab="goals">Metas</button></div>
-            <div class="finance-kpis" aria-label="Indicadores do mês"><div><span>RECEITAS</span><output id="finance-income"></output></div><div><span>DESPESAS</span><output id="finance-expenses"></output></div><div><span>SALDO</span><output id="finance-balance"></output></div><div><span>TAXA DE POUPANÇA</span><output id="finance-savings"></output></div><div><span>A PAGAR</span><output id="finance-pending"></output></div></div>
+            <div class="finance-top">
+              <div>
+                <span class="preview-brand">vértice<span>.</span></span>
+                <h3>seu mês em equilíbrio</h3>
+                <span class="preview-muted">Mês de exemplo · valores editáveis</span>
+              </div>
+              <button type="button" class="preview-reset" id="reset-finance">
+                ↺ Restaurar exemplo
+              </button>
+            </div>
+            <div class="finance-tabs" role="tablist" aria-label="Áreas da demonstração financeira">
+              <button
+                type="button"
+                role="tab"
+                id="tab-dashboard"
+                aria-controls="panel-dashboard"
+                aria-selected="true"
+                tabindex="0"
+                data-finance-tab="dashboard"
+              >
+                Dashboard</button
+              ><button
+                type="button"
+                role="tab"
+                id="tab-entries"
+                aria-controls="panel-entries"
+                aria-selected="false"
+                tabindex="-1"
+                data-finance-tab="entries"
+              >
+                Lançamentos</button
+              ><button
+                type="button"
+                role="tab"
+                id="tab-budget"
+                aria-controls="panel-budget"
+                aria-selected="false"
+                tabindex="-1"
+                data-finance-tab="budget"
+              >
+                Orçamento</button
+              ><button
+                type="button"
+                role="tab"
+                id="tab-goals"
+                aria-controls="panel-goals"
+                aria-selected="false"
+                tabindex="-1"
+                data-finance-tab="goals"
+              >
+                Metas
+              </button>
+            </div>
+            <div class="finance-kpis" aria-label="Indicadores do mês">
+              <div><span>RECEITAS</span><output id="finance-income"></output></div>
+              <div><span>DESPESAS</span><output id="finance-expenses"></output></div>
+              <div><span>SALDO</span><output id="finance-balance"></output></div>
+              <div><span>TAXA DE POUPANÇA</span><output id="finance-savings"></output></div>
+              <div><span>A PAGAR</span><output id="finance-pending"></output></div>
+            </div>
             <p class="demo-error" id="finance-input-error" role="status"></p>
             <div id="panel-dashboard" role="tabpanel" aria-labelledby="tab-dashboard">
-              <div class="finance-editor"><div><h4>Faça caber no seu mês.</h4><p>Edite receitas e gastos para experimentar.</p></div><div class="finance-input-grid"><label>Receita do mês<span class="demo-money-field"><span>R$</span><input id="finance-income-input" type="text" inputmode="decimal" maxlength="12" value="4500,00" data-finance-value="income" /></span></label><label>Moradia<span class="demo-money-field"><span>R$</span><input type="text" inputmode="decimal" maxlength="12" value="1320,00" data-expense="moradia" aria-label="Gasto com Moradia" /></span></label><label>Mercado<span class="demo-money-field"><span>R$</span><input type="text" inputmode="decimal" maxlength="12" value="707,15" data-expense="mercado" aria-label="Gasto com Mercado" /></span></label><label>Contas<span class="demo-money-field"><span>R$</span><input type="text" inputmode="decimal" maxlength="12" value="234,90" data-expense="contas" aria-label="Gasto com Contas" /></span></label><label>Outros<span class="demo-money-field"><span>R$</span><input type="text" inputmode="decimal" maxlength="12" value="1164,10" data-expense="outros" aria-label="Gasto com Outros" /></span></label></div></div>
+              <div class="finance-editor">
+                <div>
+                  <h4>Faça caber no seu mês.</h4>
+                  <p>Edite receitas e gastos para experimentar.</p>
+                </div>
+                <div class="finance-input-grid">
+                  <label
+                    >Receita do mês<span class="demo-money-field"
+                      ><span>R$</span
+                      ><input
+                        id="finance-income-input"
+                        type="text"
+                        inputmode="decimal"
+                        maxlength="12"
+                        value="4500,00"
+                        data-finance-value="income" /></span></label
+                  ><label
+                    >Moradia<span class="demo-money-field"
+                      ><span>R$</span
+                      ><input
+                        type="text"
+                        inputmode="decimal"
+                        maxlength="12"
+                        value="1320,00"
+                        data-expense="moradia"
+                        aria-label="Gasto com Moradia" /></span></label
+                  ><label
+                    >Mercado<span class="demo-money-field"
+                      ><span>R$</span
+                      ><input
+                        type="text"
+                        inputmode="decimal"
+                        maxlength="12"
+                        value="707,15"
+                        data-expense="mercado"
+                        aria-label="Gasto com Mercado" /></span></label
+                  ><label
+                    >Contas<span class="demo-money-field"
+                      ><span>R$</span
+                      ><input
+                        type="text"
+                        inputmode="decimal"
+                        maxlength="12"
+                        value="234,90"
+                        data-expense="contas"
+                        aria-label="Gasto com Contas" /></span></label
+                  ><label
+                    >Outros<span class="demo-money-field"
+                      ><span>R$</span
+                      ><input
+                        type="text"
+                        inputmode="decimal"
+                        maxlength="12"
+                        value="1164,10"
+                        data-expense="outros"
+                        aria-label="Gasto com Outros" /></span
+                  ></label>
+                </div>
+              </div>
               <div class="finance-charts">
-                <section class="finance-chart"><div class="chart-heading"><h4>Para onde foi?</h4><span>Gastos por categoria</span></div><div class="donut-layout"><div class="finance-donut" id="finance-donut" role="img" aria-label="Distribuição dos gastos"><div><span id="donut-label">Mercado</span><strong id="donut-amount"></strong><small id="donut-percent"></small></div></div><div class="finance-legend" id="finance-legend"></div></div><p class="chart-hint">Toque nas categorias para comparar.</p></section>
-                <section class="finance-chart"><div class="chart-heading"><h4>O que entra. O que sai.</h4><span>Mês de exemplo</span></div><div id="finance-flow" class="finance-bars"></div><p id="finance-flow-detail" class="chart-detail" role="status"></p></section>
-                <section class="finance-chart"><div class="chart-heading"><h4>Planejado × realizado</h4><span>Ajuste os limites na aba Orçamento</span></div><div id="finance-budget-chart" class="finance-bars"></div><p id="finance-budget-detail" class="chart-detail" role="status">Roxo: limite · verde: gasto · rosa: limite ultrapassado</p></section>
-                <section class="finance-chart"><div class="chart-heading"><h4>Como você pagou?</h4><span>Altere na aba Lançamentos</span></div><div id="finance-payments" class="finance-bars"></div><p id="finance-payment-detail" class="chart-detail" role="status"></p></section>
+                <section class="finance-chart">
+                  <div class="chart-heading">
+                    <h4>Para onde foi?</h4>
+                    <span>Gastos por categoria</span>
+                  </div>
+                  <div class="donut-layout">
+                    <div
+                      class="finance-donut"
+                      id="finance-donut"
+                      role="img"
+                      aria-label="Distribuição dos gastos"
+                    >
+                      <div>
+                        <span id="donut-label">Mercado</span><strong id="donut-amount"></strong
+                        ><small id="donut-percent"></small>
+                      </div>
+                    </div>
+                    <div class="finance-legend" id="finance-legend"></div>
+                  </div>
+                  <p class="chart-hint">Toque nas categorias para comparar.</p>
+                </section>
+                <section class="finance-chart">
+                  <div class="chart-heading">
+                    <h4>O que entra. O que sai.</h4>
+                    <span>Mês de exemplo</span>
+                  </div>
+                  <div id="finance-flow" class="finance-bars"></div>
+                  <p id="finance-flow-detail" class="chart-detail" role="status"></p>
+                </section>
+                <section class="finance-chart">
+                  <div class="chart-heading">
+                    <h4>Planejado × realizado</h4>
+                    <span>Ajuste os limites na aba Orçamento</span>
+                  </div>
+                  <div id="finance-budget-chart" class="finance-bars"></div>
+                  <p id="finance-budget-detail" class="chart-detail" role="status">
+                    Roxo: limite · verde: gasto · rosa: limite ultrapassado
+                  </p>
+                </section>
+                <section class="finance-chart">
+                  <div class="chart-heading">
+                    <h4>Como você pagou?</h4>
+                    <span>Altere na aba Lançamentos</span>
+                  </div>
+                  <div id="finance-payments" class="finance-bars"></div>
+                  <p id="finance-payment-detail" class="chart-detail" role="status"></p>
+                </section>
               </div>
             </div>
-            <div id="panel-entries" role="tabpanel" aria-labelledby="tab-entries" hidden><div class="demo-panel-heading"><h4>Quatro gastos para experimentar.</h4><p>Altere valores, formas de pagamento e o que ainda falta pagar. Os indicadores e gráficos acompanham.</p></div><div class="demo-entry-row"><strong>Moradia</strong><label>Valor (R$)<input type="text" inputmode="decimal" maxlength="12" value="1320,00" data-expense="moradia" /></label><label>Pagamento<select data-payment="moradia"><option>Pix</option><option>Cartão de débito</option><option>Boleto</option><option>Cartão de crédito</option></select></label><label>Situação<select data-paid="moradia"><option value="paid">Pago</option><option value="pending">A pagar</option></select></label></div><div class="demo-entry-row"><strong>Mercado</strong><label>Valor (R$)<input type="text" inputmode="decimal" maxlength="12" value="707,15" data-expense="mercado" /></label><label>Pagamento<select data-payment="mercado"><option>Pix</option><option>Cartão de débito</option><option>Boleto</option><option>Cartão de crédito</option></select></label><label>Situação<select data-paid="mercado"><option value="paid">Pago</option><option value="pending">A pagar</option></select></label></div><div class="demo-entry-row"><strong>Contas</strong><label>Valor (R$)<input type="text" inputmode="decimal" maxlength="12" value="234,90" data-expense="contas" /></label><label>Pagamento<select data-payment="contas"><option>Pix</option><option>Cartão de débito</option><option>Boleto</option><option>Cartão de crédito</option></select></label><label>Situação<select data-paid="contas"><option value="paid">Pago</option><option value="pending">A pagar</option></select></label></div><div class="demo-entry-row"><strong>Outros</strong><label>Valor (R$)<input type="text" inputmode="decimal" maxlength="12" value="1164,10" data-expense="outros" /></label><label>Pagamento<select data-payment="outros"><option>Pix</option><option>Cartão de débito</option><option>Boleto</option><option>Cartão de crédito</option></select></label><label>Situação<select data-paid="outros"><option value="paid">Pago</option><option value="pending">A pagar</option></select></label></div></div>
-            <div id="panel-budget" role="tabpanel" aria-labelledby="tab-budget" hidden><div class="demo-panel-heading"><h4>Um limite para cada parte do mês.</h4><p>Defina seu planejamento e compare com os gastos que você informou.</p></div><div class="demo-budget-row"><label>Moradia · limite (R$)<input type="text" inputmode="decimal" maxlength="12" value="1350,00" data-limit="moradia" /></label><div><progress max="100" value="0" data-limit-progress="moradia" aria-label="Orçamento de Moradia"></progress><span data-limit-status="moradia"></span></div></div><div class="demo-budget-row"><label>Mercado · limite (R$)<input type="text" inputmode="decimal" maxlength="12" value="750,00" data-limit="mercado" /></label><div><progress max="100" value="0" data-limit-progress="mercado" aria-label="Orçamento de Mercado"></progress><span data-limit-status="mercado"></span></div></div><div class="demo-budget-row"><label>Contas · limite (R$)<input type="text" inputmode="decimal" maxlength="12" value="250,00" data-limit="contas" /></label><div><progress max="100" value="0" data-limit-progress="contas" aria-label="Orçamento de Contas"></progress><span data-limit-status="contas"></span></div></div><div class="demo-budget-row"><label>Outros · limite (R$)<input type="text" inputmode="decimal" maxlength="12" value="1500,00" data-limit="outros" /></label><div><progress max="100" value="0" data-limit-progress="outros" aria-label="Orçamento de Outros"></progress><span data-limit-status="outros"></span></div></div></div>
-            <div id="panel-goals" role="tabpanel" aria-labelledby="tab-goals" hidden><div class="demo-panel-heading"><h4>Qual é o seu próximo plano?</h4><p>Simule uma reserva. Os valores da meta são independentes do saldo do mês.</p></div><div class="goal-inputs"><label>Sua meta (R$)<input type="text" inputmode="decimal" maxlength="12" value="12000,00" data-goal="target" /></label><label>Já guardado (R$)<input type="text" inputmode="decimal" maxlength="12" value="3200,00" data-goal="saved" /></label><label>Quanto guardar por mês (R$)<input type="text" inputmode="decimal" maxlength="12" value="400,00" data-goal="monthly" /></label></div><div class="goal-result"><span>SEU PRÓXIMO PASSO</span><strong id="goal-remaining"></strong><progress id="goal-progress" value="0" max="100" aria-label="Progresso da meta"></progress><p id="goal-time"></p><small>Projeção simples, sem juros, rendimentos ou inflação.</small></div></div>
-            <div class="finance-footer"><span class="tiny-dot"></span> Prévia interativa · nada é salvo ou enviado</div>
+            <div id="panel-entries" role="tabpanel" aria-labelledby="tab-entries" hidden>
+              <div class="demo-panel-heading">
+                <h4>Quatro gastos para experimentar.</h4>
+                <p>
+                  Altere valores, formas de pagamento e o que ainda falta pagar. Os indicadores e
+                  gráficos acompanham.
+                </p>
+              </div>
+              <div class="demo-entry-row">
+                <strong>Moradia</strong
+                ><label
+                  >Valor (R$)<input
+                    type="text"
+                    inputmode="decimal"
+                    maxlength="12"
+                    value="1320,00"
+                    data-expense="moradia" /></label
+                ><label
+                  >Pagamento<select data-payment="moradia">
+                    <option>Pix</option>
+                    <option>Cartão de débito</option>
+                    <option>Boleto</option>
+                    <option>Cartão de crédito</option>
+                  </select></label
+                ><label
+                  >Situação<select data-paid="moradia">
+                    <option value="paid">Pago</option>
+                    <option value="pending">A pagar</option>
+                  </select></label
+                >
+              </div>
+              <div class="demo-entry-row">
+                <strong>Mercado</strong
+                ><label
+                  >Valor (R$)<input
+                    type="text"
+                    inputmode="decimal"
+                    maxlength="12"
+                    value="707,15"
+                    data-expense="mercado" /></label
+                ><label
+                  >Pagamento<select data-payment="mercado">
+                    <option>Pix</option>
+                    <option>Cartão de débito</option>
+                    <option>Boleto</option>
+                    <option>Cartão de crédito</option>
+                  </select></label
+                ><label
+                  >Situação<select data-paid="mercado">
+                    <option value="paid">Pago</option>
+                    <option value="pending">A pagar</option>
+                  </select></label
+                >
+              </div>
+              <div class="demo-entry-row">
+                <strong>Contas</strong
+                ><label
+                  >Valor (R$)<input
+                    type="text"
+                    inputmode="decimal"
+                    maxlength="12"
+                    value="234,90"
+                    data-expense="contas" /></label
+                ><label
+                  >Pagamento<select data-payment="contas">
+                    <option>Pix</option>
+                    <option>Cartão de débito</option>
+                    <option>Boleto</option>
+                    <option>Cartão de crédito</option>
+                  </select></label
+                ><label
+                  >Situação<select data-paid="contas">
+                    <option value="paid">Pago</option>
+                    <option value="pending">A pagar</option>
+                  </select></label
+                >
+              </div>
+              <div class="demo-entry-row">
+                <strong>Outros</strong
+                ><label
+                  >Valor (R$)<input
+                    type="text"
+                    inputmode="decimal"
+                    maxlength="12"
+                    value="1164,10"
+                    data-expense="outros" /></label
+                ><label
+                  >Pagamento<select data-payment="outros">
+                    <option>Pix</option>
+                    <option>Cartão de débito</option>
+                    <option>Boleto</option>
+                    <option>Cartão de crédito</option>
+                  </select></label
+                ><label
+                  >Situação<select data-paid="outros">
+                    <option value="paid">Pago</option>
+                    <option value="pending">A pagar</option>
+                  </select></label
+                >
+              </div>
+            </div>
+            <div id="panel-budget" role="tabpanel" aria-labelledby="tab-budget" hidden>
+              <div class="demo-panel-heading">
+                <h4>Um limite para cada parte do mês.</h4>
+                <p>Defina seu planejamento e compare com os gastos que você informou.</p>
+              </div>
+              <div class="demo-budget-row">
+                <label
+                  >Moradia · limite (R$)<input
+                    type="text"
+                    inputmode="decimal"
+                    maxlength="12"
+                    value="1350,00"
+                    data-limit="moradia"
+                /></label>
+                <div>
+                  <progress
+                    max="100"
+                    value="0"
+                    data-limit-progress="moradia"
+                    aria-label="Orçamento de Moradia"
+                  ></progress
+                  ><span data-limit-status="moradia"></span>
+                </div>
+              </div>
+              <div class="demo-budget-row">
+                <label
+                  >Mercado · limite (R$)<input
+                    type="text"
+                    inputmode="decimal"
+                    maxlength="12"
+                    value="750,00"
+                    data-limit="mercado"
+                /></label>
+                <div>
+                  <progress
+                    max="100"
+                    value="0"
+                    data-limit-progress="mercado"
+                    aria-label="Orçamento de Mercado"
+                  ></progress
+                  ><span data-limit-status="mercado"></span>
+                </div>
+              </div>
+              <div class="demo-budget-row">
+                <label
+                  >Contas · limite (R$)<input
+                    type="text"
+                    inputmode="decimal"
+                    maxlength="12"
+                    value="250,00"
+                    data-limit="contas"
+                /></label>
+                <div>
+                  <progress
+                    max="100"
+                    value="0"
+                    data-limit-progress="contas"
+                    aria-label="Orçamento de Contas"
+                  ></progress
+                  ><span data-limit-status="contas"></span>
+                </div>
+              </div>
+              <div class="demo-budget-row">
+                <label
+                  >Outros · limite (R$)<input
+                    type="text"
+                    inputmode="decimal"
+                    maxlength="12"
+                    value="1500,00"
+                    data-limit="outros"
+                /></label>
+                <div>
+                  <progress
+                    max="100"
+                    value="0"
+                    data-limit-progress="outros"
+                    aria-label="Orçamento de Outros"
+                  ></progress
+                  ><span data-limit-status="outros"></span>
+                </div>
+              </div>
+            </div>
+            <div id="panel-goals" role="tabpanel" aria-labelledby="tab-goals" hidden>
+              <div class="demo-panel-heading">
+                <h4>Qual é o seu próximo plano?</h4>
+                <p>Simule uma reserva. Os valores da meta são independentes do saldo do mês.</p>
+              </div>
+              <div class="goal-inputs">
+                <label
+                  >Sua meta (R$)<input
+                    type="text"
+                    inputmode="decimal"
+                    maxlength="12"
+                    value="12000,00"
+                    data-goal="target" /></label
+                ><label
+                  >Já guardado (R$)<input
+                    type="text"
+                    inputmode="decimal"
+                    maxlength="12"
+                    value="3200,00"
+                    data-goal="saved" /></label
+                ><label
+                  >Quanto guardar por mês (R$)<input
+                    type="text"
+                    inputmode="decimal"
+                    maxlength="12"
+                    value="400,00"
+                    data-goal="monthly"
+                /></label>
+              </div>
+              <div class="goal-result">
+                <span>SEU PRÓXIMO PASSO</span><strong id="goal-remaining"></strong
+                ><progress
+                  id="goal-progress"
+                  value="0"
+                  max="100"
+                  aria-label="Progresso da meta"
+                ></progress>
+                <p id="goal-time"></p>
+                <small>Projeção simples, sem juros, rendimentos ou inflação.</small>
+              </div>
+            </div>
+            <div class="finance-footer">
+              <span class="tiny-dot"></span> Prévia interativa · nada é salvo ou enviado
+            </div>
           </div>
-          <div class="manual-demo interactive-manual"><div><strong>Da lista para a visão do mês.</strong><p>Simule digitar o total da compra no campo Mercado desta prévia.</p></div><button id="fill-sheet-example" type="button">Usar total da lista neste exemplo ↗</button><p id="manual-demo-status" role="status">No kit, esse registro é manual. Não existe sincronização automática entre app e planilha.</p></div>
-          <p class="interactive-caption">Use valores fictícios. Ao sair ou recarregar a página, a demonstração recomeça. Nenhum dado é gravado na planilha do kit.</p>
+          <div class="manual-demo interactive-manual">
+            <div>
+              <strong>Da lista para a visão do mês.</strong>
+              <p>Simule digitar o total da compra no campo Mercado desta prévia.</p>
+            </div>
+            <button id="fill-sheet-example" type="button">
+              Usar total da lista neste exemplo ↗
+            </button>
+            <p id="manual-demo-status" role="status">
+              No kit, esse registro é manual. Não existe sincronização automática entre app e
+              planilha.
+            </p>
+          </div>
+          <p class="interactive-caption">
+            Use valores fictícios. Ao sair ou recarregar a página, a demonstração recomeça. Nenhum
+            dado é gravado na planilha do kit.
+          </p>
         </div>
       </section>
 
