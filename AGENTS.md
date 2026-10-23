@@ -147,6 +147,11 @@ Não gerar nem rotacionar chaves ao fazer alterações visuais ou de documentaç
 - Cloudflare Pages usa `tools/build-cloudflare.mjs`, sempre com acesso protegido,
   saída `dist` e Node 24. Rotas/cache: `public/_redirects` e `public/_headers`.
   Configuração, autorização de origem e migração por backup: `docs/CLOUDFLARE.md`.
+- Página de vendas independente em `marketing/`: `index.html`, `styles.css` e
+  `script.js`. Projeto Pages `vertice-kit`, raiz `/marketing`, build `node build.mjs`
+  e saída `dist`. Não altera o app nem sua autenticação. A demonstração é fictícia;
+  o preenchimento da planilha é manual. Não publicar os arquivos pagos do kit.
+  Até integrar checkout e entrega reais, manter as vendas sinalizadas em preparação.
 
 ## Comandos e validação
 
