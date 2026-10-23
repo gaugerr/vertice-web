@@ -90,14 +90,27 @@ export default function CategoriesPage() {
                 <ChevronRight size={19} className="muted" aria-hidden="true" />
               </div>
               <h2>{category.title}</h2>
-              <p className="category-preview">
-                {group.length
-                  ? group.slice(0, 4).map(formatItemName).join(' · ')
-                  : list.status === 'completed'
+              {group.length ? (
+                <ul className="category-items" aria-label={`Itens de ${category.title}`}>
+                  {group.map((item) => (
+                    <li key={item.id} className={item.isPurchased ? 'is-purchased' : undefined}>
+                      <span className="category-item-status" aria-hidden="true">
+                        {item.isPurchased ? <Check size={14} /> : <span />}
+                      </span>
+                      <span className="sr-only">
+                        {item.isPurchased ? 'Comprado: ' : 'Pendente: '}
+                      </span>
+                      <span className="category-item-name">{formatItemName(item)}</span>
+                    </li>
+                  ))}
+                </ul>
+              ) : (
+                <p className="category-preview">
+                  {list.status === 'completed'
                     ? 'Nenhum produto nesta compra'
                     : 'Adicione os primeiros itens'}
-                {group.length > 4 ? ` · +${group.length - 4}` : ''}
-              </p>
+                </p>
+              )}
               <div className="category-footer">
                 <span>
                   {group.length} {group.length === 1 ? 'item' : 'itens'}
@@ -112,3 +125,4 @@ export default function CategoriesPage() {
     </>
   );
 }
+
