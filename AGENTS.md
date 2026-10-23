@@ -179,6 +179,11 @@ relevantes e preservar cobertura. Conferir telas estreitas, foco e ausência de
 rolagem horizontal ao alterar layout. Não atualizar dependências ou publicar fora
 do escopo solicitado. Manter este mapa atualizado quando mover ou criar funções.
 
+`e2e/responsive.spec.ts` verifica telas e diálogos de 280 a 844 px com toque,
+incluindo paisagem e nomes longos. O viewport limita a escala e `touch-action`
+preserva a rolagem sem pinça; preferências de acessibilidade do navegador podem
+sobrepor o bloqueio. A emulação não substitui conferir gestos em aparelho físico.
+
 Detalhes: `README.md`, `docs/access/SETUP.md`, `docs/access/GOOGLE.md`,
 `docs/access/VALIDATION.md`, `docs/VALIDATION.md`, `docs/FUTURE-SYNC.md` e
 `docs/FLUTTER-TO-WEB.md`. Alguns documentos têm registros históricos; conferir o
