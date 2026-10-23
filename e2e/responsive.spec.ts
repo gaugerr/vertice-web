@@ -27,9 +27,7 @@ for (const viewport of [
   { width: 430, height: 932 },
   { width: 844, height: 390 },
 ]) {
-  test(`shopping screens and forms fit ${viewport.width}×${viewport.height}`, async ({
-    page,
-  }) => {
+  test(`shopping screens and forms fit ${viewport.width}×${viewport.height}`, async ({ page }) => {
     await page.setViewportSize(viewport);
     await page.goto('/');
     await page.getByRole('button', { name: 'Nova lista', exact: true }).tap();
