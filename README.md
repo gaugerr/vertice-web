@@ -4,7 +4,7 @@ Aplicativo de listas de compras em React, TypeScript, Vite e Tailwind CSS 4. Os 
 
 Este projeto é independente do Flutter. Não substitui automaticamente o site já publicado.
 
-**[Abrir o aplicativo publicado](https://use-vertice.pages.dev)** · [Resultados da validação](docs/VALIDATION.md)
+**[Abrir o aplicativo publicado](https://app.usevertice.app.br)** · [Resultados da validação](docs/VALIDATION.md)
 
 ## Executar
 

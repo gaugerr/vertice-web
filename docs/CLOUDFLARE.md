@@ -1,9 +1,11 @@
 # Hospedagem na Cloudflare Pages
 
 Projeto: `gaugerr/vertice-web`, branch de produção `main`, nome `use-vertice`.
-Produção: <https://use-vertice.pages.dev>. A integração Git publica automaticamente
-a `main`; previews automáticos ficam desabilitados. Não comprar domínio nem
-habilitar recursos pagos nesta etapa.
+Aplicativo: <https://app.usevertice.app.br>. Página de vendas:
+<https://usevertice.app.br>, projeto Pages `vertice-kit` (raiz `/marketing`).
+Endereços alternativos: <https://use-vertice.pages.dev> para o app e
+<https://vertice-kit.pages.dev> para a apresentação. A integração Git publica a
+`main`; previews automáticos ficam desabilitados. Não habilitar recursos pagos.
 
 ## Criar o projeto
 
@@ -22,6 +24,10 @@ verificação existente no repositório é preservada. `tools/validate-access.mj
 impede builds Pages em modo `legacy`.
 
 ## Liberar o endereço no Supabase
+
+Para o domínio do app, usar a origem exata `https://app.usevertice.app.br` e o
+callback `https://app.usevertice.app.br/auth/callback`. O site de vendas não chama
+as funções de licença e não precisa ser incluído nas origens de acesso.
 
 Depois de obter a origem HTTPS exata do projeto:
 
@@ -70,3 +76,17 @@ rotas e manifesto HTTP 200, worker/conectividade sem cache e asset ausente HTTP 
 rejeitam chamadas sem sessão com HTTP 401. O proprietário confirmou os ajustes de
 callback/origem no Supabase; o login completo na conta real deve ser conferido
 pelo proprietário.
+
+## Domínios próprios
+
+Em 23/10/2026, a zona `usevertice.app.br`, o domínio raiz e o subdomínio `app`
+ficaram ativos na Cloudflare, com certificados HTTPS ativos. Os CNAMEs apontam,
+respectivamente, para `vertice-kit.pages.dev` e `use-vertice.pages.dev`.
+
+A verificação inicial do domínio próprio abriu o app e suas rotas por HTTPS, mas
+identificou bloqueio CORS nas funções de licença. Foi solicitado ao proprietário
+acrescentar a nova origem em `ACCESS_ALLOWED_ORIGINS` e o callback em Redirect URLs,
+preservando os endereços antigos. A ativação DNS sozinha não configura o Supabase.
+
+Não redirecionar o app antigo automaticamente: cada origem tem compras e sessão
+locais próprias. A migração dos registros continua sendo feita por backup.
