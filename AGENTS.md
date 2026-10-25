@@ -36,7 +36,8 @@ dos registros. `useQuery` usa `useLiveQuery` para atualizar telas e outras abas.
 
 Rotas: `/` listas; `/lists/:listId` categorias/resumo;
 `/lists/:listId/categories/:id` produtos; `/settings` dados/app; `/login` acesso;
-`/auth/callback` retorno Google; `/admin` licenças; `/privacy` privacidade.
+`/auth/callback` retorno Google; `/admin` licenças; `/privacy` privacidade;
+`/financeiro` central de acesso às planilhas do kit (mesma proteção de acesso).
 
 ## Mapa das funcionalidades
 
@@ -64,6 +65,12 @@ Nos caminhos abaixo, `src/features/` contém as telas e componentes da funcional
 | Diálogos, botões, erros e estados vazios comuns             | `src/shared/ui/Dialog.tsx`, `Button.tsx`, `Feedback.tsx`, `RouteError.tsx`                                                                               |
 
 Os controles de voltar usam `src/shared/ui/BackLink.tsx`.
+
+Vértice Financeiro: `src/features/finance/` contém página, cartão inicial,
+configuração dos quatro links externos, tutorial e dicas. A primeira visita reduz
+o cartão por conta/navegador, sem confirmar cópia/download nem alterar compras.
+Ver `docs/FINANCEIRO.md`. Não colocar arquivos pagos no GitHub nem prometer
+sincronização com as planilhas.
 
 Arquivos citados apenas pelo nome na mesma linha pertencem ao último diretório
 explícito daquela linha. Testes de regras/componentes ficam próximos ao código em
