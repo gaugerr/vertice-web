@@ -25,5 +25,16 @@ Deno.serve(
       const { error } = await service!.rpc('cakto_capture_events', { events });
       if (error) throw new Error('Capture failed');
     },
+    ...(Deno.env.get('CAKTO_PROCESSING_ENABLED') === 'true'
+      ? {
+          process: async () => {
+            const { error } = await service!.rpc('cakto_process_pending', {
+              apply_changes: true,
+              batch_limit: 20,
+            });
+            if (error) throw new Error('Processing pending');
+          },
+        }
+      : {}),
   }),
 );

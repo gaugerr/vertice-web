@@ -254,3 +254,52 @@ test('accepts POST JSON only', async () => {
   assert.equal((await handler(req)).status, 415);
   assert.equal(batches.length, 0);
 });
+
+test('processes only after durable capture and never for ignored events', async () => {
+  const sequence: string[] = [];
+  const { handler } = setup({
+    capture: async () => {
+      sequence.push('captured');
+    },
+    process: async () => {
+      sequence.push('processed');
+    },
+  });
+  const response = await handler(signed(envelope()));
+  assert.equal(response.status, 200);
+  assert.deepEqual(sequence, ['captured', 'processed']);
+  assert.deepEqual(await response.json(), {
+    received: true,
+    mode: 'process',
+    processing: 'attempted',
+  });
+  await handler(signed(envelope({}, 'pix_gerado')));
+  assert.deepEqual(sequence, ['captured', 'processed']);
+});
+
+test('acknowledges durable capture when processing needs recovery, without leaking errors', async () => {
+  const { handler, batches } = setup({
+    process: async () => {
+      throw new Error('private-processing-error buyer@example.test');
+    },
+  });
+  const response = await handler(signed(envelope()));
+  assert.equal(response.status, 200);
+  assert.equal(batches.length, 1);
+  assert.deepEqual(await response.json(), {
+    received: true,
+    mode: 'process',
+    processing: 'pending',
+  });
+  let called = false;
+  const failedStorage = setup({
+    capture: async () => {
+      throw new Error('private-storage-error');
+    },
+    process: async () => {
+      called = true;
+    },
+  });
+  assert.equal((await failedStorage.handler(signed(envelope()))).status, 503);
+  assert.equal(called, false);
+});

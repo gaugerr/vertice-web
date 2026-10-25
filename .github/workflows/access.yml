@@ -34,7 +34,7 @@ jobs:
         run: |
           npx --yes supabase@2.54.11 functions serve --env-file .secrets/license.env > /tmp/vertice-functions.log 2>&1 &
           node tools/wait-access.mjs
-      - name: Signed Cakto capture without license mutations
+      - name: Signed Cakto capture, licensing and Google access
         run: node tools/test-cakto-integration.mjs
       - id: build_access
         run: npm run build

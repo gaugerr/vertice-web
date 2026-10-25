@@ -3,6 +3,7 @@ import assert from 'node:assert/strict';
 import { createHmac } from 'node:crypto';
 import { execFileSync } from 'node:child_process';
 import { readFile } from 'node:fs/promises';
+import { createClient } from '@supabase/supabase-js';
 
 const status = JSON.parse(await readFile('/tmp/vertice-supabase-status.json', 'utf8'));
 assert.equal(status.API_URL, 'http://127.0.0.1:54321', 'Only isolated local Supabase is allowed');
@@ -125,4 +126,101 @@ const denied = await fetch(`${status.API_URL}/rest/v1/rpc/cakto_capture_events`,
   signal: AbortSignal.timeout(10000),
 });
 assert.ok([401, 403].includes(denied.status), 'Anonymous caller must not invoke capture RPC');
-console.log('Local signed webhook → Edge Function → private inbox passed; no license changed.');
+console.log('Local signed capture with product processing disabled passed; no license changed.');
+
+// Enable only the synthetic product. The real Vértice product stays disabled throughout CI.
+query(
+  "insert into access_private.cakto_products(product_id,processing_enabled) values('local-cakto-product',true)",
+);
+const fixture = JSON.parse(await readFile('.secrets/fixtures.json', 'utf8'));
+assert.equal(fixture.url, status.API_URL);
+const customer = fixture.users.cakto;
+assert.equal(customer.email, 'cakto@example.test');
+const client = createClient(status.API_URL, status.ANON_KEY, {
+  auth: { persistSession: false, autoRefreshToken: false },
+});
+const login = await client.auth.signInWithPassword({
+  email: customer.email,
+  password: customer.password,
+});
+assert.equal(Boolean(login.data.session), true, 'Synthetic local Google identity must sign in');
+
+async function checkAccess() {
+  const response = await fetch(`${status.API_URL}/functions/v1/license-check`, {
+    method: 'POST',
+    headers: {
+      Origin: 'http://127.0.0.1:4173',
+      apikey: status.ANON_KEY,
+      Authorization: `Bearer ${login.data.session.access_token}`,
+      'content-type': 'application/json',
+    },
+    body: '{}',
+    signal: AbortSignal.timeout(10000),
+  });
+  assert.equal(response.status, 200);
+  return response.json();
+}
+
+try {
+  assert.equal((await checkAccess()).status, 'absent');
+  const paid = { ...order, id: 'local-cakto-paid', customer: { email: customer.email } };
+  assert.equal((await send(paid)).status, 200);
+  assert.equal(
+    query("select user_id is null from public.licenses where email='cakto@example.test'"),
+    't',
+  );
+  const active = await checkAccess();
+  assert.equal(active.status, 'active');
+  assert.equal(typeof active.lease, 'string');
+  assert.equal(
+    query("select user_id::text from public.licenses where email='cakto@example.test'"),
+    customer.uid,
+  );
+  assert.equal((await send(paid)).status, 200);
+  assert.equal(query("select version from public.licenses where email='cakto@example.test'"), '1');
+  assert.equal((await send({ ...paid, id: 'local-cakto-paid-two' })).status, 200);
+  assert.equal(
+    (await send({ ...paid, status: 'refunded', refundedAt: '2026-10-25T13:00:00Z' }, 'refund'))
+      .status,
+    200,
+  );
+  assert.equal((await checkAccess()).status, 'active');
+  assert.equal(
+    (
+      await send(
+        {
+          ...paid,
+          id: 'local-cakto-paid-two',
+          status: 'refunded',
+          refundedAt: '2026-10-25T13:00:00Z',
+        },
+        'refund',
+      )
+    ).status,
+    200,
+  );
+  const revoked = await checkAccess();
+  assert.equal(revoked.status, 'revoked');
+  assert.equal(revoked.lease, undefined);
+  assert.equal(query("select version from public.licenses where email='cakto@example.test'"), '2');
+  assert.equal((await send({ ...paid, paidAt: '2026-10-25T14:00:00Z' })).status, 200);
+  assert.equal((await checkAccess()).status, 'revoked');
+  assert.equal((await send({ ...paid, id: 'local-cakto-paid-three' })).status, 200);
+  assert.equal((await checkAccess()).status, 'active');
+  assert.equal(query("select version from public.licenses where email='cakto@example.test'"), '3');
+  assert.equal(
+    query("select user_id::text from public.licenses where email='cakto@example.test'"),
+    customer.uid,
+  );
+  assert.equal(
+    query(
+      "select processing_enabled from access_private.cakto_products where product_id='988379d3-cbaa-465f-930b-14aa7d48422e'",
+    ),
+    'f',
+  );
+  console.log(
+    'Signed webhook → automatic license → verified local Google identity → signed access and refund checks passed.',
+  );
+} finally {
+  await client.auth.signOut();
+}

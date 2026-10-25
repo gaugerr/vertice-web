@@ -1,9 +1,10 @@
-# Integração Cakto — etapa 1: captura passiva
+# Integração Cakto — captura e processamento preparados
 
-Esta branch prepara o recebimento autenticado de notificações. **Não libera nem
-revoga licenças**, não envia e-mails e não publica configurações na Cakto. A função
-fica desativada por padrão. Nenhuma mudança precisa ser feita no Google OAuth,
-nos domínios autorizados ou no login atual.
+A branch prepara recebimento autenticado e processamento de notificações para
+licenças. **Tudo começa desativado.** A configuração real da Cakto, os secrets,
+a publicação das funções e a ativação dos produtos/jobs não são executados pelo
+merge. Não envia e-mails. Nenhuma mudança é necessária no Google OAuth, nos
+domínios autorizados ou no login atual.
 
 ## Produto identificado para a configuração
 
@@ -35,21 +36,27 @@ e o sufixo do checkout não substituem o ID completo do produto.
 - Formatos V1 (objeto) e V2 (lista), até 25 pedidos por entrega e 128 KiB por corpo.
   Esses limites são nossos; conferir uma entrega real antes de ativar.
 - Captura de `purchase_approved`, `refund` e `chargeback`, somente dos IDs de
-  produto configurados. Status como `MED` são preservados para análise futura.
-  Não interpreta o status como direito de acesso nesta etapa.
+  produto configurados. A captura não concede acesso; o processador aplica as
+  regras de autorização descritas abaixo, incluindo o tratamento de `MED`.
 - Tabela `access_private.cakto_events` com RLS, sem acesso de clientes. A RPC
   `public.cakto_capture_events` só pode ser executada pelo `service_role`, usa
   direitos do invocador e armazena cada lote em uma transação.
 - O hash dos campos normalizados identifica uma observação; repetições aumentam
   `seen_count` e atualizam `last_received_at`. Uma mudança de evento, status ou
   dados relevantes preserva outra observação do mesmo pedido. A chave **não** é
-  uma decisão de concessão; o processador futuro precisa reconciliar o pedido.
+  uma decisão de concessão; o processador avalia o histórico observado do pedido.
 - O armazenamento retém apenas pedido/produto/oferta, e-mail, evento, status e
   datas. Não guarda o corpo original, segredo, assinatura, CPF, telefone ou cartão.
 
 ## Configuração futura (não executar para ativar vendas ainda)
 
-As variáveis são **somente do servidor**, sem prefixo `VITE_`:
+As variáveis são **somente do servidor**, sem prefixo `VITE_`. Além da captura,
+`CAKTO_PROCESSING_ENABLED=true` solicita processamento logo após a gravação. A
+chamada SQL exige `apply_changes=true` e um produto com
+`access_private.cakto_products.processing_enabled=true`. O produto real é criado
+**desativado** pela migração. O modelo de ambiente mantém as duas flags em `false`.
+
+As variáveis da captura são:
 
 | Variável                                     | Uso                                                                                               |
 | -------------------------------------------- | ------------------------------------------------------------------------------------------------- |
@@ -69,14 +76,18 @@ Antes de cadastrar uma URL de produção:
 3. Conferir os registros privados e as contagens de repetição. Clientes não têm
    endpoint para consultar ou inserir eventos. Não usar logs de corpos de requisição
    para depuração: o segredo também trafega no JSON enviado pela Cakto.
-4. Só conectar vendas reais depois de implementar e revisar o processamento de
-   licenças, a recuperação de falhas e a visibilidade administrativa abaixo.
+4. Só conectar vendas reais depois da revisão das regras abaixo, da instalação
+   das tentativas periódicas e da validação de uma entrega real assinada.
 
 ## Respostas e falhas
 
 `200` confirma que todos os pedidos relevantes foram persistidos, ou que o evento
-foi ignorado por produto/tipo não configurado. A resposta indica `mode: capture`;
-**não significa acesso liberado**. `401` rejeita assinatura inválida/antiga;
+foi ignorado por produto/tipo não configurado. Sem processamento, a resposta indica
+`mode: capture`. Com processamento, indica
+`mode: process` e `processing: attempted` ou `pending`. **Nenhuma dessas respostas
+confirma uma licença individual**: confirmam recebimento durável e, quando
+solicitado, uma tentativa de processar a fila. O login consulta o direito efetivo.
+`401` rejeita assinatura inválida/antiga;
 `400` rejeita estrutura inválida; `413` limita o corpo; `415` exige JSON;
 `405` exige POST; `503` indica configuração ausente, desativação ou erro interno.
 Um membro inválido de lote relevante impede a captura inteira; é preciso corrigir
@@ -88,35 +99,87 @@ retentadas. Até existir recuperação automática, acompanhar o histórico da C
 e reenviar manualmente falhas de entrega. Não habilitar a captura em produção
 como se ela já fosse a entrega do produto.
 
-## Próxima etapa antes de liberar automaticamente
+## Regras de liberação e revogação
 
-- Confirmar produto/oferta, payload real e instrução para usar o mesmo e-mail da
-  conta Google na compra. Preservar `+` e pontos; não inventar equivalências entre
-  endereços.
-- Criar registros de pedidos e concessões separados das licenças manuais. Tratar
-  várias compras por e-mail e bloqueios administrativos; não sobrescrever uma
-  revogação manual nem revogar outra compra válida.
-- Reconciliar aprovações, reembolsos e contestações com o estado atual do pedido,
-  inclusive eventos fora de ordem, antes de alterar uma licença.
-- Criar processador transacional, tentativas internas, rotina de conciliação das
-  entregas perdidas e histórico/reprocessamento no painel do administrador.
-- Definir retenção dos eventos e observabilidade sem dados sensíveis. Esta etapa
-  não cria cron de limpeza, alertas ou processador de fila.
-- Validar compra controlada e reembolso de ponta a ponta, com acompanhamento.
-  Manter liberação manual e mecanismo para pausar o processamento.
-- Documentar o limite da revogação offline (até sete dias atualmente) e que cópias
-  de Google Planilhas/Excel já entregues não podem ser recolhidas.
+- Só `purchase_approved` com status `paid` constitui uma aprovação. Pagamento
+  pendente ou combinação de evento/status desconhecida fica para revisão.
+- A decisão agrega as observações já recebidas do mesmo pedido. Reembolso,
+  chargeback, MED ou datas de devolução/contestação bloqueiam esse pedido.
+  Uma aprovação atrasada não desfaz esse bloqueio, independentemente da ordem de
+  chegada. Recuperação de contestação no mesmo pedido exige conferência manual.
+- `access_private.cakto_orders` preserva a identidade inicial do pedido. E-mails
+  ou produtos conflitantes não transferem acesso: geram revisão. O processador
+  considera o histórico recebido, **não consulta a API da Cakto nesta etapa**.
+- O direito automático considera todos os pedidos processados do e-mail. Um
+  reembolso preserva outra compra válida. Uma nova compra pode reativar uma
+  licença automática esgotada, mantendo o mesmo UID Google.
+- Todas as licenças anteriores e novas concessões manuais têm origem `manual` e
+  ficam fora das alterações automáticas, inclusive as revogadas.
+- Nas licenças automáticas, `manual_override` registra a decisão do produtor:
+  revogar manualmente bloqueia futuras reativações automáticas; reativar
+  manualmente mantém o acesso mesmo após reembolso. A interface administrativa
+  explica essa consequência na confirmação.
+- O histórico da licença reúne as ações humanas e automáticas, identificadas como
+  Cakto. As ações automáticas têm auditoria própria, sem inventar um usuário
+  administrador. Só transições efetivas alteram a versão da licença.
+- A licença pode ser criada antes do primeiro login; a vinculação continua usando
+  a identidade Google verificada no `access_license_check` existente.
+
+## Falhas, tentativas e pausa
+
+`public.cakto_process_pending(true, 20)` é exclusiva do servidor, usa direitos do
+invocador e processa um lote limitado. Um lock transacional evita dois workers
+simultâneos. Cada decisão de pedido, mudança de licença e auditoria são atômicas.
+Uma falha reverte as três e deixa o evento recuperável; o texto do erro SQL nunca
+é guardado. Há até cinco tentativas, com intervalos crescentes; depois o evento
+fica em `review` com `retry_exhausted` para intervenção.
+
+A função é chamada depois da captura quando a flag do servidor está habilitada.
+`supabase/cakto-retry-job.sql` prepara um job de minuto em minuto **inativo**,
+sem segredos ou requisições HTTP.
+Ele depende da extensão `pg_cron` já habilitada e da execução deliberada do script
+no projeto certo. A ativação do job é uma configuração posterior, indispensável
+para recuperar eventos pendentes sem depender de outra venda.
+
+Para pausar **todo** processamento, desabilitar o produto em `cakto_products`;
+isso não revoga acessos existentes. A flag de ambiente desliga somente a tentativa
+imediata no webhook; um job SQL já ativo continua independente dela. O script
+fornecido não é executado pela migração nem pela CI.
+
+## Antes de ativar vendas reais
+
+1. Revisar as migrações, o produto e as decisões para bloqueios manuais. Confirmar
+   com uma entrega real o par de IDs e o formato V1/V2. Usar o e-mail Google na
+   compra, preservando `+` e pontos sem inventar equivalências entre endereços.
+2. Publicar/configurar em ambiente de teste; criar e observar o job de recuperação,
+   começando inativo. O segredo deve ser cadastrado com segurança no Supabase.
+3. Conferir o histórico de entregas da Cakto e definir conciliação de eventos que
+   nunca chegaram ao banco. A fila recupera falhas **após a captura**; ela não
+   descobre sozinha vendas/reembolsos perdidos na origem. Conciliação pela API,
+   alertas, retenção e painel de fila/revisão são etapas operacionais pendentes.
+4. Validar compra controlada, login e reembolso de ponta a ponta. Habilitar o
+   produto, as flags e o job só na ativação acordada, mantendo atendimento e
+   liberação manual disponíveis. Revisar a política de privacidade para os novos
+   registros de pedidos.
+5. Preservar o limite da revogação offline (até sete dias atualmente) e informar
+   que cópias de Google Planilhas/Excel já entregues não podem ser recolhidas.
 
 ## Verificação
 
 `npm run typecheck:cakto` e `npm run test:cakto` verificam o handler com dados
 sintéticos. `supabase test db` executa `supabase/tests/cakto_capture.sql` no banco
 **local**, incluindo permissões, deduplicação, lote atômico e preservação de
-licenças. A CI de acesso já executa os testes SQL com Supabase isolado.
+licenças. `cakto_processing.sql` cobre concessões, várias compras, revogações,
+ordem de chegada, overrides, histórico, rollback e recuperação de falhas.
+A CI de acesso já executa os testes SQL com Supabase isolado.
 O adaptador Deno deve ser conferido com o import map existente antes da publicação.
 `tools/test-cakto-integration.mjs` é executado pela CI com o Supabase isolado e
-valida a entrega assinada através da função Edge e da RPC até o banco. O script
-recusa qualquer URL diferente de `http://127.0.0.1:54321`.
+valida captura desativada por produto e, depois, aprovação assinada, criação de
+licença, vinculação à identidade Google local, autorização assinada, reembolso e
+nova compra, sem tocar em dados reais. O script recusa qualquer URL diferente de
+`http://127.0.0.1:54321`.
 
 Referências oficiais: [Webhooks Cakto](https://docs.cakto.com.br/conceitos/webhooks)
 e [autenticação de Edge Functions](https://supabase.com/docs/guides/functions/auth).
+
+Agendamento: [Supabase Cron](https://supabase.com/docs/guides/cron/quickstart).

@@ -8,7 +8,7 @@ const url = status.API_URL;
 assert.equal(url, 'http://127.0.0.1:54321');
 const admin = createClient(url, status.SERVICE_ROLE_KEY, { auth: { persistSession: false } });
 const users = {};
-for (const kind of ['owner', 'buyer', 'other', 'unknown']) {
+for (const kind of ['owner', 'buyer', 'other', 'unknown', 'cakto']) {
   const email = `${kind}@example.test`;
   const password = crypto.randomUUID();
   const { data, error } = await admin.auth.admin.createUser({
@@ -66,6 +66,6 @@ await writeFile(
 await appendFile(
   '.secrets/license.env',
   `ACCESS_ALLOWED_ORIGINS=http://127.0.0.1:4173\nACCESS_ISSUER=${url}\n` +
-    'CAKTO_CAPTURE_ENABLED=true\nCAKTO_WEBHOOK_SECRET=local-only-cakto-integration-fixture-secret\nCAKTO_PRODUCT_IDS=local-cakto-product\n',
+    'CAKTO_CAPTURE_ENABLED=true\nCAKTO_PROCESSING_ENABLED=true\nCAKTO_WEBHOOK_SECRET=local-only-cakto-integration-fixture-secret\nCAKTO_PRODUCT_IDS=local-cakto-product\n',
 );
 console.log('Created isolated local identities and licenses. No hosted credentials used.');

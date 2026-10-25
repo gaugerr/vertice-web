@@ -1,4 +1,4 @@
-// Capture only: this module never grants or revokes a license.
+// Verify and durably capture events before delegating optional license processing.
 const MAX_BYTES = 128 * 1024;
 const MAX_ORDERS = 25;
 const EVENTS = new Set(['purchase_approved', 'refund', 'chargeback']);
@@ -23,6 +23,7 @@ interface Dependencies {
   secret: string;
   productIds: string[];
   capture: (events: CapturedEvent[]) => Promise<void>;
+  process?: () => Promise<void>;
   now?: () => number;
 }
 
@@ -208,6 +209,15 @@ export function createCaktoHandler(deps: Dependencies) {
       const records = await normalize(payload, deps.productIds);
       // Acknowledge only after the whole batch has been durably stored.
       if (records.length) await deps.capture(records);
+      if (records.length && deps.process) {
+        try {
+          await deps.process();
+          return reply(200, { received: true, mode: 'process', processing: 'attempted' });
+        } catch {
+          // Storage already succeeded. A retry job can recover the durable pending events.
+          return reply(200, { received: true, mode: 'process', processing: 'pending' });
+        }
+      }
       return reply(200, { received: true, mode: 'capture', ignored: records.length === 0 });
     } catch (error) {
       // Do not log payloads or return database errors (they may contain personal data).
