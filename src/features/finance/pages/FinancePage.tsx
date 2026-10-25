@@ -8,6 +8,7 @@ import { financeFormats } from '../config';
 import { financeFaq, guideSteps, quickStart, routine, sheetMap } from '../guide';
 import { markFinanceVisited } from '../visit';
 import { CopyTemplateLink } from '../components/CopyTemplateLink';
+import { googleCopyHref } from '../google-copy';
 
 export default function FinancePage() {
   const scope = useAccountScope();
@@ -15,6 +16,7 @@ export default function FinancePage() {
   const selected = financeFormats.find((option) => option.id === format)!;
   const { online } = useSyncExternalStore(subscribePwa, getPwaState);
   const guideHeading = useRef<HTMLHeadingElement>(null);
+  const openInChrome = format === 'google' && /Android/i.test(navigator.userAgent);
   useEffect(() => {
     markFinanceVisited(scope);
   }, [scope]);
@@ -76,8 +78,12 @@ export default function FinancePage() {
               <p>{version.description}</p>
               <a
                 className={`button button-${index === 0 ? 'primary' : 'secondary'}`}
-                href={version.url}
-                target="_blank"
+                href={
+                  format === 'google'
+                    ? googleCopyHref(version.url, navigator.userAgent)
+                    : version.url
+                }
+                target={openInChrome ? '_self' : '_blank'}
                 rel="noopener noreferrer"
                 aria-describedby="finance-online-note"
               >
@@ -87,13 +93,21 @@ export default function FinancePage() {
                   <Download size={17} aria-hidden="true" />
                 )}
                 {version.action}
-                <span className="sr-only"> (abre em outra aba)</span>
+                <span className="sr-only">
+                  {openInChrome ? ' (tenta abrir no Chrome)' : ' (abre em outra aba)'}
+                </span>
               </a>
               {format === 'google' && <CopyTemplateLink url={version.url} title={version.title} />}
             </article>
           ))}
         </div>
         <p className="finance-hint">{selected.note}</p>
+        {openInChrome && (
+          <p className="finance-hint">
+            No Android, “Criar cópia” tenta abrir no Chrome para mostrar a tela de cópia. Se o
+            Chrome não estiver disponível, o navegador pode usar o link normal.
+          </p>
+        )}
         {format === 'google' && (
           <div className="finance-mobile-help">
             <strong>No celular, abriu no app Planilhas?</strong>

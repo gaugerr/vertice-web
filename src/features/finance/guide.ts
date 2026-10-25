@@ -117,7 +117,7 @@ export const routine = [
 export const financeFaq = [
   [
     'O celular abriu o modelo no app Google Planilhas. Como copiar?',
-    'O aplicativo do Google pode assumir o link /copy e abrir o modelo diretamente. No menu do Planilhas, procure Compartilhar e exportar → Fazer uma cópia; os nomes podem variar por versão. Você também pode copiar o link nesta tela e colar no navegador. Se o celular continuar abrindo o app, crie a cópia em um computador e depois abra-a pelo seu Drive no celular. Não edite o modelo original.',
+    'O aplicativo do Google pode assumir o link /copy e abrir o modelo diretamente. No Android, os botões tentam abrir no Chrome; o resultado depende do navegador e dos apps instalados. Se ainda abrir no Planilhas, procure Compartilhar e exportar → Fazer uma cópia; os nomes podem variar por versão. Você também pode copiar o link nesta tela e colar no navegador. Como alternativa, crie a cópia em um computador e depois abra-a pelo seu Drive no celular. Não edite o modelo original.',
   ],
   [
     'Preciso usar Google e Excel?',

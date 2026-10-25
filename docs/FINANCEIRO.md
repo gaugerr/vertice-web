@@ -17,6 +17,11 @@ continua exigindo licença pelo build protegido.
   modelo. A tela orienta a fazer uma cópia pelo menu do Planilhas ou usar o
   navegador/computador. Cada modelo tem “Copiar link”, com seleção manual se a
   área de transferência for negada. Não há promessa de forçar o navegador.
+  No Android, o botão principal usa um Android Intent direcionado ao pacote do
+  Chrome com o mesmo `/copy` e fallback HTTPS. O intent é acionado diretamente
+  pelo clique, na mesma aba; não usa timers ou redirecionamento automático.
+  Outros sistemas mantêm HTTPS em nova aba. A escolha do app e a tela de cópia
+  precisam de validação em aparelho real; emulação só verifica o destino gerado.
 - Os links foram liberados pelo proprietário para qualquer pessoa com o link.
   A proteção da rota não torna os destinos privados nem impede compartilhamento.
   Não adicionar os arquivos pagos ao GitHub público.

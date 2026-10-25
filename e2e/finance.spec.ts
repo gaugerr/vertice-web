@@ -1,5 +1,36 @@
 import { test, expect } from './fixtures';
 
+test('oferece destino Chrome no Android, sem mudar links de copiar ou download Excel', async ({
+  page,
+}) => {
+  await page.addInitScript(() => {
+    Object.defineProperty(navigator, 'userAgent', {
+      configurable: true,
+      value: 'Mozilla/5.0 (Linux; Android 14) Chrome/141.0.0.0 Mobile Safari/537.36',
+    });
+  });
+  await page.goto('/financeiro');
+  const primary = page.getByRole('link', { name: 'Criar cópia do modelo limpo' });
+  const normal =
+    'https://docs.google.com/spreadsheets/d/1lqra8SGALrb8N6l4W8vn_r8MUDxTdQU1xV1mn3fdnmg/copy';
+  await expect(primary).toHaveAttribute(
+    'href',
+    `intent://${normal.replace('https://', '')}#Intent;scheme=https;package=com.android.chrome;S.browser_fallback_url=${encodeURIComponent(normal)};end`,
+  );
+  await expect(primary).toHaveAttribute('target', '_self');
+  await expect(
+    page.getByText('No Android, “Criar cópia” tenta abrir no Chrome', { exact: false }),
+  ).toBeVisible();
+  await expect(
+    page.getByRole('button', { name: 'Copiar link — Modelo limpo', exact: true }),
+  ).toBeVisible();
+  await page.getByRole('button', { name: 'Microsoft Excel' }).click();
+  await expect(page.getByRole('link', { name: 'Baixar modelo limpo' })).toHaveAttribute(
+    'href',
+    'https://drive.google.com/uc?export=download&id=1wGGyAMfwU6yVzaZHfx7KGcNi8Yo0AsPY',
+  );
+});
+
 test('oferece cópia do link e alternativa manual quando o navegador nega a área de transferência', async ({
   page,
 }) => {
