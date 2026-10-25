@@ -9,6 +9,7 @@ test-results/
 .vercel/
 
 .secrets/
+supabase/.temp/
 .env*.local
 
 playwright-report-access/

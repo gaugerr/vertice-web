@@ -14,7 +14,8 @@ ativo para preservar o acesso aos dados locais de quem já o utiliza.
 - **Acesso:** Google via Supabase, licença vitalícia liberada manualmente e
   autorização offline assinada de até sete dias após validação online.
 - **Ainda não existem:** sincronização de compras na nuvem, checkout/webhook de
-  venda, leitura de etiquetas/códigos de barras ou integração automática com planilha.
+  venda ativo, leitura de etiquetas/códigos de barras ou integração automática com planilha.
+  A captura passiva Cakto está preparada, desativada por padrão; não altera licenças.
 
 ## Arquitetura e entrada
 
@@ -137,6 +138,13 @@ próxima validação online; não prometer revogação instantânea sem internet
 Somente URL/chave pública e chave pública de assinatura entram no frontend.
 `service_role`, segredo Google e chave privada ficam fora do Git/cliente, no servidor.
 Não gerar nem rotacionar chaves ao fazer alterações visuais ou de documentação.
+
+Cakto, etapa 1: `supabase/functions/cakto-webhook/` valida assinatura e captura
+observações em `access_private.cakto_events`, via RPC exclusiva de servidor.
+Não concede/revoga acesso. Configuração e próximos passos em `docs/access/CAKTO.md`.
+Testes: `npm run typecheck:cakto`, `npm run test:cakto` e
+`supabase/tests/cakto_capture.sql` no Supabase isolado. Nunca apontar fixtures para
+produção nem registrar corpos de webhook, que contêm o segredo da integração.
 
 ## Marca, PWA e publicação
 

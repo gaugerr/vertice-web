@@ -65,6 +65,7 @@ await writeFile(
 );
 await appendFile(
   '.secrets/license.env',
-  `ACCESS_ALLOWED_ORIGINS=http://127.0.0.1:4173\nACCESS_ISSUER=${url}\n`,
+  `ACCESS_ALLOWED_ORIGINS=http://127.0.0.1:4173\nACCESS_ISSUER=${url}\n` +
+    'CAKTO_CAPTURE_ENABLED=true\nCAKTO_WEBHOOK_SECRET=local-only-cakto-integration-fixture-secret\nCAKTO_PRODUCT_IDS=local-cakto-product\n',
 );
 console.log('Created isolated local identities and licenses. No hosted credentials used.');
