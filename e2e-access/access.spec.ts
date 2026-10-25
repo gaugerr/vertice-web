@@ -53,6 +53,19 @@ test('a customer without a license is denied and cannot invoke admin or grant it
 }) => {
   await enter(page, 'unknown');
   await expect(page.getByRole('heading', { name: 'Acesso aguardando liberação' })).toBeVisible();
+  await expect(
+    page.getByText('Seu acesso está aguardando a validação da compra.', { exact: false }),
+  ).toBeVisible();
+  await expect(
+    page.getByRole('button', { name: 'Acessar com outra conta do Google' }),
+  ).toBeVisible();
+  await expect(page.getByRole('button', { name: 'Sair da conta', exact: true })).toHaveCount(0);
+  const support = page.getByRole('link', { name: /Falar com o produtor no WhatsApp/ });
+  const contact = new URL((await support.getAttribute('href'))!);
+  expect(contact.pathname).toBe('/5551980614158');
+  expect(contact.searchParams.get('text')).toContain(
+    (await readLocalFixture()).users.unknown.email,
+  );
   await expect(page.getByRole('button', { name: 'Nova lista' })).toHaveCount(0);
   await page.goto('/admin');
   await expect(page.getByRole('alert')).toContainText('Acesso não autorizado');

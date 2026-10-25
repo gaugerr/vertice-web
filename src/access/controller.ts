@@ -95,7 +95,11 @@ async function restoreCache() {
     emit({ account: null, lease: null, phase: 'signedout', message: '', adminUid: null });
   }
 }
-function invalidate(phase: 'signedout' | 'denied', account: Account | null = null) {
+function invalidate(
+  phase: 'signedout' | 'denied',
+  account: Account | null = null,
+  message?: string,
+) {
   generation++;
   activeToken = '';
   storageRemove(cacheKey);
@@ -106,7 +110,8 @@ function invalidate(phase: 'signedout' | 'denied', account: Account | null = nul
     lease: null,
     message:
       phase === 'denied'
-        ? 'Não encontramos uma licença ativa para esta conta. Confira o e-mail usado na compra.'
+        ? (message ??
+          'Seu acesso está aguardando a validação da compra. Assim que a confirmação for concluída, ele será liberado.')
         : '',
     busy: false,
   });
@@ -148,7 +153,13 @@ async function performRefresh() {
     }>('license-check', {}, session.access_token);
     if (requestGeneration !== generation) return;
     if (response.status === 'absent' || response.status === 'revoked') {
-      invalidate('denied', state.account);
+      invalidate(
+        'denied',
+        state.account,
+        response.status === 'revoked'
+          ? 'Seu acesso está pausado. Fale com o produtor para conferir a situação da sua compra.'
+          : undefined,
+      );
       return;
     }
     if (response.status !== 'active' || !response.lease || !Number.isFinite(response.serverTime))

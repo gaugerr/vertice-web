@@ -1962,6 +1962,33 @@ dialog > p {
   gap: 0.75rem;
   margin: 1rem 0;
 }
+.access-support {
+  margin-top: 1.75rem;
+  padding-top: 1.5rem;
+  border-top: 1px solid #ffffff14;
+}
+.access-support h2 {
+  font-size: 16px;
+  font-weight: 600;
+}
+.access-support p {
+  font-size: 13px;
+  color: #bcb4c9;
+}
+.access-support-link {
+  display: inline-flex;
+  align-items: center;
+  min-height: 44px;
+  padding: 10px 14px;
+  border: 1px solid #655a77;
+  border-radius: 10px;
+  color: #d8c8ef;
+  font-size: 13px;
+  line-height: 1.6;
+}
+.access-support-link:hover {
+  background: #b39aff0a;
+}
 .access-overlay {
   position: fixed;
   inset: 0;

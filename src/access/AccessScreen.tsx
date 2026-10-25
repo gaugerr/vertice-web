@@ -32,6 +32,8 @@ export function AccessScreen({
     }
   }
   const busy = pending || state.busy;
+  const awaitingAccess = state.phase === 'denied';
+  const supportMessage = `Olá! Comprei o Kit Vértice e ainda estou aguardando a liberação do acesso. Tentei entrar com o e-mail: ${state.account?.email ?? ''}. Pode verificar, por favor?`;
   return (
     <section className="access-card" aria-labelledby="access-title">
       <div className="access-brand">
@@ -63,7 +65,7 @@ export function AccessScreen({
           </Link>
         )}
         <Button disabled={busy || !accessConfigured} onClick={() => void run(signIn)}>
-          Entrar com Google
+          {state.account ? 'Acessar com outra conta do Google' : 'Entrar com Google'}
         </Button>
         {state.account && (
           <Button
@@ -95,7 +97,7 @@ export function AccessScreen({
             Descartar edição e continuar
           </Button>
         )}
-        {state.account && (
+        {state.account && !awaitingAccess && (
           <Button
             variant="secondary"
             disabled={busy}
@@ -113,10 +115,28 @@ export function AccessScreen({
         )}
       </div>
       {error && <p role="alert">{error}</p>}
-      <p className="field-help">
-        Acesso vitalício. Após validar com internet, use offline por até sete dias. As compras ficam
-        neste aparelho.
-      </p>
+      {awaitingAccess && state.account?.email && (
+        <aside className="access-support" aria-labelledby="access-support-title">
+          <h2 id="access-support-title">Comprou e ainda não recebeu acesso?</h2>
+          <p>
+            Fale diretamente com o produtor. A mensagem já inclui o e-mail que você usou para
+            entrar, para facilitar a conferência.
+          </p>
+          <a
+            className="access-support-link"
+            href={`https://wa.me/5551980614158?text=${encodeURIComponent(supportMessage)}`}
+            target="_blank"
+            rel="noopener noreferrer"
+          >
+            Falar com o produtor no WhatsApp<span className="sr-only"> (abre em outra aba)</span>
+          </a>
+          <p className="field-help">
+            O WhatsApp abrirá com a mensagem pronta. Ela só será enviada quando você tocar em
+            Enviar.
+          </p>
+        </aside>
+      )}
+      <p className="field-help">Acesso vitalício. Suas compras ficam salvas neste aparelho.</p>
       <Link to="/privacy">Privacidade</Link>
     </section>
   );
