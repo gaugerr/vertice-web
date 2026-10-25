@@ -1,0 +1,9 @@
+VÉRTICE — ARTES
+
+icone-google.png: ícone quadrado, fundo branco.
+capa-cakto.png: capa quadrada com ilustrações conceituais, não capturas reais.
+logo-letras-escuras-transparente.png: para fundos claros.
+logo-fundo-escuro.png: letras brancas, fundo escuro incorporado. A exportação transparente branca apresentou falhas e foi excluída.
+logo-com-frase.png: composição com slogan aprovado.
+
+Arquivos PNG rasterizados, não vetores SVG. Conferir dimensões e limite de peso no campo de upload da plataforma. Não foram enviados ao Google, Cakto ou produção.
