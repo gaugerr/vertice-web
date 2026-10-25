@@ -38,8 +38,10 @@ jobs:
           fi
           git rev-parse HEAD
       - run: npm run typecheck
+      - run: npm run typecheck:cakto
       - run: npm run lint
       - run: npm run test
+      - run: npm run test:cakto
       - run: npm run build
       - run: npx playwright install --with-deps chromium webkit
       - run: npm run test:e2e

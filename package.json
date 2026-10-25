@@ -13,6 +13,8 @@
     "lint": "eslint . --max-warnings 0 && prettier --check .",
     "format": "prettier --write .",
     "typecheck": "tsc -b --pretty false",
+    "typecheck:cakto": "tsc --noEmit --allowImportingTsExtensions --module NodeNext --moduleResolution NodeNext --target ES2022 --lib ES2022,DOM --skipLibCheck --strict supabase/functions/cakto-webhook/handler.ts supabase/functions/cakto-webhook/handler.test.ts",
+    "test:cakto": "node --experimental-strip-types --test --test-isolation=none supabase/functions/cakto-webhook/handler.test.ts",
     "test": "vitest run",
     "test:watch": "vitest",
     "test:e2e": "playwright test"

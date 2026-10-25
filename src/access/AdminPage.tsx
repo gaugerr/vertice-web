@@ -13,9 +13,11 @@ interface License {
   user_id: string | null;
   order_reference: string | null;
   created_at: string;
+  provisioning_source?: 'manual' | 'cakto';
+  manual_override?: 'allow' | 'deny' | null;
 }
 interface Event {
-  id: number;
+  id: string | number;
   action: string;
   created_at: string;
 }
@@ -167,6 +169,11 @@ export default function AdminPage() {
                   {row.user_id ? 'Vinculada à conta' : 'Aguardando primeiro acesso'}
                 </p>
                 {row.order_reference && <p>Compra: {row.order_reference}</p>}
+                {row.provisioning_source === 'cakto' && (
+                  <p>
+                    Compra pela Cakto{row.manual_override ? ' · Com ajuste manual de acesso' : ''}
+                  </p>
+                )}
                 <div className="access-actions">
                   <Button
                     variant={row.status === 'active' ? 'danger' : 'secondary'}
@@ -174,7 +181,7 @@ export default function AdminPage() {
                     onClick={() => {
                       if (
                         window.confirm(
-                          `${row.status === 'active' ? 'Revogar' : 'Reativar'} acesso de ${row.email}?${row.status === 'active' ? ' Um aparelho offline pode continuar por até sete dias.' : ''}`,
+                          `${row.status === 'active' ? 'Revogar' : 'Reativar'} acesso de ${row.email}?${row.status === 'active' ? ' Um aparelho offline pode continuar por até sete dias.' : ''}${row.provisioning_source === 'cakto' ? (row.status === 'active' ? ' O bloqueio manual terá prioridade sobre a automação.' : ' A reativação manual manterá o acesso mesmo após reembolso.') : ''}`,
                         )
                       )
                         void change({
@@ -231,6 +238,9 @@ export default function AdminPage() {
                       revoke: 'Revogação',
                       reactivate: 'Reativação',
                       claim: 'Primeiro acesso',
+                      cakto_grant: 'Liberação pela Cakto',
+                      cakto_revoke: 'Revogação pela Cakto',
+                      cakto_reactivate: 'Reativação pela Cakto',
                     }[event.action] ?? event.action}{' '}
                     · {new Date(event.created_at).toLocaleString('pt-BR')}
                   </li>

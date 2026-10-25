@@ -38,3 +38,7 @@ import_map = "./functions/deno.json"
 [functions.license-admin]
 verify_jwt = false
 import_map = "./functions/deno.json"
+[functions.cakto-webhook]
+# Cakto uses HMAC, verified by the handler before any storage operation.
+verify_jwt = false
+import_map = "./functions/deno.json"
