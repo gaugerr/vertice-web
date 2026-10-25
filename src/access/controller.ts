@@ -111,7 +111,7 @@ function invalidate(
     message:
       phase === 'denied'
         ? (message ??
-          'Seu acesso está aguardando a validação da compra. Assim que a confirmação for concluída, ele será liberado.')
+          'Estamos aguardando a confirmação da sua compra para liberar o acesso ao Vértice. Confira se entrou com o e-mail informado na compra.')
         : '',
     busy: false,
   });
@@ -157,7 +157,7 @@ async function performRefresh() {
         'denied',
         state.account,
         response.status === 'revoked'
-          ? 'Seu acesso está pausado. Fale com o produtor para conferir a situação da sua compra.'
+          ? 'Precisamos conferir seu acesso. Fale com o produtor para receber ajuda.'
           : undefined,
       );
       return;

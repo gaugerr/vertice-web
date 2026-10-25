@@ -28,7 +28,7 @@ async function logout(page: Page, url: string) {
   );
   await page.getByRole('button', { name: 'Sair da conta', exact: true }).click();
   expect((await response).ok()).toBe(true);
-  await expect(page.getByRole('dialog', { name: 'Acesso pausado' })).toBeVisible();
+  await expect(page.getByRole('dialog', { name: 'Vamos conferir seu acesso' })).toBeVisible();
 }
 async function admin(action: unknown) {
   const auth = await signInTestUser('owner');
@@ -52,9 +52,9 @@ test('a customer without a license is denied and cannot invoke admin or grant it
   page,
 }) => {
   await enter(page, 'unknown');
-  await expect(page.getByRole('heading', { name: 'Acesso aguardando liberação' })).toBeVisible();
+  await expect(page.getByRole('heading', { name: 'Vamos conferir seu acesso' })).toBeVisible();
   await expect(
-    page.getByText('Seu acesso está aguardando a validação da compra.', { exact: false }),
+    page.getByText('Estamos aguardando a confirmação da sua compra', { exact: false }),
   ).toBeVisible();
   await expect(
     page.getByRole('button', { name: 'Acessar com outra conta do Google' }),
@@ -109,7 +109,7 @@ test('admin grants a license, buyer claims it, revoke blocks it and reactivation
   expect((await admin({ action: 'revoke', id: license.id })).response.ok).toBe(true);
   await page.goto('/settings');
   // Opening the app already revalidates: revocation may arrive before Settings mounts.
-  await expect(page.getByRole('heading', { name: 'Acesso aguardando liberação' })).toBeVisible();
+  await expect(page.getByRole('heading', { name: 'Vamos conferir seu acesso' })).toBeVisible();
   expect((await admin({ action: 'reactivate', id: license.id })).response.ok).toBe(true);
   await page.getByRole('button', { name: 'Verificar acesso' }).click();
   await expect(page.getByRole('heading', { name: 'Dados e aplicativo' })).toBeVisible();

@@ -23,7 +23,7 @@ beforeEach(() => {
     phase: 'denied',
     account: { uid: 'buyer', email: 'cliente+compras@example.com' },
     lease: null,
-    message: 'Seu acesso está aguardando a validação da compra.',
+    message: 'Estamos aguardando a confirmação da sua compra para liberar o acesso ao Vértice.',
     busy: false,
     adminUid: null,
   };

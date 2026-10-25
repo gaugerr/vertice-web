@@ -122,13 +122,13 @@ describe('access lifecycle', () => {
     expect(controller.canUse(uid)).toBe(false);
     expect(controller.canExport(uid)).toBe(false);
     expect(localStorage.getItem('test:access:lease')).toBeNull();
-    expect(controller.snapshot().message).toContain('pausado');
+    expect(controller.snapshot().message).toContain('Precisamos conferir seu acesso');
   });
-  it('mantém a conta sem licença bloqueada com uma orientação de validação da compra', async () => {
+  it('mantém a conta sem licença bloqueada com uma orientação de confirmação da compra', async () => {
     mocks.call.mockResolvedValue({ status: 'absent' });
     await start();
     expect(controller.snapshot().phase).toBe('denied');
-    expect(controller.snapshot().message).toContain('validação da compra');
+    expect(controller.snapshot().message).toContain('confirmação da sua compra');
     expect(controller.canUse(uid)).toBe(false);
     expect(controller.canExport(uid)).toBe(false);
   });

@@ -43,9 +43,9 @@ export function AccessScreen({
         {state.phase === 'loading'
           ? 'Verificando acesso…'
           : state.phase === 'denied'
-            ? 'Acesso aguardando liberação'
+            ? 'Vamos conferir seu acesso'
             : frozen
-              ? 'Renove seu acesso'
+              ? 'Vamos conferir seu acesso'
               : 'Suas compras com clareza'}
       </h1>
       {state.account && <p className="account-email">{state.account.email}</p>}
