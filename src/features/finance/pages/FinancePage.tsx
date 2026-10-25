@@ -8,7 +8,6 @@ import { financeFormats } from '../config';
 import { financeFaq, guideSteps, quickStart, routine, sheetMap } from '../guide';
 import { markFinanceVisited } from '../visit';
 import { CopyTemplateLink } from '../components/CopyTemplateLink';
-import { googleCopyHref } from '../google-copy';
 
 export default function FinancePage() {
   const scope = useAccountScope();
@@ -16,7 +15,6 @@ export default function FinancePage() {
   const selected = financeFormats.find((option) => option.id === format)!;
   const { online } = useSyncExternalStore(subscribePwa, getPwaState);
   const guideHeading = useRef<HTMLHeadingElement>(null);
-  const openInChrome = format === 'google' && /Android/i.test(navigator.userAgent);
   useEffect(() => {
     markFinanceVisited(scope);
   }, [scope]);
@@ -78,12 +76,8 @@ export default function FinancePage() {
               <p>{version.description}</p>
               <a
                 className={`button button-${index === 0 ? 'primary' : 'secondary'}`}
-                href={
-                  format === 'google'
-                    ? googleCopyHref(version.url, navigator.userAgent)
-                    : version.url
-                }
-                target={openInChrome ? '_self' : '_blank'}
+                href={version.url}
+                target="_blank"
                 rel="noopener noreferrer"
                 aria-describedby="finance-online-note"
               >
@@ -93,33 +87,32 @@ export default function FinancePage() {
                   <Download size={17} aria-hidden="true" />
                 )}
                 {version.action}
-                <span className="sr-only">
-                  {openInChrome ? ' (tenta abrir no Chrome)' : ' (abre em outra aba)'}
-                </span>
+                <span className="sr-only"> (abre em outra aba)</span>
               </a>
               {format === 'google' && <CopyTemplateLink url={version.url} title={version.title} />}
             </article>
           ))}
         </div>
         <p className="finance-hint">{selected.note}</p>
-        {openInChrome && (
-          <p className="finance-hint">
-            No Android, “Criar cópia” tenta abrir no Chrome para mostrar a tela de cópia. Se o
-            Chrome não estiver disponível, o navegador pode usar o link normal.
-          </p>
-        )}
         {format === 'google' && (
           <div className="finance-mobile-help">
             <strong>No celular, abriu no app Planilhas?</strong>
+            <p>Crie sua cópia pelo aplicativo do Google:</p>
+            <ol>
+              <li>
+                Toque nos <strong>três pontinhos ⋮</strong> da planilha aberta.
+              </li>
+              <li>
+                Escolha <strong>Compartilhar e exportar</strong>.
+              </li>
+              <li>
+                Toque em <strong>Fazer uma cópia</strong>.
+              </li>
+              <li>Escolha um nome e confirme. Depois, use a cópia salva no seu Drive.</li>
+            </ol>
             <p>
-              O app do Google pode abrir o modelo sem mostrar a tela de cópia. Nele, procure no menu
-              “Compartilhar e exportar” → “Fazer uma cópia” (os nomes podem variar). Trabalhe na
-              cópia criada na sua conta.
-            </p>
-            <p>
-              Outra opção: use “Copiar link” acima e cole no navegador. Se o celular continuar
-              abrindo o aplicativo, faça a cópia em um computador. Depois, ela estará no seu Drive
-              para usar no celular.
+              Os nomes das opções podem variar conforme a versão do aplicativo. Trabalhe na sua
+              cópia, sem alterar o modelo original.
             </p>
           </div>
         )}

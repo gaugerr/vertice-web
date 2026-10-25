@@ -1688,6 +1688,14 @@ dialog > p {
 .finance-mobile-help p {
   margin-top: 8px;
 }
+.finance-mobile-help ol {
+  list-style: decimal;
+  padding-left: 22px;
+  margin: 12px 0;
+}
+.finance-mobile-help li + li {
+  margin-top: 8px;
+}
 .finance-note {
   border-left: 3px solid #91c6a6;
   background: #91c6a609;

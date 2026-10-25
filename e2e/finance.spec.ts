@@ -1,6 +1,6 @@
 import { test, expect } from './fixtures';
 
-test('oferece destino Chrome no Android, sem mudar links de copiar ou download Excel', async ({
+test('mantém links padrão no Android e orienta criar uma cópia pelo aplicativo', async ({
   page,
 }) => {
   await page.addInitScript(() => {
@@ -13,13 +13,11 @@ test('oferece destino Chrome no Android, sem mudar links de copiar ou download E
   const primary = page.getByRole('link', { name: 'Criar cópia do modelo limpo' });
   const normal =
     'https://docs.google.com/spreadsheets/d/1lqra8SGALrb8N6l4W8vn_r8MUDxTdQU1xV1mn3fdnmg/copy';
-  await expect(primary).toHaveAttribute(
-    'href',
-    `intent://${normal.replace('https://', '')}#Intent;scheme=https;package=com.android.chrome;S.browser_fallback_url=${encodeURIComponent(normal)};end`,
-  );
-  await expect(primary).toHaveAttribute('target', '_self');
+  await expect(primary).toHaveAttribute('href', normal);
+  await expect(primary).toHaveAttribute('target', '_blank');
+  await expect(page.locator('.finance-mobile-help ol li')).toHaveCount(4);
   await expect(
-    page.getByText('No Android, “Criar cópia” tenta abrir no Chrome', { exact: false }),
+    page.locator('.finance-mobile-help').getByText('Fazer uma cópia', { exact: true }),
   ).toBeVisible();
   await expect(
     page.getByRole('button', { name: 'Copiar link — Modelo limpo', exact: true }),
