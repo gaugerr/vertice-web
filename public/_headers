@@ -4,6 +4,12 @@
 /index.html
   Cache-Control: public, max-age=0, must-revalidate
 
+/app-shell.html
+  Cache-Control: public, max-age=0, must-revalidate
+
+/app-shell
+  Cache-Control: public, max-age=0, must-revalidate
+
 /404.html
   Cache-Control: no-store
 

@@ -1,6 +1,6 @@
 import { useEffect } from 'react';
 import { Link, NavLink, Outlet, useBlocker, useLocation, useNavigation } from 'react-router-dom';
-import { ArrowUpRight, HardDrive, Settings2, ShoppingBasket } from 'lucide-react';
+import { ArrowUpRight, HardDrive, Settings2, ShoppingBasket, Sheet } from 'lucide-react';
 import { PwaStatus } from '../pwa/components/PwaStatus';
 import { InstallButton } from '../pwa/components/InstallButton';
 import { hasUnsavedChanges } from '../shared/lib/drafts';
@@ -50,6 +50,10 @@ export default function App() {
             <NavLink to="/" end aria-label="Minhas listas">
               <ShoppingBasket size={17} aria-hidden="true" />
               <span className="nav-lists-label">Minhas listas</span>
+            </NavLink>
+            <NavLink to="/financeiro" aria-label="Financeiro">
+              <Sheet size={18} aria-hidden="true" />
+              <span className="nav-finance-label">Financeiro</span>
             </NavLink>
             <NavLink to="/settings" aria-label="Dados e aplicativo">
               <Settings2 size={19} aria-hidden="true" />

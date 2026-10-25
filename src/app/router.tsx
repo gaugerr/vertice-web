@@ -33,6 +33,12 @@ export const router = createBrowserRouter([
       { path: 'lists/:listId', Component: CategoriesPage },
       { path: 'lists/:listId/categories/:id', Component: ItemsPage },
       {
+        path: 'financeiro',
+        lazy: async () => ({
+          Component: (await import('../features/finance/pages/FinancePage')).default,
+        }),
+      },
+      {
         path: 'settings',
         lazy: async () => ({
           Component: (await import('../features/settings/pages/SettingsPage')).default,

@@ -9,6 +9,7 @@ import { Loading, QueryError } from '../../../shared/ui/Feedback';
 import { ListForm } from '../components/ListForm';
 import { ListCard } from '../components/ListCard';
 import { ComparisonButton } from '../../comparator/components/ComparisonButton';
+import { FinanceEntry } from '../../finance/components/FinanceEntry';
 
 export default function ListsPage() {
   const repository = useRepository();
@@ -44,6 +45,7 @@ export default function ListsPage() {
           <span>encontram o equilíbrio.</span>
         </h1>
       </section>
+      <FinanceEntry />
       <div className="section-heading has-actions">
         <div>
           <h2>

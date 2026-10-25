@@ -1,6 +1,7 @@
-/lists/* /index.html 200
-/settings /index.html 200
-/login /index.html 200
-/auth/callback /index.html 200
-/admin /index.html 200
-/privacy /index.html 200
+/lists/* /app-shell 200
+/settings /app-shell 200
+/financeiro /app-shell 200
+/login /app-shell 200
+/auth/callback /app-shell 200
+/admin /app-shell 200
+/privacy /app-shell 200
