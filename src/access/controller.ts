@@ -95,7 +95,11 @@ async function restoreCache() {
     emit({ account: null, lease: null, phase: 'signedout', message: '', adminUid: null });
   }
 }
-function invalidate(phase: 'signedout' | 'denied', account: Account | null = null) {
+function invalidate(
+  phase: 'signedout' | 'denied',
+  account: Account | null = null,
+  message?: string,
+) {
   generation++;
   activeToken = '';
   storageRemove(cacheKey);
@@ -106,7 +110,8 @@ function invalidate(phase: 'signedout' | 'denied', account: Account | null = nul
     lease: null,
     message:
       phase === 'denied'
-        ? 'Não encontramos uma licença ativa para esta conta. Confira o e-mail usado na compra.'
+        ? (message ??
+          'Estamos aguardando a confirmação da sua compra para liberar o acesso ao Vértice. Confira se entrou com o e-mail informado na compra.')
         : '',
     busy: false,
   });
@@ -148,7 +153,13 @@ async function performRefresh() {
     }>('license-check', {}, session.access_token);
     if (requestGeneration !== generation) return;
     if (response.status === 'absent' || response.status === 'revoked') {
-      invalidate('denied', state.account);
+      invalidate(
+        'denied',
+        state.account,
+        response.status === 'revoked'
+          ? 'Precisamos conferir seu acesso. Fale com o produtor para receber ajuda.'
+          : undefined,
+      );
       return;
     }
     if (response.status !== 'active' || !response.lease || !Number.isFinite(response.serverTime))

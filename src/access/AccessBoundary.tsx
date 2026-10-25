@@ -180,7 +180,7 @@ function BlockingOverlay({ children }: { children: ReactNode }) {
     <dialog
       ref={ref}
       className="access-overlay"
-      aria-label="Acesso pausado"
+      aria-label="Vamos conferir seu acesso"
       onCancel={(e) => e.preventDefault()}
     >
       {children}

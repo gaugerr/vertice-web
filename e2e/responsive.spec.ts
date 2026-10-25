@@ -65,7 +65,15 @@ for (const viewport of [
     await expect(page.getByRole('heading', { name: 'Privacidade no Vértice' })).toBeVisible();
     await fitsScreen(page);
     await page.goto('/login');
-    await expect(page.getByRole('button', { name: 'Entrar com Google' })).toBeVisible();
+    await expect(
+      page.getByRole('button', {
+        name:
+          process.env.ACCESS_INTEGRATION === '1'
+            ? 'Acessar com outra conta do Google'
+            : 'Entrar com Google',
+        exact: true,
+      }),
+    ).toBeVisible();
     await fitsScreen(page);
   });
 }

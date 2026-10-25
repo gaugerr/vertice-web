@@ -64,7 +64,9 @@ it('keeps a mounted draft inert under a blocking dialog and restores it for the 
 
   await waitFor(() => expect(document.querySelector('[inert]')).toBeTruthy());
   expect(document.querySelector('input')?.value).toBe('12,90');
-  expect(await screen.findByRole('dialog', { name: 'Acesso pausado' })).toBeInTheDocument();
+  expect(
+    await screen.findByRole('dialog', { name: 'Vamos conferir seu acesso' }),
+  ).toBeInTheDocument();
   mocks.state.value = { ...mocks.state.value, phase: 'active' };
   act(() => view.rerender(tree()));
   expect(await screen.findByLabelText('Preço não salvo')).toHaveValue('12,90');
