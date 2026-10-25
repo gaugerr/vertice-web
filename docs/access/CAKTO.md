@@ -5,6 +5,27 @@ revoga licenças**, não envia e-mails e não publica configurações na Cakto. 
 fica desativada por padrão. Nenhuma mudança precisa ser feita no Google OAuth,
 nos domínios autorizados ou no login atual.
 
+## Produto identificado para a configuração
+
+| Campo        | Valor                                              | Origem                      |
+| ------------ | -------------------------------------------------- | --------------------------- |
+| Produto      | Kit Vértice — App de Compras + Planilha Financeira | Checkout público            |
+| ID completo  | `988379d3-cbaa-465f-930b-14aa7d48422e`             | Informado pelo proprietário |
+| Código curto | `3dyrkrb`                                          | Checkout público            |
+| Oferta       | `jjnk3vv`                                          | Checkout público            |
+| Checkout     | <https://pay.cakto.com.br/jjnk3vv_1241258>         | Informado pelo proprietário |
+
+O checkout consultado exibia pagamento único de R$ 19,90. Esse preço é uma
+referência comercial, não uma condição fixa de autorização: cupons e ofertas
+futuras não devem ser rejeitados apenas por mudar o valor pago.
+
+`supabase/cakto-capture.env.example` prepara o ID completo com captura desativada
+e segredo vazio. É um modelo de configuração de servidor; não é carregado
+automaticamente e não contém credenciais. A função continua exigindo configuração
+explícita do ambiente. Conferir o par `data.product.id` / `data.product.short_id`
+em uma entrega real assinada antes de habilitar a integração. O código da oferta
+e o sufixo do checkout não substituem o ID completo do produto.
+
 ## O que está preparado
 
 - `supabase/functions/cakto-webhook/`: adaptador Edge e handler independente,
