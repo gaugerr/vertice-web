@@ -49,7 +49,9 @@ credenciais pelo chat.
 
 `public/_headers` mantém `sw.js` e `online.txt` sem cache e assets com nomes
 versionados em cache longo. `public/_redirects` reescreve as rotas reais para o
-HTML do app. O build copia `index.html` para `404.html`, desabilitando o fallback
+HTML `app-shell.html`, cópia de `index.html` gerada pelo build para evitar o
+redirecionamento canônico de `index.html` à raiz e preservar callbacks e rotas
+diretas. O build também copia `index.html` para `404.html`, desabilitando o fallback
 SPA implícito da Pages: assets inexistentes retornam HTTP 404. Rotas desconhecidas
 também retornam 404, com o app exibindo a tela apropriada.
 

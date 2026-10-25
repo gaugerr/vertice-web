@@ -9,3 +9,6 @@ execFileSync('npm', ['run', 'build'], { env: process.env, stdio: 'inherit' });
 // Disable Pages' implicit SPA fallback so missing assets return a real 404.
 // Known application routes are rewritten by public/_redirects instead.
 copyFileSync('dist/index.html', 'dist/404.html');
+// Pages canonicalizes index.html to /. Use a distinct HTML shell for rewrites
+// so direct application routes (including the OAuth callback) keep their URL.
+copyFileSync('dist/index.html', 'dist/app-shell.html');
