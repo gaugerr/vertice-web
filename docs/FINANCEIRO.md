@@ -43,3 +43,19 @@ A prévia Cloudflare deve usar uma branch fora de main e manter acesso protegido
 Autorizar origem exata e callback no serviço de acesso antes do login real; não
 ampliar CORS com curingas nem desabilitar licença. Merge somente após revisão do
 proprietário.
+
+## Capturas para revisão
+
+Capturas locais da interface com dados vazios de teste (sem conta pessoal).
+
+### Entrada na página inicial
+
+![Cartão Vértice Financeiro na página inicial](previews/financeiro-inicio.png)
+
+### Central no computador
+
+![Formatos e versões no computador](previews/financeiro-desktop.png)
+
+### Central no celular
+
+![Seção Financeiro em tela de 390 px](previews/financeiro-celular.png)

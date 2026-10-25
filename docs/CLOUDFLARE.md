@@ -5,7 +5,9 @@ Aplicativo: <https://app.usevertice.app.br>. Página de vendas:
 <https://usevertice.app.br>, projeto Pages `vertice-kit` (raiz `/marketing`).
 Endereços alternativos: <https://use-vertice.pages.dev> para o app e
 <https://vertice-kit.pages.dev> para a apresentação. A integração Git publica a
-`main`; previews automáticos ficam desabilitados. Não habilitar recursos pagos.
+`main`; previews automáticos ficam desabilitados por padrão. A revisão de
+Vértice Financeiro autoriza somente a branch `feat/vertice-financeiro`, em modo
+custom. Não habilitar recursos pagos.
 
 ## Criar o projeto
 
