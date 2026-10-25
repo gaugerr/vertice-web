@@ -1,5 +1,61 @@
 import { test, expect } from './fixtures';
 
+test('oferece cópia do link e alternativa manual quando o navegador nega a área de transferência', async ({
+  page,
+}) => {
+  await page.addInitScript(() => {
+    Object.defineProperty(navigator, 'clipboard', {
+      configurable: true,
+      value: {
+        writeText: async () => {
+          throw new Error('denied');
+        },
+      },
+    });
+  });
+  await page.goto('/financeiro');
+  await page.setViewportSize({ width: 320, height: 844 });
+  await expect(page.getByText('No celular, abriu no app Planilhas?')).toBeVisible();
+  await page.getByRole('button', { name: 'Copiar link — Modelo limpo', exact: true }).click();
+  const field = page.getByLabel('Link de cópia — Modelo limpo', { exact: true });
+  await expect(field).toHaveValue(
+    'https://docs.google.com/spreadsheets/d/1lqra8SGALrb8N6l4W8vn_r8MUDxTdQU1xV1mn3fdnmg/copy',
+  );
+  await page.getByRole('button', { name: 'Selecionar link', exact: true }).click();
+  await expect(field).toBeFocused();
+  expect(
+    await field.evaluate((input: HTMLInputElement) => input.selectionEnd! - input.selectionStart!),
+  ).toBeGreaterThan(0);
+  expect(await page.evaluate(() => document.documentElement.scrollWidth <= innerWidth)).toBe(true);
+  await page.getByRole('button', { name: 'Microsoft Excel' }).click();
+  await expect(page.getByRole('button', { name: /^Copiar link/ })).toHaveCount(0);
+  await page.getByRole('button', { name: 'Google Planilhas' }).click();
+  await expect(field).toHaveCount(0);
+});
+
+test('copia o destino correto sem afirmar que a planilha foi criada', async ({ page }) => {
+  await page.addInitScript(() => {
+    Object.defineProperty(navigator, 'clipboard', {
+      configurable: true,
+      value: {
+        writeText: async (value: string) => {
+          (window as Window & { copiedTemplate?: string }).copiedTemplate = value;
+        },
+      },
+    });
+  });
+  await page.goto('/financeiro');
+  await page.getByRole('button', { name: 'Copiar link — Demonstração', exact: true }).click();
+  await expect(
+    page.getByText('Link copiado. Cole na barra de endereço', { exact: false }),
+  ).toBeVisible();
+  expect(
+    await page.evaluate(() => (window as Window & { copiedTemplate?: string }).copiedTemplate),
+  ).toBe(
+    'https://docs.google.com/spreadsheets/d/1CM5orJ2dGeLOrMGZkPLzIpaiopT48CQIKJAi6GwW4dc/copy',
+  );
+});
+
 test('encontra as planilhas, consulta o guia e mantém o acesso compacto após voltar', async ({
   page,
 }) => {

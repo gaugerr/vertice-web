@@ -1654,6 +1654,40 @@ dialog > p {
 .finance-offline {
   color: #edcda2;
 }
+.finance-copy-link {
+  width: 100%;
+  margin-top: 10px;
+}
+.finance-copy-link .button {
+  margin-top: 0;
+}
+.finance-copy-link .finance-hint:empty {
+  margin: 0;
+}
+.finance-manual-copy {
+  display: grid;
+  gap: 10px;
+  margin-top: 12px;
+  font-size: 12px;
+}
+.finance-manual-copy input {
+  font-size: 12px;
+}
+.finance-mobile-help {
+  margin-top: 20px;
+  padding: 18px;
+  border: 1px solid #534365;
+  border-radius: 12px;
+  background: #b39aff08;
+  font-size: 13px;
+  color: #cfc2df;
+}
+.finance-mobile-help strong {
+  color: #e4d7f8;
+}
+.finance-mobile-help p {
+  margin-top: 8px;
+}
 .finance-note {
   border-left: 3px solid #91c6a6;
   background: #91c6a609;

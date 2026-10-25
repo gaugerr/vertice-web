@@ -7,6 +7,7 @@ import { getPwaState, subscribePwa } from '../../../pwa/registration';
 import { financeFormats } from '../config';
 import { financeFaq, guideSteps, quickStart, routine, sheetMap } from '../guide';
 import { markFinanceVisited } from '../visit';
+import { CopyTemplateLink } from '../components/CopyTemplateLink';
 
 export default function FinancePage() {
   const scope = useAccountScope();
@@ -69,7 +70,7 @@ export default function FinancePage() {
         <p className="finance-format-description">{selected.description}</p>
         <div className="finance-versions">
           {selected.versions.map((version, index) => (
-            <article className="finance-version" key={version.title}>
+            <article className="finance-version" key={`${format}-${version.title}`}>
               <p className="eyebrow">{index === 0 ? 'PARA SEUS REGISTROS' : 'PARA EXPLORAR'}</p>
               <h3>{version.title}</h3>
               <p>{version.description}</p>
@@ -88,10 +89,26 @@ export default function FinancePage() {
                 {version.action}
                 <span className="sr-only"> (abre em outra aba)</span>
               </a>
+              {format === 'google' && <CopyTemplateLink url={version.url} title={version.title} />}
             </article>
           ))}
         </div>
         <p className="finance-hint">{selected.note}</p>
+        {format === 'google' && (
+          <div className="finance-mobile-help">
+            <strong>No celular, abriu no app Planilhas?</strong>
+            <p>
+              O app do Google pode abrir o modelo sem mostrar a tela de cópia. Nele, procure no menu
+              “Compartilhar e exportar” → “Fazer uma cópia” (os nomes podem variar). Trabalhe na
+              cópia criada na sua conta.
+            </p>
+            <p>
+              Outra opção: use “Copiar link” acima e cole no navegador. Se o celular continuar
+              abrindo o aplicativo, faça a cópia em um computador. Depois, ela estará no seu Drive
+              para usar no celular.
+            </p>
+          </div>
+        )}
         <p
           id="finance-online-note"
           className={`finance-hint ${!online ? 'finance-offline' : ''}`}

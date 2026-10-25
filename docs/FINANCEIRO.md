@@ -13,6 +13,10 @@ continua exigindo licença pelo build protegido.
   não localizam nem atualizam o arquivo já salvo pelo comprador.
 - Downloads/cópias abrem em outra aba e exigem internet. Não há confirmação de
   cópia ou download concluído. Google pode pedir uma sessão própria.
+- No celular, o aplicativo Google Planilhas pode interceptar `/copy` e abrir o
+  modelo. A tela orienta a fazer uma cópia pelo menu do Planilhas ou usar o
+  navegador/computador. Cada modelo tem “Copiar link”, com seleção manual se a
+  área de transferência for negada. Não há promessa de forçar o navegador.
 - Os links foram liberados pelo proprietário para qualquer pessoa com o link.
   A proteção da rota não torna os destinos privados nem impede compartilhamento.
   Não adicionar os arquivos pagos ao GitHub público.
