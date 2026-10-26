@@ -135,16 +135,32 @@ Uma falha reverte as três e deixa o evento recuperável; o texto do erro SQL nu
 fica em `review` com `retry_exhausted` para intervenção.
 
 A função é chamada depois da captura quando a flag do servidor está habilitada.
-`supabase/cakto-retry-job.sql` prepara um job de minuto em minuto **inativo**,
-sem segredos ou requisições HTTP.
-Ele depende da extensão `pg_cron` já habilitada e da execução deliberada do script
-no projeto certo. A ativação do job é uma configuração posterior, indispensável
-para recuperar eventos pendentes sem depender de outra venda.
+`supabase/cakto-retry-job.sql` prepara dois jobs **inativos**: recuperação a cada
+cinco minutos (`*/5 * * * *`) e limpeza diária do histórico de execução às 04:15
+UTC. A limpeza remove somente registros encerrados há mais de sete dias desses
+dois jobs em `cron.job_run_details`; preserva eventos de pagamento, pedidos,
+licenças, auditoria e histórico de outros jobs. Reexecutar o script pausa os dois
+jobs, inclusive se já estiverem ativos.
+
+O script depende da extensão `pg_cron` e deve ser executado deliberadamente no
+projeto certo. Depois de revisar os comandos, ativar ambos pelo painel Cron ou
+com `cron.alter_job(job_id := <id do job>, active := true)`. A recuperação não
+precisa de outra venda: chama a função diretamente no Postgres, sem segredos,
+requisições HTTP ou invocações adicionais de Edge Functions. São 8.640 execuções
+em 30 dias; CPU e histórico continuam consumindo recursos do banco. O intervalo
+de cinco minutos é da recuperação, não um atraso obrigatório na compra: a
+tentativa imediata continua no webhook quando habilitada.
 
 Para pausar **todo** processamento, desabilitar o produto em `cakto_products`;
 isso não revoga acessos existentes. A flag de ambiente desliga somente a tentativa
 imediata no webhook; um job SQL já ativo continua independente dela. O script
 fornecido não é executado pela migração nem pela CI.
+
+Em 26/10/2026, os dois jobs foram instalados e ativados no projeto Vértice, com
+recuperação a cada cinco minutos e limpeza restrita a sete dias. A execução direta
+do processador retornou zero alterações e o resumo criptográfico das licenças foi
+preservado. O produto permanece com `processing_enabled=false`: o agendamento
+está ativo, mas a liberação/revogação automática geral ainda está pausada.
 
 ## Antes de ativar vendas reais
 
@@ -158,7 +174,8 @@ fornecido não é executado pela migração nem pela CI.
    descobre sozinha vendas/reembolsos perdidos na origem. Conciliação pela API,
    alertas, retenção e painel de fila/revisão são etapas operacionais pendentes.
 4. Validar compra controlada, login e reembolso de ponta a ponta. Habilitar o
-   produto, as flags e o job só na ativação acordada, mantendo atendimento e
+   produto e as flags só na ativação acordada, confirmando que o job está ativo e
+   mantendo atendimento e
    liberação manual disponíveis. Revisar a política de privacidade para os novos
    registros de pedidos.
 5. Preservar o limite da revogação offline (até sete dias atualmente) e informar
