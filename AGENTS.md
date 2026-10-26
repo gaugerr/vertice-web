@@ -130,6 +130,11 @@ explícito daquela linha. Testes de regras/componentes ficam próximos ao códig
 | Tabelas, permissões, administrador inicial e testes | `supabase/migrations/`, `supabase/bootstrap-admin.sql`, `supabase/tests/access.sql`                                            |
 
 O administrador é autorizado pelo servidor; esconder um botão não é autorização.
+O painel permite excluir somente uma licença, com confirmação exata do e-mail.
+`access_admin_delete_license` preserva Auth, compras/eventos Cakto e auditoria;
+licenças de administradores são protegidas. Exclusão não equivale ao bloqueio
+manual de Revogar: uma nova notificação válida pode recriar a licença. Testes em
+`supabase/tests/admin_delete_license.sql` e `src/access/AdminPage.test.tsx`.
 Não usar email fixo/`user_metadata` do cliente para conceder privilégios nem promover
 automaticamente o primeiro usuário. Preservar separação de contas e validação da
 assinatura, identidade e validade da autorização offline. Revogação é conhecida na
