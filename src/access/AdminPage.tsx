@@ -317,7 +317,7 @@ export default function AdminPage() {
                   criar a licença novamente. Para manter um bloqueio com prioridade sobre a
                   automação, use Revogar.
                 </p>
-                <label className="access-label">
+                <label className="access-label account-email">
                   Digite {deleting.email} para confirmar
                   <input
                     type="email"
