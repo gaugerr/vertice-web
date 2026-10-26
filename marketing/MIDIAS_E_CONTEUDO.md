@@ -65,13 +65,15 @@ exemplos como se fossem experiências de compradores.
 
 ## Controles manuais
 
-`site-config.js` concentra `whatsapp`, `launchSlots` e `launchListOpen`.
+`site-config.js` concentra `checkoutUrl`, `whatsapp` e `launchSlots`.
 
-- O número inclui país e DDD, somente dígitos: `5551980614158`.
+- O checkout oficial é <https://pay.cakto.com.br/jjnk3vv_1241258>. Se mudar,
+  atualize também os links `data-checkout-link` no HTML, que funcionam sem JavaScript.
+- O número de suporte inclui país e DDD, somente dígitos: `5551980614158`.
 - `launchSlots: 100` é a capacidade total do lote; não é contagem de vagas restantes.
-- O proprietário confirma e controla as reservas pelo WhatsApp. Ao encerrar o lote,
-  altere `launchListOpen` para `false`; a página retira a chamada de reserva e passa
-  a oferecer conversa sobre a próxima disponibilidade. A lista não é um checkout.
-- Antes de vender: definir checkout, prazo de entrega/liberação, canal oficial de
-  atendimento e reembolso e prazo de atendimento. Garantia anunciada: 7 dias após
-  a entrega do kit. O site não cobra nem concede licenças.
+- O pagamento é feito na Cakto. A página não coleta contatos nem faz reservas.
+  Mantenha os preços e as condições coerentes entre página e checkout.
+- Acesso automático após a confirmação do pagamento, usando a mesma conta Google
+  informada na compra. Planilhas e tutorial ficam em Vértice Financeiro, no app.
+  Garantia anunciada: 7 dias após a entrega do kit, com solicitação de reembolso
+  pela Cakto e suporte pelo WhatsApp.

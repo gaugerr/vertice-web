@@ -11,10 +11,9 @@ ativo para preservar o acesso aos dados locais de quem já o utiliza.
 - **Stack:** React 19, TypeScript, Vite 7, Tailwind CSS 4, React Router 7,
   Dexie/IndexedDB, Zod, big.js e lucide-react. Node 24 e npm; versões no lockfile.
 - **Compras:** dados locais no navegador. Login não faz backup nem sincronização.
-- **Acesso:** Google via Supabase, licença vitalícia liberada manualmente e
+- **Acesso:** Google via Supabase, licença vitalícia liberada pelo produtor ou pela Cakto e
   autorização offline assinada de até sete dias após validação online.
-- **Ainda não existem:** sincronização de compras na nuvem, checkout/webhook de
-  venda ativo, leitura de etiquetas/códigos de barras ou integração automática com planilha.
+- **Ainda não existem:** sincronização de compras na nuvem, leitura de etiquetas/códigos de barras ou integração automática com planilha.
   A captura e o processamento Cakto estão preparados, desativados por padrão.
 
 ## Arquitetura e entrada
@@ -175,17 +174,19 @@ produção nem registrar corpos de webhook, que contêm o segredo da integraçã
   `conversion.css`, `script.js` e `site-config.js`. Prévias interativas independentes
   em `interactive-demo.js`/`.css`: estado em memória, dinheiro em centavos inteiros,
   sem persistência ou sincronização; botão manual copia o total só uma vez. Projeto Pages `vertice-kit`, raiz
-  `/marketing`, build `node build.mjs` e saída `dist`. Lista de espera prepara uma
-  mensagem ao WhatsApp do proprietário; envio e confirmação são manuais. O site
-  não salva contatos nem afirma que houve inscrição automática. Configuração do
-  telefone, capacidade total e abertura do lote: `site-config.js`. Não mostrar
-  capacidade total como vagas restantes. R$ 59 é referência após o lançamento;
+  `/marketing`, build `node build.mjs` e saída `dist`. CTAs de compra levam ao
+  checkout Cakto `https://pay.cakto.com.br/jjnk3vv_1241258`; o WhatsApp é suporte.
+  Configuração de checkout, telefone e capacidade total: `site-config.js`.
+  Manter o fallback dos links `data-checkout-link` no HTML. Sem formulário de
+  contatos. Não mostrar capacidade total como vagas restantes. R$ 59 é referência após o lançamento;
   R$ 19,90 é a condição das 100 primeiras compras. Garantia: 7 dias após a entrega.
   Mídias em `media/` são placeholders; depoimentos de exemplo ficam em template
   inerte até haver relatos reais. Checklist: `marketing/MIDIAS_E_CONTEUDO.md`.
   `social.png` é o cartão de compartilhamento 1200×630. Não publicar os arquivos
   pagos do kit. App/planilha permanecem separados, com registro manual do total.
-  As vendas continuam fechadas até haver checkout, entrega e atendimento definidos.
+  A página informa liberação automática após o pagamento, com a mesma conta Google
+  da compra; planilhas e tutorial ficam em Vértice Financeiro. Não prometer prazo
+  instantâneo de confirmação para todos os meios de pagamento.
 
 ## Comandos e validação
 
