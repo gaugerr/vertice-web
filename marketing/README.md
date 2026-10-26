@@ -7,11 +7,11 @@ Cloudflare Pages `vertice-kit`: raiz `/marketing`, comando `node build.mjs`, sa�
 
 ## Código completo
 
-- `index.html`: página, formulário, 17 perguntas, oferta e placeholders comentados.
+- `index.html`: página, checkout, 17 perguntas, oferta e placeholders comentados.
 - `styles.css`: identidade visual existente; `conversion.css`: novas seções.
-- `script.js`: formulário e chamada ao WhatsApp.
+- `script.js`: links do checkout, suporte pelo WhatsApp e chamada fixa no celular.
 - `interactive-demo.js` e `interactive-demo.css`: prévias do app e do painel financeiro.
-- `site-config.js`: telefone, capacidade total do lote e abertura da lista.
+- `site-config.js`: checkout Cakto, telefone de suporte e capacidade total do lote.
 - `media/`: espaços reservados para fotos/GIFs reais, com proporções fixas.
 - `social.png`: imagem social real de marca, PNG 1200×630; fonte `social.svg`.
 - `MIDIAS_E_CONTEUDO.md`: checklist e instruções para substituir todo conteúdo provisório.
@@ -19,30 +19,31 @@ Cloudflare Pages `vertice-kit`: raiz `/marketing`, comando `node build.mjs`, sa�
 Para gerar o site, execute `node build.mjs` dentro desta pasta. Não há dependências
 nem servidor próprio. O build não inclui instruções internas nem arquivos pagos.
 
-## Lista de espera e privacidade
+## Compra e atendimento
 
-O formulário exige nome, e-mail ou WhatsApp e consentimento. Ele prepara uma mensagem
-para **(51) 98061-4158** e abre `wa.me/5551980614158`. A pessoa precisa tocar em Enviar
-no WhatsApp. A página não consegue verificar esse envio nem confirmar a reserva.
-A confirmação deixa isso explícito, apresenta um link para tentar novamente e
-permite revisar os dados. Não há banco de leads, localStorage, cookies de marketing,
-chamada ao Supabase, disparo automático de mensagens ou dados pessoais na URL do site.
-O contato só segue para o WhatsApp no link de mensagem preparado pelo usuário.
+Todos os CTAs de compra levam diretamente a
+<https://pay.cakto.com.br/jjnk3vv_1241258>. O endereço fica em `checkoutUrl` no
+`site-config.js`, com links reais no HTML para funcionar sem JavaScript. Ao trocar
+o checkout, atualizar também esses fallbacks. O WhatsApp **(51) 98061-4158** é usado
+somente para dúvidas e suporte, sem formulário de lista de espera.
 
-O proprietário controla manualmente a lista e confirma a condição de lançamento.
-`launchSlots` é o tamanho TOTAL do lote, nunca uma contagem de vagas restantes.
-O botão fixo e os CTAs levam diretamente a `#lista-de-espera`. Ao encerrar o lote,
-use `launchListOpen: false` para retirar a promessa de reserva.
+O pagamento acontece na Cakto. Este site não coleta nome ou contato, não salva
+leads nem processa pagamentos. Não há cookies de marketing ou chamadas ao Supabase
+na página de vendas. A liberação ocorre no app, pela integração Cakto existente,
+após a confirmação do pagamento. O comprador deve informar no checkout o mesmo
+e-mail da conta Google que usará no app. As planilhas e o tutorial são acessados
+pela seção Vértice Financeiro.
 
 ## Oferta e limites reais
 
 Pagamento único, R$ 19,90 para as 100 primeiras compras; R$ 59,00 é referência para
-após o lançamento, não um histórico de vendas. O cadastro não cobra nem libera acesso.
-A garantia anunciada é de 7 dias após a entrega, com reembolso integral mediante
-solicitação ao atendimento. Canal oficial, prazo de atendimento, checkout e prazo
-de liberação devem ser definidos antes de abrir vendas. A licença é vinculada ao
-e-mail Google informado e liberada manualmente. Não há promessa de versões pagas
-futuras incluídas nem de disponibilidade eterna de serviços online.
+após o lançamento, não um histórico de vendas. `launchSlots` é o tamanho TOTAL do
+lote, nunca um contador de vagas restantes. O proprietário deve manter o preço e
+a condição de lançamento coerentes entre página e checkout.
+
+A garantia anunciada é de 7 dias após a entrega, com solicitação de reembolso pela
+Cakto ou atendimento pelo WhatsApp. Não há promessa de versões pagas futuras
+incluídas nem de disponibilidade eterna de serviços online.
 
 App e planilha são independentes; o total é registrado manualmente na planilha.
 Compras ficam no navegador, sem sincronização automática. Backup é feito por arquivo;

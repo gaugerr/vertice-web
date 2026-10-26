@@ -31,7 +31,7 @@
 }
 .demo-copy h2,
 .proof-heading h2,
-.waitlist-copy h2 {
+.checkout-copy h2 {
   font-size: 48px;
   font-weight: 500;
   line-height: 1.12;
@@ -40,7 +40,7 @@
 }
 .demo-copy h2 em,
 .proof-heading h2 em,
-.waitlist-copy h2 em {
+.checkout-copy h2 em {
   color: #c3abdf;
 }
 .demo-copy > p:not(.eyebrow) {
@@ -235,182 +235,66 @@
   line-height: 1.9;
   margin-top: 8px;
 }
-.waitlist-section {
+.checkout-section {
   background: #19151f;
   padding: 95px 0;
   scroll-margin-top: 90px;
 }
-.waitlist-layout {
+.checkout-layout {
   display: grid;
   grid-template-columns: 1fr 1fr;
   gap: 95px;
   align-items: start;
 }
-.waitlist-copy > p:not(.eyebrow) {
+.checkout-copy > p:not(.eyebrow) {
   color: #b9aac4;
   font-size: 14px;
   line-height: 1.9;
   margin-top: 20px;
   max-width: 410px;
 }
-.waitlist-copy > .waitlist-promise {
+.checkout-copy > .checkout-promise {
   color: #e6ddef;
   font-size: 19px;
   line-height: 1.6;
 }
-.waitlist-promise strong {
+.checkout-promise strong {
   color: var(--mint);
   font-weight: 500;
   white-space: nowrap;
 }
-.waitlist-copy > .waitlist-conditions {
+.checkout-copy > .checkout-conditions {
   color: #a492b3;
   font-size: 11px;
 }
-.waitlist-panel {
+.checkout-panel {
   background: #251d2e;
   padding: 32px;
   border: 1px solid #574366;
   border-radius: 10px;
   min-width: 0;
 }
-.waitlist-panel form > label:not(.waitlist-consent) {
-  display: block;
-  font-size: 12px;
-  line-height: 1.7;
-  margin-bottom: 9px;
-  color: #e3d5ed;
-}
-.waitlist-panel input[type='text'],
-.waitlist-panel input[type='email'],
-.waitlist-panel input[type='tel'] {
-  display: block;
-  width: 100%;
-  min-width: 0;
-  border: 1px solid #655172;
-  border-radius: 6px;
-  padding: 15px;
-  background: #19141f;
-  color: #f5edfb;
-  font-size: 16px;
-  line-height: 1.4;
-  min-height: 52px;
-}
-.waitlist-panel input::placeholder {
-  color: #95829f;
-}
-.waitlist-panel input:focus {
-  outline: 2px solid var(--purple);
-  outline-offset: 2px;
-}
-.contact-method {
-  border: 0;
-  padding: 0;
-  margin: 24px 0 17px;
-  display: flex;
-  gap: 20px;
-  flex-wrap: wrap;
-}
-.contact-method legend {
-  font-size: 12px;
-  line-height: 1.7;
-  margin-bottom: 8px;
-  color: #d9c8e4;
-}
-.contact-method label {
-  display: inline-flex;
-  gap: 9px;
-  align-items: center;
-  min-height: 38px;
+.checkout-steps {
+  display: grid;
+  gap: 18px;
+  padding-left: 22px;
+  margin: 0 0 26px;
+  color: #c5b3d1;
   font-size: 13px;
-  cursor: pointer;
+  line-height: 1.8;
 }
-.contact-method input,
-.waitlist-consent input {
-  accent-color: var(--purple);
-  width: 18px;
-  height: 18px;
-  flex: 0 0 18px;
+.checkout-steps li::marker {
+  color: var(--mint);
+  font-weight: 600;
+}
+.checkout-steps strong {
+  color: #eee4f5;
 }
 .field-hint {
   font-size: 10px;
   line-height: 1.8;
   color: #b09abe;
   margin-top: 11px;
-}
-.waitlist-consent {
-  display: flex;
-  gap: 10px;
-  align-items: flex-start;
-  font-size: 11px;
-  color: #d1bddf;
-  line-height: 1.8;
-  margin: 22px 0;
-  cursor: pointer;
-}
-.waitlist-consent input {
-  margin: 3px 0 0;
-}
-#waitlist-submit {
-  width: 100%;
-  justify-content: space-between;
-  font-size: 12px;
-  gap: 15px;
-}
-#waitlist-submit:disabled {
-  opacity: 0.55;
-}
-.waitlist-privacy {
-  font-size: 10px;
-  line-height: 1.9;
-  color: #a690b4;
-  margin-top: 18px;
-}
-.form-error {
-  margin-top: 12px;
-  color: #e6b1c3;
-  font-size: 12px;
-  line-height: 1.7;
-}
-.waitlist-confirmation h3 {
-  font-size: 26px;
-  font-weight: 500;
-  letter-spacing: -0.8px;
-  line-height: 1.2;
-  margin-top: 22px;
-}
-.waitlist-confirmation > p:not(.field-hint) {
-  color: #c5afd2;
-  font-size: 13px;
-  line-height: 1.9;
-  margin-top: 18px;
-}
-.confirmation-icon {
-  color: var(--mint);
-  display: grid;
-  place-items: center;
-  width: 54px;
-  height: 54px;
-  border: 1px solid #bde9c74a;
-  border-radius: 50%;
-  font-size: 28px;
-}
-.waitlist-confirmation .button {
-  width: 100%;
-  margin-top: 25px;
-  font-size: 13px;
-  gap: 12px;
-}
-.edit-waitlist {
-  min-height: 44px;
-  background: transparent;
-  border: 0;
-  padding: 12px 0;
-  color: #cdb2df;
-  font-size: 12px;
-  text-decoration: underline;
-  text-underline-offset: 4px;
-  margin-top: 12px;
 }
 .faq-cta {
   display: inline-flex;
@@ -425,15 +309,15 @@
 @media (max-width: 900px) {
   .demo-layout,
   .proof-heading,
-  .waitlist-layout {
+  .checkout-layout {
     gap: 40px;
   }
   .demo-copy h2,
   .proof-heading h2,
-  .waitlist-copy h2 {
+  .checkout-copy h2 {
     font-size: 39px;
   }
-  .waitlist-panel {
+  .checkout-panel {
     padding: 25px;
   }
   .offer-layout {
@@ -447,13 +331,13 @@
   }
   .demo-layout,
   .proof-heading,
-  .waitlist-layout {
+  .checkout-layout {
     grid-template-columns: 1fr;
     gap: 31px;
   }
   .demo-copy h2,
   .proof-heading h2,
-  .waitlist-copy h2 {
+  .checkout-copy h2 {
     font-size: 36px;
     letter-spacing: -1.3px;
   }
@@ -480,20 +364,20 @@
   .testimonial-grid {
     grid-template-columns: 1fr;
   }
-  .waitlist-section {
+  .checkout-section {
     padding: 65px 0;
   }
-  .waitlist-copy > .waitlist-promise {
+  .checkout-copy > .checkout-promise {
     font-size: 18px;
   }
-  .waitlist-copy > p:not(.eyebrow) {
+  .checkout-copy > p:not(.eyebrow) {
     max-width: 100%;
     font-size: 13px;
   }
-  .waitlist-copy > .waitlist-conditions {
+  .checkout-copy > .checkout-conditions {
     font-size: 11px;
   }
-  .waitlist-panel {
+  .checkout-panel {
     padding: 27px 23px;
   }
   .offer-card .price {
@@ -521,16 +405,16 @@
   color: #d5bde7;
 }
 
-.waitlist-panel {
+.checkout-panel {
   scroll-margin-top: 100px;
 }
-.waitlist-panel-title {
+.checkout-panel-title {
   font-size: 23px;
   font-weight: 500;
   letter-spacing: -0.5px;
   line-height: 1.3;
 }
-.waitlist-panel-intro {
+.checkout-panel-intro {
   font-size: 11px;
   line-height: 1.8;
   color: #baa5c7;
