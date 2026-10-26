@@ -14,13 +14,19 @@ Deno.serve((req) =>
     }
     if (!input || typeof input !== 'object' || Array.isArray(input))
       throw new HttpError(400, 'Invalid request');
-    const { data, error } = await service.rpc('access_admin', { actor: userId, input });
+    const operation = (input as Record<string, unknown>).action;
+    const { data, error } = await service.rpc(
+      operation === 'delete' ? 'access_admin_delete_license' : 'access_admin',
+      { actor: userId, input },
+    );
     if (error)
       throw new HttpError(
         error.code === '42501' || error.code === '28000' ? 403 : 400,
         error.code === '42501'
           ? 'Administrator required'
-          : 'Check the request; email may already be licensed',
+          : operation === 'delete'
+            ? 'Deletion failed; no records were removed'
+            : 'Check the request; email may already be licensed',
       );
     return data;
   }),

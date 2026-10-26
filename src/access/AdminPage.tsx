@@ -6,6 +6,7 @@ import { AccessScreen } from './AccessScreen';
 import { Button } from '../shared/ui/Button';
 import { trackWrite } from '../data/database/writes';
 import { useUnsavedChanges } from '../shared/lib/drafts';
+import { Dialog } from '../shared/ui/Dialog';
 interface License {
   id: string;
   email: string;
@@ -24,6 +25,7 @@ interface Event {
 export default function AdminPage() {
   const state = useAccess();
   const uid = state.account?.uid;
+  const accountEmail = state.account?.email?.toLowerCase();
   const [rows, setRows] = useState<License[]>([]);
   const [search, setSearch] = useState('');
   const [query, setQuery] = useState('');
@@ -36,6 +38,10 @@ export default function AdminPage() {
   const [error, setError] = useState('');
   const [pending, setPending] = useState(false);
   const [events, setEvents] = useState<{ email: string; rows: Event[] } | null>(null);
+  const [deleting, setDeleting] = useState<License | null>(null);
+  const [confirmEmail, setConfirmEmail] = useState('');
+  const [deleteError, setDeleteError] = useState('');
+  const [notice, setNotice] = useState('');
   const generation = useRef(0);
   useUnsavedChanges(Boolean(email || reference));
   const request = useCallback(async <T,>(input: unknown): Promise<T> => {
@@ -73,11 +79,14 @@ export default function AdminPage() {
     setAuthorizedUid(null);
     setRows([]);
     setEvents(null);
+    setDeleting(null);
+    setConfirmEmail('');
     if (uid) void load();
   }, [load, uid]);
   async function change(input: unknown) {
     setPending(true);
     setError('');
+    setNotice('');
     try {
       await trackWrite(() => request(input));
       setEmail('');
@@ -85,6 +94,26 @@ export default function AdminPage() {
       await load();
     } catch (e) {
       setError(e instanceof Error ? e.message : 'A operação falhou.');
+    } finally {
+      setPending(false);
+    }
+  }
+  async function deleteLicense() {
+    if (!deleting || confirmEmail !== deleting.email || pending) return;
+    setPending(true);
+    setDeleteError('');
+    setNotice('');
+    try {
+      await trackWrite(() => request({ action: 'delete', id: deleting.id, confirmEmail }));
+      setDeleting(null);
+      setConfirmEmail('');
+      setEvents(null);
+      setNotice('Licença excluída. Conta de login, compras e histórico preservados.');
+      await load();
+    } catch {
+      setDeleteError(
+        'Não foi possível confirmar a exclusão. Atualize o painel antes de tentar novamente. Licenças de administradores não podem ser excluídas.',
+      );
     } finally {
       setPending(false);
     }
@@ -101,6 +130,7 @@ export default function AdminPage() {
       <h1>Licenças</h1>
       <p>{state.account.email} · Administração online</p>
       {error && <p role="alert">{error}</p>}
+      {notice && <p role="status">{notice}</p>}
       {!authorized && (
         <Button disabled={pending} onClick={() => void load()}>
           Verificar permissão
@@ -205,6 +235,17 @@ export default function AdminPage() {
                   >
                     Histórico
                   </Button>
+                  <Button
+                    variant="danger"
+                    disabled={pending || row.user_id === uid || row.email === accountEmail}
+                    onClick={() => {
+                      setDeleting(row);
+                      setConfirmEmail('');
+                      setDeleteError('');
+                    }}
+                  >
+                    Excluir licença
+                  </Button>
                 </div>
               </li>
             ))}
@@ -241,6 +282,7 @@ export default function AdminPage() {
                       cakto_grant: 'Liberação pela Cakto',
                       cakto_revoke: 'Revogação pela Cakto',
                       cakto_reactivate: 'Reativação pela Cakto',
+                      delete: 'Exclusão da licença',
                     }[event.action] ?? event.action}{' '}
                     · {new Date(event.created_at).toLocaleString('pt-BR')}
                   </li>
@@ -250,6 +292,73 @@ export default function AdminPage() {
                 Fechar histórico
               </Button>
             </section>
+          )}
+          {deleting && (
+            <Dialog
+              title="Excluir licença?"
+              busy={pending}
+              onClose={() => {
+                if (!pending) setDeleting(null);
+              }}
+            >
+              <form
+                onSubmit={(event) => {
+                  event.preventDefault();
+                  void deleteLicense();
+                }}
+              >
+                <p>
+                  Esta ação remove somente a licença. O login Google, as compras, os eventos da
+                  Cakto e o histórico são preservados. Não solicita reembolso.
+                </p>
+                <p>
+                  O acesso será bloqueado na próxima verificação online. Um aparelho offline pode
+                  manter acesso por até sete dias. Uma nova notificação de compra aprovada poderá
+                  criar a licença novamente. Para manter um bloqueio com prioridade sobre a
+                  automação, use Revogar.
+                </p>
+                <label className="access-label account-email">
+                  Digite {deleting.email} para confirmar
+                  <input
+                    type="email"
+                    required
+                    autoComplete="off"
+                    spellCheck={false}
+                    maxLength={254}
+                    value={confirmEmail}
+                    disabled={pending}
+                    onChange={(event) => setConfirmEmail(event.target.value)}
+                  />
+                </label>
+                {deleteError && (
+                  <>
+                    <p role="alert">{deleteError}</p>
+                    <Button
+                      variant="secondary"
+                      disabled={pending}
+                      onClick={() => {
+                        setDeleting(null);
+                        void load();
+                      }}
+                    >
+                      Atualizar painel
+                    </Button>
+                  </>
+                )}
+                <div className="access-actions">
+                  <Button variant="secondary" disabled={pending} onClick={() => setDeleting(null)}>
+                    Cancelar
+                  </Button>
+                  <Button
+                    type="submit"
+                    variant="danger"
+                    disabled={pending || confirmEmail !== deleting.email}
+                  >
+                    {pending ? 'Excluindo…' : 'Excluir definitivamente'}
+                  </Button>
+                </div>
+              </form>
+            </Dialog>
           )}
         </>
       )}
