@@ -9,8 +9,10 @@ inventadas do produto, clientes fictícios, vendas ou avaliações fabricadas.
 - [ ] **GIF/vídeo do app no mercado:** 10–15 segundos, vertical 9:16; ideal 540×960
       ou 1080×1920. Slot `app-market-demo`, seção `#demonstracao`. Mostrar marcação de
       produtos, valor e total. Não mostrar notificações, e-mail ou outros dados pessoais.
-- [x] **Captura do app no celular:** `app-categorias.jpg`, original inteiro. Slot
-      `app-phone-photo`, seção “O app de compras”.
+- [x] **Captura completa do app no celular:** `app-captura-completa.jpg`, com
+      total de R$ 94,12 e os itens da compra. O enquadramento remove somente os 36 px
+      superiores da barra de notificações, preservando toda a largura e o restante
+      da altura. Slots `app-phone-photo` e `app-market-demo`.
 - [ ] **Foto ou captura real da planilha:** horizontal 16:10, ideal 1600×1000,
       WebP/PNG. Slot `spreadsheet-photo`, seção “A planilha financeira”. Usar o modelo
       de demonstração ou ocultar dados pessoais. O kit pago não deve virar download público.
@@ -24,7 +26,7 @@ inventadas do produto, clientes fictícios, vendas ou avaliações fabricadas.
       miniatura e da ampliação. Não reconstruir a interface nem tratar os valores
       do exemplo como economia garantida. A captura de histórico mostra um preço
       ainda em edição.
-- [x] **Resumo real da compra:** `app-orcamento.jpg` no slot `app-market-demo`.
+- [x] **Resumo real da compra:** `app-captura-completa.jpg` no slot `app-market-demo`.
       É uma captura estática identificada, não um vídeo. O vídeo acima segue opcional.
 - [ ] **Três depoimentos reais:** texto original curto, autorização de publicação e
       identificação combinada com o autor. Nome completo, foto e avaliação em estrelas
