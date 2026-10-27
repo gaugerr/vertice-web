@@ -11,8 +11,9 @@ Cloudflare Pages `vertice-kit`: raiz `/marketing`, comando `node build.mjs`, sa�
 - `styles.css`: identidade visual existente; `conversion.css`: novas seções.
 - `script.js`: links do checkout, suporte pelo WhatsApp e chamada fixa no celular.
 - `interactive-demo.js` e `interactive-demo.css`: prévias do app e do painel financeiro.
+- `app-gallery.js` e `app-gallery.css`: galeria responsiva de telas reais e ampliação.
 - `site-config.js`: checkout Cakto, telefone de suporte e capacidade total do lote.
-- `media/`: espaços reservados para fotos/GIFs reais, com proporções fixas.
+- `media/`: capturas reais do app e espaço reservado para o painel da planilha.
 - `social.png`: imagem social real de marca, PNG 1200×630; fonte `social.svg`.
 - `MIDIAS_E_CONTEUDO.md`: checklist e instruções para substituir todo conteúdo provisório.
 
@@ -50,7 +51,7 @@ Compras ficam no navegador, sem sincronização automática. Backup é feito por
 a autorização offline precisa de renovação online em até sete dias.
 
 Os três depoimentos de exemplo estão em um template inerte e não aparecem como
-prova social. As fotos e a demonstração em vídeo são espaços reservados declarados.
+prova social. As capturas do app são reais; o painel da planilha continua reservado.
 Não publicar os arquivos pagos do kit nem dados pessoais de quem usa o produto.
 
 ## Demonstrações interativas
@@ -63,6 +64,10 @@ valores do mês de exemplo, sem inventar histórico. Valores são somados em
 centavos inteiros; entradas inválidas preservam o último resultado válido.
 
 Todo estado existe só na memória da página. Não há envio, persistência, importação
-de compras reais ou alteração dos arquivos pagos. O botão de usar o total da lista
-preenche Mercado uma única vez, simulando o registro manual; não cria sincronização.
-As fotos e o vídeo reais continuam reservados em `media/`.
+de compras reais ou alteração dos arquivos pagos. As duas prévias são independentes;
+não há card nem botão para transferir o total entre os exemplos. As telas reais do
+app ficam em `media/`; a captura da planilha continua pendente.
+
+O início apresenta explicitamente o app de lista de compras inteligente e offline
+e a planilha de controle financeiro completa, com dashboard e gráficos. A nota de
+uso offline informa o preparo e a validação do acesso.

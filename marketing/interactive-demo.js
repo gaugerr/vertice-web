@@ -405,19 +405,6 @@
       selectTab(tabs[target].dataset.financeTab, true);
     });
   });
-  $('#fill-sheet-example').addEventListener('click', () => {
-    expenses.mercado = appTotal();
-    $$('[data-expense="mercado"]').forEach((input) => {
-      input.value = decimal(expenses.mercado);
-      input.removeAttribute('aria-invalid');
-    });
-    renderFinance();
-    showValidation(financeScope);
-    selectTab('dashboard');
-    $('#manual-demo-status').textContent =
-      `Exemplo de Mercado preenchido com ${reais(expenses.mercado)}. Mudanças futuras na lista não são copiadas automaticamente. No kit, você digita o total na planilha.`;
-    $('#finance-income-input').focus({ preventScroll: true });
-  });
   $('#reset-finance').addEventListener('click', () => {
     income = 450000;
     selectedCategory = 'mercado';
@@ -439,8 +426,6 @@
     $$('[data-paid]').forEach((input) => {
       input.value = 'paid';
     });
-    $('#manual-demo-status').textContent =
-      'Exemplo restaurado. No kit, o registro é manual, sem sincronização automática entre app e planilha.';
     showValidation(financeScope);
     renderFinance();
     renderGoals();

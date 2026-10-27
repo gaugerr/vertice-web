@@ -173,7 +173,10 @@ produção nem registrar corpos de webhook, que contêm o segredo da integraçã
 - Página de vendas independente em `marketing/`: `index.html`, `styles.css` e
   `conversion.css`, `script.js` e `site-config.js`. Prévias interativas independentes
   em `interactive-demo.js`/`.css`: estado em memória, dinheiro em centavos inteiros,
-  sem persistência ou sincronização; botão manual copia o total só uma vez. Projeto Pages `vertice-kit`, raiz
+  sem persistência ou sincronização, com exemplos de compras e finanças independentes.
+  A abertura destaca o app de lista de compras inteligente e offline e a planilha
+  financeira completa, com dashboard e gráficos. Uso offline depende de preparo e
+  validação do acesso. Projeto Pages `vertice-kit`, raiz
   `/marketing`, build `node build.mjs` e saída `dist`. CTAs de compra levam ao
   checkout Cakto `https://pay.cakto.com.br/jjnk3vv_1241258`; o WhatsApp é suporte.
   Configuração de checkout, telefone e capacidade total: `site-config.js`.
