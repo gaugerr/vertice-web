@@ -37,9 +37,11 @@
     <link rel="stylesheet" href="/styles.css" />
     <link rel="stylesheet" href="/conversion.css" />
     <link rel="stylesheet" href="/interactive-demo.css" />
+    <link rel="stylesheet" href="/app-gallery.css" />
     <script src="/site-config.js" defer></script>
     <script src="/interactive-demo.js" defer></script>
     <script src="/script.js" defer></script>
+    <script src="/app-gallery.js" defer></script>
     <title>Vértice — App de lista de compras + planilha financeira</title>
   </head>
   <body>
@@ -212,31 +214,28 @@
               vista, junto do orçamento que você definiu.
             </p>
             <p class="demo-honesty">
-              Estamos preparando uma demonstração real do app. Por enquanto, experimente os itens da
-              lista ilustrativa acima.
+              Esta é uma captura real do aplicativo. Para experimentar sem instalar, use a lista
+              ilustrativa acima ou conheça mais funções nas telas abaixo.
             </p>
             <a class="text-link" href="#demo-compra"
               >Testar a lista de exemplo <span aria-hidden="true">↗</span></a
             >
           </div>
           <div class="demo-media">
-            <!-- TROCAR: GIF do app no mercado, 10-15s, vertical. Substituir src e alt; para MP4, usar o exemplo em MIDIAS_E_CONTEUDO.md. -->
             <figure
-              class="media-slot media-slot-portrait"
+              class="media-slot media-slot-portrait media-slot-app-capture"
               data-media-slot="app-market-demo"
-              data-placeholder="true"
             >
               <img
-                src="/media/reservado-vertical.svg"
-                width="540"
-                height="960"
+                src="/media/app-orcamento.jpg"
+                width="592"
+                height="1280"
                 loading="lazy"
                 decoding="async"
-                alt="Espaço reservado: Demonstração do app durante uma compra no mercado. A imagem real ainda será adicionada."
+                alt="Lista Mercado Master no Vértice: R$ 69,08 comprados de um orçamento de R$ 100,00, com R$ 30,92 restantes."
               />
               <figcaption>
-                <span>MÍDIA REAL EM PREPARAÇÃO</span>Demonstração do app durante uma compra no
-                mercado
+                <span>CAPTURA REAL DO APP</span>O total e o orçamento acompanham sua compra.
               </figcaption>
             </figure>
           </div>
@@ -757,22 +756,20 @@
               </div>
               <h3>O app de compras</h3>
               <p>Praticidade para levar ao mercado.</p>
-              <!-- TROCAR: foto real do app no celular, vertical 9:16, WebP/JPG. -->
               <figure
-                class="media-slot media-slot-portrait"
+                class="media-slot media-slot-portrait media-slot-app-capture"
                 data-media-slot="app-phone-photo"
-                data-placeholder="true"
               >
                 <img
-                  src="/media/reservado-vertical.svg"
-                  width="540"
-                  height="960"
+                  src="/media/app-categorias.jpg"
+                  width="574"
+                  height="1280"
                   loading="lazy"
                   decoding="async"
-                  alt="Espaço reservado: Foto real do app Vértice aberto em um celular. A imagem real ainda será adicionada."
+                  alt="Categorias Essenciais, Hortifruti e Higiene e Limpeza no app, com produtos comprados e pendentes."
                 />
                 <figcaption>
-                  <span>MÍDIA REAL EM PREPARAÇÃO</span>Foto real do app Vértice aberto em um celular
+                  <span>CAPTURA REAL DO APP</span>Seus produtos, organizados por categoria.
                 </figcaption>
               </figure>
               <ul>
@@ -833,35 +830,228 @@
         <div class="wrap">
           <div class="proof-heading">
             <div>
-              <p class="eyebrow">QUEM USA CONTA MELHOR</p>
-              <h2 id="proof-title">O Vértice na rotina.<br /><em>Com relatos de verdade.</em></h2>
+              <p class="eyebrow">POR DENTRO DO APP</p>
+              <h2 id="proof-title">O Vértice, na prática.<br /><em>Cada função, de perto.</em></h2>
             </div>
             <p>
-              Ainda estamos reunindo os primeiros depoimentos. Este espaço receberá relatos reais,
-              com autorização de quem participou.
+              Telas reais para você conhecer o app antes de comprar. Deslize para explorar e toque
+              em uma imagem para ver os detalhes.
             </p>
           </div>
-          <div class="proof-print">
-            <!-- TROCAR: prints reais do app, montagem horizontal 16:10. Remover dados pessoais. -->
-            <figure
-              class="media-slot media-slot-landscape"
-              data-media-slot="real-app-screenshots"
-              data-placeholder="true"
+          <div
+            class="app-gallery"
+            data-app-gallery
+            role="region"
+            aria-label="Funcionalidades do Vértice"
+            aria-roledescription="carrossel"
+          >
+            <div class="app-gallery-toolbar">
+              <p>Cinco funções para a sua próxima compra.</p>
+              <div class="app-gallery-controls" data-gallery-controls hidden>
+                <output data-gallery-range aria-live="polite" aria-atomic="true">1 de 5</output>
+                <button
+                  class="gallery-arrow gallery-arrow-back"
+                  type="button"
+                  data-gallery-prev
+                  aria-controls="app-gallery-track"
+                  aria-label="Ver telas anteriores"
+                >
+                  <svg aria-hidden="true"><use href="#arrow" /></svg>
+                </button>
+                <button
+                  class="gallery-arrow"
+                  type="button"
+                  data-gallery-next
+                  aria-controls="app-gallery-track"
+                  aria-label="Ver próximas telas"
+                >
+                  <svg aria-hidden="true"><use href="#arrow" /></svg>
+                </button>
+              </div>
+            </div>
+            <ol
+              class="app-gallery-track"
+              id="app-gallery-track"
+              tabindex="0"
+              aria-label="Telas do aplicativo; deslize para os lados para ver mais"
             >
-              <img
-                src="/media/reservado-horizontal.svg"
-                width="960"
-                height="600"
-                loading="lazy"
-                decoding="async"
-                alt="Espaço reservado: Prints reais das listas, do orçamento e do total da compra no app. A imagem real ainda será adicionada."
-              />
-              <figcaption>
-                <span>MÍDIA REAL EM PREPARAÇÃO</span>Prints reais das listas, do orçamento e do
-                total da compra no app
-              </figcaption>
-            </figure>
+              <li class="screen-card">
+                <figure>
+                  <a
+                    class="screen-card-image"
+                    data-gallery-open
+                    href="/media/app-orcamento.jpg"
+                    target="_blank"
+                    rel="noopener"
+                  >
+                    <img
+                      src="/media/app-orcamento.jpg"
+                      width="592"
+                      height="1280"
+                      loading="lazy"
+                      decoding="async"
+                      alt="Total da lista de R$ 69,08 e orçamento de R$ 100,00, com R$ 30,92 restantes."
+                    />
+                    <span class="screen-card-expand"
+                      >Ampliar tela <svg aria-hidden="true"><use href="#up-right" /></svg
+                    ></span>
+                  </a>
+                  <figcaption>
+                    <span class="screen-card-step">01 · ORÇAMENTO</span>
+                    <h3>O total sempre à vista.</h3>
+                    <p>Acompanhe os itens comprados e quanto ainda cabe no limite da lista.</p>
+                  </figcaption>
+                </figure>
+              </li>
+              <li class="screen-card">
+                <figure>
+                  <a
+                    class="screen-card-image"
+                    data-gallery-open
+                    href="/media/app-categorias.jpg"
+                    target="_blank"
+                    rel="noopener"
+                  >
+                    <img
+                      src="/media/app-categorias.jpg"
+                      width="574"
+                      height="1280"
+                      loading="lazy"
+                      decoding="async"
+                      alt="Lista separada em Essenciais, Hortifruti e Higiene e Limpeza, com itens comprados e pendentes."
+                    />
+                    <span class="screen-card-expand"
+                      >Ampliar tela <svg aria-hidden="true"><use href="#up-right" /></svg
+                    ></span>
+                  </a>
+                  <figcaption>
+                    <span class="screen-card-step">02 · CATEGORIAS</span>
+                    <h3>Cada coisa no seu lugar.</h3>
+                    <p>Separe os produtos por categoria e veja o que já entrou no carrinho.</p>
+                  </figcaption>
+                </figure>
+              </li>
+              <li class="screen-card">
+                <figure>
+                  <a
+                    class="screen-card-image"
+                    data-gallery-open
+                    href="/media/app-comparador.jpg"
+                    target="_blank"
+                    rel="noopener"
+                  >
+                    <img
+                      src="/media/app-comparador.jpg"
+                      width="634"
+                      height="1280"
+                      loading="lazy"
+                      decoding="async"
+                      alt="Comparador mostra 500 g por R$ 26,99 e 250 g por R$ 15,19; a primeira opção tem menor preço por quilo."
+                    />
+                    <span class="screen-card-expand"
+                      >Ampliar tela <svg aria-hidden="true"><use href="#up-right" /></svg
+                    ></span>
+                  </a>
+                  <figcaption>
+                    <span class="screen-card-step">03 · COMPARADOR</span>
+                    <h3>Descubra qual compensa.</h3>
+                    <p>Compare o preço por peso, volume ou unidade antes de escolher.</p>
+                  </figcaption>
+                </figure>
+              </li>
+              <li class="screen-card">
+                <figure>
+                  <a
+                    class="screen-card-image"
+                    data-gallery-open
+                    href="/media/app-sugestoes.jpg"
+                    target="_blank"
+                    rel="noopener"
+                  >
+                    <img
+                      src="/media/app-sugestoes.jpg"
+                      width="1280"
+                      height="1088"
+                      loading="lazy"
+                      decoding="async"
+                      alt="Ao digitar Queijo, o app sugere Queijo prato, marca President, embalagem de 150 g, de uma compra anterior."
+                    />
+                    <span class="screen-card-expand"
+                      >Ampliar tela <svg aria-hidden="true"><use href="#up-right" /></svg
+                    ></span>
+                  </a>
+                  <figcaption>
+                    <span class="screen-card-step">04 · SUGESTÕES</span>
+                    <h3>Sua próxima lista, mais rápida.</h3>
+                    <p>Encontre sugestões de produtos de compras anteriores enquanto digita.</p>
+                  </figcaption>
+                </figure>
+              </li>
+              <li class="screen-card">
+                <figure>
+                  <a
+                    class="screen-card-image"
+                    data-gallery-open
+                    href="/media/app-historico.jpg"
+                    target="_blank"
+                    rel="noopener"
+                  >
+                    <img
+                      src="/media/app-historico.jpg"
+                      width="742"
+                      height="1280"
+                      loading="lazy"
+                      decoding="async"
+                      alt="Durante a edição do preço, o app exibe a última compra a R$ 8,99 por unidade e compara com os R$ 9,59 informados."
+                    />
+                    <span class="screen-card-expand"
+                      >Ampliar tela <svg aria-hidden="true"><use href="#up-right" /></svg
+                    ></span>
+                  </a>
+                  <figcaption>
+                    <span class="screen-card-step">05 · HISTÓRICO DE PREÇOS</span>
+                    <h3>Uma referência para decidir.</h3>
+                    <p>Consulte a última compra compatível enquanto informa o preço atual.</p>
+                  </figcaption>
+                </figure>
+              </li>
+            </ol>
+            <p class="app-gallery-hint">Deslize para os lados · toque em uma tela para ampliar</p>
           </div>
+          <dialog class="screen-viewer" data-gallery-viewer aria-labelledby="screen-viewer-title">
+            <div class="screen-viewer-toolbar">
+              <h3 id="screen-viewer-title" data-viewer-title>Tela do aplicativo</h3>
+              <button
+                class="gallery-arrow"
+                type="button"
+                data-viewer-close
+                aria-label="Fechar imagem ampliada"
+                autofocus
+              >
+                <svg aria-hidden="true"><use href="#close" /></svg>
+              </button>
+            </div>
+            <img class="screen-viewer-image" data-viewer-image alt="" />
+            <div class="screen-viewer-footer">
+              <button
+                class="gallery-arrow gallery-arrow-back"
+                type="button"
+                data-viewer-prev
+                aria-label="Ampliar tela anterior"
+              >
+                <svg aria-hidden="true"><use href="#arrow" /></svg>
+              </button>
+              <output data-viewer-position aria-live="polite" aria-atomic="true"></output>
+              <button
+                class="gallery-arrow"
+                type="button"
+                data-viewer-next
+                aria-label="Ampliar próxima tela"
+              >
+                <svg aria-hidden="true"><use href="#arrow" /></svg>
+              </button>
+            </div>
+          </dialog>
           <!-- PLACEHOLDER: os três exemplos abaixo ficam em um template inerte; não são exibidos como prova social nem indexados como avaliações. -->
           <!-- SUBSTITUIR por depoimento real antes de publicar -->
           <template id="testimonials-placeholder">

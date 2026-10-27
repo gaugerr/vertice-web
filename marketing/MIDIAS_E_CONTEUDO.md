@@ -1,20 +1,28 @@
 # Mídias e conteúdo para substituir
 
-Todos os espaços visíveis são placeholders declarados. Não há imagens inventadas do
-produto, clientes fictícios publicados, números de vendas ou avaliações fabricadas.
+As capturas reais do aplicativo enviadas pelo produtor já substituem os espaços do
+app. O painel da planilha continua reservado e identificado. Não há imagens
+inventadas do produto, clientes fictícios, vendas ou avaliações fabricadas.
 
 ## Checklist de arquivos reais
 
 - [ ] **GIF/vídeo do app no mercado:** 10–15 segundos, vertical 9:16; ideal 540×960
       ou 1080×1920. Slot `app-market-demo`, seção `#demonstracao`. Mostrar marcação de
       produtos, valor e total. Não mostrar notificações, e-mail ou outros dados pessoais.
-- [ ] **Foto do app no celular:** vertical 9:16, WebP/JPG. Slot `app-phone-photo`,
-      seção “O app de compras”.
+- [x] **Captura do app no celular:** `app-categorias.jpg`, original inteiro. Slot
+      `app-phone-photo`, seção “O app de compras”.
 - [ ] **Foto ou captura real da planilha:** horizontal 16:10, ideal 1600×1000,
       WebP/PNG. Slot `spreadsheet-photo`, seção “A planilha financeira”. Usar o modelo
       de demonstração ou ocultar dados pessoais. O kit pago não deve virar download público.
-- [ ] **Prints reais do app:** montagem horizontal 16:10 com lista, orçamento e total.
-      Slot `real-app-screenshots`, seção `#na-vida-real`.
+- [x] **Telas reais do app:** galeria em `#na-vida-real`, com cinco originais JPG:
+      `app-orcamento`, `app-categorias`, `app-comparador`, `app-sugestoes` e
+      `app-historico`. Três cartões no desktop, dois no tablet e rolagem por toque
+      no celular. Os links abrem as imagens sem JavaScript; com JavaScript, abrem
+      um diálogo ampliado, com Escape, retorno de foco e navegação por setas.
+      Não recortar interfaces nem tratar os valores do exemplo como economia
+      garantida. A captura de histórico mostra um preço ainda em edição.
+- [x] **Resumo real da compra:** `app-orcamento.jpg` no slot `app-market-demo`.
+      É uma captura estática identificada, não um vídeo. O vídeo acima segue opcional.
 - [ ] **Três depoimentos reais:** texto original curto, autorização de publicação e
       identificação combinada com o autor. Nome completo, foto e avaliação em estrelas
       não são necessários. Os três textos de exemplo estão no `<template

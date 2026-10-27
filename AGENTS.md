@@ -184,6 +184,11 @@ produção nem registrar corpos de webhook, que contêm o segredo da integraçã
   inerte até haver relatos reais. Checklist: `marketing/MIDIAS_E_CONTEUDO.md`.
   `social.png` é o cartão de compartilhamento 1200×630. Não publicar os arquivos
   pagos do kit. App/planilha permanecem separados, com registro manual do total.
+  A galeria real do app usa `marketing/app-gallery.js`/`.css`: rolagem horizontal
+  nativa, três cartões no desktop e um cartão com prévia do próximo no celular.
+  Links de imagem funcionam sem JavaScript; ampliação usa diálogo nativo com foco,
+  fechamento por Escape e navegação manual, sem autoplay. Originais JPG em `media/`
+  ficam inteiros, com `object-fit: contain`, e possuem legendas específicas.
   A página informa liberação automática após o pagamento, com a mesma conta Google
   da compra; planilhas e tutorial ficam em Vértice Financeiro. Não prometer prazo
   instantâneo de confirmação para todos os meios de pagamento.
