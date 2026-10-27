@@ -288,6 +288,8 @@
   font-weight: 600;
 }
 .checkout-steps strong {
+  display: block;
+  margin-bottom: 4px;
   color: #eee4f5;
 }
 .field-hint {

@@ -35,6 +35,12 @@ após a confirmação do pagamento. O comprador deve informar no checkout o mesm
 e-mail da conta Google que usará no app. As planilhas e o tutorial são acessados
 pela seção Vértice Financeiro.
 
+O passo a passo de compra explica os dados solicitados no checkout (nome, e-mail,
+telefone e CPF), a escolha do pagamento e a criação de senha para a conta Cakto ao
+final da compra. Após a confirmação, o comprador recebe o e-mail da plataforma com
+o botão de acesso ao conteúdo. A senha Cakto é distinta do login Google do Vértice;
+quem já tem conta na plataforma pode entrar com o cadastro existente.
+
 ## Oferta e limites reais
 
 Pagamento único, R$ 19,90 para as 100 primeiras compras; R$ 59,00 é referência para
