@@ -188,7 +188,9 @@ produção nem registrar corpos de webhook, que contêm o segredo da integraçã
   nativa, três cartões no desktop e um cartão com prévia do próximo no celular.
   Links de imagem funcionam sem JavaScript; ampliação usa diálogo nativo com foco,
   fechamento por Escape e navegação manual, sem autoplay. Originais JPG em `media/`
-  ficam inteiros, com `object-fit: contain`, e possuem legendas específicas.
+  são preservados; enquadramentos SVG com clipPath destacam cada recurso e removem
+  a barra do aparelho, inclusive no diálogo ampliado. Miniaturas e ampliação têm
+  limites explícitos no HTML, sem reconstruir textos ou valores das capturas.
   A página informa liberação automática após o pagamento, com a mesma conta Google
   da compra; planilhas e tutorial ficam em Vértice Financeiro. Não prometer prazo
   instantâneo de confirmação para todos os meios de pagamento.

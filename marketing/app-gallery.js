@@ -48,6 +48,8 @@ if (gallery) {
   if (typeof viewer?.showModal === 'function') {
     const links = [...gallery.querySelectorAll('[data-gallery-open]')];
     const image = viewer.querySelector('[data-viewer-image]');
+    const canvas = viewer.querySelector('[data-viewer-canvas]');
+    const clip = viewer.querySelector('[data-viewer-crop]');
     const title = viewer.querySelector('[data-viewer-title]');
     const position = viewer.querySelector('[data-viewer-position]');
     const viewerPrevious = viewer.querySelector('[data-viewer-prev]');
@@ -58,8 +60,22 @@ if (gallery) {
 
     const showImage = (index) => {
       active = Math.max(0, Math.min(links.length - 1, index));
-      image.src = links[active].href;
-      image.alt = links[active].querySelector('img').alt;
+      const link = links[active];
+      const [x, y, width, height] = link.dataset.expandedCrop.split(' ').map(Number);
+      const [sourceWidth, sourceHeight] = link.dataset.sourceSize.split(' ').map(Number);
+      canvas.setAttribute('viewBox', `${x} ${y} ${width} ${height}`);
+      canvas.setAttribute('width', width);
+      canvas.setAttribute('height', height);
+      canvas.setAttribute(
+        'aria-label',
+        link.querySelector('.screen-crop').getAttribute('aria-label'),
+      );
+      for (const [name, value] of Object.entries({ x, y, width, height })) {
+        clip.setAttribute(name, value);
+      }
+      image.setAttribute('href', link.href);
+      image.setAttribute('width', sourceWidth);
+      image.setAttribute('height', sourceHeight);
       title.textContent = cards[active].querySelector('h3').textContent;
       position.textContent = `${active + 1} de ${links.length}`;
       viewerPrevious.disabled = active === 0;

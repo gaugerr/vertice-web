@@ -19,8 +19,11 @@ inventadas do produto, clientes fictícios, vendas ou avaliações fabricadas.
       `app-historico`. Três cartões no desktop, dois no tablet e rolagem por toque
       no celular. Os links abrem as imagens sem JavaScript; com JavaScript, abrem
       um diálogo ampliado, com Escape, retorno de foco e navegação por setas.
-      Não recortar interfaces nem tratar os valores do exemplo como economia
-      garantida. A captura de histórico mostra um preço ainda em edição.
+      Enquadramentos SVG destacam orçamento, categoria, resultado da comparação,
+      sugestões e referência de preço. A barra de notificações fica fora da
+      miniatura e da ampliação. Não reconstruir a interface nem tratar os valores
+      do exemplo como economia garantida. A captura de histórico mostra um preço
+      ainda em edição.
 - [x] **Resumo real da compra:** `app-orcamento.jpg` no slot `app-market-demo`.
       É uma captura estática identificada, não um vídeo. O vídeo acima segue opcional.
 - [ ] **Três depoimentos reais:** texto original curto, autorização de publicação e

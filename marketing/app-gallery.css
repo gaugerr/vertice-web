@@ -1,6 +1,9 @@
-.media-slot-app-capture img {
-  aspect-ratio: auto;
-  object-fit: contain;
+.media-slot-app-capture .screen-crop {
+  display: block;
+  width: 100%;
+  height: auto;
+  border-radius: 12px;
+  background: #101015;
 }
 
 .app-gallery {
@@ -118,7 +121,7 @@
   display: flex;
   align-items: center;
   justify-content: center;
-  aspect-ratio: 9 / 16;
+  aspect-ratio: 4 / 3;
   overflow: hidden;
   border: 1px solid #b59aff30;
   border-radius: 22px;
@@ -126,11 +129,11 @@
   text-decoration: none;
 }
 
-.screen-card-image img {
+.screen-card-image .screen-crop {
   display: block;
   width: 100%;
   height: 100%;
-  object-fit: contain;
+  overflow: hidden;
 }
 
 .screen-card-expand {
@@ -139,7 +142,7 @@
   align-items: center;
   gap: 6px;
   right: 10px;
-  bottom: 10px;
+  top: 10px;
   padding: 8px 10px;
   border: 1px solid #ffffff20;
   border-radius: 100px;
