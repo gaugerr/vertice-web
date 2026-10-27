@@ -1165,6 +1165,175 @@
               </button>
             </div>
           </dialog>
+          <div class="sheet-gallery-section" id="planilha-em-detalhes">
+            <div class="proof-heading">
+              <div>
+                <p class="eyebrow">POR DENTRO DA PLANILHA</p>
+                <h2 id="sheet-gallery-title">Seu mês,<br /><em>em mais detalhes.</em></h2>
+              </div>
+              <p>
+                Além do dashboard, conheça as abas que ajudam a organizar suas finanças. As capturas
+                reais serão adicionadas em breve.
+              </p>
+            </div>
+            <div
+              class="app-gallery"
+              data-app-gallery
+              data-sheet-gallery
+              role="region"
+              aria-labelledby="sheet-gallery-title"
+              aria-roledescription="carrossel"
+            >
+              <div class="app-gallery-toolbar">
+                <p>Cinco telas para organizar sua vida financeira.</p>
+                <div class="app-gallery-controls" data-gallery-controls hidden>
+                  <output data-gallery-range aria-live="polite" aria-atomic="true">1 de 5</output>
+                  <button
+                    class="gallery-arrow gallery-arrow-back"
+                    type="button"
+                    data-gallery-prev
+                    aria-controls="sheet-gallery-track"
+                    aria-label="Ver telas anteriores da planilha"
+                  >
+                    <svg aria-hidden="true"><use href="#arrow" /></svg>
+                  </button>
+                  <button
+                    class="gallery-arrow"
+                    type="button"
+                    data-gallery-next
+                    aria-controls="sheet-gallery-track"
+                    aria-label="Ver próximas telas da planilha"
+                  >
+                    <svg aria-hidden="true"><use href="#arrow" /></svg>
+                  </button>
+                </div>
+              </div>
+              <ol
+                class="app-gallery-track"
+                id="sheet-gallery-track"
+                tabindex="0"
+                aria-label="Telas da planilha; deslize para os lados para ver mais"
+              >
+                <li class="screen-card">
+                  <figure>
+                    <!-- TROCAR: captura real da aba LANÇAMENTOS; manter o enquadramento legível. -->
+                    <div
+                      class="screen-card-image screen-card-placeholder"
+                      data-media-slot="spreadsheet-lancamentos"
+                      data-placeholder="true"
+                    >
+                      <svg viewBox="0 0 48 48" aria-hidden="true">
+                        <rect x="5" y="7" width="38" height="34" rx="5" />
+                        <path d="M5 17h38M18 17v24M18 29h25" />
+                      </svg>
+                      <strong>Lançamentos</strong>
+                      <span>Captura em preparação</span>
+                    </div>
+                    <figcaption>
+                      <span class="screen-card-step">01 · LANÇAMENTOS</span>
+                      <h3>Registre o que entra e sai.</h3>
+                      <p>
+                        Organize receitas e despesas com categoria, forma de pagamento e status.
+                      </p>
+                    </figcaption>
+                  </figure>
+                </li>
+                <li class="screen-card">
+                  <figure>
+                    <!-- TROCAR: captura real da aba CONTAS FIXAS; manter o enquadramento legível. -->
+                    <div
+                      class="screen-card-image screen-card-placeholder"
+                      data-media-slot="spreadsheet-contas-fixas"
+                      data-placeholder="true"
+                    >
+                      <svg viewBox="0 0 48 48" aria-hidden="true">
+                        <rect x="5" y="7" width="38" height="34" rx="5" />
+                        <path d="M5 17h38M18 17v24M18 29h25" />
+                      </svg>
+                      <strong>Contas fixas</strong>
+                      <span>Captura em preparação</span>
+                    </div>
+                    <figcaption>
+                      <span class="screen-card-step">02 · CONTAS FIXAS</span>
+                      <h3>As contas recorrentes, juntas.</h3>
+                      <p>
+                        Mantenha seus compromissos recorrentes organizados para acompanhar o mês.
+                      </p>
+                    </figcaption>
+                  </figure>
+                </li>
+                <li class="screen-card">
+                  <figure>
+                    <!-- TROCAR: captura real da aba ORÇAMENTO; manter o enquadramento legível. -->
+                    <div
+                      class="screen-card-image screen-card-placeholder"
+                      data-media-slot="spreadsheet-orcamento"
+                      data-placeholder="true"
+                    >
+                      <svg viewBox="0 0 48 48" aria-hidden="true">
+                        <rect x="5" y="7" width="38" height="34" rx="5" />
+                        <path d="M5 17h38M18 17v24M18 29h25" />
+                      </svg>
+                      <strong>Orçamento</strong>
+                      <span>Captura em preparação</span>
+                    </div>
+                    <figcaption>
+                      <span class="screen-card-step">03 · ORÇAMENTO</span>
+                      <h3>Planeje seus limites.</h3>
+                      <p>Defina o orçamento por categoria e compare o previsto com os gastos.</p>
+                    </figcaption>
+                  </figure>
+                </li>
+                <li class="screen-card">
+                  <figure>
+                    <!-- TROCAR: captura real da aba METAS; manter o enquadramento legível. -->
+                    <div
+                      class="screen-card-image screen-card-placeholder"
+                      data-media-slot="spreadsheet-metas"
+                      data-placeholder="true"
+                    >
+                      <svg viewBox="0 0 48 48" aria-hidden="true">
+                        <rect x="5" y="7" width="38" height="34" rx="5" />
+                        <path d="M5 17h38M18 17v24M18 29h25" />
+                      </svg>
+                      <strong>Metas</strong>
+                      <span>Captura em preparação</span>
+                    </div>
+                    <figcaption>
+                      <span class="screen-card-step">04 · METAS</span>
+                      <h3>Dê um destino aos seus planos.</h3>
+                      <p>Acompanhe o valor reservado e o que falta para alcançar cada objetivo.</p>
+                    </figcaption>
+                  </figure>
+                </li>
+                <li class="screen-card">
+                  <figure>
+                    <!-- TROCAR: captura real da aba RESUMO ANUAL; manter o enquadramento legível. -->
+                    <div
+                      class="screen-card-image screen-card-placeholder"
+                      data-media-slot="spreadsheet-resumo-anual"
+                      data-placeholder="true"
+                    >
+                      <svg viewBox="0 0 48 48" aria-hidden="true">
+                        <rect x="5" y="7" width="38" height="34" rx="5" />
+                        <path d="M5 17h38M18 17v24M18 29h25" />
+                      </svg>
+                      <strong>Resumo anual</strong>
+                      <span>Captura em preparação</span>
+                    </div>
+                    <figcaption>
+                      <span class="screen-card-step">05 · RESUMO ANUAL</span>
+                      <h3>Olhe além deste mês.</h3>
+                      <p>Compare receitas, despesas e saldo ao longo do ano.</p>
+                    </figcaption>
+                  </figure>
+                </li>
+              </ol>
+              <p class="app-gallery-hint">
+                Deslize para os lados para conhecer as abas da planilha.
+              </p>
+            </div>
+          </div>
           <!-- PLACEHOLDER: os três exemplos abaixo ficam em um template inerte; não são exibidos como prova social nem indexados como avaliações. -->
           <!-- SUBSTITUIR por depoimento real antes de publicar -->
           <template id="testimonials-placeholder">

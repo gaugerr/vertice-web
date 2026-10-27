@@ -1,6 +1,4 @@
-const gallery = document.querySelector('[data-app-gallery]');
-
-if (gallery) {
+for (const gallery of document.querySelectorAll('[data-app-gallery]')) {
   const track = gallery.querySelector('.app-gallery-track');
   const cards = [...track.querySelectorAll('.screen-card')];
   const previous = gallery.querySelector('[data-gallery-prev]');
@@ -45,7 +43,7 @@ if (gallery) {
   updateControls();
 
   const viewer = document.querySelector('[data-gallery-viewer]');
-  if (typeof viewer?.showModal === 'function') {
+  if (gallery.querySelector('[data-gallery-open]') && typeof viewer?.showModal === 'function') {
     const links = [...gallery.querySelectorAll('[data-gallery-open]')];
     const image = viewer.querySelector('[data-viewer-image]');
     const canvas = viewer.querySelector('[data-viewer-canvas]');

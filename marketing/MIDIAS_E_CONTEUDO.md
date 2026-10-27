@@ -16,6 +16,14 @@ inventadas do produto, clientes fictícios, vendas ou avaliações fabricadas.
 - [ ] **Foto ou captura real da planilha:** horizontal 16:10, ideal 1600×1000,
       WebP/PNG. Slot `spreadsheet-photo`, seção “A planilha financeira”. Usar o modelo
       de demonstração ou ocultar dados pessoais. O kit pago não deve virar download público.
+- [ ] **Telas variadas da planilha:** cinco placeholders no carrossel
+      `#planilha-em-detalhes`, separados da imagem principal do dashboard. Slots:
+      `spreadsheet-lancamentos`, `spreadsheet-contas-fixas`, `spreadsheet-orcamento`,
+      `spreadsheet-metas` e `spreadsheet-resumo-anual`. Usar dados de demonstração,
+      sem dados pessoais ou barra de notificações; priorizar texto legível.
+      Ao substituir, remover o aviso de preparação e adicionar imagem com alt,
+      dimensões e carregamento lazy. Seguir o padrão do app para oferecer ampliação
+      quando houver capturas reais; por enquanto, os placeholders não são clicáveis.
 - [x] **Telas reais do app:** galeria em `#na-vida-real`, com cinco originais JPG:
       `app-orcamento`, `app-categorias`, `app-comparador`, `app-sugestoes` e
       `app-historico`. Três cartões no desktop, dois no tablet e rolagem por toque

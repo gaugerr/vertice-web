@@ -77,3 +77,14 @@ app ficam em `media/`; a captura da planilha continua pendente.
 O início apresenta explicitamente o app de lista de compras inteligente e offline
 e a planilha de controle financeiro completa, com dashboard e gráficos. A nota de
 uso offline informa o preparo e a validação do acesso.
+
+## Galerias de telas
+
+O carrossel do app em `#na-vida-real` mantém as cinco capturas reais e a ampliação.
+O carrossel da planilha em `#planilha-em-detalhes` reserva cinco cartões para
+Lançamentos, Contas Fixas, Orçamento, Metas e Resumo Anual. O dashboard continua
+como captura principal no slot `spreadsheet-photo`. Os espaços da planilha são
+identificados como “Captura em preparação”, sem links ou ampliação até receberem
+as imagens reais. Os dois carrosséis têm controles e contagem independentes,
+rolagem por toque e o mesmo layout responsivo. As demonstrações interativas dos
+dois produtos permanecem disponíveis.

@@ -194,6 +194,10 @@ produção nem registrar corpos de webhook, que contêm o segredo da integraçã
   são preservados; enquadramentos SVG com clipPath destacam cada recurso e removem
   a barra do aparelho, inclusive no diálogo ampliado. Miniaturas e ampliação têm
   limites explícitos no HTML, sem reconstruir textos ou valores das capturas.
+  O segundo carrossel, em `#planilha-em-detalhes`, usa os mesmos controles, com
+  contagem independente. Seus cinco slots `spreadsheet-*` são placeholders
+  identificados e não clicáveis até receberem capturas reais; o dashboard mantém
+  o slot principal `spreadsheet-photo`. Preservar as duas demonstrações interativas.
   A página informa liberação automática após o pagamento, com a mesma conta Google
   da compra; planilhas e tutorial ficam em Vértice Financeiro. Não prometer prazo
   instantâneo de confirmação para todos os meios de pagamento.
