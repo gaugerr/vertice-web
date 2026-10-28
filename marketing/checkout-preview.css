@@ -54,10 +54,10 @@ main {
   gap: 26px;
   margin-bottom: 22px;
 }
-.builder-row[data-layout="12"] {
+.builder-row[data-layout='12'] {
   grid-template-columns: minmax(0, 1fr);
 }
-.builder-row[data-layout="8,4"] {
+.builder-row[data-layout='8,4'] {
   grid-template-columns: minmax(0, 1.65fr) minmax(0, 1fr);
 }
 .builder-column {
@@ -118,7 +118,7 @@ main {
   color: var(--muted);
 }
 .benefits li:before {
-  content: "✓";
+  content: '✓';
   color: var(--mint);
   font-weight: bold;
 }
@@ -268,7 +268,7 @@ main {
     gap: 18px;
     margin-bottom: 18px;
   }
-  .builder-row[data-layout="8,4"] {
+  .builder-row[data-layout='8,4'] {
     grid-template-columns: minmax(0, 1fr);
   }
   .native-form {
