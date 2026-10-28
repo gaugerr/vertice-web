@@ -183,7 +183,7 @@ produção nem registrar corpos de webhook, que contêm o segredo da integraçã
   Manter o fallback dos links `data-checkout-link` no HTML. Sem formulário de
   contatos. Não mostrar capacidade total como vagas restantes. R$ 59 é referência após o lançamento;
   R$ 19,90 é a condição das 100 primeiras compras. Garantia: 7 dias após a entrega.
-  Mídias em `media/` são placeholders; depoimentos de exemplo ficam em template
+  Mídias em `media/` incluem capturas reais do app e da planilha; depoimentos de exemplo ficam em template
   inerte até haver relatos reais. Checklist: `marketing/MIDIAS_E_CONTEUDO.md`.
   `social.png` é o cartão de compartilhamento 1200×630. Não publicar os arquivos
   pagos do kit. App/planilha permanecem separados, com registro manual do total.
@@ -195,9 +195,13 @@ produção nem registrar corpos de webhook, que contêm o segredo da integraçã
   a barra do aparelho, inclusive no diálogo ampliado. Miniaturas e ampliação têm
   limites explícitos no HTML, sem reconstruir textos ou valores das capturas.
   O segundo carrossel, em `#planilha-em-detalhes`, usa os mesmos controles, com
-  contagem independente. Seus cinco slots `spreadsheet-*` são placeholders
-  identificados e não clicáveis até receberem capturas reais; o dashboard mantém
-  o slot principal `spreadsheet-photo`. Preservar as duas demonstrações interativas.
+  contagem independente. Seus cinco slots `spreadsheet-*` mostram capturas reais
+  de Lançamentos, Contas Fixas, Orçamento, Metas e Resumo Anual. O dashboard usa
+  `spreadsheet-photo`. As capturas vêm de regiões da exportação PDF nativa Google
+  do modelo de demonstração, sem reconstruir textos ou valores. Não publicar o PDF
+  completo nem o arquivo pago. Um diálogo compartilhado amplia a galeria selecionada
+  ou o dashboard; planilhas mantêm largura legível e rolagem interna em duas direções.
+  Preservar as duas demonstrações interativas.
   A página informa liberação automática após o pagamento, com a mesma conta Google
   da compra; planilhas e tutorial ficam em Vértice Financeiro. Não prometer prazo
   instantâneo de confirmação para todos os meios de pagamento.

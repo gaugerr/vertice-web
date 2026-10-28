@@ -41,73 +41,85 @@ for (const gallery of document.querySelectorAll('[data-app-gallery]')) {
   window.addEventListener('resize', queueUpdate);
   gallery.querySelector('[data-gallery-controls]').hidden = false;
   updateControls();
+}
 
-  const viewer = document.querySelector('[data-gallery-viewer]');
-  if (gallery.querySelector('[data-gallery-open]') && typeof viewer?.showModal === 'function') {
-    const links = [...gallery.querySelectorAll('[data-gallery-open]')];
-    const image = viewer.querySelector('[data-viewer-image]');
-    const canvas = viewer.querySelector('[data-viewer-canvas]');
-    const clip = viewer.querySelector('[data-viewer-crop]');
-    const title = viewer.querySelector('[data-viewer-title]');
-    const position = viewer.querySelector('[data-viewer-position]');
-    const viewerPrevious = viewer.querySelector('[data-viewer-prev]');
-    const viewerNext = viewer.querySelector('[data-viewer-next]');
-    let active = 0;
-    let opener;
-    let oldOverflow;
+const viewer = document.querySelector('[data-gallery-viewer]');
+if (typeof viewer?.showModal === 'function') {
+  let links = [];
+  const image = viewer.querySelector('[data-viewer-image]');
+  const canvas = viewer.querySelector('[data-viewer-canvas]');
+  const clip = viewer.querySelector('[data-viewer-crop]');
+  const title = viewer.querySelector('[data-viewer-title]');
+  const position = viewer.querySelector('[data-viewer-position]');
+  const viewerPrevious = viewer.querySelector('[data-viewer-prev]');
+  const viewerNext = viewer.querySelector('[data-viewer-next]');
+  const stage = viewer.querySelector('[data-viewer-stage]');
+  const hint = viewer.querySelector('[data-viewer-hint]');
+  let active = 0;
+  let opener;
+  let oldOverflow;
 
-    const showImage = (index) => {
-      active = Math.max(0, Math.min(links.length - 1, index));
-      const link = links[active];
-      const [x, y, width, height] = link.dataset.expandedCrop.split(' ').map(Number);
-      const [sourceWidth, sourceHeight] = link.dataset.sourceSize.split(' ').map(Number);
-      canvas.setAttribute('viewBox', `${x} ${y} ${width} ${height}`);
-      canvas.setAttribute('width', width);
-      canvas.setAttribute('height', height);
-      canvas.setAttribute(
-        'aria-label',
-        link.querySelector('.screen-crop').getAttribute('aria-label'),
-      );
-      for (const [name, value] of Object.entries({ x, y, width, height })) {
-        clip.setAttribute(name, value);
-      }
-      image.setAttribute('href', link.href);
-      image.setAttribute('width', sourceWidth);
-      image.setAttribute('height', sourceHeight);
-      title.textContent = cards[active].querySelector('h3').textContent;
-      position.textContent = `${active + 1} de ${links.length}`;
-      viewerPrevious.disabled = active === 0;
-      viewerNext.disabled = active === links.length - 1;
-      viewer.scrollTop = 0;
-    };
-
-    for (const [index, link] of links.entries()) {
-      link.addEventListener('click', (event) => {
-        if (event.ctrlKey || event.metaKey || event.shiftKey || event.altKey) return;
-        event.preventDefault();
-        opener = link;
-        showImage(index);
-        viewer.showModal();
-        oldOverflow = document.documentElement.style.overflow;
-        document.documentElement.style.overflow = 'hidden';
-      });
+  const showImage = (index) => {
+    active = Math.max(0, Math.min(links.length - 1, index));
+    const link = links[active];
+    const sheet = link.hasAttribute('data-sheet-capture');
+    viewer.classList.toggle('screen-viewer-sheet', sheet);
+    hint.hidden = !sheet;
+    const [x, y, width, height] = link.dataset.expandedCrop.split(' ').map(Number);
+    const [sourceWidth, sourceHeight] = link.dataset.sourceSize.split(' ').map(Number);
+    canvas.setAttribute('viewBox', `${x} ${y} ${width} ${height}`);
+    canvas.setAttribute('width', width);
+    canvas.setAttribute('height', height);
+    canvas.setAttribute(
+      'aria-label',
+      link.querySelector('.screen-crop').getAttribute('aria-label') ||
+        link.querySelector('.screen-crop').getAttribute('alt'),
+    );
+    for (const [name, value] of Object.entries({ x, y, width, height })) {
+      clip.setAttribute(name, value);
     }
+    image.setAttribute('href', link.href);
+    image.setAttribute('width', sourceWidth);
+    image.setAttribute('height', sourceHeight);
+    title.textContent =
+      link.dataset.viewerTitle || link.closest('.screen-card').querySelector('h3').textContent;
+    position.textContent = `${active + 1} de ${links.length}`;
+    viewerPrevious.disabled = active === 0;
+    viewerNext.disabled = active === links.length - 1;
+    viewer.scrollTop = 0;
+    stage.scrollTop = 0;
+    stage.scrollLeft = 0;
+  };
 
-    viewerPrevious.addEventListener('click', () => showImage(active - 1));
-    viewerNext.addEventListener('click', () => showImage(active + 1));
-    viewer.querySelector('[data-viewer-close]').addEventListener('click', () => viewer.close());
-    viewer.addEventListener('click', (event) => {
-      if (event.target === viewer) viewer.close();
-    });
-    viewer.addEventListener('keydown', (event) => {
-      if (event.key === 'ArrowLeft' || event.key === 'ArrowRight') {
-        event.preventDefault();
-        showImage(active + (event.key === 'ArrowLeft' ? -1 : 1));
-      }
-    });
-    viewer.addEventListener('close', () => {
-      document.documentElement.style.overflow = oldOverflow;
-      opener?.focus({ preventScroll: true });
+  for (const link of document.querySelectorAll('[data-gallery-open]')) {
+    link.addEventListener('click', (event) => {
+      if (event.ctrlKey || event.metaKey || event.shiftKey || event.altKey) return;
+      event.preventDefault();
+      const gallery = link.closest('[data-app-gallery]');
+      links = gallery ? [...gallery.querySelectorAll('[data-gallery-open]')] : [link];
+      opener = link;
+      showImage(links.indexOf(link));
+      viewer.showModal();
+      oldOverflow = document.documentElement.style.overflow;
+      document.documentElement.style.overflow = 'hidden';
     });
   }
+
+  viewerPrevious.addEventListener('click', () => showImage(active - 1));
+  viewerNext.addEventListener('click', () => showImage(active + 1));
+  viewer.querySelector('[data-viewer-close]').addEventListener('click', () => viewer.close());
+  viewer.addEventListener('click', (event) => {
+    if (event.target === viewer) viewer.close();
+  });
+  viewer.addEventListener('keydown', (event) => {
+    if (event.target === stage) return;
+    if (event.key === 'ArrowLeft' || event.key === 'ArrowRight') {
+      event.preventDefault();
+      showImage(active + (event.key === 'ArrowLeft' ? -1 : 1));
+    }
+  });
+  viewer.addEventListener('close', () => {
+    document.documentElement.style.overflow = oldOverflow;
+    opener?.focus({ preventScroll: true });
+  });
 }

@@ -809,24 +809,32 @@
               </div>
               <h3>A planilha financeira</h3>
               <p>Perspectiva para cuidar do mês inteiro.</p>
-              <!-- TROCAR: foto ou captura real da planilha, horizontal 16:10, WebP/PNG. Ocultar dados pessoais. -->
               <figure
-                class="media-slot media-slot-landscape"
+                class="media-slot media-slot-landscape media-slot-sheet-capture"
                 data-media-slot="spreadsheet-photo"
-                data-placeholder="true"
               >
-                <img
-                  src="/media/reservado-horizontal.svg"
-                  width="960"
-                  height="600"
-                  loading="lazy"
-                  decoding="async"
-                  alt="Espaço reservado: Foto ou captura real do painel da planilha financeira. A imagem real ainda será adicionada."
-                />
-                <figcaption>
-                  <span>MÍDIA REAL EM PREPARAÇÃO</span>Foto ou captura real do painel da planilha
-                  financeira
-                </figcaption>
+                <a
+                  href="/media/planilha-dashboard.webp"
+                  target="_blank"
+                  rel="noopener"
+                  data-gallery-open
+                  data-sheet-capture
+                  data-viewer-title="Dashboard financeiro"
+                  data-expanded-crop="0 0 2161 1600"
+                  data-source-size="2161 1600"
+                  aria-label="Ampliar o dashboard da planilha financeira"
+                >
+                  <img
+                    class="screen-crop"
+                    src="/media/planilha-dashboard.webp"
+                    width="2161"
+                    height="1600"
+                    loading="lazy"
+                    decoding="async"
+                    alt="Dashboard real do modelo de demonstração, com receitas e saídas previstas, saldo e quatro gráficos financeiros."
+                  />
+                </a>
+                <figcaption>Dashboard do modelo de demonstração · toque para ampliar.</figcaption>
               </figure>
               <ul>
                 <li>Painel financeiro com quatro gráficos</li>
@@ -1133,18 +1141,28 @@
                 <svg aria-hidden="true"><use href="#close" /></svg>
               </button>
             </div>
-            <svg
-              class="screen-viewer-image"
-              data-viewer-canvas
-              role="img"
-              aria-label="Tela do aplicativo ampliada"
-              focusable="false"
+            <div
+              class="screen-viewer-stage"
+              data-viewer-stage
+              tabindex="0"
+              aria-label="Imagem ampliada; role para explorar os detalhes"
             >
-              <defs>
-                <clipPath id="screen-viewer-clip"><rect data-viewer-crop /></clipPath>
-              </defs>
-              <image data-viewer-image clip-path="url(#screen-viewer-clip)" />
-            </svg>
+              <svg
+                class="screen-viewer-image"
+                data-viewer-canvas
+                role="img"
+                aria-label="Tela do aplicativo ampliada"
+                focusable="false"
+              >
+                <defs>
+                  <clipPath id="screen-viewer-clip"><rect data-viewer-crop /></clipPath>
+                </defs>
+                <image data-viewer-image clip-path="url(#screen-viewer-clip)" />
+              </svg>
+            </div>
+            <p class="app-gallery-hint" data-viewer-hint hidden>
+              Deslize na imagem para ver todas as colunas e linhas.
+            </p>
             <div class="screen-viewer-footer">
               <button
                 class="gallery-arrow gallery-arrow-back"
@@ -1172,8 +1190,8 @@
                 <h2 id="sheet-gallery-title">Seu mês,<br /><em>em mais detalhes.</em></h2>
               </div>
               <p>
-                Além do dashboard, conheça as abas que ajudam a organizar suas finanças. As capturas
-                reais serão adicionadas em breve.
+                Além do dashboard, conheça as abas que ajudam a organizar suas finanças. Capturas
+                reais do modelo de demonstração, com valores de exemplo.
               </p>
             </div>
             <div
@@ -1216,19 +1234,42 @@
               >
                 <li class="screen-card">
                   <figure>
-                    <!-- TROCAR: captura real da aba LANÇAMENTOS; manter o enquadramento legível. -->
-                    <div
-                      class="screen-card-image screen-card-placeholder"
+                    <a
+                      class="screen-card-image"
+                      href="/media/planilha-lancamentos.webp"
                       data-media-slot="spreadsheet-lancamentos"
-                      data-placeholder="true"
+                      data-gallery-open
+                      data-sheet-capture
+                      data-expanded-crop="0 0 2161 1130"
+                      data-source-size="2161 1130"
+                      target="_blank"
+                      rel="noopener"
                     >
-                      <svg viewBox="0 0 48 48" aria-hidden="true">
-                        <rect x="5" y="7" width="38" height="34" rx="5" />
-                        <path d="M5 17h38M18 17v24M18 29h25" />
+                      <svg
+                        class="screen-crop"
+                        viewBox="0 0 2161 1130"
+                        width="2161"
+                        height="1130"
+                        role="img"
+                        aria-label="Lançamentos reais da demonstração, com data, descrição, categoria, pagamento, valor e status de receitas e despesas."
+                        focusable="false"
+                      >
+                        <defs>
+                          <clipPath id="sheet-crop-1">
+                            <rect x="0" y="0" width="2161" height="1130" />
+                          </clipPath>
+                        </defs>
+                        <image
+                          href="/media/planilha-lancamentos.webp"
+                          width="2161"
+                          height="1130"
+                          clip-path="url(#sheet-crop-1)"
+                        />
                       </svg>
-                      <strong>Lançamentos</strong>
-                      <span>Captura em preparação</span>
-                    </div>
+                      <span class="screen-card-expand"
+                        >Ampliar tela <svg aria-hidden="true"><use href="#up-right" /></svg
+                      ></span>
+                    </a>
                     <figcaption>
                       <span class="screen-card-step">01 · LANÇAMENTOS</span>
                       <h3>Registre o que entra e sai.</h3>
@@ -1240,19 +1281,42 @@
                 </li>
                 <li class="screen-card">
                   <figure>
-                    <!-- TROCAR: captura real da aba CONTAS FIXAS; manter o enquadramento legível. -->
-                    <div
-                      class="screen-card-image screen-card-placeholder"
+                    <a
+                      class="screen-card-image"
+                      href="/media/planilha-contas-fixas.webp"
                       data-media-slot="spreadsheet-contas-fixas"
-                      data-placeholder="true"
+                      data-gallery-open
+                      data-sheet-capture
+                      data-expanded-crop="0 0 2161 794"
+                      data-source-size="2161 794"
+                      target="_blank"
+                      rel="noopener"
                     >
-                      <svg viewBox="0 0 48 48" aria-hidden="true">
-                        <rect x="5" y="7" width="38" height="34" rx="5" />
-                        <path d="M5 17h38M18 17v24M18 29h25" />
+                      <svg
+                        class="screen-crop"
+                        viewBox="0 0 2161 794"
+                        width="2161"
+                        height="794"
+                        role="img"
+                        aria-label="Contas fixas da demonstração, com totais do mês, aluguel, condomínio, energia, internet e status dos pagamentos."
+                        focusable="false"
+                      >
+                        <defs>
+                          <clipPath id="sheet-crop-2">
+                            <rect x="0" y="0" width="2161" height="794" />
+                          </clipPath>
+                        </defs>
+                        <image
+                          href="/media/planilha-contas-fixas.webp"
+                          width="2161"
+                          height="794"
+                          clip-path="url(#sheet-crop-2)"
+                        />
                       </svg>
-                      <strong>Contas fixas</strong>
-                      <span>Captura em preparação</span>
-                    </div>
+                      <span class="screen-card-expand"
+                        >Ampliar tela <svg aria-hidden="true"><use href="#up-right" /></svg
+                      ></span>
+                    </a>
                     <figcaption>
                       <span class="screen-card-step">02 · CONTAS FIXAS</span>
                       <h3>As contas recorrentes, juntas.</h3>
@@ -1264,19 +1328,42 @@
                 </li>
                 <li class="screen-card">
                   <figure>
-                    <!-- TROCAR: captura real da aba ORÇAMENTO; manter o enquadramento legível. -->
-                    <div
-                      class="screen-card-image screen-card-placeholder"
+                    <a
+                      class="screen-card-image"
+                      href="/media/planilha-orcamento.webp"
                       data-media-slot="spreadsheet-orcamento"
-                      data-placeholder="true"
+                      data-gallery-open
+                      data-sheet-capture
+                      data-expanded-crop="0 0 2161 2525"
+                      data-source-size="2161 2525"
+                      target="_blank"
+                      rel="noopener"
                     >
-                      <svg viewBox="0 0 48 48" aria-hidden="true">
-                        <rect x="5" y="7" width="38" height="34" rx="5" />
-                        <path d="M5 17h38M18 17v24M18 29h25" />
+                      <svg
+                        class="screen-crop"
+                        viewBox="0 0 2161 1350"
+                        width="2161"
+                        height="1350"
+                        role="img"
+                        aria-label="Orçamento por categoria na demonstração, com meta mensal, realizado, diferença, percentuais e barras de progresso."
+                        focusable="false"
+                      >
+                        <defs>
+                          <clipPath id="sheet-crop-3">
+                            <rect x="0" y="0" width="2161" height="1350" />
+                          </clipPath>
+                        </defs>
+                        <image
+                          href="/media/planilha-orcamento.webp"
+                          width="2161"
+                          height="2525"
+                          clip-path="url(#sheet-crop-3)"
+                        />
                       </svg>
-                      <strong>Orçamento</strong>
-                      <span>Captura em preparação</span>
-                    </div>
+                      <span class="screen-card-expand"
+                        >Ampliar tela <svg aria-hidden="true"><use href="#up-right" /></svg
+                      ></span>
+                    </a>
                     <figcaption>
                       <span class="screen-card-step">03 · ORÇAMENTO</span>
                       <h3>Planeje seus limites.</h3>
@@ -1286,19 +1373,42 @@
                 </li>
                 <li class="screen-card">
                   <figure>
-                    <!-- TROCAR: captura real da aba METAS; manter o enquadramento legível. -->
-                    <div
-                      class="screen-card-image screen-card-placeholder"
+                    <a
+                      class="screen-card-image"
+                      href="/media/planilha-metas.webp"
                       data-media-slot="spreadsheet-metas"
-                      data-placeholder="true"
+                      data-gallery-open
+                      data-sheet-capture
+                      data-expanded-crop="0 0 2161 885"
+                      data-source-size="2161 885"
+                      target="_blank"
+                      rel="noopener"
                     >
-                      <svg viewBox="0 0 48 48" aria-hidden="true">
-                        <rect x="5" y="7" width="38" height="34" rx="5" />
-                        <path d="M5 17h38M18 17v24M18 29h25" />
+                      <svg
+                        class="screen-crop"
+                        viewBox="0 0 2161 885"
+                        width="2161"
+                        height="885"
+                        role="img"
+                        aria-label="Metas da demonstração, com reserva de emergência, viagem e notebook, valores guardados, aportes e previsão de conclusão."
+                        focusable="false"
+                      >
+                        <defs>
+                          <clipPath id="sheet-crop-4">
+                            <rect x="0" y="0" width="2161" height="885" />
+                          </clipPath>
+                        </defs>
+                        <image
+                          href="/media/planilha-metas.webp"
+                          width="2161"
+                          height="885"
+                          clip-path="url(#sheet-crop-4)"
+                        />
                       </svg>
-                      <strong>Metas</strong>
-                      <span>Captura em preparação</span>
-                    </div>
+                      <span class="screen-card-expand"
+                        >Ampliar tela <svg aria-hidden="true"><use href="#up-right" /></svg
+                      ></span>
+                    </a>
                     <figcaption>
                       <span class="screen-card-step">04 · METAS</span>
                       <h3>Dê um destino aos seus planos.</h3>
@@ -1308,19 +1418,42 @@
                 </li>
                 <li class="screen-card">
                   <figure>
-                    <!-- TROCAR: captura real da aba RESUMO ANUAL; manter o enquadramento legível. -->
-                    <div
-                      class="screen-card-image screen-card-placeholder"
+                    <a
+                      class="screen-card-image"
+                      href="/media/planilha-resumo-anual.webp"
                       data-media-slot="spreadsheet-resumo-anual"
-                      data-placeholder="true"
+                      data-gallery-open
+                      data-sheet-capture
+                      data-expanded-crop="0 0 2161 1922"
+                      data-source-size="2161 1922"
+                      target="_blank"
+                      rel="noopener"
                     >
-                      <svg viewBox="0 0 48 48" aria-hidden="true">
-                        <rect x="5" y="7" width="38" height="34" rx="5" />
-                        <path d="M5 17h38M18 17v24M18 29h25" />
+                      <svg
+                        class="screen-crop"
+                        viewBox="0 0 2161 1500"
+                        width="2161"
+                        height="1500"
+                        role="img"
+                        aria-label="Resumo anual da demonstração, com receitas, despesas e saldos previstos de 2026, incluindo contas fixas futuras."
+                        focusable="false"
+                      >
+                        <defs>
+                          <clipPath id="sheet-crop-5">
+                            <rect x="0" y="0" width="2161" height="1500" />
+                          </clipPath>
+                        </defs>
+                        <image
+                          href="/media/planilha-resumo-anual.webp"
+                          width="2161"
+                          height="1922"
+                          clip-path="url(#sheet-crop-5)"
+                        />
                       </svg>
-                      <strong>Resumo anual</strong>
-                      <span>Captura em preparação</span>
-                    </div>
+                      <span class="screen-card-expand"
+                        >Ampliar tela <svg aria-hidden="true"><use href="#up-right" /></svg
+                      ></span>
+                    </a>
                     <figcaption>
                       <span class="screen-card-step">05 · RESUMO ANUAL</span>
                       <h3>Olhe além deste mês.</h3>
@@ -1330,7 +1463,7 @@
                 </li>
               </ol>
               <p class="app-gallery-hint">
-                Deslize para os lados para conhecer as abas da planilha.
+                Deslize para explorar · toque para ampliar e ler os detalhes.
               </p>
             </div>
           </div>

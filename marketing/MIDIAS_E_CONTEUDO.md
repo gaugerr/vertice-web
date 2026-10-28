@@ -1,7 +1,7 @@
 # Mídias e conteúdo para substituir
 
-As capturas reais do aplicativo enviadas pelo produtor já substituem os espaços do
-app. O painel da planilha continua reservado e identificado. Não há imagens
+As capturas reais do aplicativo e da planilha substituem os espaços reservados.
+A planilha usa o modelo de demonstração com valores de exemplo. Não há imagens
 inventadas do produto, clientes fictícios, vendas ou avaliações fabricadas.
 
 ## Checklist de arquivos reais
@@ -13,17 +13,19 @@ inventadas do produto, clientes fictícios, vendas ou avaliações fabricadas.
       total de R$ 94,12 e os itens da compra. O enquadramento remove somente os 36 px
       superiores da barra de notificações, preservando toda a largura e o restante
       da altura. Slots `app-phone-photo` e `app-market-demo`.
-- [ ] **Foto ou captura real da planilha:** horizontal 16:10, ideal 1600×1000,
-      WebP/PNG. Slot `spreadsheet-photo`, seção “A planilha financeira”. Usar o modelo
-      de demonstração ou ocultar dados pessoais. O kit pago não deve virar download público.
-- [ ] **Telas variadas da planilha:** cinco placeholders no carrossel
-      `#planilha-em-detalhes`, separados da imagem principal do dashboard. Slots:
-      `spreadsheet-lancamentos`, `spreadsheet-contas-fixas`, `spreadsheet-orcamento`,
-      `spreadsheet-metas` e `spreadsheet-resumo-anual`. Usar dados de demonstração,
-      sem dados pessoais ou barra de notificações; priorizar texto legível.
-      Ao substituir, remover o aviso de preparação e adicionar imagem com alt,
-      dimensões e carregamento lazy. Seguir o padrão do app para oferecer ampliação
-      quando houver capturas reais; por enquanto, os placeholders não são clicáveis.
+- [x] **Painel real da planilha:** `planilha-dashboard.webp`, 2161×1600, no slot
+      `spreadsheet-photo`. Cabeçalho, indicadores e quatro gráficos preservados.
+      O link abre a ampliação e funciona sem JavaScript abrindo o WebP.
+- [x] **Telas variadas da planilha:** `planilha-lancamentos.webp`,
+      `planilha-contas-fixas.webp`, `planilha-orcamento.webp`, `planilha-metas.webp`
+      e `planilha-resumo-anual.webp`, no carrossel `#planilha-em-detalhes`.
+      Todos são recortes da exportação PDF gerada pelo Google a partir do modelo
+      de demonstração atual. Não são interfaces reconstruídas nem capturas do
+      computador pessoal. Orçamento e resumo anual têm miniaturas com recorte
+      superior; a ampliação mostra a região completa de cada imagem. Valores são
+      exemplos, incluindo previsões de contas fixas futuras no resumo anual.
+      A ampliação tem rolagem para ler as colunas. Não publicar a exportação PDF
+      completa ou arquivos de planilha pagos junto das imagens.
 - [x] **Telas reais do app:** galeria em `#na-vida-real`, com cinco originais JPG:
       `app-orcamento`, `app-categorias`, `app-comparador`, `app-sugestoes` e
       `app-historico`. Três cartões no desktop, dois no tablet e rolagem por toque
