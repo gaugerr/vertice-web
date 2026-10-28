@@ -186,6 +186,9 @@ produção nem registrar corpos de webhook, que contêm o segredo da integraçã
   contador de vagas ou preço riscado. A seção `#seus-motivos` relaciona objetivos do
   comprador às funções reais do kit, sem prometer economia garantida.
   Garantia: 7 dias após a entrega.
+  O build de marketing referencia CSS por hash do conteúdo no HTML publicado para
+  evitar mistura com estilos de versões anteriores. Fontes mantêm os links simples;
+  arquivos com hash e `dist/` são gerados, sem edição manual.
   Mídias em `media/` incluem capturas reais do app e da planilha; depoimentos de exemplo ficam em template
   inerte até haver relatos reais. Checklist: `marketing/MIDIAS_E_CONTEUDO.md`.
   `social.png` é o cartão de compartilhamento 1200×630. Não publicar os arquivos

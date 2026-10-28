@@ -19,6 +19,9 @@ Cloudflare Pages `vertice-kit`: raiz `/marketing`, comando `node build.mjs`, sa�
 
 Para gerar o site, execute `node build.mjs` dentro desta pasta. Não há dependências
 nem servidor próprio. O build não inclui instruções internas nem arquivos pagos.
+O HTML gerado usa nomes de CSS com hash do conteúdo para que visitas recorrentes
+recebam os estilos correspondentes à página publicada. As cópias sem hash continuam
+disponíveis para páginas antigas; não editar os arquivos gerados em `dist/`.
 
 ## Compra e atendimento
 
