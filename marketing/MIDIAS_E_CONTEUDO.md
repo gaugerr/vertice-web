@@ -88,12 +88,13 @@ exemplos como se fossem experiências de compradores.
 
 ## Controles manuais
 
-`site-config.js` concentra `checkoutUrl`, `whatsapp` e `launchSlots`.
+`site-config.js` concentra `checkoutUrl` e `whatsapp`.
 
 - O checkout oficial é <https://pay.cakto.com.br/jjnk3vv_1241258>. Se mudar,
   atualize também os links `data-checkout-link` no HTML, que funcionam sem JavaScript.
 - O número de suporte inclui país e DDD, somente dígitos: `5551980614158`.
-- `launchSlots: 100` é a capacidade total do lote; não é contagem de vagas restantes.
+- Condição exclusiva de lançamento por R$ 19,90 no total à vista. Não há lote,
+  limite de compras, prazo ou preço anterior anunciados. Não adicionar contadores.
 - O pagamento é feito na Cakto. A página não coleta contatos nem faz reservas.
   Mantenha os preços e as condições coerentes entre página e checkout.
 - Acesso automático após a confirmação do pagamento, usando a mesma conta Google

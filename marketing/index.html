@@ -46,9 +46,15 @@
   </head>
   <body>
     <svg class="symbols" xmlns="http://www.w3.org/2000/svg" aria-hidden="true">
-      <symbol id="arrow" viewBox="0 0 24 24"><path d="M5 12h14m-6-6 6 6-6 6" /></symbol>
-      <symbol id="up-right" viewBox="0 0 24 24"><path d="M6 18 18 6M6 6h12v12" /></symbol>
-      <symbol id="check" viewBox="0 0 24 24"><path d="m5 12 4 4L19 6" /></symbol>
+      <symbol id="arrow" viewBox="0 0 24 24">
+        <path d="M5 12h14m-6-6 6 6-6 6" />
+      </symbol>
+      <symbol id="up-right" viewBox="0 0 24 24">
+        <path d="M6 18 18 6M6 6h12v12" />
+      </symbol>
+      <symbol id="check" viewBox="0 0 24 24">
+        <path d="m5 12 4 4L19 6" />
+      </symbol>
       <symbol id="basket" viewBox="0 0 24 24">
         <path d="m8 3-5 8m13-8 5 8M2 10h20l-3 10H5L2 10Zm6 4 1 3m7-3-1 3m-3-3v3" />
       </symbol>
@@ -61,7 +67,9 @@
       <symbol id="lock" viewBox="0 0 24 24">
         <path d="M7 10V7a5 5 0 0 1 10 0v3M5 10h14v11H5V10Zm7 4v3" />
       </symbol>
-      <symbol id="close" viewBox="0 0 24 24"><path d="m6 6 12 12M6 18 18 6" /></symbol>
+      <symbol id="close" viewBox="0 0 24 24">
+        <path d="m6 6 12 12M6 18 18 6" />
+      </symbol>
     </svg>
     <a class="skip" href="#conteudo">Pular para o conteúdo</a>
     <header class="header">
@@ -104,12 +112,12 @@
                 class="button button-purple"
                 data-checkout-link
                 href="https://pay.cakto.com.br/jjnk3vv_1241258"
-                >Comprar o kit <svg><use href="#arrow" /></svg></a
+                >Quero organizar meu dinheiro <svg><use href="#arrow" /></svg></a
               ><a class="text-link" href="#seu-mes">Ver a planilha <span>↗</span></a>
             </div>
             <p class="hero-price">
-              <strong>App + planilha por R$ 19,90</strong
-              ><span>Pagamento único · condição de lançamento</span>
+              <strong>App + planilha por R$ 19,90 no total</strong
+              ><span>Condição exclusiva de lançamento · pagamento único</span>
             </p>
             <p class="google-access-note">
               <svg aria-hidden="true"><use href="#lock" /></svg
@@ -208,6 +216,68 @@
           ><span>COMPRA ACOMPANHADA</span><span class="connector" aria-hidden="true"></span
           ><span>MÊS ORGANIZADO</span
           ><span class="hero-scroll">Role para conhecer <span>↓</span></span>
+        </div>
+      </section>
+
+      <section class="reasons-section" id="seus-motivos" aria-labelledby="reasons-title">
+        <div class="wrap">
+          <div class="reasons-heading">
+            <p class="eyebrow">SEU DINHEIRO, COM MAIS CLAREZA</p>
+            <h2 id="reasons-title">O que você quer mudar<br /><em>na sua rotina?</em></h2>
+            <p>
+              Uma lista bem planejada ajuda na compra de hoje. Um controle financeiro ajuda a
+              enxergar o mês inteiro. Comece pelo que faz sentido para você.
+            </p>
+          </div>
+          <div class="reasons-grid">
+            <article class="reason-card">
+              <span class="reason-number" aria-hidden="true">01</span>
+              <h3>Quero saber para onde meu dinheiro vai.</h3>
+              <p>
+                Registre suas receitas e despesas na planilha e veja, no dashboard e nos gráficos,
+                quais categorias mais pesam no seu mês.
+              </p>
+              <span class="reason-tool">Planilha financeira · dashboard e gráficos</span>
+            </article>
+            <article class="reason-card">
+              <span class="reason-number" aria-hidden="true">02</span>
+              <h3>Quero comprar sem perder o controle.</h3>
+              <p>
+                Planeje sua lista, defina um limite e acompanhe o total dos itens marcados no
+                carrinho. Veja quanto ainda cabe no orçamento antes de chegar ao caixa.
+              </p>
+              <span class="reason-tool">App de compras · total e orçamento</span>
+            </article>
+            <article class="reason-card">
+              <span class="reason-number" aria-hidden="true">03</span>
+              <h3>Quero criar o hábito de economizar.</h3>
+              <p>
+                Compare produtos pelo preço por quantidade e consulte o último preço registrado no
+                app. Na planilha, revise seus gastos para encontrar onde pode ajustar.
+              </p>
+              <span class="reason-tool">Comparador · histórico · categorias de gastos</span>
+            </article>
+            <article class="reason-card">
+              <span class="reason-number" aria-hidden="true">04</span>
+              <h3>Quero me organizar para alcançar minhas metas.</h3>
+              <p>
+                Coloque contas fixas, orçamento e metas no mesmo planejamento. Acompanhe seus
+                registros e decida suas prioridades para os próximos meses.
+              </p>
+              <span class="reason-tool">Planilha financeira · contas, orçamento e metas</span>
+            </article>
+          </div>
+          <div class="reasons-action">
+            <a
+              class="button button-purple"
+              data-checkout-link
+              href="https://pay.cakto.com.br/jjnk3vv_1241258"
+            >
+              Quero começar com mais controle
+              <svg aria-hidden="true"><use href="#arrow" /></svg>
+            </a>
+            <p>Kit completo por R$ 19,90 no total.<br />Pagamento único. Sem mensalidade.</p>
+          </div>
         </div>
       </section>
 
@@ -1155,7 +1225,9 @@
                 focusable="false"
               >
                 <defs>
-                  <clipPath id="screen-viewer-clip"><rect data-viewer-crop /></clipPath>
+                  <clipPath id="screen-viewer-clip">
+                    <rect data-viewer-crop />
+                  </clipPath>
                 </defs>
                 <image data-viewer-image clip-path="url(#screen-viewer-clip)" />
               </svg>
@@ -1518,17 +1590,14 @@
           </div>
           <div class="offer-card">
             <span class="launch-label"
-              ><span class="status-dot"></span> CONDIÇÃO DE LANÇAMENTO</span
+              ><span class="status-dot"></span> CONDIÇÃO EXCLUSIVA DE LANÇAMENTO</span
             >
             <h3>Kit Vértice completo</h3>
             <p class="offer-subtitle">App de lista de compras + planilha de controle financeiro</p>
-            <p class="reference-price">De <del>R$ 59,00</del> por</p>
             <p class="price"><span>R$</span>19<span>,90</span></p>
-            <p class="price-description">Pagamento único. Sem mensalidade.</p>
-            <p class="price-reference-note">Preço de referência após o lançamento: R$ 59,00.</p>
-            <!-- EDITAR MANUALMENTE: capacidade total em site-config.js. Este indicador não é um contador de vagas restantes. -->
-            <p class="launch-capacity">
-              <strong>Para as <span data-launch-slots>100</span> primeiras compras</strong
+            <p class="price-description">Valor total à vista. Pagamento único. Sem mensalidade.</p>
+            <p class="launch-summary">
+              <strong>Mais clareza para comprar e planejar seu mês.</strong
               ><span>App + planilha em uma única compra pela Cakto.</span>
             </p>
             <ul class="offer-includes">
@@ -1553,7 +1622,7 @@
               class="button button-purple purchase-button"
               data-checkout-link
               href="https://pay.cakto.com.br/jjnk3vv_1241258"
-              >Quero meu Vértice <svg aria-hidden="true"><use href="#arrow" /></svg
+              >Quero começar com mais controle <svg aria-hidden="true"><use href="#arrow" /></svg
             ></a>
             <div class="guarantee">
               <span class="guarantee-seal" aria-hidden="true">7<small>DIAS</small></span>
@@ -1581,8 +1650,8 @@
             <p>Finalize a compra na Cakto e use o Vértice para organizar suas compras e seu mês.</p>
             <p class="checkout-conditions">
               Informe no checkout o mesmo e-mail da conta Google que você usará para entrar no app.
-              A condição de lançamento vale para as <span data-launch-slots>100</span> primeiras
-              compras.
+              Seu kit tem pagamento único, com a condição exclusiva de lançamento de R$ 19,90 no
+              total.
             </p>
           </div>
           <div class="checkout-panel" id="checkout">
@@ -1628,7 +1697,8 @@
               data-checkout-link
               href="https://pay.cakto.com.br/jjnk3vv_1241258"
             >
-              Comprar o Kit Vértice <svg aria-hidden="true"><use href="#arrow" /></svg>
+              Comprar o Kit Vértice
+              <svg aria-hidden="true"><use href="#arrow" /></svg>
             </a>
             <p class="field-hint">Os dados de compra e o pagamento são informados na Cakto.</p>
             <p class="direct-whatsapp">
@@ -1660,7 +1730,7 @@
               <summary>Preciso pagar uma mensalidade?<span aria-hidden="true">+</span></summary>
               <div>
                 Não. O kit tem pagamento único e inclui o acesso vitalício ao app e uma cópia da
-                planilha. A condição de lançamento é R$ 19,90 para as 100 primeiras compras. Você
+                planilha. A condição exclusiva de lançamento é R$ 19,90 no total à vista. Você
                 conclui o pagamento diretamente no checkout da Cakto.
               </div>
             </details>
