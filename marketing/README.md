@@ -12,7 +12,7 @@ Cloudflare Pages `vertice-kit`: raiz `/marketing`, comando `node build.mjs`, sa�
 - `script.js`: links do checkout, suporte pelo WhatsApp e chamada fixa no celular.
 - `interactive-demo.js` e `interactive-demo.css`: prévias do app e do painel financeiro.
 - `app-gallery.js` e `app-gallery.css`: galeria responsiva de telas reais e ampliação.
-- `site-config.js`: checkout Cakto, telefone de suporte e capacidade total do lote.
+- `site-config.js`: checkout Cakto e telefone de suporte.
 - `media/`: capturas reais do app e seis recortes reais da planilha de demonstração.
 - `social.png`: imagem social real de marca, PNG 1200×630; fonte `social.svg`.
 - `MIDIAS_E_CONTEUDO.md`: checklist e instruções para substituir todo conteúdo provisório.
@@ -43,10 +43,15 @@ quem já tem conta na plataforma pode entrar com o cadastro existente.
 
 ## Oferta e limites reais
 
-Pagamento único, R$ 19,90 para as 100 primeiras compras; R$ 59,00 é referência para
-após o lançamento, não um histórico de vendas. `launchSlots` é o tamanho TOTAL do
-lote, nunca um contador de vagas restantes. O proprietário deve manter o preço e
-a condição de lançamento coerentes entre página e checkout.
+Condição exclusiva de lançamento: R$ 19,90 no total à vista, em pagamento único.
+Não há limite de compras, prazo, preço anterior riscado ou contador anunciados.
+A oferta Cakto custa R$ 18,91 e acrescenta R$ 0,99 de serviço ao comprador.
+Manter o total e a condição de lançamento coerentes entre página e checkout.
+
+A seção `#seus-motivos`, logo após a abertura, apresenta quatro objetivos em
+primeira pessoa e explica como as funções do kit ajudam em cada um. Botões de
+compra destacam organização e controle, sem prometer resultado financeiro ou
+economia garantida. As demonstrações e galerias reais continuam disponíveis.
 
 A garantia anunciada é de 7 dias após a entrega, com solicitação de reembolso pela
 Cakto ou atendimento pelo WhatsApp. Não há promessa de versões pagas futuras

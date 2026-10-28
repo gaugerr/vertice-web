@@ -1,8 +1,4 @@
 const config = window.VERTICE_MARKETING;
-for (const label of document.querySelectorAll('[data-launch-slots]')) {
-  label.textContent = String(config.launchSlots);
-}
-
 // The HTML also has the checkout URL so purchase links work without JavaScript.
 for (const link of document.querySelectorAll('[data-checkout-link]')) {
   link.href = config.checkoutUrl;

@@ -179,10 +179,13 @@ produção nem registrar corpos de webhook, que contêm o segredo da integraçã
   validação do acesso. Projeto Pages `vertice-kit`, raiz
   `/marketing`, build `node build.mjs` e saída `dist`. CTAs de compra levam ao
   checkout Cakto `https://pay.cakto.com.br/jjnk3vv_1241258`; o WhatsApp é suporte.
-  Configuração de checkout, telefone e capacidade total: `site-config.js`.
+  Configuração de checkout e telefone: `site-config.js`.
   Manter o fallback dos links `data-checkout-link` no HTML. Sem formulário de
-  contatos. Não mostrar capacidade total como vagas restantes. R$ 59 é referência após o lançamento;
-  R$ 19,90 é a condição das 100 primeiras compras. Garantia: 7 dias após a entrega.
+  contatos. Condição exclusiva de lançamento: R$ 19,90 no total à vista, sem limite
+  de compras, prazo ou preço anterior anunciados. Não reintroduzir lote de 100,
+  contador de vagas ou preço riscado. A seção `#seus-motivos` relaciona objetivos do
+  comprador às funções reais do kit, sem prometer economia garantida.
+  Garantia: 7 dias após a entrega.
   Mídias em `media/` incluem capturas reais do app e da planilha; depoimentos de exemplo ficam em template
   inerte até haver relatos reais. Checklist: `marketing/MIDIAS_E_CONTEUDO.md`.
   `social.png` é o cartão de compartilhamento 1200×630. Não publicar os arquivos
