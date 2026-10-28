@@ -6,7 +6,7 @@
     <meta name="theme-color" content="#17151c" />
     <meta
       name="description"
-      content="App de lista de compras e planilha de controle financeiro para acompanhar o orçamento e o controle de gastos. Kit Vértice: pagamento único, sem mensalidade."
+      content="App de lista de compras inteligente e offline + planilha de controle financeiro completa, com dashboard e gráficos. Kit Vértice: pagamento único, sem mensalidade."
     />
     <meta property="og:title" content="Vértice — App de lista de compras + planilha financeira" />
     <meta
@@ -37,9 +37,11 @@
     <link rel="stylesheet" href="/styles.css" />
     <link rel="stylesheet" href="/conversion.css" />
     <link rel="stylesheet" href="/interactive-demo.css" />
+    <link rel="stylesheet" href="/app-gallery.css" />
     <script src="/site-config.js" defer></script>
     <script src="/interactive-demo.js" defer></script>
     <script src="/script.js" defer></script>
+    <script src="/app-gallery.js" defer></script>
     <title>Vértice — App de lista de compras + planilha financeira</title>
   </head>
   <body>
@@ -84,12 +86,18 @@
         <div class="wrap hero-grid">
           <div class="hero-copy">
             <div class="eyebrow">
-              <span class="status-dot"></span> UM KIT. DOIS MOMENTOS DO SEU DINHEIRO.
+              <span class="status-dot"></span> KIT VÉRTICE · APP + PLANILHA FINANCEIRA
             </div>
-            <h1 id="hero-title">A compra de hoje.<br />O equilíbrio<br /><em>do seu mês.</em></h1>
-            <p class="hero-description">
-              Saiba o total antes de chegar ao caixa. Depois, acompanhe suas contas, seu orçamento e
-              seus planos em uma planilha feita para a vida real.
+            <h1 id="hero-title" class="hero-title-products">
+              App de lista de compras<br /><em>inteligente e offline.</em>
+            </h1>
+            <p class="hero-description hero-description-products">
+              <strong
+                >Planilha de controle financeiro completa, com
+                <span>dashboard e gráficos.</span></strong
+              >
+              Saiba o total antes de chegar ao caixa e acompanhe suas contas, seu orçamento e suas
+              metas.
             </p>
             <div class="hero-actions">
               <a
@@ -111,7 +119,8 @@
               >
             </p>
             <div class="hero-footnote">
-              <svg><use href="#spark" /></svg><span>Um pequeno hábito. Uma visão maior.</span>
+              <svg><use href="#spark" /></svg
+              ><span>Uso offline após preparo e validação do acesso.</span>
             </div>
           </div>
 
@@ -212,31 +221,42 @@
               vista, junto do orçamento que você definiu.
             </p>
             <p class="demo-honesty">
-              Estamos preparando uma demonstração real do app. Por enquanto, experimente os itens da
-              lista ilustrativa acima.
+              Esta é uma captura real do aplicativo. Para experimentar sem instalar, use a lista
+              ilustrativa acima ou conheça mais funções nas telas abaixo.
             </p>
             <a class="text-link" href="#demo-compra"
               >Testar a lista de exemplo <span aria-hidden="true">↗</span></a
             >
           </div>
           <div class="demo-media">
-            <!-- TROCAR: GIF do app no mercado, 10-15s, vertical. Substituir src e alt; para MP4, usar o exemplo em MIDIAS_E_CONTEUDO.md. -->
             <figure
-              class="media-slot media-slot-portrait"
+              class="media-slot media-slot-portrait media-slot-app-capture"
               data-media-slot="app-market-demo"
-              data-placeholder="true"
             >
-              <img
-                src="/media/reservado-vertical.svg"
-                width="540"
-                height="960"
-                loading="lazy"
-                decoding="async"
-                alt="Espaço reservado: Demonstração do app durante uma compra no mercado. A imagem real ainda será adicionada."
-              />
+              <svg
+                class="screen-crop"
+                viewBox="0 36 574 1244"
+                width="574"
+                height="1244"
+                role="img"
+                aria-label="Captura real do Vértice: seis de seis itens comprados, total de R$ 94,12, orçamento de R$ 100,00 e R$ 5,88 restantes, com os produtos da categoria Essenciais."
+                focusable="false"
+                data-screen-name="app-captura-completa"
+              >
+                <defs>
+                  <clipPath id="screen-crop-1">
+                    <rect x="0" y="36" width="574" height="1244" />
+                  </clipPath>
+                </defs>
+                <image
+                  href="/media/app-captura-completa.jpg"
+                  width="574"
+                  height="1280"
+                  clip-path="url(#screen-crop-1)"
+                />
+              </svg>
               <figcaption>
-                <span>MÍDIA REAL EM PREPARAÇÃO</span>Demonstração do app durante uma compra no
-                mercado
+                <span>CAPTURA REAL DO APP</span>O total e o orçamento acompanham sua compra.
               </figcaption>
             </figure>
           </div>
@@ -718,19 +738,6 @@
               <span class="tiny-dot"></span> Prévia interativa · nada é salvo ou enviado
             </div>
           </div>
-          <div class="manual-demo interactive-manual">
-            <div>
-              <strong>Da lista para a visão do mês.</strong>
-              <p>Simule digitar o total da compra no campo Mercado desta prévia.</p>
-            </div>
-            <button id="fill-sheet-example" type="button">
-              Usar total da lista neste exemplo ↗
-            </button>
-            <p id="manual-demo-status" role="status">
-              No kit, esse registro é manual. Não existe sincronização automática entre app e
-              planilha.
-            </p>
-          </div>
           <p class="interactive-caption">
             Use valores fictícios. Ao sair ou recarregar a página, a demonstração recomeça. Nenhum
             dado é gravado na planilha do kit.
@@ -757,22 +764,34 @@
               </div>
               <h3>O app de compras</h3>
               <p>Praticidade para levar ao mercado.</p>
-              <!-- TROCAR: foto real do app no celular, vertical 9:16, WebP/JPG. -->
               <figure
-                class="media-slot media-slot-portrait"
+                class="media-slot media-slot-portrait media-slot-app-capture"
                 data-media-slot="app-phone-photo"
-                data-placeholder="true"
               >
-                <img
-                  src="/media/reservado-vertical.svg"
-                  width="540"
-                  height="960"
-                  loading="lazy"
-                  decoding="async"
-                  alt="Espaço reservado: Foto real do app Vértice aberto em um celular. A imagem real ainda será adicionada."
-                />
+                <svg
+                  class="screen-crop"
+                  viewBox="0 36 574 1244"
+                  width="574"
+                  height="1244"
+                  role="img"
+                  aria-label="Captura real do Vértice: seis de seis itens comprados, total de R$ 94,12, orçamento de R$ 100,00 e R$ 5,88 restantes, com os produtos da categoria Essenciais."
+                  focusable="false"
+                  data-screen-name="app-captura-completa"
+                >
+                  <defs>
+                    <clipPath id="screen-crop-2">
+                      <rect x="0" y="36" width="574" height="1244" />
+                    </clipPath>
+                  </defs>
+                  <image
+                    href="/media/app-captura-completa.jpg"
+                    width="574"
+                    height="1280"
+                    clip-path="url(#screen-crop-2)"
+                  />
+                </svg>
                 <figcaption>
-                  <span>MÍDIA REAL EM PREPARAÇÃO</span>Foto real do app Vértice aberto em um celular
+                  <span>CAPTURA REAL DO APP</span>Seus produtos, organizados por categoria.
                 </figcaption>
               </figure>
               <ul>
@@ -790,24 +809,32 @@
               </div>
               <h3>A planilha financeira</h3>
               <p>Perspectiva para cuidar do mês inteiro.</p>
-              <!-- TROCAR: foto ou captura real da planilha, horizontal 16:10, WebP/PNG. Ocultar dados pessoais. -->
               <figure
-                class="media-slot media-slot-landscape"
+                class="media-slot media-slot-landscape media-slot-sheet-capture"
                 data-media-slot="spreadsheet-photo"
-                data-placeholder="true"
               >
-                <img
-                  src="/media/reservado-horizontal.svg"
-                  width="960"
-                  height="600"
-                  loading="lazy"
-                  decoding="async"
-                  alt="Espaço reservado: Foto ou captura real do painel da planilha financeira. A imagem real ainda será adicionada."
-                />
-                <figcaption>
-                  <span>MÍDIA REAL EM PREPARAÇÃO</span>Foto ou captura real do painel da planilha
-                  financeira
-                </figcaption>
+                <a
+                  href="/media/planilha-dashboard.webp"
+                  target="_blank"
+                  rel="noopener"
+                  data-gallery-open
+                  data-sheet-capture
+                  data-viewer-title="Dashboard financeiro"
+                  data-expanded-crop="0 0 2161 1600"
+                  data-source-size="2161 1600"
+                  aria-label="Ampliar o dashboard da planilha financeira"
+                >
+                  <img
+                    class="screen-crop"
+                    src="/media/planilha-dashboard.webp"
+                    width="2161"
+                    height="1600"
+                    loading="lazy"
+                    decoding="async"
+                    alt="Dashboard real do modelo de demonstração, com receitas e saídas previstas, saldo e quatro gráficos financeiros."
+                  />
+                </a>
+                <figcaption>Dashboard do modelo de demonstração · toque para ampliar.</figcaption>
               </figure>
               <ul>
                 <li>Painel financeiro com quatro gráficos</li>
@@ -833,34 +860,612 @@
         <div class="wrap">
           <div class="proof-heading">
             <div>
-              <p class="eyebrow">QUEM USA CONTA MELHOR</p>
-              <h2 id="proof-title">O Vértice na rotina.<br /><em>Com relatos de verdade.</em></h2>
+              <p class="eyebrow">POR DENTRO DO APP</p>
+              <h2 id="proof-title">O Vértice, na prática.<br /><em>Cada função, de perto.</em></h2>
             </div>
             <p>
-              Ainda estamos reunindo os primeiros depoimentos. Este espaço receberá relatos reais,
-              com autorização de quem participou.
+              Telas reais para você conhecer o app antes de comprar. Deslize para explorar e toque
+              em uma imagem para ver os detalhes.
             </p>
           </div>
-          <div class="proof-print">
-            <!-- TROCAR: prints reais do app, montagem horizontal 16:10. Remover dados pessoais. -->
-            <figure
-              class="media-slot media-slot-landscape"
-              data-media-slot="real-app-screenshots"
-              data-placeholder="true"
+          <div
+            class="app-gallery"
+            data-app-gallery
+            role="region"
+            aria-label="Funcionalidades do Vértice"
+            aria-roledescription="carrossel"
+          >
+            <div class="app-gallery-toolbar">
+              <p>Cinco funções para a sua próxima compra.</p>
+              <div class="app-gallery-controls" data-gallery-controls hidden>
+                <output data-gallery-range aria-live="polite" aria-atomic="true">1 de 5</output>
+                <button
+                  class="gallery-arrow gallery-arrow-back"
+                  type="button"
+                  data-gallery-prev
+                  aria-controls="app-gallery-track"
+                  aria-label="Ver telas anteriores"
+                >
+                  <svg aria-hidden="true"><use href="#arrow" /></svg>
+                </button>
+                <button
+                  class="gallery-arrow"
+                  type="button"
+                  data-gallery-next
+                  aria-controls="app-gallery-track"
+                  aria-label="Ver próximas telas"
+                >
+                  <svg aria-hidden="true"><use href="#arrow" /></svg>
+                </button>
+              </div>
+            </div>
+            <ol
+              class="app-gallery-track"
+              id="app-gallery-track"
+              tabindex="0"
+              aria-label="Telas do aplicativo; deslize para os lados para ver mais"
             >
-              <img
-                src="/media/reservado-horizontal.svg"
-                width="960"
-                height="600"
-                loading="lazy"
-                decoding="async"
-                alt="Espaço reservado: Prints reais das listas, do orçamento e do total da compra no app. A imagem real ainda será adicionada."
-              />
-              <figcaption>
-                <span>MÍDIA REAL EM PREPARAÇÃO</span>Prints reais das listas, do orçamento e do
-                total da compra no app
-              </figcaption>
-            </figure>
+              <li class="screen-card">
+                <figure>
+                  <a
+                    class="screen-card-image"
+                    data-gallery-open
+                    href="/media/app-orcamento.jpg"
+                    data-expanded-crop="12 175 568 490"
+                    data-source-size="592 1280"
+                    target="_blank"
+                    rel="noopener"
+                  >
+                    <svg
+                      class="screen-crop"
+                      viewBox="12 175 568 490"
+                      width="568"
+                      height="490"
+                      role="img"
+                      aria-label="Total da lista de R$ 69,08 e orçamento de R$ 100,00, com R$ 30,92 restantes."
+                      focusable="false"
+                      data-screen-name="app-orcamento"
+                    >
+                      <defs>
+                        <clipPath id="screen-crop-3">
+                          <rect x="12" y="175" width="568" height="490" />
+                        </clipPath>
+                      </defs>
+                      <image
+                        href="/media/app-orcamento.jpg"
+                        width="592"
+                        height="1280"
+                        clip-path="url(#screen-crop-3)"
+                      />
+                    </svg>
+                    <span class="screen-card-expand"
+                      >Ampliar tela <svg aria-hidden="true"><use href="#up-right" /></svg
+                    ></span>
+                  </a>
+                  <figcaption>
+                    <span class="screen-card-step">01 · ORÇAMENTO</span>
+                    <h3>O total sempre à vista.</h3>
+                    <p>Acompanhe os itens comprados e quanto ainda cabe no limite da lista.</p>
+                  </figcaption>
+                </figure>
+              </li>
+              <li class="screen-card">
+                <figure>
+                  <a
+                    class="screen-card-image"
+                    data-gallery-open
+                    href="/media/app-categorias.jpg"
+                    data-expanded-crop="10 40 554 1000"
+                    data-source-size="574 1280"
+                    target="_blank"
+                    rel="noopener"
+                  >
+                    <svg
+                      class="screen-crop"
+                      viewBox="14 120 546 540"
+                      width="546"
+                      height="540"
+                      role="img"
+                      aria-label="Categoria Essenciais com quatro produtos, marcação de comprados e total de R$ 69,08."
+                      focusable="false"
+                      data-screen-name="app-categorias"
+                    >
+                      <defs>
+                        <clipPath id="screen-crop-4">
+                          <rect x="14" y="120" width="546" height="540" />
+                        </clipPath>
+                      </defs>
+                      <image
+                        href="/media/app-categorias.jpg"
+                        width="574"
+                        height="1280"
+                        clip-path="url(#screen-crop-4)"
+                      />
+                    </svg>
+                    <span class="screen-card-expand"
+                      >Ampliar tela <svg aria-hidden="true"><use href="#up-right" /></svg
+                    ></span>
+                  </a>
+                  <figcaption>
+                    <span class="screen-card-step">02 · CATEGORIAS</span>
+                    <h3>Cada coisa no seu lugar.</h3>
+                    <p>Separe os produtos por categoria e veja o que já entrou no carrinho.</p>
+                  </figcaption>
+                </figure>
+              </li>
+              <li class="screen-card">
+                <figure>
+                  <a
+                    class="screen-card-image"
+                    data-gallery-open
+                    href="/media/app-comparador.jpg"
+                    data-expanded-crop="36 78 562 1080"
+                    data-source-size="634 1280"
+                    target="_blank"
+                    rel="noopener"
+                  >
+                    <svg
+                      class="screen-crop"
+                      viewBox="40 900 554 265"
+                      width="554"
+                      height="265"
+                      role="img"
+                      aria-label="Resultado do exemplo: opção A a R$ 53,98/kg e opção B a R$ 60,76/kg, com diferença de 11,2%."
+                      focusable="false"
+                      data-screen-name="app-comparador"
+                    >
+                      <defs>
+                        <clipPath id="screen-crop-5">
+                          <rect x="40" y="900" width="554" height="265" />
+                        </clipPath>
+                      </defs>
+                      <image
+                        href="/media/app-comparador.jpg"
+                        width="634"
+                        height="1280"
+                        clip-path="url(#screen-crop-5)"
+                      />
+                    </svg>
+                    <span class="screen-card-expand"
+                      >Ampliar tela <svg aria-hidden="true"><use href="#up-right" /></svg
+                    ></span>
+                  </a>
+                  <figcaption>
+                    <span class="screen-card-step">03 · COMPARADOR</span>
+                    <h3>Descubra qual compensa.</h3>
+                    <p>Compare o preço por peso, volume ou unidade antes de escolher.</p>
+                  </figcaption>
+                </figure>
+              </li>
+              <li class="screen-card">
+                <figure>
+                  <a
+                    class="screen-card-image"
+                    data-gallery-open
+                    href="/media/app-sugestoes.jpg"
+                    data-expanded-crop="32 625 1216 439"
+                    data-source-size="1280 1088"
+                    target="_blank"
+                    rel="noopener"
+                  >
+                    <svg
+                      class="screen-crop"
+                      viewBox="32 625 1216 439"
+                      width="1216"
+                      height="439"
+                      role="img"
+                      aria-label="Ao digitar Queijo, o app sugere Queijo prato, marca President, embalagem de 150 g, de uma compra anterior."
+                      focusable="false"
+                      data-screen-name="app-sugestoes"
+                    >
+                      <defs>
+                        <clipPath id="screen-crop-6">
+                          <rect x="32" y="625" width="1216" height="439" />
+                        </clipPath>
+                      </defs>
+                      <image
+                        href="/media/app-sugestoes.jpg"
+                        width="1280"
+                        height="1088"
+                        clip-path="url(#screen-crop-6)"
+                      />
+                    </svg>
+                    <span class="screen-card-expand"
+                      >Ampliar tela <svg aria-hidden="true"><use href="#up-right" /></svg
+                    ></span>
+                  </a>
+                  <figcaption>
+                    <span class="screen-card-step">04 · SUGESTÕES</span>
+                    <h3>Sua próxima lista, mais rápida.</h3>
+                    <p>Encontre sugestões de produtos de compras anteriores enquanto digita.</p>
+                  </figcaption>
+                </figure>
+              </li>
+              <li class="screen-card">
+                <figure>
+                  <a
+                    class="screen-card-image"
+                    data-gallery-open
+                    href="/media/app-historico.jpg"
+                    data-expanded-crop="32 356 678 380"
+                    data-source-size="742 1280"
+                    target="_blank"
+                    rel="noopener"
+                  >
+                    <svg
+                      class="screen-crop"
+                      viewBox="32 356 678 380"
+                      width="678"
+                      height="380"
+                      role="img"
+                      aria-label="Durante a edição do preço, o app exibe a última compra a R$ 8,99 por unidade e compara com os R$ 9,59 informados."
+                      focusable="false"
+                      data-screen-name="app-historico"
+                    >
+                      <defs>
+                        <clipPath id="screen-crop-7">
+                          <rect x="32" y="356" width="678" height="380" />
+                        </clipPath>
+                      </defs>
+                      <image
+                        href="/media/app-historico.jpg"
+                        width="742"
+                        height="1280"
+                        clip-path="url(#screen-crop-7)"
+                      />
+                    </svg>
+                    <span class="screen-card-expand"
+                      >Ampliar tela <svg aria-hidden="true"><use href="#up-right" /></svg
+                    ></span>
+                  </a>
+                  <figcaption>
+                    <span class="screen-card-step">05 · HISTÓRICO DE PREÇOS</span>
+                    <h3>Uma referência para decidir.</h3>
+                    <p>Consulte a última compra compatível enquanto informa o preço atual.</p>
+                  </figcaption>
+                </figure>
+              </li>
+            </ol>
+            <p class="app-gallery-hint">Deslize para os lados · toque em uma tela para ampliar</p>
+          </div>
+          <dialog class="screen-viewer" data-gallery-viewer aria-labelledby="screen-viewer-title">
+            <div class="screen-viewer-toolbar">
+              <h3 id="screen-viewer-title" data-viewer-title>Tela do aplicativo</h3>
+              <button
+                class="gallery-arrow"
+                type="button"
+                data-viewer-close
+                aria-label="Fechar imagem ampliada"
+                autofocus
+              >
+                <svg aria-hidden="true"><use href="#close" /></svg>
+              </button>
+            </div>
+            <div
+              class="screen-viewer-stage"
+              data-viewer-stage
+              tabindex="0"
+              aria-label="Imagem ampliada; role para explorar os detalhes"
+            >
+              <svg
+                class="screen-viewer-image"
+                data-viewer-canvas
+                role="img"
+                aria-label="Tela do aplicativo ampliada"
+                focusable="false"
+              >
+                <defs>
+                  <clipPath id="screen-viewer-clip"><rect data-viewer-crop /></clipPath>
+                </defs>
+                <image data-viewer-image clip-path="url(#screen-viewer-clip)" />
+              </svg>
+            </div>
+            <p class="app-gallery-hint" data-viewer-hint hidden>
+              Deslize na imagem para ver todas as colunas e linhas.
+            </p>
+            <div class="screen-viewer-footer">
+              <button
+                class="gallery-arrow gallery-arrow-back"
+                type="button"
+                data-viewer-prev
+                aria-label="Ampliar tela anterior"
+              >
+                <svg aria-hidden="true"><use href="#arrow" /></svg>
+              </button>
+              <output data-viewer-position aria-live="polite" aria-atomic="true"></output>
+              <button
+                class="gallery-arrow"
+                type="button"
+                data-viewer-next
+                aria-label="Ampliar próxima tela"
+              >
+                <svg aria-hidden="true"><use href="#arrow" /></svg>
+              </button>
+            </div>
+          </dialog>
+          <div class="sheet-gallery-section" id="planilha-em-detalhes">
+            <div class="proof-heading">
+              <div>
+                <p class="eyebrow">POR DENTRO DA PLANILHA</p>
+                <h2 id="sheet-gallery-title">Seu mês,<br /><em>em mais detalhes.</em></h2>
+              </div>
+              <p>
+                Além do dashboard, conheça as abas que ajudam a organizar suas finanças. Capturas
+                reais do modelo de demonstração, com valores de exemplo.
+              </p>
+            </div>
+            <div
+              class="app-gallery"
+              data-app-gallery
+              data-sheet-gallery
+              role="region"
+              aria-labelledby="sheet-gallery-title"
+              aria-roledescription="carrossel"
+            >
+              <div class="app-gallery-toolbar">
+                <p>Cinco telas para organizar sua vida financeira.</p>
+                <div class="app-gallery-controls" data-gallery-controls hidden>
+                  <output data-gallery-range aria-live="polite" aria-atomic="true">1 de 5</output>
+                  <button
+                    class="gallery-arrow gallery-arrow-back"
+                    type="button"
+                    data-gallery-prev
+                    aria-controls="sheet-gallery-track"
+                    aria-label="Ver telas anteriores da planilha"
+                  >
+                    <svg aria-hidden="true"><use href="#arrow" /></svg>
+                  </button>
+                  <button
+                    class="gallery-arrow"
+                    type="button"
+                    data-gallery-next
+                    aria-controls="sheet-gallery-track"
+                    aria-label="Ver próximas telas da planilha"
+                  >
+                    <svg aria-hidden="true"><use href="#arrow" /></svg>
+                  </button>
+                </div>
+              </div>
+              <ol
+                class="app-gallery-track"
+                id="sheet-gallery-track"
+                tabindex="0"
+                aria-label="Telas da planilha; deslize para os lados para ver mais"
+              >
+                <li class="screen-card">
+                  <figure>
+                    <a
+                      class="screen-card-image"
+                      href="/media/planilha-lancamentos.webp"
+                      data-media-slot="spreadsheet-lancamentos"
+                      data-gallery-open
+                      data-sheet-capture
+                      data-expanded-crop="0 0 2161 1130"
+                      data-source-size="2161 1130"
+                      target="_blank"
+                      rel="noopener"
+                    >
+                      <svg
+                        class="screen-crop"
+                        viewBox="0 0 2161 1130"
+                        width="2161"
+                        height="1130"
+                        role="img"
+                        aria-label="Lançamentos reais da demonstração, com data, descrição, categoria, pagamento, valor e status de receitas e despesas."
+                        focusable="false"
+                      >
+                        <defs>
+                          <clipPath id="sheet-crop-1">
+                            <rect x="0" y="0" width="2161" height="1130" />
+                          </clipPath>
+                        </defs>
+                        <image
+                          href="/media/planilha-lancamentos.webp"
+                          width="2161"
+                          height="1130"
+                          clip-path="url(#sheet-crop-1)"
+                        />
+                      </svg>
+                      <span class="screen-card-expand"
+                        >Ampliar tela <svg aria-hidden="true"><use href="#up-right" /></svg
+                      ></span>
+                    </a>
+                    <figcaption>
+                      <span class="screen-card-step">01 · LANÇAMENTOS</span>
+                      <h3>Registre o que entra e sai.</h3>
+                      <p>
+                        Organize receitas e despesas com categoria, forma de pagamento e status.
+                      </p>
+                    </figcaption>
+                  </figure>
+                </li>
+                <li class="screen-card">
+                  <figure>
+                    <a
+                      class="screen-card-image"
+                      href="/media/planilha-contas-fixas.webp"
+                      data-media-slot="spreadsheet-contas-fixas"
+                      data-gallery-open
+                      data-sheet-capture
+                      data-expanded-crop="0 0 2161 794"
+                      data-source-size="2161 794"
+                      target="_blank"
+                      rel="noopener"
+                    >
+                      <svg
+                        class="screen-crop"
+                        viewBox="0 0 2161 794"
+                        width="2161"
+                        height="794"
+                        role="img"
+                        aria-label="Contas fixas da demonstração, com totais do mês, aluguel, condomínio, energia, internet e status dos pagamentos."
+                        focusable="false"
+                      >
+                        <defs>
+                          <clipPath id="sheet-crop-2">
+                            <rect x="0" y="0" width="2161" height="794" />
+                          </clipPath>
+                        </defs>
+                        <image
+                          href="/media/planilha-contas-fixas.webp"
+                          width="2161"
+                          height="794"
+                          clip-path="url(#sheet-crop-2)"
+                        />
+                      </svg>
+                      <span class="screen-card-expand"
+                        >Ampliar tela <svg aria-hidden="true"><use href="#up-right" /></svg
+                      ></span>
+                    </a>
+                    <figcaption>
+                      <span class="screen-card-step">02 · CONTAS FIXAS</span>
+                      <h3>As contas recorrentes, juntas.</h3>
+                      <p>
+                        Mantenha seus compromissos recorrentes organizados para acompanhar o mês.
+                      </p>
+                    </figcaption>
+                  </figure>
+                </li>
+                <li class="screen-card">
+                  <figure>
+                    <a
+                      class="screen-card-image"
+                      href="/media/planilha-orcamento.webp"
+                      data-media-slot="spreadsheet-orcamento"
+                      data-gallery-open
+                      data-sheet-capture
+                      data-expanded-crop="0 0 2161 2525"
+                      data-source-size="2161 2525"
+                      target="_blank"
+                      rel="noopener"
+                    >
+                      <svg
+                        class="screen-crop"
+                        viewBox="0 0 2161 1350"
+                        width="2161"
+                        height="1350"
+                        role="img"
+                        aria-label="Orçamento por categoria na demonstração, com meta mensal, realizado, diferença, percentuais e barras de progresso."
+                        focusable="false"
+                      >
+                        <defs>
+                          <clipPath id="sheet-crop-3">
+                            <rect x="0" y="0" width="2161" height="1350" />
+                          </clipPath>
+                        </defs>
+                        <image
+                          href="/media/planilha-orcamento.webp"
+                          width="2161"
+                          height="2525"
+                          clip-path="url(#sheet-crop-3)"
+                        />
+                      </svg>
+                      <span class="screen-card-expand"
+                        >Ampliar tela <svg aria-hidden="true"><use href="#up-right" /></svg
+                      ></span>
+                    </a>
+                    <figcaption>
+                      <span class="screen-card-step">03 · ORÇAMENTO</span>
+                      <h3>Planeje seus limites.</h3>
+                      <p>Defina o orçamento por categoria e compare o previsto com os gastos.</p>
+                    </figcaption>
+                  </figure>
+                </li>
+                <li class="screen-card">
+                  <figure>
+                    <a
+                      class="screen-card-image"
+                      href="/media/planilha-metas.webp"
+                      data-media-slot="spreadsheet-metas"
+                      data-gallery-open
+                      data-sheet-capture
+                      data-expanded-crop="0 0 2161 885"
+                      data-source-size="2161 885"
+                      target="_blank"
+                      rel="noopener"
+                    >
+                      <svg
+                        class="screen-crop"
+                        viewBox="0 0 2161 885"
+                        width="2161"
+                        height="885"
+                        role="img"
+                        aria-label="Metas da demonstração, com reserva de emergência, viagem e notebook, valores guardados, aportes e previsão de conclusão."
+                        focusable="false"
+                      >
+                        <defs>
+                          <clipPath id="sheet-crop-4">
+                            <rect x="0" y="0" width="2161" height="885" />
+                          </clipPath>
+                        </defs>
+                        <image
+                          href="/media/planilha-metas.webp"
+                          width="2161"
+                          height="885"
+                          clip-path="url(#sheet-crop-4)"
+                        />
+                      </svg>
+                      <span class="screen-card-expand"
+                        >Ampliar tela <svg aria-hidden="true"><use href="#up-right" /></svg
+                      ></span>
+                    </a>
+                    <figcaption>
+                      <span class="screen-card-step">04 · METAS</span>
+                      <h3>Dê um destino aos seus planos.</h3>
+                      <p>Acompanhe o valor reservado e o que falta para alcançar cada objetivo.</p>
+                    </figcaption>
+                  </figure>
+                </li>
+                <li class="screen-card">
+                  <figure>
+                    <a
+                      class="screen-card-image"
+                      href="/media/planilha-resumo-anual.webp"
+                      data-media-slot="spreadsheet-resumo-anual"
+                      data-gallery-open
+                      data-sheet-capture
+                      data-expanded-crop="0 0 2161 1922"
+                      data-source-size="2161 1922"
+                      target="_blank"
+                      rel="noopener"
+                    >
+                      <svg
+                        class="screen-crop"
+                        viewBox="0 0 2161 1500"
+                        width="2161"
+                        height="1500"
+                        role="img"
+                        aria-label="Resumo anual da demonstração, com receitas, despesas e saldos previstos de 2026, incluindo contas fixas futuras."
+                        focusable="false"
+                      >
+                        <defs>
+                          <clipPath id="sheet-crop-5">
+                            <rect x="0" y="0" width="2161" height="1500" />
+                          </clipPath>
+                        </defs>
+                        <image
+                          href="/media/planilha-resumo-anual.webp"
+                          width="2161"
+                          height="1922"
+                          clip-path="url(#sheet-crop-5)"
+                        />
+                      </svg>
+                      <span class="screen-card-expand"
+                        >Ampliar tela <svg aria-hidden="true"><use href="#up-right" /></svg
+                      ></span>
+                    </a>
+                    <figcaption>
+                      <span class="screen-card-step">05 · RESUMO ANUAL</span>
+                      <h3>Olhe além deste mês.</h3>
+                      <p>Compare receitas, despesas e saldo ao longo do ano.</p>
+                    </figcaption>
+                  </figure>
+                </li>
+              </ol>
+              <p class="app-gallery-hint">
+                Deslize para explorar · toque para ampliar e ler os detalhes.
+              </p>
+            </div>
           </div>
           <!-- PLACEHOLDER: os três exemplos abaixo ficam em um template inerte; não são exibidos como prova social nem indexados como avaliações. -->
           <!-- SUBSTITUIR por depoimento real antes de publicar -->
@@ -982,14 +1587,36 @@
           </div>
           <div class="checkout-panel" id="checkout">
             <h3 class="checkout-panel-title">Do pagamento ao seu primeiro acesso</h3>
-            <p class="checkout-panel-intro">Tudo começa com uma única compra do Kit Vértice.</p>
+            <p class="checkout-panel-intro">
+              Veja como comprar, receber o e-mail de acesso e começar a usar seu kit.
+            </p>
             <ol class="checkout-steps">
               <li>
-                <strong>Compre pela Cakto.</strong> Informe seu e-mail Google e conclua o pagamento.
+                <strong>Preencha seus dados na Cakto.</strong>
+                Clique em Comprar o Kit Vértice e informe seu nome, e-mail, telefone e CPF no
+                checkout. Use o mesmo e-mail da conta Google que você usará no app.
               </li>
               <li>
-                <strong>Entre no aplicativo.</strong> Após a confirmação do pagamento, seu acesso é
-                liberado automaticamente. Use a mesma conta Google da compra.
+                <strong>Escolha a forma de pagamento.</strong>
+                Selecione uma das opções disponíveis na Cakto e siga as instruções para concluir a
+                compra. A liberação acontece após a confirmação do pagamento.
+              </li>
+              <li>
+                <strong>Crie sua conta na Cakto.</strong>
+                Ao final da compra, siga a orientação da plataforma para criar uma senha de acesso.
+                Se já tiver uma conta, faça login. Essa senha é da Cakto; no Vértice, você entra com
+                o Google.
+              </li>
+              <li>
+                <strong>Confira o e-mail de acesso.</strong>
+                Com o pagamento confirmado, você receberá um e-mail da Cakto com um botão para
+                acessar o conteúdo. Clique nele e siga as orientações. Confira também as pastas Spam
+                e Promoções.
+              </li>
+              <li>
+                <strong>Entre no aplicativo Vértice.</strong>
+                Use a mesma conta Google informada na compra. Seu acesso é liberado automaticamente
+                após a confirmação do pagamento; não é preciso usar a senha da Cakto no app.
               </li>
               <li>
                 <strong>Acesse suas planilhas.</strong> No app, abra Vértice Financeiro para copiar
@@ -1003,7 +1630,7 @@
             >
               Comprar o Kit Vértice <svg aria-hidden="true"><use href="#arrow" /></svg>
             </a>
-            <p class="field-hint">O pagamento é feito no checkout da Cakto.</p>
+            <p class="field-hint">Os dados de compra e o pagamento são informados na Cakto.</p>
             <p class="direct-whatsapp">
               Precisa de ajuda?
               <a
@@ -1052,10 +1679,12 @@
                 Como vou receber o kit e acessar o app?<span aria-hidden="true">+</span>
               </summary>
               <div>
-                Após a confirmação do pagamento pela Cakto, seu acesso ao app é liberado
-                automaticamente para o e-mail informado na compra. Entre com essa mesma conta Google
-                e abra Vértice Financeiro para copiar suas planilhas, baixar os arquivos Excel e
-                consultar as instruções de uso.
+                Conclua a compra na Cakto e siga a orientação para criar a senha da sua conta, caso
+                ainda não tenha cadastro. Com o pagamento confirmado, a Cakto envia um e-mail com um
+                botão para acessar o conteúdo. No Vértice, entre com a mesma conta Google informada
+                na compra; a senha da Cakto é usada somente na plataforma de compra. Abra Vértice
+                Financeiro para copiar as planilhas, baixar os arquivos Excel e consultar o
+                tutorial. Se não encontrar o e-mail, confira Spam e Promoções.
               </div>
             </details>
             <details>

@@ -8,6 +8,8 @@ for (const file of [
   'conversion.css',
   'interactive-demo.css',
   'interactive-demo.js',
+  'app-gallery.css',
+  'app-gallery.js',
   'script.js',
   'site-config.js',
   'icon.svg',

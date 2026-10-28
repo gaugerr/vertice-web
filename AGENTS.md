@@ -173,17 +173,35 @@ produção nem registrar corpos de webhook, que contêm o segredo da integraçã
 - Página de vendas independente em `marketing/`: `index.html`, `styles.css` e
   `conversion.css`, `script.js` e `site-config.js`. Prévias interativas independentes
   em `interactive-demo.js`/`.css`: estado em memória, dinheiro em centavos inteiros,
-  sem persistência ou sincronização; botão manual copia o total só uma vez. Projeto Pages `vertice-kit`, raiz
+  sem persistência ou sincronização, com exemplos de compras e finanças independentes.
+  A abertura destaca o app de lista de compras inteligente e offline e a planilha
+  financeira completa, com dashboard e gráficos. Uso offline depende de preparo e
+  validação do acesso. Projeto Pages `vertice-kit`, raiz
   `/marketing`, build `node build.mjs` e saída `dist`. CTAs de compra levam ao
   checkout Cakto `https://pay.cakto.com.br/jjnk3vv_1241258`; o WhatsApp é suporte.
   Configuração de checkout, telefone e capacidade total: `site-config.js`.
   Manter o fallback dos links `data-checkout-link` no HTML. Sem formulário de
   contatos. Não mostrar capacidade total como vagas restantes. R$ 59 é referência após o lançamento;
   R$ 19,90 é a condição das 100 primeiras compras. Garantia: 7 dias após a entrega.
-  Mídias em `media/` são placeholders; depoimentos de exemplo ficam em template
+  Mídias em `media/` incluem capturas reais do app e da planilha; depoimentos de exemplo ficam em template
   inerte até haver relatos reais. Checklist: `marketing/MIDIAS_E_CONTEUDO.md`.
   `social.png` é o cartão de compartilhamento 1200×630. Não publicar os arquivos
   pagos do kit. App/planilha permanecem separados, com registro manual do total.
+  A galeria real do app usa `marketing/app-gallery.js`/`.css`: rolagem horizontal
+  nativa, três cartões no desktop e um cartão com prévia do próximo no celular.
+  Links de imagem funcionam sem JavaScript; ampliação usa diálogo nativo com foco,
+  fechamento por Escape e navegação manual, sem autoplay. Originais JPG em `media/`
+  são preservados; enquadramentos SVG com clipPath destacam cada recurso e removem
+  a barra do aparelho, inclusive no diálogo ampliado. Miniaturas e ampliação têm
+  limites explícitos no HTML, sem reconstruir textos ou valores das capturas.
+  O segundo carrossel, em `#planilha-em-detalhes`, usa os mesmos controles, com
+  contagem independente. Seus cinco slots `spreadsheet-*` mostram capturas reais
+  de Lançamentos, Contas Fixas, Orçamento, Metas e Resumo Anual. O dashboard usa
+  `spreadsheet-photo`. As capturas vêm de regiões da exportação PDF nativa Google
+  do modelo de demonstração, sem reconstruir textos ou valores. Não publicar o PDF
+  completo nem o arquivo pago. Um diálogo compartilhado amplia a galeria selecionada
+  ou o dashboard; planilhas mantêm largura legível e rolagem interna em duas direções.
+  Preservar as duas demonstrações interativas.
   A página informa liberação automática após o pagamento, com a mesma conta Google
   da compra; planilhas e tutorial ficam em Vértice Financeiro. Não prometer prazo
   instantâneo de confirmação para todos os meios de pagamento.
