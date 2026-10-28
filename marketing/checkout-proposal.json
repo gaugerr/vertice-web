@@ -1,0 +1,585 @@
+{
+  "name": "Checkout Principal",
+  "config": {
+    "desktop": {
+      "settings": {
+        "box": {
+          "default": {
+            "text": {
+              "color": {
+                "primary": "#f7f5ff",
+                "secondary": "#c3bdce"
+              }
+            },
+            "header": {
+              "text": {
+                "color": {
+                  "primary": "#f7f5ff",
+                  "secondary": "#c3bdce"
+                }
+              },
+              "background": {
+                "color": "#1c1924"
+              }
+            },
+            "background": {
+              "color": "#1c1924"
+            }
+          },
+          "selected": {
+            "text": {
+              "color": {
+                "primary": "#f7f5ff",
+                "secondary": "#c3bdce"
+              }
+            },
+            "header": {
+              "text": {
+                "color": {
+                  "primary": "#f7f5ff",
+                  "secondary": "#c3bdce"
+                }
+              },
+              "background": {
+                "color": "#30263f"
+              }
+            },
+            "background": {
+              "color": "#30263f"
+            }
+          },
+          "unselected": {
+            "text": {
+              "color": {
+                "primary": "#f7f5ff",
+                "secondary": "#c3bdce"
+              }
+            },
+            "header": {
+              "text": {
+                "color": {
+                  "primary": "#f7f5ff",
+                  "secondary": "#c3bdce"
+                }
+              },
+              "background": {
+                "color": "#141219"
+              }
+            },
+            "background": {
+              "color": "#141219"
+            }
+          }
+        },
+        "font": {
+          "family": "Arial"
+        },
+        "form": {
+          "background": {
+            "color": "#1c1924"
+          }
+        },
+        "icon": {
+          "color": "#b59aff"
+        },
+        "text": {
+          "color": {
+            "active": "#a8e6c0",
+            "primary": "#f7f5ff",
+            "secondary": "#c3bdce"
+          }
+        },
+        "payButton": {
+          "text": {
+            "color": "#18121f"
+          },
+          "color": "#b59aff"
+        },
+        "background": {
+          "color": "#101015",
+          "cover": false,
+          "fixed": false,
+          "image": null,
+          "repeat": false
+        },
+        "paymentOptions": {
+          "button": {
+            "selected": {
+              "icon": {
+                "color": "#f7f5ff"
+              },
+              "text": {
+                "color": "#f7f5ff"
+              },
+              "background": {
+                "color": "#30263f"
+              }
+            },
+            "unselected": {
+              "icon": {
+                "color": "#f7f5ff"
+              },
+              "text": {
+                "color": "#f7f5ff"
+              },
+              "background": {
+                "color": "#141219"
+              }
+            }
+          }
+        }
+      },
+      "extra": {
+        "chat": {
+          "enabled": true,
+          "provider": "whatsapp",
+          "accountId": "5551980614158"
+        },
+        "exitPopup": {
+          "enabled": false
+        },
+        "notification": {
+          "enabled": false
+        }
+      },
+      "rows": [
+        {
+          "id": "desktop-brand-row",
+          "type": "row",
+          "layout": [12],
+          "columns": [
+            {
+              "id": "desktop-brand-col",
+              "type": "column",
+              "components": [
+                {
+                  "id": "desktop-logo",
+                  "type": "image",
+                  "attributes": {
+                    "image": "https://raw.githubusercontent.com/gaugerr/vertice-web/main/artes/vertice/logo-fundo-escuro.png",
+                    "alignment": "center",
+                    "width": 340
+                  }
+                }
+              ]
+            }
+          ]
+        },
+        {
+          "id": "desktop-title-row",
+          "type": "row",
+          "layout": [12],
+          "columns": [
+            {
+              "id": "desktop-title-col",
+              "type": "column",
+              "components": [
+                {
+                  "id": "desktop-title",
+                  "type": "header",
+                  "attributes": {
+                    "backgroundType": "color",
+                    "backgroundColor": "#101015",
+                    "titleTextColor": "#f7f5ff",
+                    "titleText": "Sua próxima compra começa com mais equilíbrio.",
+                    "titleFontSize": 30,
+                    "showSubtitle": true,
+                    "subtitleText": "Kit Vértice — App de Compras + Planilha Financeira",
+                    "subtitleTextColor": "#c3bdce",
+                    "subtitleFontSize": 16
+                  }
+                }
+              ]
+            }
+          ]
+        },
+        {
+          "id": "desktop-body-row",
+          "type": "row",
+          "layout": [8, 4],
+          "columns": [
+            {
+              "id": "desktop-form-col",
+              "type": "column",
+              "components": [
+                {
+                  "id": "desktop-email-tip",
+                  "type": "text",
+                  "attributes": {
+                    "text": "Use o e-mail da sua conta Google na compra. Você usará essa mesma conta para entrar no aplicativo.",
+                    "color": "#daf2e2",
+                    "backgroundColor": "#202c28",
+                    "borderColor": "#a8e6c0",
+                    "borderWidth": 1,
+                    "borderRadius": 10
+                  }
+                },
+                {
+                  "id": "desktop-payment",
+                  "type": "checkout",
+                  "attributes": {}
+                }
+              ]
+            },
+            {
+              "id": "desktop-benefits-col",
+              "type": "column",
+              "components": [
+                {
+                  "id": "desktop-benefits",
+                  "type": "list",
+                  "attributes": {
+                    "title": "Uma compra. Duas ferramentas.",
+                    "showTitle": true,
+                    "backgroundColor": "#1c1924",
+                    "textColor": "#f7f5ff",
+                    "alignment": "left",
+                    "fontSize": 15,
+                    "style": "check",
+                    "iconColor": "#a8e6c0",
+                    "items": [
+                      {
+                        "id": "desktop-benefit-app",
+                        "text": "App de lista de compras inteligente: orçamento, categorias, comparador e histórico de preços."
+                      },
+                      {
+                        "id": "desktop-benefit-offline",
+                        "text": "Use no mercado, mesmo sem internet, após preparar e validar o acesso online."
+                      },
+                      {
+                        "id": "desktop-benefit-sheet",
+                        "text": "Planilha financeira completa com dashboard, gráficos, contas fixas, orçamento e metas."
+                      },
+                      {
+                        "id": "desktop-benefit-formats",
+                        "text": "Modelos para Google Planilhas e Excel, versões limpa e de demonstração e tutorial no app."
+                      },
+                      {
+                        "id": "desktop-benefit-payment",
+                        "text": "Pagamento único pelo kit. Sem mensalidade."
+                      }
+                    ]
+                  }
+                },
+                {
+                  "id": "desktop-delivery",
+                  "type": "text",
+                  "attributes": {
+                    "text": "Depois da confirmação do pagamento\nA Cakto envia o e-mail com o botão de acesso. Entre no app com a mesma conta Google da compra e encontre as planilhas em Vértice Financeiro.",
+                    "color": "#c3bdce",
+                    "backgroundColor": "#1c1924",
+                    "borderRadius": 12
+                  }
+                },
+                {
+                  "id": "desktop-guarantee",
+                  "type": "text",
+                  "attributes": {
+                    "text": "7 dias de garantia após a entrega\nSe o kit não for para você, solicite o reembolso pela Cakto dentro desse prazo.",
+                    "color": "#a8e6c0",
+                    "backgroundColor": "#202c28",
+                    "borderRadius": 12
+                  }
+                }
+              ]
+            }
+          ]
+        }
+      ]
+    },
+    "mobile": {
+      "settings": {
+        "box": {
+          "default": {
+            "text": {
+              "color": {
+                "primary": "#f7f5ff",
+                "secondary": "#c3bdce"
+              }
+            },
+            "header": {
+              "text": {
+                "color": {
+                  "primary": "#f7f5ff",
+                  "secondary": "#c3bdce"
+                }
+              },
+              "background": {
+                "color": "#1c1924"
+              }
+            },
+            "background": {
+              "color": "#1c1924"
+            }
+          },
+          "selected": {
+            "text": {
+              "color": {
+                "primary": "#f7f5ff",
+                "secondary": "#c3bdce"
+              }
+            },
+            "header": {
+              "text": {
+                "color": {
+                  "primary": "#f7f5ff",
+                  "secondary": "#c3bdce"
+                }
+              },
+              "background": {
+                "color": "#30263f"
+              }
+            },
+            "background": {
+              "color": "#30263f"
+            }
+          },
+          "unselected": {
+            "text": {
+              "color": {
+                "primary": "#f7f5ff",
+                "secondary": "#c3bdce"
+              }
+            },
+            "header": {
+              "text": {
+                "color": {
+                  "primary": "#f7f5ff",
+                  "secondary": "#c3bdce"
+                }
+              },
+              "background": {
+                "color": "#141219"
+              }
+            },
+            "background": {
+              "color": "#141219"
+            }
+          }
+        },
+        "font": {
+          "family": "Arial"
+        },
+        "form": {
+          "background": {
+            "color": "#1c1924"
+          }
+        },
+        "icon": {
+          "color": "#b59aff"
+        },
+        "text": {
+          "color": {
+            "active": "#a8e6c0",
+            "primary": "#f7f5ff",
+            "secondary": "#c3bdce"
+          }
+        },
+        "payButton": {
+          "text": {
+            "color": "#18121f"
+          },
+          "color": "#b59aff"
+        },
+        "background": {
+          "color": "#101015",
+          "cover": false,
+          "fixed": false,
+          "image": null,
+          "repeat": false
+        },
+        "paymentOptions": {
+          "button": {
+            "selected": {
+              "icon": {
+                "color": "#f7f5ff"
+              },
+              "text": {
+                "color": "#f7f5ff"
+              },
+              "background": {
+                "color": "#30263f"
+              }
+            },
+            "unselected": {
+              "icon": {
+                "color": "#f7f5ff"
+              },
+              "text": {
+                "color": "#f7f5ff"
+              },
+              "background": {
+                "color": "#141219"
+              }
+            }
+          }
+        }
+      },
+      "extra": {
+        "chat": {
+          "enabled": true,
+          "provider": "whatsapp",
+          "accountId": "5551980614158"
+        },
+        "exitPopup": {
+          "enabled": false
+        },
+        "notification": {
+          "enabled": false
+        }
+      },
+      "rows": [
+        {
+          "id": "mobile-brand-row",
+          "type": "row",
+          "layout": [12],
+          "columns": [
+            {
+              "id": "mobile-brand-col",
+              "type": "column",
+              "components": [
+                {
+                  "id": "mobile-logo",
+                  "type": "image",
+                  "attributes": {
+                    "image": "https://raw.githubusercontent.com/gaugerr/vertice-web/main/artes/vertice/logo-fundo-escuro.png",
+                    "alignment": "center",
+                    "width": 340
+                  }
+                }
+              ]
+            }
+          ]
+        },
+        {
+          "id": "mobile-title-row",
+          "type": "row",
+          "layout": [12],
+          "columns": [
+            {
+              "id": "mobile-title-col",
+              "type": "column",
+              "components": [
+                {
+                  "id": "mobile-title",
+                  "type": "header",
+                  "attributes": {
+                    "backgroundType": "color",
+                    "backgroundColor": "#101015",
+                    "titleTextColor": "#f7f5ff",
+                    "titleText": "Sua próxima compra começa com mais equilíbrio.",
+                    "titleFontSize": 30,
+                    "showSubtitle": true,
+                    "subtitleText": "Kit Vértice — App de Compras + Planilha Financeira",
+                    "subtitleTextColor": "#c3bdce",
+                    "subtitleFontSize": 16
+                  }
+                }
+              ]
+            }
+          ]
+        },
+        {
+          "id": "mobile-form-row",
+          "type": "row",
+          "layout": [12],
+          "columns": [
+            {
+              "id": "mobile-form-col",
+              "type": "column",
+              "components": [
+                {
+                  "id": "mobile-email-tip",
+                  "type": "text",
+                  "attributes": {
+                    "text": "Use o e-mail da sua conta Google na compra. Você usará essa mesma conta para entrar no aplicativo.",
+                    "color": "#daf2e2",
+                    "backgroundColor": "#202c28",
+                    "borderColor": "#a8e6c0",
+                    "borderWidth": 1,
+                    "borderRadius": 10
+                  }
+                },
+                {
+                  "id": "mobile-payment",
+                  "type": "checkout",
+                  "attributes": {}
+                }
+              ]
+            }
+          ]
+        },
+        {
+          "id": "mobile-benefits-row",
+          "type": "row",
+          "layout": [12],
+          "columns": [
+            {
+              "id": "mobile-benefits-col",
+              "type": "column",
+              "components": [
+                {
+                  "id": "mobile-benefits",
+                  "type": "list",
+                  "attributes": {
+                    "title": "Uma compra. Duas ferramentas.",
+                    "showTitle": true,
+                    "backgroundColor": "#1c1924",
+                    "textColor": "#f7f5ff",
+                    "alignment": "left",
+                    "fontSize": 15,
+                    "style": "check",
+                    "iconColor": "#a8e6c0",
+                    "items": [
+                      {
+                        "id": "mobile-benefit-app",
+                        "text": "App de lista de compras inteligente: orçamento, categorias, comparador e histórico de preços."
+                      },
+                      {
+                        "id": "mobile-benefit-offline",
+                        "text": "Use no mercado, mesmo sem internet, após preparar e validar o acesso online."
+                      },
+                      {
+                        "id": "mobile-benefit-sheet",
+                        "text": "Planilha financeira completa com dashboard, gráficos, contas fixas, orçamento e metas."
+                      },
+                      {
+                        "id": "mobile-benefit-formats",
+                        "text": "Modelos para Google Planilhas e Excel, versões limpa e de demonstração e tutorial no app."
+                      },
+                      {
+                        "id": "mobile-benefit-payment",
+                        "text": "Pagamento único pelo kit. Sem mensalidade."
+                      }
+                    ]
+                  }
+                },
+                {
+                  "id": "mobile-delivery",
+                  "type": "text",
+                  "attributes": {
+                    "text": "Depois da confirmação do pagamento\nA Cakto envia o e-mail com o botão de acesso. Entre no app com a mesma conta Google da compra e encontre as planilhas em Vértice Financeiro.",
+                    "color": "#c3bdce",
+                    "backgroundColor": "#1c1924",
+                    "borderRadius": 12
+                  }
+                },
+                {
+                  "id": "mobile-guarantee",
+                  "type": "text",
+                  "attributes": {
+                    "text": "7 dias de garantia após a entrega\nSe o kit não for para você, solicite o reembolso pela Cakto dentro desse prazo.",
+                    "color": "#a8e6c0",
+                    "backgroundColor": "#202c28",
+                    "borderRadius": 12
+                  }
+                }
+              ]
+            }
+          ]
+        }
+      ]
+    }
+  },
+  "default": true
+}
