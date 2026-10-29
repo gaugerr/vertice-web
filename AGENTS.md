@@ -1,5 +1,53 @@
 # Vértice — guia do projeto
 
+## Comece aqui: contexto e conexões
+
+Guia para retomar o projeto sem o histórico do chat. Estado operacional conferido
+em **29/10/2026 UTC**; confirmar novamente antes de alterar produção. Instruções
+detalhadas e consultas seguras: [Operações](docs/OPERACOES.md).
+
+1. **GitHub e workspace:** repositório `gaugerr/vertice-web`, produção na `main`.
+   Consultar a referência remota atual e executar `git status --short` antes de
+   editar. Há cópias antigas e alterações locais de trabalhos anteriores; não
+   resetar, sobrescrever ou publicar essas cópias inteiras. Usar branch baseada na
+   `main` atual e revisar o diff. SHA/deploy citado em um chat não é fonte atual.
+2. **Descobrir ferramentas:** procurar as ferramentas conectadas de GitHub,
+   Cloudflare e Supabase disponíveis na sessão. Seus nomes e IDs de conexão podem
+   mudar. Em ambiente gerenciado, consultar `cloud_environment.environment_status`
+   e a política de rede antes de usar CLI; não imprimir variáveis/credenciais nem
+   contornar o proxy. Credencial ausente no shell não significa plugin desconectado.
+3. **Cloudflare:** conta `ab0452392516e43ea097317ea48c57d5`. Com o plugin, descobrir
+   o endpoint pela busca e fazer GET de `/accounts/{account_id}/pages/projects`.
+   Conferir os projetos, domínios, último deploy de produção e commit:
+   `use-vertice` é o **app** (`app.usevertice.app.br`); `vertice-kit` é a
+   **página de vendas** (`usevertice.app.br`). Ambos acompanham `main`, com builds
+   diferentes. Não confundir preview com produção nem disparar deploy para testar conexão.
+4. **Supabase:** listar projetos na conexão apropriada e confirmar nome `vertice`,
+   ref **`wqutcsjdozcukwxvkbtc`**, região `us-east-1`. Não usar o projeto Docery.
+   A conexão que funcionou nesta revisão chamava-se `Supabase`, ID
+   `link_6acfe773755081919a0d054cf101d061`; redescobrir se não existir na sessão.
+   Verificar com SQL de leitura (`select now();`) e as consultas de produto/cron
+   em [Operações](docs/OPERACOES.md#supabase-banco-e-automação).
+5. **Cakto sem MCP:** o acesso já funciona pela API oficial, usando credenciais
+   somente no servidor, no Vault do Supabase (`CAKTO_CLIENT_ID` e
+   `CAKTO_CLIENT_SECRET`). Testar a função privada existente, sem recriá-la:
+
+   ```sql
+   select cakto_private.read_api(
+     'products/988379d3-cbaa-465f-930b-14aa7d48422e/checkouts/1241258/'
+   );
+   ```
+
+   Esperado: `ok=true`, `status=200`. O resultado é configuração do checkout,
+   nunca token/segredo. A função é privada e só lê produtos/checkouts; não aceita
+   ofertas ou escrita. Fluxo de autenticação, endpoints e backups em
+   [API Cakto](docs/OPERACOES.md#api-cakto-sem-mcp).
+
+6. **Se falhar:** distinguir ferramenta ausente, falta de permissão, projeto
+   incorreto e indisponibilidade de rede. Informar a falha concreta; não pedir
+   segredos pelo chat, trocar OAuth, recriar infraestrutura ou desativar proteção
+   para contornar o problema. Reutilizar a configuração existente.
+
 ## Visão geral
 
 PWA de listas de compras, pensado para uso rápido no mercado e funcionamento
@@ -14,7 +62,8 @@ ativo para preservar o acesso aos dados locais de quem já o utiliza.
 - **Acesso:** Google via Supabase, licença vitalícia liberada pelo produtor ou pela Cakto e
   autorização offline assinada de até sete dias após validação online.
 - **Ainda não existem:** sincronização de compras na nuvem, leitura de etiquetas/códigos de barras ou integração automática com planilha.
-  A captura e o processamento Cakto estão preparados, desativados por padrão.
+  A automação Cakto está ativa em produção; modelos de configuração e migrações
+  novas começam desativados por segurança. Não confundir esses dois estados.
 
 ## Arquitetura e entrada
 
@@ -72,6 +121,11 @@ o cartão por conta/navegador, sem confirmar cópia/download nem alterar compras
 Ver `docs/FINANCEIRO.md`. Não colocar arquivos pagos no GitHub nem prometer
 sincronização com as planilhas.
 
+Links dos quatro arquivos: `src/features/finance/config.ts`; tutorial e dicas:
+`src/features/finance/guide.ts`. Google usa `/copy` em nova aba; no Android, o
+Planilhas pode abrir o modelo e exigir “Fazer uma cópia” pelo menu. Não prometer
+forçar o navegador. A rota protegida não impede o compartilhamento dos links.
+
 Arquivos citados apenas pelo nome na mesma linha pertencem ao último diretório
 explícito daquela linha. Testes de regras/componentes ficam próximos ao código em
 `*.test.ts`/`*.test.tsx`; fluxos de navegador ficam em `e2e/`.
@@ -103,6 +157,11 @@ explícito daquela linha. Testes de regras/componentes ficam próximos ao códig
   a partir de 80%, sem bloquear a compra.
 
 ## Persistência, conta e segurança
+
+Há dois armazenamentos distintos: **compras no IndexedDB do aparelho** e
+**identidade/licenças/eventos de pagamento no Supabase**. A planilha é um terceiro
+arquivo independente, copiado/baixado pelo comprador. Não mover compras para o
+Supabase nem integrar a planilha como efeito colateral de alterações de interface.
 
 - Dexie está na **versão 5**: `lists`, `categories`, `items` e recibos `migrations`.
   Migrações futuras incrementam a versão e preservam registros; não apagar/recriar
@@ -143,11 +202,41 @@ Somente URL/chave pública e chave pública de assinatura entram no frontend.
 `service_role`, segredo Google e chave privada ficam fora do Git/cliente, no servidor.
 Não gerar nem rotacionar chaves ao fazer alterações visuais ou de documentação.
 
+### Banco do servidor e fluxo de acesso
+
+| Tabela                                 | Responsabilidade                                                                                                                                                                                                   |
+| -------------------------------------- | ------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------ |
+| `public.licenses`                      | Licença por e-mail normalizado; UID Google vinculado após identidade verificada, status, versão, referência e origem da concessão/override manual. RLS permite ao cliente ler somente a própria licença vinculada. |
+| `access_private.admins`                | UIDs autorizados a administrar; nunca inferir pelo primeiro login ou e-mail fixo no cliente.                                                                                                                       |
+| `access_private.audit`                 | Histórico das ações humanas e da vinculação de identidade.                                                                                                                                                         |
+| `access_private.cakto_events`          | Observações normalizadas/deduplicadas de webhooks, estado de processamento e tentativas.                                                                                                                           |
+| `access_private.cakto_orders`          | Identidade original e decisão agregada de cada pedido recebido.                                                                                                                                                    |
+| `access_private.cakto_products`        | Produtos conhecidos e flag de processamento por produto.                                                                                                                                                           |
+| `access_private.cakto_license_changes` | Auditoria das transições automáticas de licença.                                                                                                                                                                   |
+| `cakto_private.checkout_backups`       | Snapshots operacionais do checkout para revisão/restauração; não são compras do usuário.                                                                                                                           |
+
+Os schemas privados não são APIs do navegador. Funções de licença/administração e
+pagamento usam direitos do invocador e permissões restritas do servidor. Detalhes
+de relações, exclusões e consultas: [Operações](docs/OPERACOES.md).
+
+Fluxo: Google OAuth → `license-check` → RPC `access_license_check` → licença ativa
+→ autorização ES256 com UID, versão e audiência da origem, válida por até sete
+dias. O cliente valida a assinatura/chave pública e preserva o isolamento por conta.
+Online, verifica ao iniciar, voltar ao foco/visibilidade, recuperar conexão e a
+cada 15 minutos em primeiro plano; chamadas comuns têm intervalo mínimo de um
+minuto. Os timers locais não equivalem a uma requisição por segundo.
+Os **cinco minutos** abaixo pertencem à fila Cakto, não à renovação do app.
+
 Cakto: `supabase/functions/cakto-webhook/` valida assinatura e captura observações
 em `access_private.cakto_events`. O processador exclusivo do servidor agrega o
 histórico do pedido, concede/revoga licenças automáticas e preserva as manuais.
-Tudo começa desativado; não habilitar produtos, secrets ou cron durante tarefas
-de código. Configuração, limites e próximos passos em `docs/access/CAKTO.md`.
+Produção conferida em 29/10/2026: produto real habilitado e recuperação ativa a cada
+cinco minutos (`vertice-cakto-process-pending`); limpeza diária restrita ao histórico
+de execução desses jobs, após sete dias. A tentativa imediata depende da flag do
+webhook. Não reexecutar `supabase/cakto-retry-job.sql` como diagnóstico: ele
+**pausa jobs existentes**. Não habilitar, pausar ou recriar configurações durante
+tarefas de código/documentação. Estado e consultas em `docs/OPERACOES.md`;
+contrato, regras e testes em `docs/access/CAKTO.md`.
 Testes: `npm run typecheck:cakto`, `npm run test:cakto` e
 `supabase/tests/cakto_*.sql` no Supabase isolado. Nunca apontar fixtures para
 produção nem registrar corpos de webhook, que contêm o segredo da integração.
@@ -170,6 +259,12 @@ produção nem registrar corpos de webhook, que contêm o segredo da integraçã
 - Cloudflare Pages usa `tools/build-cloudflare.mjs`, sempre com acesso protegido,
   saída `dist` e Node 24. Rotas/cache: `public/_redirects` e `public/_headers`.
   Configuração, autorização de origem e migração por backup: `docs/CLOUDFLARE.md`.
+- Checkout Cakto: visual claro nativo com roxo discreto no botão e seleção,
+  tanto no celular quanto no computador. Não restaurar o tema escuro antigo ou
+  recriar blocos que trocam a cor do texto durante o carregamento. Oferta `jjnk3vv`
+  a R$ 18,91; total observado com taxa do comprador de R$ 0,99: R$ 19,90 à vista.
+  A API do checkout é separada do site e da automação. Procedimento e limites em
+  `docs/OPERACOES.md`; alterações futuras exigem backup e verificação do total.
 - Página de vendas independente em `marketing/`: `index.html`, `styles.css` e
   `conversion.css`, `script.js` e `site-config.js`. Prévias interativas independentes
   em `interactive-demo.js`/`.css`: estado em memória, dinheiro em centavos inteiros,
@@ -250,6 +345,27 @@ do escopo solicitado. Manter este mapa atualizado quando mover ou criar funçõe
 incluindo paisagem e nomes longos. O viewport limita a escala e `touch-action`
 preserva a rolagem sem pinça; preferências de acessibilidade do navegador podem
 sobrepor o bloqueio. A emulação não substitui conferir gestos em aparelho físico.
+
+## Mídias e pendências para continuidade
+
+- Logos e capa oficiais em `artes/vertice/`, com mapa em seu `README.md`.
+  Capturas reais usadas no site em `marketing/media/`. O enquadramento de várias
+  capturas remove a barra do celular pelo SVG da página; o JPG original pode
+  continuar contendo notificações. Não reconstruir valores ou telas nas capturas.
+- Instagram atual: **@usevertice.app**. Domínios continuam terminando em
+  `usevertice.app.br`; não trocar os domínios pelo nome do perfil. Suporte no
+  WhatsApp: `5551980614158` (formato internacional).
+- A página de vendas foi considerada finalizada pelo proprietário. Preservar as
+  demonstrações e galerias; fazer novas mudanças somente no escopo solicitado.
+- **Planejado, não implementado:** cards em “Por categoria” devem mostrar até
+  cinco itens, pendentes primeiro e comprados completando as vagas; preservar a
+  ordem atual dentro de cada grupo. Exibir “+ N itens…” abaixo, somente se houver
+  excedentes (singular para um). Totais e “Concluída” continuam usando o grupo
+  completo; tocar abre todos os itens. Entrada: `CategoriesPage.tsx`, no diretório
+  de categorias acima. Não tratar o plano como funcionalidade já entregue.
+- Conciliação automática de notificações que nunca chegaram, alertas e painel de
+  revisão de pagamentos ainda não foram implementados. A fila atual recupera
+  eventos já recebidos, sem consultar pedidos na API Cakto.
 
 Detalhes: `README.md`, `docs/access/SETUP.md`, `docs/access/GOOGLE.md`,
 `docs/access/VALIDATION.md`, `docs/VALIDATION.md`, `docs/FUTURE-SYNC.md` e

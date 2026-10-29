@@ -1,10 +1,20 @@
-# Integração Cakto — captura e processamento preparados
+# Integração Cakto — captura e processamento de licenças
 
-A branch prepara recebimento autenticado e processamento de notificações para
-licenças. **Tudo começa desativado.** A configuração real da Cakto, os secrets,
-a publicação das funções e a ativação dos produtos/jobs não são executados pelo
-merge. Não envia e-mails. Nenhuma mudança é necessária no Google OAuth, nos
-domínios autorizados ou no login atual.
+**Produção ativa; última conferência em 29/10/2026 UTC.** No projeto Supabase
+`vertice` (`wqutcsjdozcukwxvkbtc`), o produto real está com
+`processing_enabled=true`, o webhook está publicado e os jobs de recuperação
+(cinco minutos) e limpeza diária estão ativos. O proprietário confirmou a ativação
+da captura e do processamento imediato e testou compra, login e reembolso.
+Os valores dos secrets Edge não foram lidos nesta conferência; consultar o estado
+real antes de operações. Conexões, SQL de leitura e API de checkout/oferta estão
+em [Operações](../OPERACOES.md).
+
+Os modelos de ambiente, migrações e script de instalação continuam começando
+**desativados** para novos ambientes. Isso não descreve o estado atual da produção.
+Merge não publica Edge Functions nem ativa flags/jobs por si só. Não executar o
+rollout novamente como teste: o script de jobs pausa inclusive jobs existentes.
+A integração não envia e-mails; a entrega por e-mail é configurada na Cakto.
+Não alterar Google OAuth, domínios ou login para administrar o webhook.
 
 ## Produto identificado para a configuração
 
@@ -16,9 +26,12 @@ domínios autorizados ou no login atual.
 | Oferta       | `jjnk3vv`                                          | Checkout público            |
 | Checkout     | <https://pay.cakto.com.br/jjnk3vv_1241258>         | Informado pelo proprietário |
 
-O checkout consultado exibia pagamento único de R$ 19,90. Esse preço é uma
-referência comercial, não uma condição fixa de autorização: cupons e ofertas
-futuras não devem ser rejeitados apenas por mudar o valor pago.
+Oferta configurada em 28/10/2026 a R$ 18,91; checkout verificado com R$ 0,99 de
+taxa ao comprador, total à vista de R$ 19,90. Conferir novamente antes de mudar
+preço. Esse valor é referência comercial, não condição fixa de autorização:
+cupons e ofertas futuras não devem ser rejeitados apenas por mudar o valor pago.
+O visual atual é o formulário claro nativo com detalhes roxos; não restaurar
+temas anteriores ou o preço de teste ao operar backups.
 
 `supabase/cakto-capture.env.example` prepara o ID completo com captura desativada
 e segredo vazio. É um modelo de configuração de servidor; não é carregado
@@ -27,7 +40,7 @@ explícita do ambiente. Conferir o par `data.product.id` / `data.product.short_i
 em uma entrega real assinada antes de habilitar a integração. O código da oferta
 e o sufixo do checkout não substituem o ID completo do produto.
 
-## O que está preparado
+## Contrato implementado
 
 - `supabase/functions/cakto-webhook/`: adaptador Edge e handler independente,
   validando HMAC-SHA256 sobre o corpo original e timestamp com tolerância de cinco
@@ -48,7 +61,10 @@ e o sufixo do checkout não substituem o ID completo do produto.
 - O armazenamento retém apenas pedido/produto/oferta, e-mail, evento, status e
   datas. Não guarda o corpo original, segredo, assinatura, CPF, telefone ou cartão.
 
-## Configuração futura (não executar para ativar vendas ainda)
+## Configuração do servidor (referência para novos ambientes)
+
+Esta seção descreve instalação/rollout, não uma pendência de ativação do produto
+real. Na produção existente, verificar e preservar a configuração antes de agir.
 
 As variáveis são **somente do servidor**, sem prefixo `VITE_`. Além da captura,
 `CAKTO_PROCESSING_ENABLED=true` solicita processamento logo após a gravação. A
@@ -61,12 +77,16 @@ As variáveis da captura são:
 | Variável                                     | Uso                                                                                               |
 | -------------------------------------------- | ------------------------------------------------------------------------------------------------- |
 | `CAKTO_CAPTURE_ENABLED`                      | Só o valor exato `true` permite capturar; ausente fica desativado.                                |
+| `CAKTO_PROCESSING_ENABLED`                   | Só o valor exato `true` solicita tentativa imediata após captura; não controla o cron SQL.        |
 | `CAKTO_WEBHOOK_SECRET`                       | Segredo gerado na Cakto, cadastrado de forma segura no Supabase. Nunca colocar no Git ou no chat. |
 | `CAKTO_PRODUCT_IDS`                          | IDs completos dos produtos autorizados, separados por vírgula; conferir V1/V2 real.               |
 | `SUPABASE_URL` / `SUPABASE_SERVICE_ROLE_KEY` | Configuração já fornecida pelo ambiente Edge, nunca pelo navegador.                               |
 
-A função futura terá o caminho `/functions/v1/cakto-webhook` no projeto escolhido.
-Antes de cadastrar uma URL de produção:
+A função publicada está em
+`https://wqutcsjdozcukwxvkbtc.supabase.co/functions/v1/cakto-webhook`.
+Não exige JWT de usuário no gateway: a autenticação servidor-a-servidor é HMAC
+no handler. Não remover essa validação para corrigir `401 Invalid signature`.
+Para instalar em um novo ambiente, antes de cadastrar sua URL:
 
 1. Revisar e aplicar a migração em ambiente de teste, publicar a função e definir
    segredo/IDs **de teste**, mantendo as configurações atuais de acesso.
@@ -93,11 +113,12 @@ solicitado, uma tentativa de processar a fila. O login consulta o direito efetiv
 Um membro inválido de lote relevante impede a captura inteira; é preciso corrigir
 e reenviar. Não existe confirmação antecipada seguida de gravação em background.
 
-A documentação da Cakto informa que resposta HTTP não-2xx, inclusive 500/503,
-**não recebe nova tentativa automática**. Falhas de rede/timeout podem ser
-retentadas. Até existir recuperação automática, acompanhar o histórico da Cakto
-e reenviar manualmente falhas de entrega. Não habilitar a captura em produção
-como se ela já fosse a entrega do produto.
+A documentação consultada da Cakto informa que resposta HTTP não-2xx, inclusive
+500/503, **não recebe nova tentativa automática**; falhas de rede/timeout podem
+ser retentadas. Reconfirmar esse contrato ao investigar entregas. O cron local
+recupera somente eventos já persistidos: não consulta pedidos na API nem descobre
+notificações que nunca chegaram. Acompanhar o histórico da Cakto e reenviar falhas
+de entrega quando necessário. HTTP 200 isolado não certifica liberação de acesso.
 
 ## Regras de liberação e revogação
 
@@ -156,13 +177,18 @@ isso não revoga acessos existentes. A flag de ambiente desliga somente a tentat
 imediata no webhook; um job SQL já ativo continua independente dela. O script
 fornecido não é executado pela migração nem pela CI.
 
-Em 26/10/2026, os dois jobs foram instalados e ativados no projeto Vértice, com
-recuperação a cada cinco minutos e limpeza restrita a sete dias. A execução direta
-do processador retornou zero alterações e o resumo criptográfico das licenças foi
-preservado. O produto permanece com `processing_enabled=false`: o agendamento
-está ativo, mas a liberação/revogação automática geral ainda está pausada.
+Em 26/10/2026, os dois jobs foram instalados e ativados. Em 29/10/2026, consultas
+de leitura confirmaram ambos ativos e o produto real com
+**`processing_enabled=true`**. A automação já está em operação; não confundir o
+estado inicial desativado da migração com essa configuração real. A limpeza
+continua restrita a execuções encerradas há mais de sete dias dos dois jobs,
+sem remover eventos, pedidos, licenças ou auditoria.
 
-## Antes de ativar vendas reais
+## Checklist de instalação e limites operacionais
+
+Compra controlada, login e reembolso já foram testados pelo proprietário no
+ambiente real. O checklist abaixo serve para nova instalação/revisão; não exige
+comprar novamente nem repetir a ativação para retomar o desenvolvimento.
 
 1. Revisar as migrações, o produto e as decisões para bloqueios manuais. Confirmar
    com uma entrega real o par de IDs e o formato V1/V2. Usar o e-mail Google na
