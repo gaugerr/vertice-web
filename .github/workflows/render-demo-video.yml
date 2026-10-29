@@ -31,7 +31,22 @@ jobs:
           npx playwright install --with-deps chromium
       - name: Build isolated local demonstration
         run: npm run build
-      - name: Record real app interactions and render vertical MP4
+      - name: Record real app interactions
+        env:
+          DEMO_CAPTURE_ONLY: '1'
+        run: node tools/video/render-demo.mjs
+      - name: Preserve captured scenes before encoding
+        uses: actions/upload-artifact@ea165f8d65b6e75b540449e92b4886f43607fa02
+        with:
+          name: vertice-captured-scenes
+          path: |
+            video-output/frames/
+            video-output/*.ffconcat
+            video-output/capture.json
+          retention-days: 2
+      - name: Render vertical MP4 with bounded memory
+        env:
+          DEMO_RENDER_ONLY: '1'
         run: node tools/video/render-demo.mjs
       - name: Deliver video, narration and technical verification
         if: always()
