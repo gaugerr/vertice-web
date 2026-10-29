@@ -23,7 +23,15 @@ jobs:
       - name: Retrieve preserved captured scenes
         env:
           GH_TOKEN: ${{ github.token }}
-        run: gh run download 40882530571 --repo gaugerr/vertice-web --name vertice-captured-scenes --dir video-output
+        run: |
+          for video_attempt in {1..30}; do
+            if gh run download 40884728155 --repo gaugerr/vertice-web --name vertice-captured-scenes --dir video-output; then
+              exit 0
+            fi
+            echo "Waiting for the final captured scenes..."
+            sleep 5
+          done
+          exit 1
       - name: Encode with streaming frames and verify MP4
         run: python3 -u tools/encode-demo.py
       - name: Deliver completed video
