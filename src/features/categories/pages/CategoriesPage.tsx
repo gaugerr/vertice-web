@@ -72,6 +72,11 @@ export default function CategoriesPage() {
       <div className="categories-grid">
         {categories.map((category, index) => {
           const group = grouped.get(category.id) ?? [];
+          const visibleItems = [
+            ...group.filter((item) => !item.isPurchased),
+            ...group.filter((item) => item.isPurchased),
+          ].slice(0, 5);
+          const hiddenCount = group.length - visibleItems.length;
           const complete = group.length > 0 && group.every((item) => item.isPurchased);
           return (
             <Link
@@ -92,7 +97,7 @@ export default function CategoriesPage() {
               <h2>{category.title}</h2>
               {group.length ? (
                 <ul className="category-items" aria-label={`Itens de ${category.title}`}>
-                  {group.map((item) => (
+                  {visibleItems.map((item) => (
                     <li key={item.id} className={item.isPurchased ? 'is-purchased' : undefined}>
                       <span className="category-item-status" aria-hidden="true">
                         {item.isPurchased ? <Check size={14} /> : <span />}
@@ -109,6 +114,11 @@ export default function CategoriesPage() {
                   {list.status === 'completed'
                     ? 'Nenhum produto nesta compra'
                     : 'Adicione os primeiros itens'}
+                </p>
+              )}
+              {hiddenCount > 0 && (
+                <p className="category-overflow">
+                  + {hiddenCount} {hiddenCount === 1 ? 'item' : 'itens'}…
                 </p>
               )}
               <div className="category-footer">

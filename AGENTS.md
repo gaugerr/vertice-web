@@ -251,11 +251,11 @@ produção nem registrar corpos de webhook, que contêm o segredo da integraçã
 - Service worker só em produção; primeiro acesso/preparo exige internet. Com acesso
   protegido, também exige login/licença e renovação da autorização em até sete dias.
   Atualização pede ação do usuário, protege rascunhos e aguarda gravações pendentes.
-- `public/online.txt` verifica conectividade real, sem cache. `vercel.json` mantém
-  SPA, assets ausentes com 404 e `/sw.js` com `no-store`. Cache não é backup.
-- Vercel publica a `main` pelo GitHub. `tools/build-vercel.mjs` impõe acesso protegido
-  em produção e no preview `feat/google-access`; o build local padrão é `legacy`.
-  Não mudar origem, modo de acesso ou configuração OAuth para uma tarefa visual.
+- `public/online.txt` verifica conectividade real, sem cache. Rotas SPA e cache
+  da hospedagem são definidos em `public/_redirects` e `public/_headers`.
+- Hospedagem e previews são exclusivamente Cloudflare Pages. Não recriar
+  integração, projeto ou deploy na Vercel. `vercel.json` contém somente o bloqueio
+  de deploys Git enquanto a desconexão externa não for confirmada.
 - Cloudflare Pages usa `tools/build-cloudflare.mjs`, sempre com acesso protegido,
   saída `dist` e Node 24. Rotas/cache: `public/_redirects` e `public/_headers`.
   Configuração, autorização de origem e migração por backup: `docs/CLOUDFLARE.md`.
@@ -357,12 +357,11 @@ sobrepor o bloqueio. A emulação não substitui conferir gestos em aparelho fí
   WhatsApp: `5551980614158` (formato internacional).
 - A página de vendas foi considerada finalizada pelo proprietário. Preservar as
   demonstrações e galerias; fazer novas mudanças somente no escopo solicitado.
-- **Planejado, não implementado:** cards em “Por categoria” devem mostrar até
-  cinco itens, pendentes primeiro e comprados completando as vagas; preservar a
-  ordem atual dentro de cada grupo. Exibir “+ N itens…” abaixo, somente se houver
-  excedentes (singular para um). Totais e “Concluída” continuam usando o grupo
-  completo; tocar abre todos os itens. Entrada: `CategoriesPage.tsx`, no diretório
-  de categorias acima. Não tratar o plano como funcionalidade já entregue.
+- Cards em “Por categoria” mostram até cinco itens, pendentes primeiro e
+  comprados completando as vagas; preservam a ordem de cada grupo. “+ N itens…”
+  indica excedentes, com singular para um. Totais e “Concluída” usam o grupo
+  completo; tocar abre todos os produtos. Seleção em `CategoriesPage.tsx`, com
+  atualização reativa também em listas finalizadas.
 - Conciliação automática de notificações que nunca chegaram, alertas e painel de
   revisão de pagamentos ainda não foram implementados. A fila atual recupera
   eventos já recebidos, sem consultar pedidos na API Cakto.
