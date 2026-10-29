@@ -89,7 +89,7 @@ video = next(stream for stream in probe["streams"] if stream["codec_type"] == "v
 assert video["width"] == WIDTH and video["height"] == HEIGHT
 assert video["avg_frame_rate"] == "30/1"
 assert not any(stream["codec_type"] == "audio" for stream in probe["streams"])
-assert 34 <= float(probe["format"]["duration"]) <= 37
+assert 34 <= float(probe["format"]["duration"]) <= 65
 subprocess.run([
     "ffmpeg", "-hide_banner", "-loglevel", "warning", "-y", "-threads", "1", "-i", str(final),
     "-vf", "fps=1/4,scale=360:640,tile=3x3", "-frames:v", "1", "-threads", "1", "-q:v", "5",

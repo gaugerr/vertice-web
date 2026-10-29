@@ -33,7 +33,7 @@ async function capture(seconds, note = '') {
   elapsed += seconds;
 }
 async function tap(locator) {
-  await locator.scrollIntoViewIfNeeded();
+  await scroll(locator, 0.75);
   const b = await locator.boundingBox();
   if (!b) throw new Error('Controle fora do enquadramento');
   await stage.evaluate(
@@ -60,6 +60,7 @@ async function tap(locator) {
   });
 }
 async function type(locator, text, pace = 0.12) {
+  await scroll(locator, 0.75);
   await locator.click();
   await locator.fill('');
   for (const character of text) {
@@ -67,11 +68,23 @@ async function type(locator, text, pace = 0.12) {
     await capture(pace);
   }
 }
-async function scroll(locator, duration = 0.45) {
-  await locator.evaluate((el) => el.scrollIntoView({ behavior: 'smooth', block: 'center' }));
-  for (let i = 0; i < 6; i++) {
-    await sleep(55);
-    await capture(duration / 6);
+async function scroll(locator, duration = 0.8) {
+  const movement = await locator.evaluate((el) => {
+    const rect = el.getBoundingClientRect();
+    const win = el.ownerDocument.defaultView;
+    const doc = el.ownerDocument.scrollingElement;
+    const start = win.scrollY;
+    if (rect.top >= 55 && rect.bottom <= win.innerHeight - 55) return { start, end: start };
+    const end = Math.max(0, Math.min(doc.scrollHeight - win.innerHeight, start + rect.top + rect.height / 2 - win.innerHeight / 2));
+    return { start, end };
+  });
+  if (Math.abs(movement.end - movement.start) < 2) return;
+  const frames = Math.round(Math.max(0.8, duration) * 30);
+  for (let i = 1; i <= frames; i++) {
+    const p = i / frames;
+    const eased = p * p * (3 - 2 * p);
+    await locator.evaluate((el, y) => el.ownerDocument.defaultView.scrollTo({ top: y, behavior: 'instant' }), movement.start + (movement.end - movement.start) * eased);
+    await capture(1 / 30);
   }
 }
 async function concatFile(path, entries) {
@@ -205,7 +218,7 @@ try {
     await summary.waitFor();
     await scroll(summary, 0.5);
     if (!(await summary.innerText()).includes('52,30')) throw new Error('Resumo incorreto');
-    await capture(1.4, 'Resumo: três produtos, total de R$ 52,30');
+    await capture(4.5, 'Resumo: três produtos, total de R$ 52,30');
     // Keep the demonstration readable while targeting approximately 35 seconds overall.
     if (elapsed < 29.8) await capture(29.8 - elapsed);
     appDuration = elapsed;

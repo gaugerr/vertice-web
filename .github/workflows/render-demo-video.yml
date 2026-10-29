@@ -27,7 +27,9 @@ jobs:
         run: |
           npm ci --ignore-scripts --no-audit --no-fund
           sudo apt-get update -qq
-          sudo apt-get install -y ffmpeg
+          sudo apt-get install -y ffmpeg python3-pil python3-venv fonts-dejavu-core
+          python3 -m venv /tmp/vertice-voice
+          /tmp/vertice-voice/bin/pip install edge-tts
           npx playwright install --with-deps chromium
       - name: Build isolated local demonstration
         run: npm run build
@@ -44,3 +46,20 @@ jobs:
             video-output/*.ffconcat
             video-output/capture.json
           retention-days: 2
+      - name: Encode smooth video
+        run: python3 tools/encode-demo.py
+      - name: Add Brazilian narration and synchronized subtitles
+        run: /tmp/vertice-voice/bin/python tools/video-voice.py
+      - name: Deliver edited video with audio and captions
+        if: always()
+        uses: actions/upload-artifact@ea165f8d65b6e75b540449e92b4886f43607fa02
+        with:
+          name: vertice-video-audio-legendas
+          path: |
+            video-output/vertice-com-audio-e-legendas.mp4
+            video-output/vertice-lista-de-compras-1080x1920.mp4
+            video-output/narracao-pt-BR.wav
+            video-output/legendas-sincronizadas.srt
+            video-output/verificacao-audio.json
+            video-output/previa-legendas.jpg
+          retention-days: 30
