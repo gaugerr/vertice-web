@@ -75,7 +75,13 @@ async function scroll(locator, duration = 0.8) {
     const doc = el.ownerDocument.scrollingElement;
     const start = win.scrollY;
     if (rect.top >= 55 && rect.bottom <= win.innerHeight - 55) return { start, end: start };
-    const end = Math.max(0, Math.min(doc.scrollHeight - win.innerHeight, start + rect.top + rect.height / 2 - win.innerHeight / 2));
+    const end = Math.max(
+      0,
+      Math.min(
+        doc.scrollHeight - win.innerHeight,
+        start + rect.top + rect.height / 2 - win.innerHeight / 2,
+      ),
+    );
     return { start, end };
   });
   if (Math.abs(movement.end - movement.start) < 2) return;
@@ -83,7 +89,10 @@ async function scroll(locator, duration = 0.8) {
   for (let i = 1; i <= frames; i++) {
     const p = i / frames;
     const eased = p * p * (3 - 2 * p);
-    await locator.evaluate((el, y) => el.ownerDocument.defaultView.scrollTo({ top: y, behavior: 'instant' }), movement.start + (movement.end - movement.start) * eased);
+    await locator.evaluate(
+      (el, y) => el.ownerDocument.defaultView.scrollTo({ top: y, behavior: 'instant' }),
+      movement.start + (movement.end - movement.start) * eased,
+    );
     await capture(1 / 30);
   }
 }
