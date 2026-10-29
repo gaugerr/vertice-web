@@ -1,0 +1,48 @@
+name: Render Vértice demo video
+on:
+  push:
+    branches: [video/shopping-demo-20261029]
+    paths:
+      - '.github/workflows/render-demo-video.yml'
+      - 'tools/video/**'
+permissions:
+  contents: read
+concurrency:
+  group: vertice-demo-video
+  cancel-in-progress: true
+jobs:
+  render:
+    runs-on: ubuntu-24.04
+    timeout-minutes: 20
+    env:
+      VITE_ACCESS_MODE: legacy
+    steps:
+      - uses: actions/checkout@11bd71901bbe5b1630ceea73d27597364c9af683
+        with:
+          persist-credentials: false
+      - uses: actions/setup-node@49933ea5288caeca8642d1e84afbd3f7d6820020
+        with:
+          node-version-file: .nvmrc
+      - name: Install pinned application and rendering tools
+        run: |
+          npm ci --ignore-scripts --no-audit --no-fund
+          sudo apt-get update -qq
+          sudo apt-get install -y ffmpeg
+          npx playwright install --with-deps chromium
+      - name: Build isolated local demonstration
+        run: npm run build
+      - name: Record real app interactions and render vertical MP4
+        run: node tools/video/render-demo.mjs
+      - name: Deliver video, narration and technical verification
+        if: always()
+        uses: actions/upload-artifact@ea165f8d65b6e75b540449e92b4886f43607fa02
+        with:
+          name: vertice-video-lista-de-compras
+          path: |
+            video-output/*.mp4
+            video-output/*.srt
+            video-output/*.txt
+            video-output/*.json
+            video-output/*.jpg
+            video-output/error.png
+          retention-days: 30
