@@ -19,25 +19,29 @@ for (const width of [280, 1280]) {
       format: 'vertice-backup',
       version: 5,
       exportedAt: timestamps.createdAt,
-      lists: [{
-        ...timestamps,
-        id: id(1),
-        storeName: 'Prévia por categoria',
-        date: '2026-10-29',
-        description: '',
-        budgetCents: null,
-        status: 'active',
-        completedAt: null,
-        purchaseDate: null,
-        marketName: null,
-      }],
-      categories: [{
-        ...timestamps,
-        id: id(2),
-        shoppingListId: id(1),
-        title: 'Essenciais',
-        position: 0,
-      }],
+      lists: [
+        {
+          ...timestamps,
+          id: id(1),
+          storeName: 'Prévia por categoria',
+          date: '2026-10-29',
+          description: '',
+          budgetCents: null,
+          status: 'active',
+          completedAt: null,
+          purchaseDate: null,
+          marketName: null,
+        },
+      ],
+      categories: [
+        {
+          ...timestamps,
+          id: id(2),
+          shoppingListId: id(1),
+          title: 'Essenciais',
+          position: 0,
+        },
+      ],
       items: names.map((name, index) => ({
         ...timestamps,
         id: id(100 + index),
@@ -65,12 +69,18 @@ for (const width of [280, 1280]) {
       has: page.getByRole('heading', { name: 'Essenciais', exact: true }),
     });
     await expect(card.locator('.category-item-name')).toHaveText([
-      longName, 'Produto 07', 'Produto 11', 'Produto 01', 'Produto 02',
+      longName,
+      'Produto 07',
+      'Produto 11',
+      'Produto 01',
+      'Produto 02',
     ]);
     await expect(card.getByText('+ 7 itens…', { exact: true })).toBeVisible();
     await expect(card.locator('.category-footer')).toContainText('12 itens');
     await expect(card.locator('.category-footer strong')).toContainText('22,50');
-    expect(await page.evaluate(() => document.documentElement.scrollWidth <= innerWidth)).toBe(true);
+    expect(await page.evaluate(() => document.documentElement.scrollWidth <= innerWidth)).toBe(
+      true,
+    );
     await info.attach(`category-preview-${width}`, {
       body: await page.screenshot(),
       contentType: 'image/png',
@@ -83,12 +93,20 @@ for (const width of [280, 1280]) {
     await detail.getByRole('checkbox', { name: `Marcar ${longName} como comprado` }).click();
     await detail.getByRole('button', { name: 'Fechar', exact: true }).click();
     await expect(card.locator('.category-item-name')).toHaveText([
-      'Produto 07', 'Produto 11', 'Produto 01', 'Produto 02', longName,
+      'Produto 07',
+      'Produto 11',
+      'Produto 01',
+      'Produto 02',
+      longName,
     ]);
     await expect(card.locator('.category-footer strong')).toContainText('25,00');
     await detail.getByRole('checkbox', { name: 'Marcar Produto 12 como comprado' }).click();
     await expect(card.locator('.category-item-name')).toHaveText([
-      'Produto 07', 'Produto 11', 'Produto 12', 'Produto 01', 'Produto 02',
+      'Produto 07',
+      'Produto 11',
+      'Produto 12',
+      'Produto 01',
+      'Produto 02',
     ]);
     await expect(card.locator('.category-footer strong')).toContainText('22,50');
     await expect(card.getByText('+ 7 itens…', { exact: true })).toBeVisible();
