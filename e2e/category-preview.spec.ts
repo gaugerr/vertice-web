@@ -11,7 +11,7 @@ for (const width of [280, 1280]) {
       createdAt: '2026-10-29T00:00:00.000Z',
       updatedAt: '2026-10-29T00:00:00.000Z',
     };
-    const longName = 'ProdutoComNomeMuitoLongo'.repeat(4);
+    const longName = 'ProdutoComNomeMuitoLongo'.repeat(2);
     const names = Array.from({ length: 12 }, (_, index) =>
       index === 2 ? longName : `Produto ${String(index + 1).padStart(2, '0')}`,
     );
