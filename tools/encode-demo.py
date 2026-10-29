@@ -54,23 +54,33 @@ def encode(shots, target):
 
 app_duration = encode(entries("app.ffconcat"), "vertice-gravacao-bruta.mp4")
 end_duration = encode(entries("end.ffconcat"), "closing.mp4")
-duration = app_duration + end_duration - 1.0
+duration = app_duration + end_duration
 camera = "zoompan=z='1.018+0.016*sin(on/30*0.28-1)':x='iw/2-(iw/zoom/2)':y='ih*0.43-(ih/zoom*0.43)':d=1:s=1080x1920:fps=30"
-filters = (
-    "[0:v]" + camera + ",setsar=1,settb=AVTB,setpts=PTS-STARTPTS,fps=30[a];"
-    "[1:v]setsar=1,settb=AVTB,setpts=PTS-STARTPTS,fps=30[b];"
-    "[a][b]xfade=transition=fade:duration=1:offset=" + str(app_duration - 1.0) +
-    ",fade=t=in:st=0:d=0.5,fade=t=out:st=" + str(duration - 0.7) + ":d=0.7,format=yuv420p[v]"
-)
 final = OUT / "vertice-lista-de-compras-1080x1920.mp4"
-print("COMPOSITING_FINAL", duration, "seconds", flush=True)
+print("EDITING_APP_SINGLE_STREAM", app_duration, flush=True)
 subprocess.run([
-    "ffmpeg", "-hide_banner", "-loglevel", "info", "-y", "-filter_complex_threads", "1",
+    "ffmpeg", "-hide_banner", "-loglevel", "info", "-y",
     "-threads", "1", "-i", str(OUT / "vertice-gravacao-bruta.mp4"),
+    "-vf", camera + ",fade=t=in:st=0:d=0.5,fade=t=out:st=" + str(app_duration - 0.65) + ":d=0.65,format=yuv420p",
+    "-filter_threads", "1", "-an", "-c:v", "libx264", "-threads", "2",
+    "-preset", "veryfast", "-crf", "18", "-pix_fmt", "yuv420p", "-r", "30",
+    "-video_track_timescale", "15360", str(OUT / "app-editado.mp4")
+], check=True)
+print("EDITING_BRAND_SINGLE_STREAM", end_duration, flush=True)
+subprocess.run([
+    "ffmpeg", "-hide_banner", "-loglevel", "info", "-y",
     "-threads", "1", "-i", str(OUT / "closing.mp4"),
-    "-filter_complex", filters, "-map", "[v]", "-an", "-t", str(duration),
-    "-c:v", "libx264", "-threads", "2", "-preset", "veryfast", "-crf", "18",
-    "-pix_fmt", "yuv420p", "-r", "30", "-movflags", "+faststart", str(final)
+    "-vf", "fade=t=in:st=0:d=0.65,fade=t=out:st=" + str(end_duration - 0.7) + ":d=0.7,format=yuv420p",
+    "-filter_threads", "1", "-an", "-c:v", "libx264", "-threads", "2",
+    "-preset", "veryfast", "-crf", "18", "-pix_fmt", "yuv420p", "-r", "30",
+    "-video_track_timescale", "15360", str(OUT / "marca-editada.mp4")
+], check=True)
+(OUT / "filme.ffconcat").write_text("ffconcat version 1.0\\nfile 'app-editado.mp4'\\nfile 'marca-editada.mp4'\\n")
+print("JOINING_COMPLETED_SCENES", duration, flush=True)
+subprocess.run([
+    "ffmpeg", "-hide_banner", "-loglevel", "info", "-y",
+    "-f", "concat", "-safe", "0", "-i", str(OUT / "filme.ffconcat"),
+    "-an", "-c:v", "copy", "-movflags", "+faststart", str(final)
 ], check=True)
 probe = json.loads(subprocess.check_output([
     "ffprobe", "-v", "error", "-show_format", "-show_streams", "-of", "json", str(final)
@@ -79,7 +89,7 @@ video = next(stream for stream in probe["streams"] if stream["codec_type"] == "v
 assert video["width"] == WIDTH and video["height"] == HEIGHT
 assert video["avg_frame_rate"] == "30/1"
 assert not any(stream["codec_type"] == "audio" for stream in probe["streams"])
-assert 34 <= float(probe["format"]["duration"]) <= 36
+assert 34 <= float(probe["format"]["duration"]) <= 37
 subprocess.run([
     "ffmpeg", "-hide_banner", "-loglevel", "warning", "-y", "-threads", "1", "-i", str(final),
     "-vf", "fps=1/4,scale=360:640,tile=3x3", "-frames:v", "1", "-threads", "1", "-q:v", "5",
@@ -136,7 +146,7 @@ encontram o equilíbrio.
 """)
 (OUT / "LEIA-ME.txt").write_text("""VÉRTICE — VÍDEO DEMONSTRATIVO
 
-vertice-lista-de-compras-1080x1920.mp4: vídeo final vertical em H.264, 35 segundos e 30 fps, sem áudio nem legendas fixas. Inclui zoom suave, transição para a marca e fade-out.
+vertice-lista-de-compras-1080x1920.mp4: vídeo final vertical em H.264, 36 segundos e 30 fps, sem áudio nem legendas fixas. Inclui zoom suave, transição para a marca e fade-out.
 vertice-gravacao-bruta.mp4: demonstração antes dos efeitos de câmera e fechamento.
 closing.mp4: fechamento da marca separado.
 narracao.txt: texto sugerido para gravar a voz.
