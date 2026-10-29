@@ -107,6 +107,14 @@ describe('category item previews', () => {
     expect(items).toEqual(original);
   });
 
+  it('keeps every item when a mixed category fits in the card', () => {
+    seed([true, false, true, false]);
+    render(page());
+    expect(names()).toEqual(['Produto 2', 'Produto 4', 'Produto 1', 'Produto 3']);
+    expect(card()).not.toHaveTextContent('+');
+    expect(card().querySelector('.category-footer strong')).toHaveTextContent('5,00');
+  });
+
   it('uses the singular and never exceeds five pending items', () => {
     seed(Array.from({ length: 6 }, () => false));
     render(page());
