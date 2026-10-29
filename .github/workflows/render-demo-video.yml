@@ -1,4 +1,4 @@
-name: Render Vértice demo video
+name: Capture final Vértice scenes
 on:
   push:
     branches: [video/shopping-demo-20261029]
@@ -44,20 +44,3 @@ jobs:
             video-output/*.ffconcat
             video-output/capture.json
           retention-days: 2
-      - name: Render vertical MP4 with bounded memory
-        env:
-          DEMO_RENDER_ONLY: '1'
-        run: node tools/video/render-demo.mjs
-      - name: Deliver video, narration and technical verification
-        if: always()
-        uses: actions/upload-artifact@ea165f8d65b6e75b540449e92b4886f43607fa02
-        with:
-          name: vertice-video-lista-de-compras
-          path: |
-            video-output/*.mp4
-            video-output/*.srt
-            video-output/*.txt
-            video-output/*.json
-            video-output/*.jpg
-            video-output/error.png
-          retention-days: 30
