@@ -23,8 +23,9 @@ scenes=[
 (701,759,"Transporte: trezentos e cinquenta.","Transporte: R$ 350,00"),
 (759,817,"Lazer: trezentos reais.","Lazer: R$ 300,00"),
 (817,940,"No dashboard, confiro minha receita: quatro mil e quinhentos.","Receita: R$ 4.500,00"),
-(940,1019,"Despesas: seiscentos e noventa e três reais e sessenta centavos.","Despesas: R$ 693,60"),
-(1019,1098,"Saldo previsto: três mil oitocentos e seis reais e quarenta centavos.","Saldo previsto: R$ 3.806,40"),
+(940,977,"Despesas: seiscentos e noventa e três reais e sessenta centavos.","Despesas: R$ 693,60"),
+(977,1019,"Saldo previsto: três mil oitocentos e seis reais e quarenta centavos.","Saldo previsto: R$ 3.806,40"),
+(1019,1098,"A sobra prevista é de oitenta e quatro vírgula seis por cento.","Sobra prevista: 84,6%"),
 (1098,1198,"Assim, cada gasto fica claro e eu planejo o próximo passo.",None),
 (1198,1333,"Vértice. Meu mês em equilíbrio.",None)
 ]
@@ -189,7 +190,7 @@ p=probe(final)
 assert any(s["codec_type"]=="audio" and s["channels"]==2 for s in p["streams"])
 assert any(s.get("width")==1080 and s.get("height")==1920 for s in p["streams"])
 assert abs(float(p["format"]["duration"])-duration)<.1
-for i in [0,3,12,16]:
+for i in [0,3,12,16,17]:
  t=(retimed[i][2]+retimed[i][3])/2
  jpg=O/f"check-{i}.jpg"
  subprocess.run(["ffmpeg","-v","error","-y","-threads","1","-ss",str(t),"-i",str(final),"-frames:v","1",str(jpg)],check=True)
