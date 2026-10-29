@@ -75,7 +75,7 @@ subprocess.run([
     "-preset", "veryfast", "-crf", "18", "-pix_fmt", "yuv420p", "-r", "30",
     "-video_track_timescale", "15360", str(OUT / "marca-editada.mp4")
 ], check=True)
-(OUT / "filme.ffconcat").write_text("ffconcat version 1.0\\nfile 'app-editado.mp4'\\nfile 'marca-editada.mp4'\\n")
+(OUT / "filme.ffconcat").write_text(chr(10).join(["ffconcat version 1.0", "file 'app-editado.mp4'", "file 'marca-editada.mp4'", ""]))
 print("JOINING_COMPLETED_SCENES", duration, flush=True)
 subprocess.run([
     "ffmpeg", "-hide_banner", "-loglevel", "info", "-y",
