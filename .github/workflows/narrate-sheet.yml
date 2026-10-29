@@ -1,0 +1,35 @@
+name: Narrate Vértice salary story
+on:
+  push:
+    branches: [video/shopping-demo-20261029]
+    paths: ['tools/narrate-sheet.py', '.github/workflows/narrate-sheet.yml']
+permissions:
+  contents: read
+  actions: read
+jobs:
+  narrate:
+    runs-on: ubuntu-24.04
+    timeout-minutes: 12
+    steps:
+      - uses: actions/checkout@11bd71901bbe5b1630ceea73d27597364c9af683
+        with:
+          persist-credentials: false
+      - name: Retrieve approved spreadsheet recording
+        env:
+          GH_TOKEN: ${{ github.token }}
+        run: gh run download 40952214782 --repo gaugerr/vertice-web --name Vertice-planilha-video --dir prior
+      - name: Install audio and subtitle tools
+        run: |
+          sudo apt-get update -qq
+          sudo apt-get install -y ffmpeg python3-venv fonts-dejavu-core
+          python3 -m venv /tmp/vertice-narration
+          /tmp/vertice-narration/bin/pip install edge-tts numpy
+      - name: Narrate exact values and synchronize video captions and music
+        run: /tmp/vertice-narration/bin/python tools/narrate-sheet.py
+      - name: Deliver finished video only
+        uses: actions/upload-artifact@ea165f8d65b6e75b540449e92b4886f43607fa02
+        with:
+          name: Vertice-planilha-narrada
+          path: sheet-audio/Vertice-Planilha-Narrada.mp4
+          if-no-files-found: error
+          retention-days: 30
