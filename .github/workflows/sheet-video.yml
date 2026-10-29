@@ -5,6 +5,7 @@ on:
     paths: ['tools/sheet-video.py', '.github/workflows/sheet-video.yml']
 permissions:
   contents: read
+  actions: read
 jobs:
   film:
     runs-on: ubuntu-24.04
@@ -22,6 +23,10 @@ jobs:
       - name: Download official Excel template into temporary workspace
         run: |
           /tmp/drive-download/bin/gdown 'https://drive.google.com/uc?id=1wGGyAMfwU6yVzaZHfx7KGcNi8Yo0AsPY' -O sheet.xlsx
+      - name: Retrieve approved brand closing
+        env:
+          GH_TOKEN: ${{ github.token }}
+        run: gh run download 40944623257 --repo gaugerr/vertice-web --name vertice-video-audio-legendas --dir prior
       - name: Film real spreadsheet
         run: xvfb-run -a -s "-screen 0 1600x1000x24" /usr/bin/python3 tools/sheet-video.py
       - name: Deliver finished video only
