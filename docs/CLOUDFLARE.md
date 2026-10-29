@@ -19,8 +19,7 @@ custom. Não habilitar recursos pagos.
 5. Habilitar deploys de produção. Deixar previews automáticos desabilitados;
    previews futuros precisam de autorização de origem e callback próprios.
 
-O build mantém acesso obrigatório, URL e chave pública do mesmo Supabase da
-Vercel. Variáveis públicas podem substituir URL/chave; nunca colocar `service_role`,
+O build mantém acesso obrigatório, URL e chave pública do Supabase Vértice. Variáveis públicas podem substituir URL/chave; nunca colocar `service_role`,
 segredo Google ou chave privada de assinatura no frontend. A chave pública de
 verificação existente no repositório é preservada. `tools/validate-access.mjs`
 impede builds Pages em modo `legacy`.

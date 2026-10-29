@@ -46,7 +46,7 @@ O build está em `dist`. O orçamento de JavaScript de 250 KiB gzip inclui tamb�
 - Avisos de conectividade, preparo offline e alterações não salvas.
 - Interface em português, tema escuro, roxo e verde, com layout para celular e desktop.
 
-A `main` inclui login Google, licenças vitalícias manuais, administração, autorização offline assinada de até sete dias, dados separados por conta e transferência confirmada das listas antigas. O build de produção na Vercel exige login e licença; o desenvolvimento local usa `legacy` por padrão. [Configuração do acesso](docs/access/SETUP.md) · [Primeiro passo no Google](docs/access/GOOGLE.md) · [Validação de segurança](docs/access/VALIDATION.md).
+A `main` inclui login Google, licenças vitalícias manuais, administração, autorização offline assinada de até sete dias, dados separados por conta e transferência confirmada das listas antigas. O build de produção na Cloudflare Pages exige login e licença; o desenvolvimento local usa `legacy` por padrão. [Configuração do acesso](docs/access/SETUP.md) · [Primeiro passo no Google](docs/access/GOOGLE.md) · [Validação de segurança](docs/access/VALIDATION.md).
 
 Checkout, webhooks de compra e sincronização das compras na nuvem continuam para uma etapa futura. O login atual controla a licença; não faz backup das listas no Supabase.
 
@@ -150,23 +150,29 @@ npm run test:e2e
 
 Vitest cobre regras financeiras, validações, transações, relacionamentos, backups e preservação de formulários em falhas. Playwright usa o build real em Chromium e WebKit para CRUD, foco, backups, rotas, duas abas e 100 itens. Os cenários de fechamento/reabertura offline e ciclo de atualização do service worker rodam em Chromium.
 
-O servidor `tools/serve-test.mjs` é exclusivo de testes e inclui um endpoint que muda o service worker em memória. Ele não faz parte de `dist` nem da publicação na Vercel.
+O servidor `tools/serve-test.mjs` é exclusivo de testes e inclui um endpoint que muda o service worker em memória. Ele não faz parte de `dist` nem da publicação na Cloudflare Pages.
 
 Consulte [VALIDATION.md](docs/VALIDATION.md) para o estado efetivamente verificado. Arquivos de testes escritos não significam testes aprovados.
 
-## Hospedagem na Vercel
+## Hospedagem na Cloudflare Pages
 
-Importe este repositório como um **projeto novo**. O projeto Flutter e o Docery não devem ser alterados.
+Produção e previews são publicados exclusivamente na Cloudflare Pages.
+App: <https://app.usevertice.app.br>, projeto `use-vertice`.
+Página de vendas: <https://usevertice.app.br>, projeto `vertice-kit`.
 
-- Framework: Vite.
-- Instalação: `npm ci`.
-- Build: `node tools/build-vercel.mjs` (configurado em `vercel.json`).
-- Saída: `dist`.
-- A produção da `main` e o preview de `feat/google-access` recebem a configuração pública do projeto e `VITE_ACCESS_MODE=enforced` no build. Segredos Google e chave privada de assinatura ficam somente no Supabase.
+- Instalação: `npm ci`, Node 24.
+- App: raiz `/`, build `node tools/build-cloudflare.mjs`, saída `dist`.
+- Vendas: raiz `/marketing`, build `node build.mjs`, saída `dist`.
+- App em produção e preview exige login Google e licença.
+- Previews manuais devem informar branch e commit; a nova origem e seu callback
+  precisam estar autorizados no Supabase, sem curingas.
 
-`vercel.json` define as rotas SPA, revalidação de HTML/service worker e cache longo apenas para assets com hash. Verifique no deployment: rota interna abre diretamente, `/assets/inexistente.js` retorna 404, `/sw.js` retorna JavaScript com `no-store`, e `/online.txt` não é substituído por HTML.
+Rotas SPA e cache ficam em `public/_redirects` e `public/_headers`.
+Consulte [CLOUDFLARE.md](docs/CLOUDFLARE.md) para configuração e validação.
 
-A configuração externa do Google, das origens permitidas e da assinatura é necessária para o primeiro login real. O app não oferece um bypass de licença quando essa configuração está incompleta. O plano da hospedagem deve ser adequado ao uso comercial antes das vendas.
+O arquivo `vercel.json` contém somente `git.deploymentEnabled=false`, para
+bloquear deploys automáticos de uma integração antiga até sua desconexão externa.
+Não é configuração de hospedagem do app. Não recriar projetos ou previews lá.
 
 ## Para quem vem do Flutter
 

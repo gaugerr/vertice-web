@@ -251,11 +251,11 @@ produção nem registrar corpos de webhook, que contêm o segredo da integraçã
 - Service worker só em produção; primeiro acesso/preparo exige internet. Com acesso
   protegido, também exige login/licença e renovação da autorização em até sete dias.
   Atualização pede ação do usuário, protege rascunhos e aguarda gravações pendentes.
-- `public/online.txt` verifica conectividade real, sem cache. `vercel.json` mantém
-  SPA, assets ausentes com 404 e `/sw.js` com `no-store`. Cache não é backup.
-- Vercel publica a `main` pelo GitHub. `tools/build-vercel.mjs` impõe acesso protegido
-  em produção e no preview `feat/google-access`; o build local padrão é `legacy`.
-  Não mudar origem, modo de acesso ou configuração OAuth para uma tarefa visual.
+- `public/online.txt` verifica conectividade real, sem cache. Rotas SPA e cache
+  da hospedagem são definidos em `public/_redirects` e `public/_headers`.
+- Hospedagem e previews são exclusivamente Cloudflare Pages. Não recriar
+  integração, projeto ou deploy na Vercel. `vercel.json` contém somente o bloqueio
+  de deploys Git enquanto a desconexão externa não for confirmada.
 - Cloudflare Pages usa `tools/build-cloudflare.mjs`, sempre com acesso protegido,
   saída `dist` e Node 24. Rotas/cache: `public/_redirects` e `public/_headers`.
   Configuração, autorização de origem e migração por backup: `docs/CLOUDFLARE.md`.

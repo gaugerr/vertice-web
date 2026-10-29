@@ -100,9 +100,12 @@ próxima sessão; este valor não deve ser usado para forçar rollback ou atuali
 - Após publicação do app, conferir rotas, OAuth, manifesto, `sw.js`/`online.txt`
   sem cache e asset ausente 404. Após vendas, conferir CTAs, preço, galerias,
   demonstrações e layout móvel. Ver [hospedagem](CLOUDFLARE.md).
-- A Vercel também tem integração existente com o app. Não removê-la nem trocar
-  origens como parte de uma tarefa na Cloudflare. Compras pertencem à origem do
-  navegador: mudanças de domínio exigem exportação/importação de backup.
+- Hospedagem e previews são exclusivamente Cloudflare Pages. Não criar deploys
+  na Vercel. O `vercel.json` bloqueia deploys automáticos Git; esse bloqueio não
+  substitui desconectar o repositório no painel externo e remover o projeto antigo.
+  A desconexão externa precisa ser confirmada por quem tem acesso à equipe.
+  Compras pertencem à origem do navegador: mudanças de domínio exigem
+  exportação/importação de backup.
 
 ## Supabase: banco e automação
 
