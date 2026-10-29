@@ -1,0 +1,39 @@
+name: Finish Vértice with lively audio
+on:
+  push:
+    branches: [video/shopping-demo-20261029]
+    paths:
+      - '.github/workflows/finish-video.yml'
+      - 'tools/finish-video.py'
+permissions:
+  contents: read
+  actions: read
+jobs:
+  finish:
+    runs-on: ubuntu-24.04
+    timeout-minutes: 12
+    steps:
+      - uses: actions/checkout@11bd71901bbe5b1630ceea73d27597364c9af683
+        with:
+          persist-credentials: false
+      - name: Retrieve approved smooth video
+        env:
+          GH_TOKEN: ${{ github.token }}
+        run: |
+          mkdir -p video-output
+          gh run download 40944623257 --repo gaugerr/vertice-web --name vertice-video-audio-legendas --dir video-output
+      - name: Install rendering tools
+        run: |
+          sudo apt-get update -qq
+          sudo apt-get install -y ffmpeg python3-venv fonts-dejavu-core
+          python3 -m venv /tmp/vertice-final
+          /tmp/vertice-final/bin/pip install edge-tts numpy
+      - name: Render enhanced captions narration and original music
+        run: /tmp/vertice-final/bin/python tools/finish-video.py
+      - name: Deliver finished video only
+        uses: actions/upload-artifact@ea165f8d65b6e75b540449e92b4886f43607fa02
+        with:
+          name: Vertice-video-final
+          path: video-output/Vertice.mp4
+          retention-days: 30
+          if-no-files-found: error
