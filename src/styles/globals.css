@@ -713,6 +713,12 @@ nav a.active {
   border-color: #87b69a;
   background: #87b69a1a;
 }
+.category-overflow {
+  margin-top: 10px;
+  color: #b9b1c6;
+  font-size: 13px;
+  line-height: 1.5;
+}
 .category-footer {
   display: flex;
   justify-content: space-between;

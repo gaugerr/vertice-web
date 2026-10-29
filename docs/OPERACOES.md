@@ -398,12 +398,11 @@ Conferir contratos atuais antes de novas alterações.
 - Instagram atual **@usevertice.app**, WhatsApp **5551980614158**; o site continua
   `usevertice.app.br`. A página de vendas foi considerada finalizada. O checkout
   atual fica na Cakto e não é gerado pelo HTML do site.
-- Próxima melhoria planejada, **ainda não implementada**: até cinco itens por card
-  de categoria, pendentes primeiro, comprados completando vagas, ordem preservada
-  em cada grupo; “+ N itens…” para excedentes, com singular quando necessário.
-  Totais/status usam todos os registros; card abre a categoria completa. Trabalhar
-  em `src/features/categories/pages/CategoriesPage.tsx` e estilos correspondentes,
-  mantendo banco, fórmulas monetárias e detalhes dos itens.
+- Cards em “Por categoria”: até cinco itens, pendentes primeiro e comprados
+  completando vagas, com ordem preservada em cada grupo; “+ N itens…” indica
+  excedentes, com singular para um. Totais/status usam todos os registros; o card
+  abre a categoria completa. Seleção em `CategoriesPage.tsx`, sem alterar os
+  registros salvos, também em listas finalizadas.
 
 Arquivos temporários de conversas, sessões de navegador, IDs de conexão e pastas
 em `/workspace` não são dependências permanentes do projeto. Recomeçar pelos

@@ -357,12 +357,11 @@ sobrepor o bloqueio. A emulação não substitui conferir gestos em aparelho fí
   WhatsApp: `5551980614158` (formato internacional).
 - A página de vendas foi considerada finalizada pelo proprietário. Preservar as
   demonstrações e galerias; fazer novas mudanças somente no escopo solicitado.
-- **Planejado, não implementado:** cards em “Por categoria” devem mostrar até
-  cinco itens, pendentes primeiro e comprados completando as vagas; preservar a
-  ordem atual dentro de cada grupo. Exibir “+ N itens…” abaixo, somente se houver
-  excedentes (singular para um). Totais e “Concluída” continuam usando o grupo
-  completo; tocar abre todos os itens. Entrada: `CategoriesPage.tsx`, no diretório
-  de categorias acima. Não tratar o plano como funcionalidade já entregue.
+- Cards em “Por categoria” mostram até cinco itens, pendentes primeiro e
+  comprados completando as vagas; preservam a ordem de cada grupo. “+ N itens…”
+  indica excedentes, com singular para um. Totais e “Concluída” usam o grupo
+  completo; tocar abre todos os produtos. Seleção em `CategoriesPage.tsx`, com
+  atualização reativa também em listas finalizadas.
 - Conciliação automática de notificações que nunca chegaram, alertas e painel de
   revisão de pagamentos ainda não foram implementados. A fila atual recupera
   eventos já recebidos, sem consultar pedidos na API Cakto.
