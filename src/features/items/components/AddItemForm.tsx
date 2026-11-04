@@ -30,7 +30,7 @@ export function AddItemForm({
   const suggestions = useItemSuggestions(listId, name, !readOnly);
   useUnsavedChanges(name.trim().length > 0);
   async function add(product?: SuggestedProduct) {
-    if (readOnly || composition.current || mutation.pending) return;
+    if (readOnly || (!product && composition.current) || mutation.pending) return;
     // Restore focus during the gesture, never after the asynchronous write.
     input.current?.focus({ preventScroll: true });
     const submittedName = name;

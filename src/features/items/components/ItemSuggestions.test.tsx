@@ -58,6 +58,8 @@ describe('compact suggestion interaction', () => {
     expect(screen.getByRole('list')).toBeInTheDocument();
     fireEvent.submit(input.closest('form')!);
     expect(repository.addItem).not.toHaveBeenCalled();
+    fireEvent.click(screen.getByRole('button', { name: 'Adicionar Massa · Melitta · 500 g' }));
+    await waitFor(() => expect(repository.addSuggestedItem).toHaveBeenCalledTimes(1));
   });
   it('filters locally, hides on Escape, blocks IME submission and keeps ordinary Enter manual', async () => {
     const { input } = await mount();
