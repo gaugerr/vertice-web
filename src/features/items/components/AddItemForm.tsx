@@ -21,7 +21,6 @@ export function AddItemForm({
   const [name, setName] = useState('');
   const [focused, setFocused] = useState(false);
   const [dismissed, setDismissed] = useState(false);
-  const [composing, setComposing] = useState(false);
   const composition = useRef(false);
   const input = useRef<HTMLInputElement>(null);
   const revision = useRef(0);
@@ -88,11 +87,9 @@ export function AddItemForm({
           }}
           onCompositionStart={() => {
             composition.current = true;
-            setComposing(true);
           }}
           onCompositionEnd={() => {
             composition.current = false;
-            setComposing(false);
           }}
           onKeyDown={(event) => {
             if (
@@ -117,7 +114,7 @@ export function AddItemForm({
           <Plus size={22} aria-hidden="true" />
         </Button>
       </div>
-      {focused && !dismissed && !composing && !readOnly && suggestions.length > 0 ? (
+      {focused && !dismissed && !readOnly && suggestions.length > 0 ? (
         <ul className="item-suggestions" aria-label="Sugestões de compras anteriores">
           {suggestions.map((suggestion) => {
             const label = suggestionLabel(suggestion);
