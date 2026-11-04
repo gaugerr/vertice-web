@@ -42,6 +42,25 @@ async function mount() {
   return { input, ...view };
 }
 describe('compact suggestion interaction', () => {
+  it('suggests Massa from two letters while the mobile keyboard is composing, without a space', async () => {
+    vi.mocked(repository.getCompletedItemSuggestions).mockResolvedValue([
+      { ...suggestions[0], name: 'Massa' },
+    ]);
+    render(<AddItemForm listId="list" categoryId="category" />);
+    const input = screen.getByRole('textbox');
+    input.focus();
+    fireEvent.compositionStart(input);
+    fireEvent.change(input, { target: { value: 'm' } });
+    expect(screen.queryByRole('list')).not.toBeInTheDocument();
+    fireEvent.change(input, { target: { value: 'ma' } });
+    await screen.findByRole('button', { name: 'Adicionar Massa · Melitta · 500 g' });
+    fireEvent.change(input, { target: { value: 'mass' } });
+    expect(screen.getByRole('list')).toBeInTheDocument();
+    fireEvent.submit(input.closest('form')!);
+    expect(repository.addItem).not.toHaveBeenCalled();
+    fireEvent.click(screen.getByRole('button', { name: 'Adicionar Massa · Melitta · 500 g' }));
+    await waitFor(() => expect(repository.addSuggestedItem).toHaveBeenCalledTimes(1));
+  });
   it('filters locally, hides on Escape, blocks IME submission and keeps ordinary Enter manual', async () => {
     const { input } = await mount();
     const reads = vi.mocked(repository.getCompletedItemSuggestions).mock.calls.length;
@@ -55,7 +74,7 @@ describe('compact suggestion interaction', () => {
     fireEvent.compositionStart(input);
     fireEvent.submit(input.closest('form')!);
     expect(repository.addItem).not.toHaveBeenCalled();
-    expect(screen.queryByRole('list')).not.toBeInTheDocument();
+    expect(screen.getByRole('list')).toBeInTheDocument();
     fireEvent.compositionEnd(input);
     fireEvent.submit(input.closest('form')!);
     await waitFor(() => expect(input).toHaveValue(''));
