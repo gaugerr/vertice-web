@@ -11,7 +11,7 @@
     <meta property="og:title" content="Vértice — App de lista de compras + planilha financeira" />
     <meta
       property="og:description"
-      content="App de compras + planilha financeira. Experimente uma compra de exemplo e conheça o kit."
+      content="App inteligente: sugestões das suas compras, último preço compatível e uso offline após preparo. Mais planilha financeira. Pagamento único."
     />
     <meta property="og:type" content="website" />
     <meta property="og:url" content="https://usevertice.app.br/" />
@@ -97,16 +97,16 @@
               <span class="status-dot"></span> KIT VÉRTICE · APP + PLANILHA FINANCEIRA
             </div>
             <h1 id="hero-title" class="hero-title-products">
-              App de lista de compras<br /><em>inteligente e offline.</em>
+              Sua lista de compras.<br /><em>Mais inteligente a cada compra.</em>
             </h1>
             <p class="hero-description hero-description-products">
-              <strong
-                >Planilha de controle financeiro completa, com
-                <span>dashboard e gráficos.</span></strong
-              >
-              Saiba o total antes de chegar ao caixa e acompanhe suas contas, seu orçamento e suas
-              metas.
+              Sugestões do que você já comprou, referência do último preço e o total sempre à vista.
+              Um app inteligente para suas compras, com uso offline após o preparo inicial.
+              <strong>Mais uma planilha financeira completa, com dashboard e gráficos para organizar seu mês.</strong>
             </p>
+            <ul class="smart-hero-benefits" aria-label="Diferenciais do app">
+              <li>Sugestões enquanto digita</li><li>Último preço compatível</li><li>Uso offline</li>
+            </ul>
             <div class="hero-actions">
               <a
                 class="button button-purple"
@@ -117,7 +117,7 @@
             </div>
             <p class="hero-price">
               <strong>App + planilha por R$ 19,90 no total</strong
-              ><span>Condição exclusiva de lançamento · pagamento único</span>
+              ><span>Pagamento único · acesso vitalício · sem mensalidade</span>
             </p>
             <p class="google-access-note">
               <svg aria-hidden="true"><use href="#lock" /></svg
@@ -128,7 +128,7 @@
             </p>
             <div class="hero-footnote">
               <svg><use href="#spark" /></svg
-              ><span>Uso offline após preparo e validação do acesso.</span>
+              ><span>Prepare uma vez com internet e use durante suas compras, mesmo sem sinal.</span>
             </div>
           </div>
 
@@ -216,6 +216,40 @@
           ><span>COMPRA ACOMPANHADA</span><span class="connector" aria-hidden="true"></span
           ><span>MÊS ORGANIZADO</span
           ><span class="hero-scroll">Role para conhecer <span>↓</span></span>
+        </div>
+      </section>
+
+      <section class="smart-shopping" id="app-inteligente" aria-labelledby="smart-title">
+        <div class="wrap">
+          <p class="eyebrow">INTELIGÊNCIA QUE VEM DAS SUAS COMPRAS</p>
+          <h2 id="smart-title">Quanto mais você usa,<br /><em>mais prática fica a próxima compra.</em></h2>
+          <p class="smart-intro">O Vértice aproveita o histórico das suas compras finalizadas para ajudar você a repetir produtos e consultar preços. Experimente com os dados de exemplo abaixo.</p>
+          <div class="smart-grid">
+            <article class="smart-card">
+              <span class="eyebrow">01 · SUGESTÕES DE PRODUTOS</span>
+              <h3>Já comprou? Adicione mais rápido.</h3>
+              <p>Digite as primeiras letras e encontre sugestões das suas compras finalizadas, com marca e embalagem. Sem redigitar tudo.</p>
+              <label for="smart-search">Experimente digitar “ma”</label>
+              <input id="smart-search" type="text" autocomplete="off" maxlength="50" placeholder="Ex.: ma" aria-describedby="smart-search-hint" />
+              <p id="smart-search-hint" class="smart-hint">A partir de duas letras. Toque numa sugestão para experimentar o preço.</p>
+              <ul id="smart-suggestions" aria-label="Sugestões do histórico de exemplo"></ul>
+              <p id="smart-selected" role="status" class="smart-selected"></p>
+            </article>
+            <article class="smart-card">
+              <span class="eyebrow">02 · REFERÊNCIA DE PREÇO</span>
+              <h3>Lembra quanto pagou? O Vértice mostra.</h3>
+              <p>Consulte o último preço de uma compra compatível enquanto informa o valor atual. Uma referência para perceber o que mudou.</p>
+              <p id="smart-product" class="smart-product">Massa · marca Exemplo · 500 g</p>
+              <p class="smart-reference">Última compra compatível <strong id="smart-last-price">R$ 5,49</strong></p>
+              <label for="smart-price">Preço atual (R$)</label>
+              <input id="smart-price" type="text" inputmode="decimal" maxlength="12" placeholder="Experimente: 5,99" aria-describedby="smart-price-result" />
+              <p id="smart-price-result" class="smart-result" role="status">Digite um preço para comparar com a referência de exemplo.</p>
+              <p class="smart-hint">No app, a referência considera produto, marca, embalagem equivalente e unidade. O preço é informado por você.</p>
+            </article>
+          </div>
+          <div class="smart-offline"><strong>Sua lista vai com você, mesmo sem sinal.</strong><p>Prepare o app com internet antes de sair. Durante a compra, consulte seus produtos, registre preços e acompanhe o total offline.</p><span>Pagamento único. Acesso vitalício ao app adquirido. Sem mensalidade.</span></div>
+          <p class="smart-disclaimer">Demonstração independente com histórico fictício. Não salva compras nem consulta preços de lojas. No app, as sugestões e referências vêm das suas próprias compras finalizadas.</p>
+          <a class="text-link" href="#na-vida-real">Ver as telas reais do app <span aria-hidden="true">↗</span></a>
         </div>
       </section>
 
@@ -863,8 +897,9 @@
                 <li>Listas organizadas por categoria</li>
                 <li>Total dos itens comprados e orçamento</li>
                 <li>Comparador de preço por quantidade</li>
-                <li>Histórico de preços de compras finalizadas</li>
-                <li>Uso offline após preparo e validação do acesso</li>
+                <li>Sugestões de produtos enquanto digita</li>
+                <li>Último preço compatível de compras finalizadas</li>
+                <li>Uso offline após o preparo inicial</li>
               </ul>
               <span class="kit-platform">NO NAVEGADOR · INSTALÁVEL NO CELULAR</span>
             </article>
@@ -970,139 +1005,7 @@
               tabindex="0"
               aria-label="Telas do aplicativo; deslize para os lados para ver mais"
             >
-              <li class="screen-card">
-                <figure>
-                  <a
-                    class="screen-card-image"
-                    data-gallery-open
-                    href="/media/app-orcamento.jpg"
-                    data-expanded-crop="12 175 568 490"
-                    data-source-size="592 1280"
-                    target="_blank"
-                    rel="noopener"
-                  >
-                    <svg
-                      class="screen-crop"
-                      viewBox="12 175 568 490"
-                      width="568"
-                      height="490"
-                      role="img"
-                      aria-label="Total da lista de R$ 69,08 e orçamento de R$ 100,00, com R$ 30,92 restantes."
-                      focusable="false"
-                      data-screen-name="app-orcamento"
-                    >
-                      <defs>
-                        <clipPath id="screen-crop-3">
-                          <rect x="12" y="175" width="568" height="490" />
-                        </clipPath>
-                      </defs>
-                      <image
-                        href="/media/app-orcamento.jpg"
-                        width="592"
-                        height="1280"
-                        clip-path="url(#screen-crop-3)"
-                      />
-                    </svg>
-                    <span class="screen-card-expand"
-                      >Ampliar tela <svg aria-hidden="true"><use href="#up-right" /></svg
-                    ></span>
-                  </a>
-                  <figcaption>
-                    <span class="screen-card-step">01 · ORÇAMENTO</span>
-                    <h3>O total sempre à vista.</h3>
-                    <p>Acompanhe os itens comprados e quanto ainda cabe no limite da lista.</p>
-                  </figcaption>
-                </figure>
-              </li>
-              <li class="screen-card">
-                <figure>
-                  <a
-                    class="screen-card-image"
-                    data-gallery-open
-                    href="/media/app-categorias.jpg"
-                    data-expanded-crop="10 40 554 1000"
-                    data-source-size="574 1280"
-                    target="_blank"
-                    rel="noopener"
-                  >
-                    <svg
-                      class="screen-crop"
-                      viewBox="14 120 546 540"
-                      width="546"
-                      height="540"
-                      role="img"
-                      aria-label="Categoria Essenciais com quatro produtos, marcação de comprados e total de R$ 69,08."
-                      focusable="false"
-                      data-screen-name="app-categorias"
-                    >
-                      <defs>
-                        <clipPath id="screen-crop-4">
-                          <rect x="14" y="120" width="546" height="540" />
-                        </clipPath>
-                      </defs>
-                      <image
-                        href="/media/app-categorias.jpg"
-                        width="574"
-                        height="1280"
-                        clip-path="url(#screen-crop-4)"
-                      />
-                    </svg>
-                    <span class="screen-card-expand"
-                      >Ampliar tela <svg aria-hidden="true"><use href="#up-right" /></svg
-                    ></span>
-                  </a>
-                  <figcaption>
-                    <span class="screen-card-step">02 · CATEGORIAS</span>
-                    <h3>Cada coisa no seu lugar.</h3>
-                    <p>Separe os produtos por categoria e veja o que já entrou no carrinho.</p>
-                  </figcaption>
-                </figure>
-              </li>
-              <li class="screen-card">
-                <figure>
-                  <a
-                    class="screen-card-image"
-                    data-gallery-open
-                    href="/media/app-comparador.jpg"
-                    data-expanded-crop="36 78 562 1080"
-                    data-source-size="634 1280"
-                    target="_blank"
-                    rel="noopener"
-                  >
-                    <svg
-                      class="screen-crop"
-                      viewBox="40 900 554 265"
-                      width="554"
-                      height="265"
-                      role="img"
-                      aria-label="Resultado do exemplo: opção A a R$ 53,98/kg e opção B a R$ 60,76/kg, com diferença de 11,2%."
-                      focusable="false"
-                      data-screen-name="app-comparador"
-                    >
-                      <defs>
-                        <clipPath id="screen-crop-5">
-                          <rect x="40" y="900" width="554" height="265" />
-                        </clipPath>
-                      </defs>
-                      <image
-                        href="/media/app-comparador.jpg"
-                        width="634"
-                        height="1280"
-                        clip-path="url(#screen-crop-5)"
-                      />
-                    </svg>
-                    <span class="screen-card-expand"
-                      >Ampliar tela <svg aria-hidden="true"><use href="#up-right" /></svg
-                    ></span>
-                  </a>
-                  <figcaption>
-                    <span class="screen-card-step">03 · COMPARADOR</span>
-                    <h3>Descubra qual compensa.</h3>
-                    <p>Compare o preço por peso, volume ou unidade antes de escolher.</p>
-                  </figcaption>
-                </figure>
-              </li>
-              <li class="screen-card">
+<li class="screen-card">
                 <figure>
                   <a
                     class="screen-card-image"
@@ -1140,13 +1043,13 @@
                     ></span>
                   </a>
                   <figcaption>
-                    <span class="screen-card-step">04 · SUGESTÕES</span>
-                    <h3>Sua próxima lista, mais rápida.</h3>
-                    <p>Encontre sugestões de produtos de compras anteriores enquanto digita.</p>
+                    <span class="screen-card-step">01 · SUGESTÕES</span>
+                    <h3>Já comprou? Adicione mais rápido.</h3>
+                    <p>Digite as primeiras letras e escolha um produto de suas compras finalizadas, com marca e embalagem.</p>
                   </figcaption>
                 </figure>
               </li>
-              <li class="screen-card">
+<li class="screen-card">
                 <figure>
                   <a
                     class="screen-card-image"
@@ -1184,13 +1087,145 @@
                     ></span>
                   </a>
                   <figcaption>
-                    <span class="screen-card-step">05 · HISTÓRICO DE PREÇOS</span>
-                    <h3>Uma referência para decidir.</h3>
-                    <p>Consulte a última compra compatível enquanto informa o preço atual.</p>
+                    <span class="screen-card-step">02 · HISTÓRICO DE PREÇOS</span>
+                    <h3>Veja quanto pagou da última vez.</h3>
+                    <p>Compare o preço que está digitando com a última compra compatível do mesmo produto.</p>
                   </figcaption>
                 </figure>
               </li>
-            </ol>
+<li class="screen-card">
+                <figure>
+                  <a
+                    class="screen-card-image"
+                    data-gallery-open
+                    href="/media/app-orcamento.jpg"
+                    data-expanded-crop="12 175 568 490"
+                    data-source-size="592 1280"
+                    target="_blank"
+                    rel="noopener"
+                  >
+                    <svg
+                      class="screen-crop"
+                      viewBox="12 175 568 490"
+                      width="568"
+                      height="490"
+                      role="img"
+                      aria-label="Total da lista de R$ 69,08 e orçamento de R$ 100,00, com R$ 30,92 restantes."
+                      focusable="false"
+                      data-screen-name="app-orcamento"
+                    >
+                      <defs>
+                        <clipPath id="screen-crop-3">
+                          <rect x="12" y="175" width="568" height="490" />
+                        </clipPath>
+                      </defs>
+                      <image
+                        href="/media/app-orcamento.jpg"
+                        width="592"
+                        height="1280"
+                        clip-path="url(#screen-crop-3)"
+                      />
+                    </svg>
+                    <span class="screen-card-expand"
+                      >Ampliar tela <svg aria-hidden="true"><use href="#up-right" /></svg
+                    ></span>
+                  </a>
+                  <figcaption>
+                    <span class="screen-card-step">03 · ORÇAMENTO</span>
+                    <h3>O total sempre à vista.</h3>
+                    <p>Acompanhe os itens comprados e quanto ainda cabe no limite da lista.</p>
+                  </figcaption>
+                </figure>
+              </li>
+<li class="screen-card">
+                <figure>
+                  <a
+                    class="screen-card-image"
+                    data-gallery-open
+                    href="/media/app-categorias.jpg"
+                    data-expanded-crop="10 40 554 1000"
+                    data-source-size="574 1280"
+                    target="_blank"
+                    rel="noopener"
+                  >
+                    <svg
+                      class="screen-crop"
+                      viewBox="14 120 546 540"
+                      width="546"
+                      height="540"
+                      role="img"
+                      aria-label="Categoria Essenciais com quatro produtos, marcação de comprados e total de R$ 69,08."
+                      focusable="false"
+                      data-screen-name="app-categorias"
+                    >
+                      <defs>
+                        <clipPath id="screen-crop-4">
+                          <rect x="14" y="120" width="546" height="540" />
+                        </clipPath>
+                      </defs>
+                      <image
+                        href="/media/app-categorias.jpg"
+                        width="574"
+                        height="1280"
+                        clip-path="url(#screen-crop-4)"
+                      />
+                    </svg>
+                    <span class="screen-card-expand"
+                      >Ampliar tela <svg aria-hidden="true"><use href="#up-right" /></svg
+                    ></span>
+                  </a>
+                  <figcaption>
+                    <span class="screen-card-step">04 · CATEGORIAS</span>
+                    <h3>Cada coisa no seu lugar.</h3>
+                    <p>Separe os produtos por categoria e veja o que já entrou no carrinho.</p>
+                  </figcaption>
+                </figure>
+              </li>
+<li class="screen-card">
+                <figure>
+                  <a
+                    class="screen-card-image"
+                    data-gallery-open
+                    href="/media/app-comparador.jpg"
+                    data-expanded-crop="36 78 562 1080"
+                    data-source-size="634 1280"
+                    target="_blank"
+                    rel="noopener"
+                  >
+                    <svg
+                      class="screen-crop"
+                      viewBox="40 900 554 265"
+                      width="554"
+                      height="265"
+                      role="img"
+                      aria-label="Resultado do exemplo: opção A a R$ 53,98/kg e opção B a R$ 60,76/kg, com diferença de 11,2%."
+                      focusable="false"
+                      data-screen-name="app-comparador"
+                    >
+                      <defs>
+                        <clipPath id="screen-crop-5">
+                          <rect x="40" y="900" width="554" height="265" />
+                        </clipPath>
+                      </defs>
+                      <image
+                        href="/media/app-comparador.jpg"
+                        width="634"
+                        height="1280"
+                        clip-path="url(#screen-crop-5)"
+                      />
+                    </svg>
+                    <span class="screen-card-expand"
+                      >Ampliar tela <svg aria-hidden="true"><use href="#up-right" /></svg
+                    ></span>
+                  </a>
+                  <figcaption>
+                    <span class="screen-card-step">05 · COMPARADOR</span>
+                    <h3>Descubra qual compensa.</h3>
+                    <p>Compare o preço por peso, volume ou unidade antes de escolher.</p>
+                  </figcaption>
+                </figure>
+              </li>
+</ol>
             <p class="app-gallery-hint">Deslize para os lados · toque em uma tela para ampliar</p>
           </div>
           <dialog class="screen-viewer" data-gallery-viewer aria-labelledby="screen-viewer-title">
@@ -1768,10 +1803,9 @@
                 Preciso de internet para usar o aplicativo?<span aria-hidden="true">+</span>
               </summary>
               <div>
-                O primeiro acesso exige internet, login Google e licença liberada. Depois de
-                preparar o uso offline e validar o acesso, você pode usar sem conexão por até sete
-                dias. Após esse período, a autorização precisa ser renovada online; isso não é uma
-                mensalidade.
+                O primeiro acesso e o preparo do aplicativo exigem internet, login Google e licença
+                liberada. Com o app preparado, você pode consultar a lista e registrar suas compras
+                mesmo sem sinal no mercado. O kit tem pagamento único, sem mensalidade.
               </div>
             </details>
             <details>
@@ -1890,8 +1924,7 @@
               <div>
                 A licença do app adquirido não tem prazo de expiração nem cobrança recorrente. Isso
                 não promete que produtos separados ou futuras versões pagas estarão incluídos. O
-                funcionamento online depende da continuidade e manutenção do serviço; a validação
-                offline precisa de renovação em até sete dias.
+                funcionamento online depende da continuidade e manutenção do serviço.
               </div>
             </details>
             <details>
@@ -1938,3 +1971,4 @@
     </div>
   </body>
 </html>
+
