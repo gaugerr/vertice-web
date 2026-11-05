@@ -1,0 +1,29 @@
+name: Marketing browser checks
+on:
+  push:
+    paths: ['marketing/**', '.github/workflows/marketing.yml']
+  pull_request:
+    paths: ['marketing/**', '.github/workflows/marketing.yml']
+permissions:
+  contents: read
+jobs:
+  marketing:
+    runs-on: ubuntu-24.04
+    timeout-minutes: 12
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-node@v4
+        with:
+          node-version-file: .nvmrc
+      - run: npm ci --ignore-scripts --no-audit --no-fund
+      - name: Build sales page
+        working-directory: marketing
+        run: node build.mjs
+      - run: npx playwright install --with-deps chromium webkit
+      - run: node marketing/verify-smart-demo.mjs
+      - uses: actions/upload-artifact@v4
+        if: always()
+        with:
+          name: marketing-review
+          path: marketing-results/
+          retention-days: 14

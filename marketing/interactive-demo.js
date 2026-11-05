@@ -17,6 +17,70 @@
     const [whole, fraction = ''] = normalized.replace(',', '.').split('.');
     return Number(whole) * 100 + Number(fraction.padEnd(2, '0'));
   }
+  // Histórico fictício e explícito, independente das compras do app.
+  const smartHistory = [
+    { name: 'Massa', detail: 'marca Exemplo · 500 g', cents: 549 },
+    { name: 'Massa integral', detail: 'marca Exemplo · 500 g', cents: 799 },
+    { name: 'Maçã', detail: 'por kg', cents: 890 },
+  ];
+  let smartProduct = smartHistory[0];
+  const normalizeSmart = (value) =>
+    value.trim().toLocaleLowerCase('pt-BR').normalize('NFD').replace(/\p{M}/gu, '');
+  function renderSmartPrice() {
+    const input = $('#smart-price');
+    const cents = parseMoney(input.value);
+    input.setAttribute('aria-invalid', String(cents === null));
+    const output = $('#smart-price-result');
+    if (!input.value.trim())
+      output.textContent = 'Digite um preço para comparar com a referência de exemplo.';
+    else if (cents === null)
+      output.textContent = 'Informe um preço positivo com até duas casas decimais.';
+    else {
+      const difference = cents - smartProduct.cents;
+      output.textContent =
+        difference === 0
+          ? 'Mesmo preço da última compra compatível de exemplo.'
+          : reais(Math.abs(difference)) +
+            (difference > 0 ? ' a mais' : ' a menos') +
+            ' que na última compra compatível de exemplo.';
+    }
+  }
+  $('#smart-search').addEventListener('input', () => {
+    const query = normalizeSmart($('#smart-search').value);
+    const list = $('#smart-suggestions');
+    list.replaceChildren();
+    $('#smart-selected').textContent = '';
+    if (query.length < 2) return;
+    const matches = smartHistory
+      .filter((product) => normalizeSmart(product.name).startsWith(query))
+      .slice(0, 3);
+    for (const product of matches) {
+      const li = document.createElement('li');
+      const button = document.createElement('button');
+      button.type = 'button';
+      button.textContent = product.name + ' · ' + product.detail;
+      button.addEventListener('click', () => {
+        smartProduct = product;
+        $('#smart-selected').textContent =
+          product.name + ' selecionado no exemplo. Agora experimente informar o preço.';
+        $('#smart-product').textContent = product.name + ' · ' + product.detail;
+        $('#smart-last-price').textContent = reais(product.cents);
+        $('#smart-price').value = '';
+        list.replaceChildren();
+        renderSmartPrice();
+        $('#smart-price').focus({ preventScroll: true });
+      });
+      li.append(button);
+      list.append(li);
+    }
+    if (!matches.length)
+      $('#smart-selected').textContent =
+        'Nenhum produto neste histórico fictício. Experimente “ma”.';
+  });
+  $('#smart-search').addEventListener('keydown', (event) => {
+    if (event.key === 'Escape') $('#smart-suggestions').replaceChildren();
+  });
+  $('#smart-price').addEventListener('input', renderSmartPrice);
   const productDefaults = [
     { name: 'Arroz', detail: '1 pacote · 5 kg', category: 'essenciais', cents: 1249, bought: true },
     { name: 'Leite', detail: '1 unidade · 1 L', category: 'essenciais', cents: 579, bought: true },
