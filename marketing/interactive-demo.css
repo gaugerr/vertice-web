@@ -1068,3 +1068,7 @@ progress::-webkit-progress-value {
     overflow-wrap: anywhere;
   }
 }
+
+@media (max-width: 360px) {
+  .finance-tabs { flex-wrap: wrap; }
+}
