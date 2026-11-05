@@ -93,7 +93,32 @@ try {
         assert.notEqual(await page.locator('#demo-total').innerText(), before);
         await page.locator('#reset-app').click();
         assert.equal(await page.locator('#demo-total').innerText(), before);
-        console.log('LAYOUT', name, width, await page.evaluate(() => ({ width: innerWidth, scroll: document.documentElement.scrollWidth, outside: [...document.querySelectorAll('body *')].filter(e => { const r=e.getBoundingClientRect(); return r.width && (r.right>innerWidth+1 || r.left < -1) && getComputedStyle(e).position !== 'fixed'; }).slice(0,18).map(e=>({tag:e.tagName,cls:e.className,id:e.id,width:e.getBoundingClientRect().width,right:e.getBoundingClientRect().right})) })));
+        console.log(
+          'LAYOUT',
+          name,
+          width,
+          await page.evaluate(() => ({
+            width: innerWidth,
+            scroll: document.documentElement.scrollWidth,
+            outside: [...document.querySelectorAll('body *')]
+              .filter((e) => {
+                const r = e.getBoundingClientRect();
+                return (
+                  r.width &&
+                  (r.right > innerWidth + 1 || r.left < -1) &&
+                  getComputedStyle(e).position !== 'fixed'
+                );
+              })
+              .slice(0, 18)
+              .map((e) => ({
+                tag: e.tagName,
+                cls: e.className,
+                id: e.id,
+                width: e.getBoundingClientRect().width,
+                right: e.getBoundingClientRect().right,
+              })),
+          })),
+        );
         assert.ok(await page.evaluate(() => document.documentElement.scrollWidth <= innerWidth));
         assert.deepEqual(errors, []);
         assert.equal(
