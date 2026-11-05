@@ -907,30 +907,164 @@ progress::-webkit-progress-value {
   }
 }
 
-
 /* Histórico em destaque: exemplos isolados dos dados do comprador. */
-.smart-hero-benefits { display:flex; flex-wrap:wrap; gap:8px; list-style:none; padding:0; margin:22px 0; }
-.smart-hero-benefits li { border:1px solid #b39aff55; border-radius:999px; padding:7px 11px; color:#e8ddff; font-size:12px; }
-.smart-shopping { padding:80px 0; background:#141219; color:#f5f0fc; }
-.smart-shopping h2 { font-size:clamp(30px,4.5vw,54px); line-height:1.12; letter-spacing:-.04em; margin:15px 0 22px; }
-.smart-shopping h2 em { color:#b39aff; font-style:normal; }
-.smart-intro { max-width:740px; color:#c8c1d2; line-height:1.7; }
-.smart-grid { display:grid; grid-template-columns:repeat(2,minmax(0,1fr)); gap:24px; margin:34px 0 24px; }
-.smart-card { min-width:0; background:#211c2b; border:1px solid #b39aff33; border-radius:22px; padding:28px; }
-.smart-card h3 { font-size:25px; line-height:1.2; margin:16px 0; }
-.smart-card p { line-height:1.6; color:#d2cbdc; }
-.smart-card label { display:block; font-weight:650; margin:22px 0 10px; }
-.smart-card input { display:block; box-sizing:border-box; width:100%; min-height:48px; background:#141219; border:1px solid #b39aff88; border-radius:12px; color:#fff; padding:12px 14px; font:inherit; }
-.smart-card input:focus-visible,.smart-card button:focus-visible { outline:3px solid #b7edce; outline-offset:3px; }
-.smart-card .smart-hint,.smart-disclaimer { font-size:13px; color:#bfb6cd; line-height:1.6; }
-#smart-suggestions { list-style:none; padding:0; margin:12px 0; }
-#smart-suggestions button { width:100%; text-align:left; padding:12px; border:1px solid #b39aff55; background:#31263f; color:#fff; border-radius:10px; font:inherit; cursor:pointer; }
-#smart-suggestions li+li { margin-top:8px; }
-.smart-card .smart-selected,.smart-card .smart-result { color:#b7edce; min-height:48px; }
-.smart-product { font-weight:650; }
-.smart-reference { display:flex; justify-content:space-between; flex-wrap:wrap; gap:10px; background:#141219; border-radius:12px; padding:14px; }
-.smart-reference strong { color:#b7edce; white-space:nowrap; }
-.smart-offline { background:#b7edce0d; border-left:3px solid #b7edce; padding:22px; border-radius:0 16px 16px 0; }
-.smart-offline strong { font-size:22px; }.smart-offline p { line-height:1.6; color:#d2cbdc; }.smart-offline span { color:#b7edce; font-size:14px; }
-.smart-disclaimer { margin:20px 0; max-width:780px; }
-@media(max-width:700px) { .smart-grid { grid-template-columns:1fr; }.smart-card { padding:22px 18px; }.smart-shopping { padding:54px 0; }.smart-shopping h2 { overflow-wrap:anywhere; } }
+.smart-hero-benefits {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 8px;
+  list-style: none;
+  padding: 0;
+  margin: 22px 0;
+}
+.smart-hero-benefits li {
+  border: 1px solid #b39aff55;
+  border-radius: 999px;
+  padding: 7px 11px;
+  color: #e8ddff;
+  font-size: 12px;
+}
+.smart-shopping {
+  padding: 80px 0;
+  background: #141219;
+  color: #f5f0fc;
+}
+.smart-shopping h2 {
+  font-size: clamp(30px, 4.5vw, 54px);
+  line-height: 1.12;
+  letter-spacing: -0.04em;
+  margin: 15px 0 22px;
+}
+.smart-shopping h2 em {
+  color: #b39aff;
+  font-style: normal;
+}
+.smart-intro {
+  max-width: 740px;
+  color: #c8c1d2;
+  line-height: 1.7;
+}
+.smart-grid {
+  display: grid;
+  grid-template-columns: repeat(2, minmax(0, 1fr));
+  gap: 24px;
+  margin: 34px 0 24px;
+}
+.smart-card {
+  min-width: 0;
+  background: #211c2b;
+  border: 1px solid #b39aff33;
+  border-radius: 22px;
+  padding: 28px;
+}
+.smart-card h3 {
+  font-size: 25px;
+  line-height: 1.2;
+  margin: 16px 0;
+}
+.smart-card p {
+  line-height: 1.6;
+  color: #d2cbdc;
+}
+.smart-card label {
+  display: block;
+  font-weight: 650;
+  margin: 22px 0 10px;
+}
+.smart-card input {
+  display: block;
+  box-sizing: border-box;
+  width: 100%;
+  min-height: 48px;
+  background: #141219;
+  border: 1px solid #b39aff88;
+  border-radius: 12px;
+  color: #fff;
+  padding: 12px 14px;
+  font: inherit;
+}
+.smart-card input:focus-visible,
+.smart-card button:focus-visible {
+  outline: 3px solid #b7edce;
+  outline-offset: 3px;
+}
+.smart-card .smart-hint,
+.smart-disclaimer {
+  font-size: 13px;
+  color: #bfb6cd;
+  line-height: 1.6;
+}
+#smart-suggestions {
+  list-style: none;
+  padding: 0;
+  margin: 12px 0;
+}
+#smart-suggestions button {
+  width: 100%;
+  text-align: left;
+  padding: 12px;
+  border: 1px solid #b39aff55;
+  background: #31263f;
+  color: #fff;
+  border-radius: 10px;
+  font: inherit;
+  cursor: pointer;
+}
+#smart-suggestions li + li {
+  margin-top: 8px;
+}
+.smart-card .smart-selected,
+.smart-card .smart-result {
+  color: #b7edce;
+  min-height: 48px;
+}
+.smart-product {
+  font-weight: 650;
+}
+.smart-reference {
+  display: flex;
+  justify-content: space-between;
+  flex-wrap: wrap;
+  gap: 10px;
+  background: #141219;
+  border-radius: 12px;
+  padding: 14px;
+}
+.smart-reference strong {
+  color: #b7edce;
+  white-space: nowrap;
+}
+.smart-offline {
+  background: #b7edce0d;
+  border-left: 3px solid #b7edce;
+  padding: 22px;
+  border-radius: 0 16px 16px 0;
+}
+.smart-offline strong {
+  font-size: 22px;
+}
+.smart-offline p {
+  line-height: 1.6;
+  color: #d2cbdc;
+}
+.smart-offline span {
+  color: #b7edce;
+  font-size: 14px;
+}
+.smart-disclaimer {
+  margin: 20px 0;
+  max-width: 780px;
+}
+@media (max-width: 700px) {
+  .smart-grid {
+    grid-template-columns: 1fr;
+  }
+  .smart-card {
+    padding: 22px 18px;
+  }
+  .smart-shopping {
+    padding: 54px 0;
+  }
+  .smart-shopping h2 {
+    overflow-wrap: anywhere;
+  }
+}
