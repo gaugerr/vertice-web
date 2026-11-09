@@ -31,12 +31,13 @@ export const methodNames = [
 ];
 const colors = ['#b19aef', '#8caed5', '#b7edce', '#e0bd8e', '#e6a4b2', '#c1ade4'];
 export const normalize = (s) => s.trim().normalize('NFC').toLocaleLowerCase('pt-BR');
-export function cents(input) {
+export function cents(input, { allowZero = false } = {}) {
   if (!/^\d{1,8}([,.]\d{1,2})?$/.test(String(input).trim()))
     throw Error('Use um valor como 120,50, sem separador de milhares.');
   const [a, b = ''] = String(input).trim().replace(',', '.').split('.');
   const value = Number(a) * 100 + Number(b.padEnd(2, '0'));
-  positive(value);
+  if (allowZero) nonnegative(value);
+  else positive(value);
   return value;
 }
 function positive(n) {
@@ -223,7 +224,7 @@ function reference(s, catId, methodId, type, oldCat, oldMethod) {
   if (!c || c.type !== type || (!c.active && c.id !== oldCat))
     throw Error('Escolha uma categoria ativa do tipo correto.');
   const m = s.methods.find((m) => m.id === methodId);
-  if (!m || (!m.active && m.id !== oldMethod))
+  if ((methodId !== null || oldMethod !== null) && (!m || (!m.active && m.id !== oldMethod)))
     throw Error('Escolha uma forma de pagamento ou recebimento ativa.');
 }
 export function saveCatalog(s, kind, { id, name, type }) {
@@ -333,10 +334,15 @@ export function fixedRows(s, month) {
     const key = a.id + ':' + month,
       record = s.occurrences[key];
     if (record?.payment) {
+      const p = record.payment;
+      const settled = p.settled === undefined || p.settled;
+      const expected = settled ? p.amount : Math.max(p.snapshot.amount, p.amount);
       rows.push({
         ...record.payment.snapshot,
-        amount: record.payment.amount,
-        paid: true,
+        amount: expected,
+        paidAmount: p.amount,
+        remainingAmount: expected - p.amount,
+        paid: settled,
         paymentDate: record.payment.date,
         source: 'fixed',
         accountId: a.id,
@@ -361,6 +367,8 @@ export function fixedRows(s, month) {
       paymentMethodId: v.paymentMethodId,
       type: 'expense',
       paid: false,
+      paidAmount: 0,
+      remainingAmount: record?.amountOverride ?? v.amount,
       observation: record?.observation ?? a.observation,
     });
   }
@@ -372,7 +380,7 @@ export function monthlyRows(s, month) {
     ...fixedRows(s, month),
   ].sort((a, b) => b.date.localeCompare(a.date) || a.id.localeCompare(b.id));
 }
-export function payFixed(s, id, month, { date, amount, observation: note = '' }) {
+export function payFixed(s, id, month, { date, amount, observation: note = '', settle = false }) {
   const row = fixedRows(s, month).find((r) => r.accountId === id);
   if (!row || row.paid) throw Error('Esta competência não está disponível para pagamento.');
   if (!validDate(date)) throw Error('Informe a data real do pagamento.');
@@ -380,7 +388,16 @@ export function payFixed(s, id, month, { date, amount, observation: note = '' })
   observation(note);
   const key = id + ':' + month;
   const record = s.occurrences[key] || {};
-  record.payment = { date, amount, snapshot: { ...row, observation: note } };
+  const old = record.payment;
+  const total = (old?.amount || 0) + amount;
+  positive(total);
+  record.payment = {
+    date,
+    amount: total,
+    settled: settle || total >= row.amount,
+    snapshot: old ? { ...old.snapshot, observation: note } : { ...row, observation: note },
+    history: [...(old?.history || []), { date, amount, observation: note }],
+  };
   s.occurrences[key] = record;
 }
 export function undoFixed(s, id, month) {
@@ -390,7 +407,8 @@ export function undoFixed(s, id, month) {
 }
 export function adjustFixed(s, id, month, amount, note = '') {
   const row = fixedRows(s, month).find((r) => r.accountId === id);
-  if (!row || row.paid) throw Error('Desfaça o pagamento antes de ajustar esta competência.');
+  if (!row || row.paid || row.paidAmount)
+    throw Error('Desfaça os pagamentos antes de ajustar esta competência.');
   positive(amount);
   observation(note);
   s.occurrences[id + ':' + month] = {
@@ -407,7 +425,9 @@ export function endFixed(s, id, month) {
 }
 export function totals(rows) {
   const add = (type, paidOnly) =>
-    rows.filter((r) => r.type === type && (!paidOnly || r.paid)).reduce((n, r) => n + r.amount, 0);
+    rows
+      .filter((r) => r.type === type)
+      .reduce((n, r) => n + (paidOnly ? (r.paidAmount ?? (r.paid ? r.amount : 0)) : r.amount), 0);
   const income = add('income', true),
     expense = add('expense', true),
     expectedIncome = add('income', false),
@@ -511,6 +531,8 @@ export function validateState(s) {
     if (r.amountOverride !== undefined) positive(r.amountOverride);
     if (r.observation !== undefined) observation(r.observation);
     if (r.payment) {
+      if (r.payment.settled !== undefined && typeof r.payment.settled !== 'boolean')
+        throw Error('Situação de pagamento inválida.');
       positive(r.payment.amount);
       if (!validDate(r.payment.date)) throw Error('Pagamento inválido.');
       const snap = r.payment.snapshot;
@@ -528,6 +550,24 @@ export function validateState(s) {
       positive(snap.amount);
       text(snap.name);
       observation(snap.observation);
+      if (r.payment.settled === false && r.payment.amount >= snap.amount)
+        throw Error('Pagamento parcial inválido.');
+      if (r.payment.history !== undefined) {
+        if (!Array.isArray(r.payment.history) || !r.payment.history.length)
+          throw Error('Histórico inválido.');
+        let sum = 0;
+        for (const h of r.payment.history) {
+          if (
+            !validDate(h.date) ||
+            !Number.isSafeInteger(h.amount) ||
+            Math.abs(h.amount) > MAX_AMOUNT
+          )
+            throw Error('Movimentação inválida.');
+          observation(h.observation);
+          sum += h.amount;
+        }
+        if (sum !== r.payment.amount) throw Error('Histórico diverge do total pago.');
+      }
     }
   }
   for (const g of s.goals) {
@@ -537,12 +577,23 @@ export function validateState(s) {
   }
   return s;
 }
-export function correctPayment(s, id, month, { date, amount, observation: note = '' }) {
+export function correctPayment(
+  s,
+  id,
+  month,
+  { date, amount, observation: note = '', settle = false },
+) {
   const payment = s.occurrences[id + ':' + month]?.payment;
   if (!payment) throw Error('Pagamento não encontrado.');
   if (!validDate(date)) throw Error('Informe a data real do pagamento.');
   positive(amount);
   observation(note);
+  const history = payment.history || [
+    { date: payment.date, amount: payment.amount, observation: payment.snapshot.observation },
+  ];
+  history.push({ date, amount: amount - payment.amount, observation: note });
+  payment.history = history;
+  payment.settled = settle || amount >= payment.snapshot.amount;
   payment.date = date;
   payment.amount = amount;
   payment.snapshot.observation = note;

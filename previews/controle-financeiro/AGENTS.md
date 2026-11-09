@@ -14,6 +14,8 @@ Não altera as rotas, autenticação, banco, app de compras ou página de vendas
 - Migrar v1 uma única vez, conservando a chave original e vertice-finance-preview-v1-backup. Nunca restaurar exemplos automaticamente se houver erro de leitura.
 - Categorias e pagamentos usam IDs estáveis; arquivar mantém as referências históricas. Não inferir categorias ou pagamentos ausentes nos dados antigos.
 - Contas fixas são versões mensais com ocorrências únicas por conta/competência. Pagamentos entram nos indicadores pela competência, preservando também a data real e o valor efetivo. Não somar o cadastro da recorrência aos lançamentos.
+- Pagamento parcial mantém uma ocorrência com paidAmount e remainingAmount. Totais confirmados usam paidAmount; orçamento usa amount completo. Novos pagamentos acumulam; correção altera o total. Pagamentos legados sem settled continuam quitados. Desconto exige quitação explícita. Histórico de movimentos soma o total pago.
+- Limites aceitam zero; campo vazio significa sem limite. Edição de legado pode preservar método nulo, novos lançamentos e cópias não podem.
 - Compras: reutiliza telas/repositório reais de src/ através de shopping.tsx, com IndexedDB exclusivo vertice_shopping_navigation_preview_v1.
 - shell.js mantém o menu de áreas, breadcrumbs e abas inferiores apenas do Financeiro.
 - Abas: Resumo, Lançamentos, Contas Fixas, Orçamento e Metas. Cadastros editáveis ficam em Configurações e nos formulários.

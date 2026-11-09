@@ -38,6 +38,85 @@ const memory = () => {
   const m = new Map();
   return { getItem: (k) => m.get(k) ?? null, setItem: (k, v) => m.set(k, v) };
 };
+test('orçamento aceita zero sem permitir zero em lançamentos ou valores negativos', () => {
+  assert.equal(cents('0', { allowZero: true }), 0);
+  assert.equal(cents('0,00', { allowZero: true }), 0);
+  assert.throws(() => cents('0'));
+  assert.throws(() => cents('-1', { allowZero: true }));
+  const s = emptyState();
+  s.budgets.D01 = 0;
+  validateState(s);
+});
+test('edição mantém pagamento desconhecido do legado; novos registros e cópias exigem método', () => {
+  const s = migrateV1({
+    entries: [
+      {
+        id: 'legacy',
+        name: 'Antigo',
+        amount: 12345,
+        date: '2026-11-05',
+        category: 'Alimentação',
+        type: 'expense',
+        paid: false,
+      },
+    ],
+    budgets: {},
+    goals: [],
+  });
+  saveEntry(s, { ...s.entries[0], name: 'Corrigido' });
+  assert.equal(s.entries[0].paymentMethodId, null);
+  assert.throws(() => saveEntry(s, { ...s.entries[0], id: 'copy' }));
+  saveEntry(s, { ...s.entries[0], paymentMethodId: 'P2' });
+  assert.throws(() => saveEntry(s, { ...s.entries[0], paymentMethodId: null }));
+  validateState(s);
+});
+test('parcial mantém restante, soma pagamentos e entra uma única vez no orçamento e totais', () => {
+  const s = emptyState();
+  account(s, { amount: 10000 });
+  payFixed(s, 'rent', '2026-11', { date: '2026-12-01', amount: 6000 });
+  let r = fixedRows(s, '2026-11')[0];
+  assert.equal(r.paid, false);
+  assert.equal(r.paidAmount, 6000);
+  assert.equal(r.remainingAmount, 4000);
+  assert.equal(r.amount, 10000);
+  assert.equal(totals(monthlyRows(s, '2026-11')).expense, 6000);
+  assert.equal(totals(monthlyRows(s, '2026-11')).expectedExpense, 10000);
+  assert.equal(totals(monthlyRows(s, '2026-12')).expense, 0);
+  assert.throws(() => adjustFixed(s, 'rent', '2026-11', 20000));
+  account(s, { from: '2026-11', amount: 15000 });
+  endFixed(s, 'rent', '2026-11');
+  assert.equal(fixedRows(s, '2026-11')[0].remainingAmount, 4000);
+  payFixed(s, 'rent', '2026-11', { date: '2026-12-02', amount: 4000 });
+  r = fixedRows(s, '2026-11')[0];
+  assert.equal(r.paid, true);
+  assert.equal(r.remainingAmount, 0);
+  assert.equal(r.paidAmount, 10000);
+  assert.equal(monthlyRows(s, '2026-11').length, 1);
+  assert.equal(s.occurrences['rent:2026-11'].payment.history.length, 2);
+  assert.equal(totals(monthlyRows(s, '2026-11')).expense, 10000);
+  validateState(s);
+});
+test('correção e desfazer pagamentos parciais, quitação com desconto e legado quitado', () => {
+  const s = emptyState();
+  account(s, { amount: 10000 });
+  payFixed(s, 'rent', '2026-11', { date: '2026-11-10', amount: 6000 });
+  correctPayment(s, 'rent', '2026-11', { date: '2026-11-11', amount: 5000 });
+  assert.equal(fixedRows(s, '2026-11')[0].remainingAmount, 5000);
+  validateState(s);
+  payFixed(s, 'rent', '2026-11', { date: '2026-11-12', amount: 1000, settle: true });
+  assert.equal(fixedRows(s, '2026-11')[0].paid, true);
+  assert.equal(totals(monthlyRows(s, '2026-11')).expectedExpense, 6000);
+  validateState(s);
+  delete s.occurrences['rent:2026-11'].payment.settled;
+  delete s.occurrences['rent:2026-11'].payment.history;
+  assert.equal(fixedRows(s, '2026-11')[0].paid, true);
+  assert.equal(fixedRows(s, '2026-11')[0].amount, 6000);
+  validateState(s);
+  undoFixed(s, 'rent', '2026-11');
+  assert.equal(fixedRows(s, '2026-11')[0].remainingAmount, 10000);
+  assert.equal(totals(monthlyRows(s, '2026-11')).expense, 0);
+  validateState(s);
+});
 test('centavos, datas civis e fevereiro inclusive bissexto', () => {
   assert.equal(cents('120,50'), 12050);
   for (const v of ['0', '1.200,50', '-3', '1,999']) assert.throws(() => cents(v));

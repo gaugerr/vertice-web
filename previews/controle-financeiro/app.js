@@ -140,8 +140,10 @@ function row(e, full = false) {
   const c = category(e.categoryId),
     fixed = e.source === 'fixed';
   const source = fixed ? 'Conta fixa' : 'Avulso';
-  const date = e.paymentDate ? `Pago em ${dateName(e.paymentDate)}` : dateName(e.date);
-  return `<article class="transaction"><span class="txn-icon ${e.type === 'income' ? 'income' : ''}" aria-hidden="true">${c.icon}</span><div class="txn-info"><strong>${esc(e.name)}</strong><small>${esc(c.name)}${!c.active ? ' · arquivada' : ''} · ${source}</small><small>${esc(method(e.paymentMethodId))} · ${date}</small>${e.observation ? `<p class="record-note">${esc(e.observation)}</p>` : ''}</div><div class="txn-amount ${e.type === 'income' ? 'green' : ''}">${e.type === 'income' ? '+' : '−'} ${money(e.amount)}<small>${e.paid ? (e.type === 'income' ? 'Recebido' : 'Pago') : 'Pendente'}</small></div>${full ? `<div class="txn-actions">${fixed ? `<button data-fixed-action="${e.paid ? 'correct' : 'pay'}" data-id="${esc(e.accountId)}" aria-label="${e.paid ? 'Corrigir pagamento de' : 'Pagar'} ${esc(e.name)}" title="${e.paid ? 'Corrigir pagamento' : 'Pagar'}">${actionIcon(e.paid ? 'edit' : 'check')}</button><button data-fixed-action="details" data-id="${esc(e.accountId)}" aria-label="Detalhes de ${esc(e.name)}" title="Detalhes">${actionIcon('more')}</button>` : `<button data-entry-edit="${esc(e.id)}" aria-label="Editar ${esc(e.name)}" title="Editar">${actionIcon('edit')}</button><button data-entry-copy="${esc(e.id)}" aria-label="Copiar ${esc(e.name)}" title="Copiar">${actionIcon('copy')}</button><button class="danger-action" data-entry-delete="${esc(e.id)}" aria-label="Excluir ${esc(e.name)}" title="Excluir">${actionIcon('trash')}</button>`}</div>` : ''}</article>`;
+  const date = e.paymentDate
+    ? `${e.paid ? 'Pago' : 'Último pagamento'} em ${dateName(e.paymentDate)}`
+    : dateName(e.date);
+  return `<article class="transaction"><span class="txn-icon ${e.type === 'income' ? 'income' : ''}" aria-hidden="true">${c.icon}</span><div class="txn-info"><strong>${esc(e.name)}</strong><small>${esc(c.name)}${!c.active ? ' · arquivada' : ''} · ${source}</small><small>${esc(method(e.paymentMethodId))} · ${date}</small>${e.observation ? `<p class="record-note">${esc(e.observation)}</p>` : ''}</div><div class="txn-amount ${e.type === 'income' ? 'green' : ''}">${e.type === 'income' ? '+' : '−'} ${money(e.amount)}<small>${e.paid ? (e.type === 'income' ? 'Recebido' : 'Pago') : e.paidAmount ? `Parcial · pago ${money(e.paidAmount)} · resta ${money(e.remainingAmount)}` : 'Pendente'}</small></div>${full ? `<div class="txn-actions">${fixed ? `<button data-fixed-action="${e.paid ? 'correct' : 'pay'}" data-id="${esc(e.accountId)}" aria-label="${e.paid ? 'Corrigir pagamento de' : 'Pagar'} ${esc(e.name)}" title="${e.paid ? 'Corrigir pagamento' : 'Pagar'}">${actionIcon(e.paid ? 'edit' : 'check')}</button><button data-fixed-action="details" data-id="${esc(e.accountId)}" aria-label="Detalhes de ${esc(e.name)}" title="Detalhes">${actionIcon('more')}</button>` : `<button data-entry-edit="${esc(e.id)}" aria-label="Editar ${esc(e.name)}" title="Editar">${actionIcon('edit')}</button><button data-entry-copy="${esc(e.id)}" aria-label="Copiar ${esc(e.name)}" title="Copiar">${actionIcon('copy')}</button><button class="danger-action" data-entry-delete="${esc(e.id)}" aria-label="Excluir ${esc(e.name)}" title="Excluir">${actionIcon('trash')}</button>`}</div>` : ''}</article>`;
 }
 function distribution() {
   const list = state.categories
@@ -163,12 +165,12 @@ function distribution() {
     )}</svg><div class="donut-center"><small>Despesas do mês</small><strong>${money(total)}</strong></div></div><div class="category-legend">${list.length ? list.map((c) => `<div class="legend-row"><span><i style="background:${esc(c.color)}"></i>${esc(c.name)}</span><span>${Math.round((c.value / total) * 100)}%</span></div>`).join('') : '<p class="muted">Nenhuma despesa neste mês.</p>'}</div></div>`;
 }
 function chart() {
-  const list = rows().filter((r) => r.paid),
+  const list = rows().filter((r) => r.paid || r.paidAmount),
     series = (type) =>
       Array.from({ length: 5 }, (_, w) =>
         list
           .filter((r) => r.type === type && Math.floor((Number(r.date.slice(-2)) - 1) / 7) === w)
-          .reduce((n, r) => n + r.amount, 0),
+          .reduce((n, r) => n + (r.paidAmount ?? r.amount), 0),
       );
   const a = series('income'),
     b = series('expense'),
@@ -211,7 +213,7 @@ function bills() {
         .slice(0, 4)
         .map(
           (e) =>
-            `<div class="bill"><div class="bill-date">${e.date.slice(-2)}<small>${e.source === 'fixed' ? 'FIXA' : 'AVULSA'}</small></div><div class="bill-info">${esc(e.name)}<small>${e.date < today() ? 'Atrasada · ' : ''}${esc(method(e.paymentMethodId))}</small></div><div class="bill-value">${money(e.amount)}${e.source === 'fixed' ? `<button data-fixed-action="pay" data-id="${e.accountId}">Pagar competência</button>` : `<button data-entry-edit="${esc(e.id)}">Editar pagamento</button>`}</div></div>`,
+            `<div class="bill"><div class="bill-date">${e.date.slice(-2)}<small>${e.source === 'fixed' ? 'FIXA' : 'AVULSA'}</small></div><div class="bill-info">${esc(e.name)}<small>${e.date < today() ? 'Atrasada · ' : ''}${esc(method(e.paymentMethodId))}</small></div><div class="bill-value">${money(e.remainingAmount ?? e.amount)}${e.source === 'fixed' ? `<button data-fixed-action="pay" data-id="${e.accountId}">Pagar competência</button>` : `<button data-entry-edit="${esc(e.id)}">Editar pagamento</button>`}</div></div>`,
         )
         .join('')
     : empty('Tudo em dia. Nenhuma conta pendente neste mês.');
@@ -265,12 +267,14 @@ function fixedPage() {
     paid = list.filter((r) => r.paid),
     pending = list.filter((r) => !r.paid),
     sum = (rs) => rs.reduce((n, r) => n + r.amount, 0);
+  const paidTotal = list.reduce((n, r) => n + r.paidAmount, 0);
+  const remainingTotal = list.reduce((n, r) => n + r.remainingAmount, 0);
   const sections = [
     ['Pendentes', pending.filter((r) => r.date >= today())],
     ['Atrasadas', pending.filter((r) => r.date < today())],
     ['Pagas', paid],
   ];
-  return `<div class="fixed-summary"><article><small>Total previsto</small><strong>${money(sum(list))}</strong></article><article><small>Pago</small><strong class="green">${money(sum(paid))}</strong></article><article><small>A pagar</small><strong class="pink">${money(sum(pending))}</strong></article></div><div class="main-grid"><div>${sections.map(([title, rs]) => panel(title, `${rs.length} competência(s) em ${monthName().toLowerCase()}`, rs.length ? rs.map((e) => row(e, true)).join('') : empty('Nenhuma conta nesta situação.'))).join('')}</div>${panel('Minhas contas cadastradas', 'Gerencie vigências sem apagar o histórico.', state.fixedAccounts.length ? state.fixedAccounts.map((a) => `<article class="registered-account"><strong>${esc(a.name)}</strong><small>Desde ${a.startMonth.split('-').reverse().join('/')} ${a.endMonth ? `· término ${a.endMonth.split('-').reverse().join('/')}` : '· mensal'}</small><button class="text-button" data-fixed-action="details" data-id="${a.id}">Detalhes e histórico →</button></article>`).join('') : empty('Nenhuma conta fixa cadastrada.<br>Comece por aluguel, internet ou uma assinatura.'), '<button class="text-button" data-new-fixed>＋ Nova conta</button>')}</div>`;
+  return `<div class="fixed-summary"><article><small>Total previsto</small><strong>${money(sum(list))}</strong></article><article><small>Pago</small><strong class="green">${money(paidTotal)}</strong></article><article><small>A pagar</small><strong class="pink">${money(remainingTotal)}</strong></article></div><div class="main-grid"><div>${sections.map(([title, rs]) => panel(title, `${rs.length} competência(s) em ${monthName().toLowerCase()}`, rs.length ? rs.map((e) => row(e, true)).join('') : empty('Nenhuma conta nesta situação.'))).join('')}</div>${panel('Minhas contas cadastradas', 'Gerencie vigências sem apagar o histórico.', state.fixedAccounts.length ? state.fixedAccounts.map((a) => `<article class="registered-account"><strong>${esc(a.name)}</strong><small>Desde ${a.startMonth.split('-').reverse().join('/')} ${a.endMonth ? `· término ${a.endMonth.split('-').reverse().join('/')}` : '· mensal'}</small><button class="text-button" data-fixed-action="details" data-id="${a.id}">Detalhes e histórico →</button></article>`).join('') : empty('Nenhuma conta fixa cadastrada.<br>Comece por aluguel, internet ou uma assinatura.'), '<button class="text-button" data-new-fixed>＋ Nova conta</button>')}</div>`;
 }
 function errorPage() {
   return panel(
@@ -343,8 +347,8 @@ function field(label, name, value = '', type = 'text', extra = '') {
 function categoryField(current, type) {
   return `<label>Categoria<select name="categoryId" required data-current="${esc(current || '')}" data-category-type="${type}">${catalogOptions('categories', current, type)}</select></label><button type="button" class="text-button manage-link" data-catalog="categories">Gerenciar categorias</button>`;
 }
-function methodField(current, type = 'expense') {
-  return `<label>${type === 'income' ? 'Forma de recebimento' : 'Forma de pagamento'}<select name="paymentMethodId" required data-current="${esc(current || '')}">${catalogOptions('methods', current)}</select></label><button type="button" class="text-button manage-link" data-catalog="methods">Gerenciar formas de pagamento</button>`;
+function methodField(current, type = 'expense', allowUnknown = false) {
+  return `<label>${type === 'income' ? 'Forma de recebimento' : 'Forma de pagamento'}<select name="paymentMethodId" ${allowUnknown ? '' : 'required'} data-current="${esc(current || '')}">${catalogOptions('methods', current, undefined, !allowUnknown)}</select></label><button type="button" class="text-button manage-link" data-catalog="methods">Gerenciar formas de pagamento</button>`;
 }
 const noteField = (value) =>
   `<label>Observação <span class="muted">(opcional)</span><textarea name="observation" rows="2" maxlength="1000">${esc(value || '')}</textarea></label>`;
@@ -374,7 +378,7 @@ function openEntry(id, copy = false) {
   showForm(
     'entry',
     copy ? 'Copiar lançamento' : e ? 'Editar lançamento' : 'Novo lançamento',
-    `${copy ? '<p class="muted">Revise a cópia antes de salvar. Ela começa pendente. Cadastros arquivados precisam ser substituídos.</p>' : ''}<label>Tipo<select name="type" id="entry-type">${option('expense', 'Despesa', type)}${option('income', 'Receita', type)}</select></label>${field('Descrição', 'name', e?.name || '', 'text', 'required maxlength="80"')}<div class="form-grid">${field('Valor (R$)', 'amount', e ? decimal(e.amount) : '', 'text', 'required inputmode="decimal"')}${field('Data de referência', 'date', e?.date || month + '-09', 'date', 'required')}</div><div id="entry-category">${categoryField(e?.categoryId, type)}</div><div id="entry-method">${methodField(e?.paymentMethodId, type)}</div><label class="check-label"><input name="paid" type="checkbox" ${!e || e.paid ? 'checked' : ''}> Já foi pago ou recebido</label>${noteField(e?.observation)}`,
+    `${copy ? '<p class="muted">Revise a cópia antes de salvar. Ela começa pendente. Cadastros arquivados precisam ser substituídos.</p>' : ''}<label>Tipo<select name="type" id="entry-type">${option('expense', 'Despesa', type)}${option('income', 'Receita', type)}</select></label>${field('Descrição', 'name', e?.name || '', 'text', 'required maxlength="80"')}<div class="form-grid">${field('Valor (R$)', 'amount', e ? decimal(e.amount) : '', 'text', 'required inputmode="decimal"')}${field('Data de referência', 'date', e?.date || month + '-09', 'date', 'required')}</div><div id="entry-category">${categoryField(e?.categoryId, type)}</div><div id="entry-method">${methodField(e?.paymentMethodId, type, Boolean(source && !copy && source.paymentMethodId === null))}</div><label class="check-label"><input name="paid" type="checkbox" ${!e || e.paid ? 'checked' : ''}> Já foi pago ou recebido</label>${noteField(e?.observation)}`,
     { id: e?.id || crypto.randomUUID() },
   );
 }
@@ -392,13 +396,19 @@ function openFixed(id) {
     { id: a?.id || crypto.randomUUID() },
   );
 }
-function openPayment(id) {
+function openPayment(id, correction = false) {
   const r = fixedRows(state, month).find((r) => r.accountId === id);
   if (!r) throw Error('Competência não encontrada.');
+  const correcting = correction || r.paid;
+  const payment = state.occurrences[id + ':' + month]?.payment;
   showForm(
-    r.paid ? 'correct' : 'pay',
-    r.paid ? 'Corrigir pagamento' : 'Pagar competência',
-    `<p class="muted">${esc(r.name)} · competência ${monthName()} · vencimento ${dateName(r.date)}. O pagamento continuará neste mês de referência.</p><div class="form-grid">${field('Valor pago (R$)', 'amount', decimal(r.amount), 'text', 'required inputmode="decimal"')}${field('Data real do pagamento', 'date', r.paymentDate || today(), 'date', 'required')}</div>${noteField(r.observation)}`,
+    correcting ? 'correct' : 'pay',
+    correcting
+      ? 'Corrigir total pago'
+      : r.paidAmount
+        ? 'Pagar valor restante'
+        : 'Pagar competência',
+    `<p class="muted">${esc(r.name)} · competência ${monthName()} · vencimento ${dateName(r.date)}. O pagamento continuará neste mês de referência.</p><div class="form-grid">${field(correcting ? 'Total pago acumulado (R$)' : 'Valor deste pagamento (R$)', 'amount', decimal(correcting ? r.paidAmount : r.remainingAmount), 'text', 'required inputmode="decimal"')}${field('Data real do pagamento', 'date', correcting ? r.paymentDate : today(), 'date', 'required')}</div><p class="muted">Total da conta: ${money(payment?.snapshot.amount ?? r.amount)} · já pago: ${money(r.paidAmount)} · restante: ${money(r.remainingAmount)}.${correcting ? ' A correção substitui o total acumulado, não soma outro pagamento.' : ' Este valor será somado aos pagamentos anteriores.'}</p><label class="check-label"><input name="settle" type="checkbox" ${correcting && (payment?.settled === undefined || payment?.settled) ? 'checked' : ''}> Quitar o restante com desconto</label><p class="muted">Se pagar menos, o restante continua pendente. Marque a opção somente se a diferença foi dispensada.</p>${noteField(r.observation)}`,
     { id, month },
   );
 }
@@ -408,7 +418,7 @@ function openDetails(id) {
     .filter(([key, r]) => key.startsWith(id + ':') && r.payment)
     .sort(([a], [b]) => b.localeCompare(a));
   $('#fixed-detail-content').innerHTML =
-    `<div class="dialog-heading"><h2>${esc(a.name)}</h2><button class="icon-button" data-close aria-label="Fechar">×</button></div><p class="muted">Mensal desde ${a.startMonth}${a.endMonth ? ' · encerrada após ' + a.endMonth : ''}</p><div class="detail-actions"><button class="secondary" data-fixed-action="edit" data-id="${id}">Editar / reajustar</button><button class="secondary" data-fixed-action="adjust" data-id="${id}">Ajustar só ${monthName()}</button><button class="secondary" data-fixed-action="end" data-id="${id}">Encerrar recorrência</button>${fixedRows(state, month).find((r) => r.accountId === id)?.paid ? `<button class="secondary" data-fixed-action="undo" data-id="${id}">Desfazer pagamento de ${monthName()}</button>` : ''}</div><h3>Valores por vigência</h3><div class="version-history">${a.versions.map((v) => `<p><strong>${v.from}</strong> · ${money(v.amount)} · dia ${v.dueDay}<small>${esc(category(v.categoryId).name)} · ${esc(method(v.paymentMethodId))}</small></p>`).join('')}</div><h3>Pagamentos registrados</h3>${payments.length ? payments.map(([key, r]) => `<p class="payment-history"><strong>Competência ${key.slice(key.lastIndexOf(':') + 1)}</strong><br>${money(r.payment.amount)} · pago em ${dateName(r.payment.date)}<small>${esc(category(r.payment.snapshot.categoryId).name)} · ${esc(method(r.payment.snapshot.paymentMethodId))}</small></p>`).join('') : empty('Nenhum pagamento registrado.')}`;
+    `<div class="dialog-heading"><h2>${esc(a.name)}</h2><button class="icon-button" data-close aria-label="Fechar">×</button></div><p class="muted">Mensal desde ${a.startMonth}${a.endMonth ? ' · encerrada após ' + a.endMonth : ''}</p><div class="detail-actions"><button class="secondary" data-fixed-action="edit" data-id="${id}">Editar / reajustar</button><button class="secondary" data-fixed-action="adjust" data-id="${id}">Ajustar só ${monthName()}</button><button class="secondary" data-fixed-action="end" data-id="${id}">Encerrar recorrência</button>${fixedRows(state, month).find((r) => r.accountId === id)?.paidAmount ? `<button class="secondary" data-fixed-action="correct" data-id="${id}">Corrigir total pago</button><button class="secondary" data-fixed-action="undo" data-id="${id}">Desfazer todos os pagamentos de ${monthName()}</button>` : ''}</div><h3>Valores por vigência</h3><div class="version-history">${a.versions.map((v) => `<p><strong>${v.from}</strong> · ${money(v.amount)} · dia ${v.dueDay}<small>${esc(category(v.categoryId).name)} · ${esc(method(v.paymentMethodId))}</small></p>`).join('')}</div><h3>Pagamentos registrados</h3>${payments.length ? payments.map(([key, r]) => `<p class="payment-history"><strong>Competência ${key.slice(key.lastIndexOf(':') + 1)}</strong><br>${money(r.payment.amount)} · total pago · último registro em ${dateName(r.payment.date)}${r.payment.history ? r.payment.history.map((h) => `<small>${dateName(h.date)} · ${money(h.amount)}${h.observation ? ' · ' + esc(h.observation) : ''}</small>`).join('') : ''}<small>${esc(category(r.payment.snapshot.categoryId).name)} · ${esc(method(r.payment.snapshot.paymentMethodId))}</small></p>`).join('') : empty('Nenhum pagamento registrado.')}`;
   $('#fixed-detail').showModal();
 }
 function openCatalog(kind) {
@@ -441,7 +451,7 @@ function refreshFormCatalogs() {
   const m = $('#financial-form select[name=paymentMethodId]');
   if (m) {
     const current = m.value || m.dataset.current;
-    m.innerHTML = catalogOptions('methods', current);
+    m.innerHTML = catalogOptions('methods', current, undefined, m.required);
   }
 }
 function downloadPreserved() {
@@ -478,7 +488,7 @@ $('#financial-form').addEventListener('submit', (e) => {
           amount: cents(get('amount')),
           date: get('date'),
           categoryId: get('categoryId'),
-          paymentMethodId: get('paymentMethodId'),
+          paymentMethodId: get('paymentMethodId') || null,
           type: get('type'),
           paid: f.has('paid'),
           observation: get('observation'),
@@ -493,7 +503,7 @@ $('#financial-form').addEventListener('submit', (e) => {
           from: get('from') || get('startMonth'),
           dueDay: Number(get('dueDay')),
           categoryId: get('categoryId'),
-          paymentMethodId: get('paymentMethodId'),
+          paymentMethodId: get('paymentMethodId') || null,
           observation: get('observation'),
         });
       else if (context.kind === 'pay' || context.kind === 'correct')
@@ -501,13 +511,14 @@ $('#financial-form').addEventListener('submit', (e) => {
           date: get('date'),
           amount: cents(get('amount')),
           observation: get('observation'),
+          settle: f.has('settle'),
         });
       else if (context.kind === 'adjust')
         adjustFixed(s, context.id, context.month, cents(get('amount')), get('observation'));
       else if (context.kind === 'end') endFixed(s, context.id, get('endMonth'));
       else if (context.kind === 'budget') {
         if (!get('amount').trim()) delete s.budgets[context.id];
-        else s.budgets[context.id] = cents(get('amount'));
+        else s.budgets[context.id] = cents(get('amount'), { allowZero: true });
       } else if (context.kind === 'goal') {
         const g = s.goals.find((g) => g.id === context.id),
           value = cents(get('amount'));
@@ -588,7 +599,11 @@ document.addEventListener('change', (e) => {
   if (e.target.id === 'entry-type') {
     const old = $('#entry-method select').value;
     $('#entry-category').innerHTML = categoryField(null, e.target.value);
-    $('#entry-method').innerHTML = methodField(old, e.target.value);
+    $('#entry-method').innerHTML = methodField(
+      old,
+      e.target.value,
+      state.entries.find((r) => r.id === editing?.id)?.paymentMethodId === null,
+    );
   }
 });
 document.addEventListener('click', (e) => {
@@ -652,17 +667,17 @@ document.addEventListener('click', (e) => {
       else {
         $('#fixed-detail').close();
         if (action === 'edit') openFixed(id);
-        else if (action === 'pay' || action === 'correct') openPayment(id);
+        else if (action === 'pay' || action === 'correct') openPayment(id, action === 'correct');
         else if (action === 'undo') {
           if (
             confirm(
-              'Desfazer o pagamento desta competência? O valor previsto em vigor será utilizado novamente.',
+              'Desfazer todos os pagamentos desta competência? O valor previsto em vigor será utilizado novamente.',
             )
           )
             transact((s) => undoFixed(s, id, month), 'Pagamento desfeito.');
         } else if (action === 'adjust') {
           const r = fixedRows(state, month).find((r) => r.accountId === id);
-          if (!r || r.paid)
+          if (!r || r.paid || r.paidAmount)
             throw Error('Escolha uma competência em aberto para ajustar somente este mês.');
           showForm(
             'adjust',

@@ -24,6 +24,18 @@ continuam compartilhados entre os meses nesta etapa; cartões/faturas/parcelas n
 
 ## Dados locais e migração
 
+Orçamento aceita limite zero; deixar o campo vazio remove o limite. Ao editar um
+lançamento antigo sem forma de pagamento, é possível preservar “Não informado”.
+Novos lançamentos e cópias continuam exigindo uma forma válida.
+
+Contas fixas aceitam pagamentos parciais: o total pago entra nas saídas confirmadas,
+o restante fica pendente e o valor completo permanece no orçamento. Novos pagamentos
+somam ao total da competência. O histórico registra cada pagamento e as diferenças
+de correções; corrigir altera o total acumulado. “Desfazer” remove todos os pagamentos
+da competência. Quitação abaixo do previsto exige marcar “Quitar o restante com
+desconto”. Pagamentos antigos sem essa informação preservam a quitação anterior.
+Reajustes não mudam o valor de uma competência que já recebeu pagamento parcial.
+
 Financeiro salva em `vertice-finance-preview-v2`, com revisão para detectar alterações
 em outra aba. A migração preserva `vertice-finance-preview-v1` e uma cópia literal em
 `vertice-finance-preview-v1-backup`. Categorias genéricas antigas são mantidas como
