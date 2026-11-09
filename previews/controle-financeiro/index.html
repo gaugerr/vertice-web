@@ -123,6 +123,21 @@
             <button class="secondary" id="shopping-settings">Abrir dados das compras</button>
           </section>
           <section class="panel">
+            <h2>Backup do financeiro</h2>
+            <p class="panel-subtitle">
+              Guarde um arquivo ou restaure um backup. As listas de compras têm backup separado.
+            </p>
+            <div class="backup-actions">
+              <button class="secondary" id="export-finance">Exportar backup</button
+              ><button class="secondary" id="import-finance">Restaurar backup</button
+              ><button class="text-button" id="export-before-restore" hidden>
+                Baixar cópia anterior à restauração
+              </button>
+            </div>
+            <input id="finance-backup-file" type="file" accept=".json,application/json" hidden />
+            <p id="finance-backup-status" role="status" class="muted"></p>
+          </section>
+          <section class="panel">
             <h2>Exemplos do financeiro</h2>
             <p class="panel-subtitle">
               Restaure as receitas, despesas, limites e metas de exemplo. Isso não altera as
@@ -164,6 +179,7 @@
     </dialog>
     <dialog id="financial-dialog"><form id="financial-form"></form></dialog>
     <dialog id="fixed-detail"><div id="fixed-detail-content"></div></dialog>
+    <dialog id="goal-history"><div id="goal-history-content"></div></dialog>
     <dialog id="catalog-dialog">
       <div class="dialog-heading">
         <h2 id="catalog-title">Cadastros</h2>

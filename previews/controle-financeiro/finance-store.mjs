@@ -2,6 +2,7 @@ import { initialState, migrateV1, validateState } from './finance-domain.mjs';
 export const STORAGE_KEY = 'vertice-finance-preview-v2';
 export const LEGACY_KEY = 'vertice-finance-preview-v1';
 export const BACKUP_KEY = LEGACY_KEY + '-backup';
+export const PRE_RESTORE_KEY = 'vertice-finance-preview-before-restore';
 export class FinanceStore {
   constructor(storage) {
     this.storage = storage;
@@ -62,5 +63,18 @@ export class FinanceStore {
     }
     this.state = next;
     return next;
+  }
+  restore(imported) {
+    const replacement = structuredClone(validateState(imported));
+    return this.commit((s) => {
+      try {
+        this.storage.setItem(PRE_RESTORE_KEY, JSON.stringify(s));
+      } catch {
+        throw Error('Não foi possível guardar a cópia de segurança. Nada foi substituído.');
+      }
+      const revision = s.revision;
+      for (const key of Object.keys(s)) delete s[key];
+      Object.assign(s, replacement, { revision });
+    });
   }
 }

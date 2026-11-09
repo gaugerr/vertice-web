@@ -444,6 +444,113 @@ export function totals(rows) {
     throw Error('O total ultrapassou o limite seguro.');
   return values;
 }
+export function adjacentMonth(month, step) {
+  if (!validMonth(month) || !Number.isInteger(step)) throw Error('Mês inválido.');
+  const d = new Date(month + '-15T12:00:00Z');
+  d.setUTCMonth(d.getUTCMonth() + step);
+  const next = `${d.getUTCFullYear()}-${String(d.getUTCMonth() + 1).padStart(2, '0')}`;
+  return validMonth(next) ? next : null;
+}
+export function budgetsFor(s, month) {
+  if (!validMonth(month)) throw Error('Mês inválido.');
+  return Object.fromEntries(
+    Object.entries(s.monthlyBudgets?.[month] ?? s.budgets).filter(([, value]) => value !== null),
+  );
+}
+export function saveBudget(s, month, categoryId, amount) {
+  if (!s.categories.some((c) => c.id === categoryId && c.type === 'expense'))
+    throw Error('Categoria inválida.');
+  if (amount !== null) nonnegative(amount);
+  const limits = { ...budgetsFor(s, month) };
+  if (amount === null) delete limits[categoryId];
+  else limits[categoryId] = amount;
+  s.monthlyBudgets ??= {};
+  s.monthlyBudgets[month] = limits;
+}
+export function copyPreviousBudget(s, month) {
+  const prev = adjacentMonth(month, -1);
+  if (!prev) throw Error('Não há mês anterior disponível.');
+  s.monthlyBudgets ??= {};
+  s.monthlyBudgets[month] = { ...budgetsFor(s, prev) };
+}
+export function overdueRows(s, referenceMonth, asOf) {
+  if (!validMonth(referenceMonth) || !validDate(asOf)) throw Error('Data inválida.');
+  const result = s.entries
+    .filter(
+      (e) =>
+        e.type === 'expense' && !e.paid && e.date < asOf && e.date.slice(0, 7) < referenceMonth,
+    )
+    .map((e) => ({ ...e, source: 'entry', month: e.date.slice(0, 7), remainingAmount: e.amount }));
+  const starts = s.fixedAccounts
+    .map((a) => a.startMonth)
+    .filter((m) => m < referenceMonth && m <= asOf.slice(0, 7));
+  if (starts.length) {
+    let m = starts.sort()[0];
+    while (m && m < referenceMonth && m <= asOf.slice(0, 7)) {
+      result.push(...fixedRows(s, m).filter((r) => !r.paid && r.date < asOf));
+      m = adjacentMonth(m, 1);
+    }
+  }
+  return result.sort((a, b) => a.date.localeCompare(b.date) || a.id.localeCompare(b.id));
+}
+export function compareMonths(s, month) {
+  const previous = adjacentMonth(month, -1);
+  return {
+    previous,
+    current: totals(monthlyRows(s, month)),
+    prior: previous ? totals(monthlyRows(s, previous)) : null,
+    hasPrior: previous ? monthlyRows(s, previous).length > 0 : false,
+  };
+}
+function goalById(s, id) {
+  const g = s.goals.find((g) => g.id === id);
+  if (!g) throw Error('Meta não encontrada.');
+  return g;
+}
+export function saveGoal(s, { id, name, target, subtitle = '', openingAmount = 0 }) {
+  name = text(name, 150);
+  positive(target);
+  observation(subtitle);
+  const old = s.goals.find((g) => g.id === id);
+  if (old) {
+    Object.assign(old, { name, target, subtitle });
+  } else {
+    nonnegative(openingAmount);
+    s.goals.push({
+      id,
+      name,
+      target,
+      subtitle,
+      current: openingAmount,
+      openingAmount,
+      contributions: [],
+    });
+  }
+}
+export function saveContribution(s, goalId, { id, date, amount }) {
+  const g = goalById(s, goalId);
+  if (!validDate(date)) throw Error('Data inválida.');
+  positive(amount);
+  const contributions = structuredClone(g.contributions || []);
+  const old = contributions.find((c) => c.id === id);
+  if (old) Object.assign(old, { date, amount });
+  else contributions.push({ id, date, amount });
+  const openingAmount = g.openingAmount ?? g.current;
+  const current = openingAmount + contributions.reduce((n, c) => n + c.amount, 0);
+  nonnegative(current);
+  Object.assign(g, { openingAmount, current, contributions });
+}
+export function removeContribution(s, goalId, id) {
+  const g = goalById(s, goalId);
+  const old = g.contributions?.find((c) => c.id === id);
+  if (!old) throw Error('Aporte não encontrado.');
+  g.current -= old.amount;
+  g.contributions = g.contributions.filter((c) => c.id !== id);
+}
+export function removeGoal(s, id) {
+  goalById(s, id);
+  s.goals = s.goals.filter((g) => g.id !== id);
+}
 export function validateState(s) {
   if (
     !s ||
@@ -500,6 +607,23 @@ export function validateState(s) {
     if (!cats.has(id) || s.categories.find((c) => c.id === id).type !== 'expense')
       throw Error('Orçamento sem categoria.');
     if (limit !== null) nonnegative(limit);
+  }
+  if (s.monthlyBudgets !== undefined) {
+    if (
+      !s.monthlyBudgets ||
+      typeof s.monthlyBudgets !== 'object' ||
+      Array.isArray(s.monthlyBudgets)
+    )
+      throw Error('Orçamento mensal inválido.');
+    for (const [m, limits] of Object.entries(s.monthlyBudgets)) {
+      if (!validMonth(m) || !limits || typeof limits !== 'object' || Array.isArray(limits))
+        throw Error('Orçamento mensal inválido.');
+      for (const [id, value] of Object.entries(limits)) {
+        if (!cats.has(id) || s.categories.find((c) => c.id === id).type !== 'expense')
+          throw Error('Categoria do orçamento inválida.');
+        nonnegative(value);
+      }
+    }
   }
   for (const a of s.fixedAccounts) {
     text(a.name);
@@ -574,6 +698,18 @@ export function validateState(s) {
     text(g.name, 150);
     nonnegative(g.current);
     positive(g.target);
+    if (g.subtitle !== undefined) observation(g.subtitle);
+    if (g.contributions !== undefined || g.openingAmount !== undefined) {
+      nonnegative(g.openingAmount);
+      if (!Array.isArray(g.contributions)) throw Error('Histórico da meta inválido.');
+      ids(g.contributions);
+      for (const c of g.contributions) {
+        if (!validDate(c.date)) throw Error('Data do aporte inválida.');
+        positive(c.amount);
+      }
+      const sum = g.openingAmount + g.contributions.reduce((n, c) => n + c.amount, 0);
+      if (sum !== g.current) throw Error('Histórico diverge do valor guardado.');
+    }
   }
   return s;
 }

@@ -19,8 +19,21 @@ montado durante a troca de área para preservar rascunhos. Nenhuma transferênci
 - Resumo, lançamentos e orçamento usam as mesmas ocorrências mensais para evitar contagem duplicada. O saldo do resumo é da competência, sem representar um saldo bancário.
 
 Os cadastros, regras e armazenamento estão separados em `finance-domain.mjs`,
-`finance-store.mjs` e `app.js` para facilitar alterações futuras. Limites do orçamento
-continuam compartilhados entre os meses nesta etapa; cartões/faturas/parcelas não são calculados.
+`finance-store.mjs`, `finance-backup.mjs` e `app.js` para facilitar alterações futuras.
+Cartões/faturas/parcelas não são calculados.
+
+## Melhorias com uso simples
+
+- Resumo mostra pendências de meses anteriores em um bloco expansível. O restante de pagamentos parciais é preservado; abrir o mês original permite pagar a obrigação sem duplicá-la no mês atual.
+- Comparação no Resumo mostra entradas recebidas, saídas pagas e resultado versus o mês anterior. Não calcula variações percentuais quando falta uma base; avisa que meses em andamento podem estar incompletos.
+- Limites são por competência em `monthlyBudgets`. Até personalizar um mês, os limites anteriores de `budgets` continuam como base. Alterações e cópia do mês anterior criam um retrato independente e não alteram o histórico. Campo vazio remove um limite somente daquele mês.
+- Metas podem ser criadas, editadas e excluídas. Aportes têm IDs próprios e datas, com correção e exclusão. O valor legado vira saldo inicial do histórico ao registrar o primeiro aporte; não são inventadas datas de aportes antigos. O seletor de mês fica oculto em Metas, pois o progresso é global.
+- Backup financeiro em Configurações exporta JSON com identificação e versão. Importação limita a 5 MB, valida referências e totais, mostra uma prévia e pede confirmação. Não faz mesclagem nem altera Compras. A cópia anterior é guardada em `vertice-finance-preview-before-restore` e pode ser baixada. Se a cópia ou gravação falhar, o financeiro atual é preservado.
+
+As regras permanecem independentes do navegador; o armazenamento fica em `FinanceStore`.
+IDs e datas dos registros são preservados na restauração. A futura conexão ao banco
+deve tratar a propriedade por usuário, autorização no servidor, sincronização e migração
+dos dados locais. A preview não cria contas nem simula proteção por usuário.
 
 ## Dados locais e migração
 
@@ -51,7 +64,7 @@ Tudo permanece apenas neste navegador/origem, sem sincronização ou banco ofici
 Na raiz do repositório:
 
 ```sh
-node --test --test-isolation=none previews/controle-financeiro/finance-domain.test.mjs
+node --test --test-isolation=none previews/controle-financeiro/finance-domain.test.mjs previews/controle-financeiro/finance-improvements.test.mjs
 node previews/controle-financeiro/build.mjs
 ```
 

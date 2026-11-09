@@ -356,3 +356,78 @@ textarea {
   outline: 2px solid #b59aff;
   outline-offset: 2px;
 }
+.old-pending summary {
+  cursor: pointer;
+  padding: 12px 0;
+  color: var(--purple);
+}
+.old-pending-row,
+.contribution-row,
+.goal-heading {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 12px;
+  padding: 10px 0;
+}
+.old-pending-row + .old-pending-row,
+.contribution-row + .contribution-row {
+  border-top: 1px solid #302837;
+}
+.old-pending-row strong,
+.old-pending-row small,
+.contribution-row small {
+  display: block;
+}
+.old-pending-row small,
+.contribution-row small {
+  color: #a798b6;
+  margin-top: 5px;
+}
+.old-pending-row > div,
+.goal-heading h3 {
+  min-width: 0;
+  overflow-wrap: anywhere;
+}
+.old-pending-row button {
+  flex-shrink: 0;
+  min-height: 44px;
+}
+.goal-heading {
+  align-items: flex-start;
+  padding: 0;
+}
+.goal .txn-actions,
+.contribution-row .txn-actions {
+  flex-shrink: 0;
+}
+.goal .txn-actions button,
+.contribution-row .txn-actions button {
+  width: 44px;
+  height: 44px;
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+}
+.danger-action {
+  color: #ffb7c7;
+}
+.comparison-row {
+  display: grid;
+  grid-template-columns: 1fr auto;
+  gap: 6px 10px;
+  padding: 12px 0;
+  border-bottom: 1px solid #302837;
+}
+.comparison-row small {
+  grid-column: 1 / -1;
+  color: #a798b6;
+}
+.backup-actions {
+  display: flex;
+  gap: 10px;
+  flex-wrap: wrap;
+}
+#goal-history .txn-actions button:focus-visible {
+  outline: 2px solid var(--purple);
+}

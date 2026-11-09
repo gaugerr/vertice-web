@@ -13,6 +13,7 @@ for (const file of [
   'finance.css',
   'finance-domain.mjs',
   'finance-store.mjs',
+  'finance-backup.mjs',
   'vertice.svg',
   '_headers',
   'robots.txt',
