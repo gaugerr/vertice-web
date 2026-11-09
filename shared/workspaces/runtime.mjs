@@ -5,6 +5,7 @@ import { financeRows, shoppingRows, changesBetween } from './mapping.mjs';
 import { FinanceStore as LegacyFinanceStore } from '../../previews/controle-financeiro/finance-store.mjs';
 import { VerticeDatabase } from '../../src/data/database/database.ts';
 import { DexieShoppingRepository } from '../../src/data/repositories/dexie-shopping-repository.ts';
+import { importAccountShopping } from './local-import.mjs';
 export { WorkspaceClient, WorkspaceFinanceStore, DEMO_ACTORS };
 export { HttpWorkspaceTransport } from './http.mjs';
 export { verifyWorkspaceLease } from './lease.mjs';
@@ -127,6 +128,12 @@ async function initialize() {
         throw new WorkspaceError('removed', 'Sua participação mudou. Reabra o espaço.');
       Object.assign(client.space, current);
       await client.flush();
+      if (environment.mode === 'staging' && client.space.kind === 'personal') {
+        // Refresh identity and remote records before examining legacy local data.
+        if (client.syncError) throw client.syncError;
+        await importAccountShopping(client, environment);
+        await client.flush();
+      }
     } catch (error) {
       client.syncError = error;
       if (error.code === 'unauthorized') await client.authenticationFailed();

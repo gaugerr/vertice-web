@@ -113,8 +113,15 @@ resultado de código; ler o job atual. Não generalizar resultados históricos.
 1. Resolver/conferir o alias fixo servindo o novo bundle; preservar origem e dados
    locais. Não remover deployments antigos ou alterar infraestrutura oficial por tentativa.
 2. Completar teste real do casal, offline/reconexão e concorrência com duas contas.
-3. Importação automática única dos dados REAIS do navegador para conta, com recibos,
-   deduplicação e original preservado. Exemplos fictícios nunca migram automaticamente.
+3. Importação local implementada em `shared/workspaces/local-import.mjs`: somente
+   Compras do IndexedDB `vertice_web_<projeto>_<uid>` para Meu espaço, após
+   revalidação online. Recibo por lista e outbox na mesma transação; originais
+   preservados. IDs existentes, inclusive excluídos, impedem importar a lista inteira,
+   sem sobrescrever ou mesclar versões. Falha de rede retoma pela fila; falha antes
+   de enfileirar pode repetir ao reabrir. Fontes sem dono e exemplos não entram.
+   Financeiro real já está na fila/nuvem; não há fonte financeira legada vinculada
+   à conta. A preview não lê IndexedDB do domínio oficial (same-origin); validar
+   migração real no domínio oficial ao integrar o router, antes de liberar main.
 4. Compartilhamento simples com confirmação explícita de tornar compras e financeiro
    visíveis ao parceiro; definir migração antes de executar, sem merge silencioso.
 5. Integrar router/navegação protegida e módulos da PWA ao app oficial. A pasta de
