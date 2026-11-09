@@ -337,6 +337,11 @@ textarea {
   justify-content: flex-end;
 }
 .transaction .txn-actions button {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  width: 44px;
+  height: 44px;
   min-width: 44px;
   min-height: 44px;
   padding: 8px 10px;
