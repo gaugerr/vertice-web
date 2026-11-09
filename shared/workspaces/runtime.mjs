@@ -1,5 +1,5 @@
 import Dexie from 'dexie';
-import { WorkspaceClient, WorkspaceFinanceStore } from './core.mjs';
+import { WorkspaceClient, WorkspaceFinanceStore, WorkspaceError } from './core.mjs';
 import { DemoTransport, DEMO_ACTORS } from './demo.mjs';
 import { financeRows, shoppingRows, changesBetween } from './mapping.mjs';
 import { FinanceStore as LegacyFinanceStore } from '../../previews/controle-financeiro/finance-store.mjs';
@@ -45,13 +45,27 @@ async function initialize() {
     );
   if (!environment.actor) throw Error('Entre com Google para abrir ou aceitar um espaço.');
   const { actor, transport } = environment;
-  let spaces;
-  try {
-    spaces = await transport.request('list');
-    localStorage.setItem('vertice_demo_spaces_' + actor.uid, JSON.stringify(spaces));
-  } catch {
-    spaces = JSON.parse(localStorage.getItem('vertice_demo_spaces_' + actor.uid) ?? '[]');
-  }
+  const spacesKey = `vertice_spaces_${environment.project}_${actor.uid}`;
+  const cachedSpaces = () => {
+    try {
+      return JSON.parse(
+        localStorage.getItem(spacesKey) ??
+          localStorage.getItem('vertice_demo_spaces_' + actor.uid) ??
+          '[]',
+      );
+    } catch {
+      return [];
+    }
+  };
+  environment.spaces = cachedSpaces();
+  environment.refreshSpaces = async () => {
+    if (environment.verifyIdentity) await environment.verifyIdentity();
+    environment.spaces = await transport.request('list');
+    localStorage.setItem(spacesKey, JSON.stringify(environment.spaces));
+    return environment.spaces;
+  };
+  let spaces = environment.spaces;
+  if (!spaces.length) spaces = await environment.refreshSpaces();
   const chosen = localStorage.getItem(selectionKey(actor.uid));
   const space = spaces.find((s) => s.id === chosen) ?? spaces.find((s) => s.status === 'active');
   if (!space) throw Error('Aceite um convite para abrir um espaço compartilhado.');
@@ -61,7 +75,7 @@ async function initialize() {
     actor,
     space,
     transport,
-  }).initialize();
+  }).initialize({ preferCache: environment.mode === 'staging' });
   if (
     environment.mode === 'demo' &&
     space.kind === 'personal' &&
@@ -99,8 +113,38 @@ async function initialize() {
       },
     );
   }
+  if (typeof window !== 'undefined')
+    window.addEventListener(
+      'vertice:workspace-auth-invalid',
+      () => void client.authenticationFailed(),
+    );
   client.start();
-  void client.flush();
+  void (async () => {
+    try {
+      const current = (await environment.refreshSpaces()).find((s) => s.id === client.space.id);
+      if (!current) throw new WorkspaceError('removed', 'Você não participa mais deste espaço.');
+      if (current.generation !== client.space.generation)
+        throw new WorkspaceError('removed', 'Sua participação mudou. Reabra o espaço.');
+      Object.assign(client.space, current);
+      await client.flush();
+    } catch (error) {
+      client.syncError = error;
+      if (error.code === 'unauthorized') await client.authenticationFailed();
+      if (error.code === 'removed') {
+        await client.db.workspaceMeta.put({
+          key: 'revoked',
+          value: true,
+          generation: client.space.generation,
+        });
+        await client.db.workspaceOutbox
+          .filter((o) => o.generation === client.space.generation)
+          .modify({ status: 'quarantined' });
+      }
+    } finally {
+      client.syncingBootstrap = false;
+      client.notify();
+    }
+  })();
   return client;
 }
 export function openPreviewWorkspace() {

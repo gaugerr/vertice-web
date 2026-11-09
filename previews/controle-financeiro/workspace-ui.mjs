@@ -78,28 +78,61 @@ async function canSwitch() {
 }
 async function activate(id) {
   if (!(await canSwitch())) {
-    await render();
+    await render(true);
     return;
   }
   await client?.flush();
   localStorage.setItem(selectionKey(actor.uid), id);
   location.reload();
 }
+const memberDetails = new Map();
 async function refreshSpaces() {
+  spaces = environment.spaces ?? spaces;
+}
+let detailsRequest;
+function refreshDetails() {
+  return (detailsRequest ??= loadDetails().finally(() => {
+    detailsRequest = null;
+  }));
+}
+async function loadDetails() {
   if (!transport) return;
-  try {
-    spaces = await transport.request('list');
-    localStorage.setItem('vertice_demo_spaces_' + actor.uid, JSON.stringify(spaces));
-  } catch {
-    spaces = JSON.parse(localStorage.getItem('vertice_demo_spaces_' + actor.uid) ?? '[]');
+  await environment.refreshSpaces?.();
+  await refreshSpaces();
+  for (const space of spaces.filter((s) => s.kind === 'shared' && s.status === 'active')) {
+    const key = `vertice_members_${environment.project}_${actor.uid}_${space.id}`;
+    try {
+      const value = await transport.request('members', { workspace_id: space.id });
+      memberDetails.set(space.id, value);
+      localStorage.setItem(key, JSON.stringify(value));
+    } catch {
+      try {
+        const value = JSON.parse(localStorage.getItem(key));
+        if (value) memberDetails.set(space.id, value);
+      } catch {
+        /* Preserve cached display. */
+      }
+    }
   }
 }
-async function render() {
+async function render(force = false) {
+  if (force) await refreshDetails();
   const revocation = await client?.db.workspaceMeta.get('revoked'),
     access = (await client?.db.workspaceMeta.get('access'))?.value;
+  const authRequired = (await client?.db.workspaceMeta.get('auth-required'))?.value;
+  $('#workspace-login').hidden =
+    environment.mode !== 'staging' || (Boolean(environment.actor) && !authRequired);
+  let accessError;
+  try {
+    await client?.assertRead();
+  } catch (error) {
+    accessError = error;
+  }
   const revoked = Boolean(
-    (revocation?.value &&
-      (!revocation.generation || revocation.generation === client?.space.generation)) ||
+    accessError ||
+      authRequired ||
+      (revocation?.value &&
+        (!revocation.generation || revocation.generation === client?.space.generation)) ||
       (access && access.generation !== client?.space.generation),
   );
   document.body.dataset.workspaceBlocked = String(revoked);
@@ -110,6 +143,11 @@ async function render() {
   $('#workspace-login-start').disabled = !environment.configured;
   $('#workspace-login-start').onclick = () => $('#workspace-login').click();
   $('#workspace-access-block').hidden = !revoked;
+  if (authRequired) $('#workspace-access-block h2').textContent = 'Entre novamente com Google';
+  else if (accessError?.code === 'access_expired') {
+    $('#workspace-access-block h2').textContent = 'Reconecte para validar o acesso';
+    $('#workspace-access-block p').textContent = accessError.message;
+  }
   if (!environment.actor) {
     feedback(
       environment.configured
@@ -134,6 +172,14 @@ async function render() {
   $('#workspace-selector').disabled =
     spaces.filter((s) => s.status === 'active').length < 2 && current?.status !== 'closed';
   $('#workspace-sync').textContent = client ? await client.status() : 'Aceite um convite';
+  const lastSynced = (await client?.db.workspaceMeta.get('last-synced'))?.value;
+  $('#workspace-sync').title = lastSynced
+    ? 'Última sincronização completa: ' + new Date(lastSynced).toLocaleString('pt-BR')
+    : 'Aguardando a primeira sincronização completa';
+  if (lastSynced)
+    $('#workspace-sync').textContent +=
+      ' · ' +
+      new Date(lastSynced).toLocaleTimeString('pt-BR', { hour: '2-digit', minute: '2-digit' });
   if (current && !current.writable) $('#workspace-sync').textContent = 'Somente consulta';
   let content = '<p>Seu login pessoal continua separado do espaço compartilhado.</p>';
   actor.licensed =
@@ -148,19 +194,22 @@ async function render() {
         ? '<p>Aceite o link de convite usando a conta da demonstração Parceiro.</p>'
         : '<p>Use o link recebido da outra pessoa para entrar no espaço compartilhado. Para ter seu espaço pessoal, entre com a conta Google vinculada à sua compra.</p>';
   } else {
-    const data = await transport.request('members', { workspace_id: shared.id });
-    content += `<h3>${esc(shared.name)}</h3><p class="muted">Compras e todo o financeiro deste espaço são visíveis para os dois.</p>${data.members.map((m) => `<div class="workspace-member"><div><strong>${esc(m.display_name ?? m.name)}</strong><small>${m.role === 'owner' ? 'Titular' : 'Participante'} · ${esc(m.email)}</small></div>${shared.role === 'owner' && m.role !== 'owner' ? `<button class="secondary" data-workspace-remove="${esc(m.user_id)}">Remover</button>` : ''}</div>`).join('')}`;
-    if (shared.role === 'owner') {
-      if (data.members.length < 2)
-        content += `<label>E-mail Google do convidado<input id="workspace-invite-email" type="email" value="${esc(data.pending[0]?.email ?? (environment.mode === 'demo' ? DEMO_ACTORS[1].email : ''))}"></label><button class="secondary" id="workspace-invite">${data.pending.length ? 'Gerar novo convite' : 'Gerar convite'}</button>${data.pending.length ? '<button class="text-button" id="workspace-revoke">Cancelar convite</button>' : ''}`;
-      if (lastInvite)
-        content += `<label>Link do convite<input id="workspace-invite-link" readonly value="${esc(lastInvite)}"></label><div class="workspace-buttons"><button class="primary" id="workspace-share">Compartilhar convite</button><button class="secondary" id="workspace-copy-link">Copiar link</button>${environment.mode === 'demo' ? '<button class="text-button" id="workspace-test-invite">Abrir convite de teste</button>' : ''}</div>`;
-      if (personal())
+    const data = memberDetails.get(shared.id);
+    if (!data) content += '<p class="muted">Atualizando participantes…</p>';
+    else {
+      content += `<h3>${esc(shared.name)}</h3><p class="muted">Compras e todo o financeiro deste espaço são visíveis para os dois.</p>${data.members.map((m) => `<div class="workspace-member"><div><strong>${esc(m.display_name ?? m.name)}</strong><small>${m.role === 'owner' ? 'Titular' : 'Participante'} · ${esc(m.email)}</small></div>${shared.role === 'owner' && m.role !== 'owner' ? `<button class="secondary" data-workspace-remove="${esc(m.user_id)}">Remover</button>` : ''}</div>`).join('')}`;
+      if (shared.role === 'owner') {
+        if (data.members.length < 2)
+          content += `<label>E-mail Google do convidado<input id="workspace-invite-email" type="email" value="${esc(data.pending[0]?.email ?? (environment.mode === 'demo' ? DEMO_ACTORS[1].email : ''))}"></label><button class="secondary" id="workspace-invite">${data.pending.length ? 'Gerar novo convite' : 'Gerar convite'}</button>${data.pending.length ? '<button class="text-button" id="workspace-revoke">Cancelar convite</button>' : ''}`;
+        if (lastInvite)
+          content += `<label>Link do convite<input id="workspace-invite-link" readonly value="${esc(lastInvite)}"></label><div class="workspace-buttons"><button class="primary" id="workspace-share">Compartilhar convite</button><button class="secondary" id="workspace-copy-link">Copiar link</button>${environment.mode === 'demo' ? '<button class="text-button" id="workspace-test-invite">Abrir convite de teste</button>' : ''}</div>`;
+        if (personal())
+          content +=
+            '<button class="secondary" id="workspace-copy-data">Copiar meus dados para o casal</button>';
         content +=
-          '<button class="secondary" id="workspace-copy-data">Copiar meus dados para o casal</button>';
-      content +=
-        '<button class="text-button" id="workspace-close">Encerrar compartilhamento</button>';
-    } else content += '<button class="secondary" id="workspace-leave">Sair do espaço</button>';
+          '<button class="text-button" id="workspace-close">Encerrar compartilhamento</button>';
+      } else content += '<button class="secondary" id="workspace-leave">Sair do espaço</button>';
+    }
   }
   const archives = spaces.filter((s) => s.kind === 'shared' && s.status === 'closed');
   if (archives.length)
@@ -246,7 +295,7 @@ $('#workspace-demo-license').onclick = async () => {
       ? ''
       : 'true';
     await client?.refresh();
-    await render();
+    await render(true);
   } catch (e) {
     feedback(e.message);
   }
@@ -304,7 +353,7 @@ $('#workspace-form').onsubmit = async (e) => {
       $('#workspace-dialog').close();
       feedback('Cópia independente concluída. Os dados pessoais foram preservados.');
       if (client?.space.id === shared.id) await client.pull();
-      await render();
+      await render(true);
       return;
     }
     const shared = await transport.request('create', {
@@ -313,7 +362,7 @@ $('#workspace-form').onsubmit = async (e) => {
     });
     await makeInvite(shared, String(f.get('email')));
     $('#workspace-dialog').close();
-    await render();
+    await render(true);
     feedback('Espaço criado vazio. Compartilhe o convite e escolha Nossa casa no seletor.');
   } catch (error) {
     $('#workspace-form-error').textContent = error.message;
@@ -336,13 +385,13 @@ document.addEventListener('click', async (e) => {
       );
     if (b.id === 'workspace-invite') {
       await makeInvite(shared, $('#workspace-invite-email').value);
-      await render();
+      await render(true);
       feedback('Convite válido por sete dias. O link só pode ser aceito pela conta convidada.');
     }
     if (b.id === 'workspace-revoke') {
       await transport.request('revoke_invite', { workspace_id: shared.id });
       lastInvite = undefined;
-      await render();
+      await render(true);
       feedback('Convite cancelado.');
     }
     if (b.id === 'workspace-copy-link') {
@@ -376,7 +425,7 @@ document.addEventListener('click', async (e) => {
         workspace_id: shared.id,
         user_id: b.dataset.workspaceRemove,
       });
-      await render();
+      await render(true);
     }
     if (
       b.id === 'workspace-leave' &&
@@ -450,7 +499,7 @@ document.addEventListener('click', async (e) => {
     ) {
       await client.discardConflicts();
       $('#workspace-dialog').close();
-      await render();
+      await render(true);
     }
   } catch (error) {
     if (error.name !== 'AbortError') feedback(error.message);
@@ -463,4 +512,15 @@ try {
   feedback(e.message);
 }
 await render().catch((e) => feedback(e.message));
+const updateDetails = () =>
+  void refreshDetails()
+    .then(() => render())
+    .catch(() => {});
+updateDetails();
+setInterval(updateDetails, 30000);
+window.addEventListener('online', updateDetails);
+window.addEventListener('focus', updateDetails);
+document.addEventListener('click', (event) => {
+  if (event.target.closest('[data-area=settings],#workspace-manage')) updateDetails();
+});
 if (location.hash.startsWith('#convite?')) await inspectInvite();

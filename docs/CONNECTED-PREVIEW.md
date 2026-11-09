@@ -62,6 +62,23 @@ antes de qualquer migração em massa.
 
 ## Verificação técnica
 
+A abertura usa primeiro o cache do mesmo usuário/projeto/espaço, somente com
+autorização ES256 ainda válida. O primeiro download completo marca o snapshot
+como pronto, inclusive quando vazio. Caches anteriores recebem essa marca após
+uma sincronização completa; dados e filas anteriores são preservados.
+
+Configuração, identidade e espaços são conferidos em segundo plano. Falhas não
+apagam dados nem significam sincronização concluída. A interface indica a última
+conferência completa, pendências e necessidade de reconexão. Cada requisição tem
+limite de dez segundos. Logout, sessão rejeitada e remoção conhecida bloqueiam
+nova leitura do cache; operações pendentes são preservadas.
+
+`node shared/workspaces/cache-browser-check.mjs` verifica a abertura em até um
+segundo com configuração/Auth/API suspensas, autorização sintética assinada,
+atualização posterior e rascunho preservado. Todo HTTP do teste é interceptado;
+não usa contas reais. Esse teste pressupõe os arquivos do app carregados e não
+comprova instalação/preparo offline da PWA oficial.
+
 O teste PostgreSQL usa as migrações reais de licenças/Cakto e identidades sintéticas
 em container descartável sem rede. Cobre também as permissões do segredo dedicado.
 O cliente é verificado com IndexedDB, transporte HTTP e assinatura ES256. O navegador

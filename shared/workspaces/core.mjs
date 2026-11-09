@@ -61,10 +61,61 @@ export class WorkspaceClient {
   notify() {
     for (const fn of this.listeners) fn();
   }
-  async initialize() {
+  async initialize({ preferCache = false } = {}) {
     await this.db.open();
-    await this.refresh();
+    if (preferCache && (await this.db.workspaceMeta.get('snapshot-ready'))?.value) {
+      try {
+        await this.assertRead();
+        this.fromCache = true;
+        this.syncingBootstrap = true;
+        await this.db.workspaceMeta.put({
+          key: 'high-water',
+          value: Math.max(
+            this.clock(),
+            (await this.db.workspaceMeta.get('high-water'))?.value ?? 0,
+          ),
+        });
+        return this;
+      } catch {
+        /* Revalidate online. */
+      }
+    }
+    try {
+      await this.refresh();
+    } catch (error) {
+      if (!(await this.db.workspaceMeta.get('snapshot-ready'))?.value) throw error;
+      await this.assertRead();
+      this.fromCache = true;
+    }
     return this;
+  }
+  async cachedAccess() {
+    let access = (await this.db.workspaceMeta.get('access'))?.value;
+    if (access && this.transport.verifyCached)
+      access = await Dexie.waitFor(
+        this.transport.verifyCached(access, {
+          uid: this.actor.uid,
+          workspaceId: this.space.id,
+          generation: this.space.generation,
+          now: this.clock(),
+        }),
+      );
+    const water = (await this.db.workspaceMeta.get('high-water'))?.value ?? 0;
+    if (
+      !access?.member ||
+      access.generation !== this.space.generation ||
+      this.clock() + 60000 < water ||
+      Math.max(this.clock(), water) >= access.expiresAt
+    )
+      throw new WorkspaceError(
+        'access_expired',
+        'Reconecte para validar seu acesso. Seus dados continuam preservados.',
+      );
+    return access;
+  }
+  async authenticationFailed() {
+    await this.db.workspaceMeta.put({ key: 'auth-required', value: true });
+    this.notify();
   }
   async refresh() {
     try {
@@ -86,6 +137,8 @@ export class WorkspaceClient {
           });
           await this.db.workspaceOutbox.clear();
           await this.db.workspaceRecords.clear();
+          await this.db.workspaceMeta.delete('snapshot-ready');
+          await this.db.workspaceMeta.delete('last-synced');
           await this.db.workspaceConflicts.clear();
           await this.db.workspaceMeta.put({ key: 'cursor', value: 0 });
           const rev = (await this.db.workspaceMeta.get('finance-revision'))?.value ?? 0;
@@ -93,6 +146,7 @@ export class WorkspaceClient {
         });
       }
       await this.db.workspaceMeta.put({ key: 'access', value: access });
+      await this.db.workspaceMeta.put({ key: 'auth-required', value: false });
       await this.db.workspaceMeta.put({
         key: 'revoked',
         value: false,
@@ -112,11 +166,18 @@ export class WorkspaceClient {
         this.notify();
         throw e;
       }
-      if (!(await this.db.workspaceMeta.get('access'))) throw e;
+      if (e.code === 'unauthorized') await this.authenticationFailed();
+      throw e;
     }
     this.notify();
   }
   async assertWrite() {
+    try {
+      await this.assertRead();
+    } catch (error) {
+      if (error.code === 'access_expired') throw new WorkspaceError('read_only', error.message);
+      throw error;
+    }
     let a = (await this.db.workspaceMeta.get('access'))?.value;
     if (a && this.transport.verifyCached)
       a = await Dexie.waitFor(
@@ -207,6 +268,7 @@ export class WorkspaceClient {
     });
     this.notify();
     if (data.more) return this.pull();
+    await this.db.workspaceMeta.put({ key: 'snapshot-ready', value: true });
   }
   async ack(op, response) {
     await this.db.workspaceOutbox.delete(op.id);
@@ -397,6 +459,8 @@ export class WorkspaceClient {
     });
   }
   async assertRead() {
+    if ((await this.db.workspaceMeta.get('auth-required'))?.value)
+      throw new WorkspaceError('unauthorized', 'Entre novamente com sua conta Google.');
     const r = await this.db.workspaceMeta.get('revoked'),
       a = (await this.db.workspaceMeta.get('access'))?.value;
     if (
@@ -407,13 +471,16 @@ export class WorkspaceClient {
         'removed',
         'Seu acesso a este espaço foi removido. Suas alterações pendentes continuam preservadas.',
       );
+    await this.cachedAccess();
   }
   async flush() {
     if (this.running || this.stopped) return this.running;
+    this.syncError = null;
     this.running = this.sendPending().finally(() => {
       this.running = null;
       this.notify();
     });
+    this.notify();
     return this.running;
   }
   async sendPending() {
@@ -450,6 +517,8 @@ export class WorkspaceClient {
               generation: this.space.generation,
             });
           }
+          this.syncError = e;
+          if (e.code === 'unauthorized') await this.authenticationFailed();
           break;
         }
         await this.db.transaction('rw', dataTables(this.db), async () => {
@@ -458,16 +527,30 @@ export class WorkspaceClient {
             await this.materializeShopping();
         });
       }
-      if (!(await this.db.workspaceOutbox.count())) await this.pull();
-    } catch {
-      /* Durable operations remain pending during a network failure. */
+      if (!(await this.db.workspaceOutbox.count())) {
+        await this.pull();
+        await this.db.workspaceMeta.put({ key: 'last-synced', value: this.clock() });
+      }
+    } catch (error) {
+      this.syncError = error;
+      if (error.code === 'unauthorized') await this.authenticationFailed();
     }
   }
   async status() {
     const ops = await this.db.workspaceOutbox.toArray();
     if (ops.some((o) => ['conflict', 'quarantined'].includes(o.status)))
       return 'Precisa de atenção';
+    if ((await this.db.workspaceMeta.get('auth-required'))?.value) return 'Entre novamente';
+    try {
+      await this.assertRead();
+    } catch {
+      return 'Reconecte para validar';
+    }
+    if (typeof navigator !== 'undefined' && navigator.onLine === false) return 'Sem conexão';
     if (ops.length) return 'Pendente de envio';
+    if (this.syncError) return 'Não foi possível atualizar';
+    if (this.running || this.syncingBootstrap) return 'Atualizando…';
+    if (!(await this.db.workspaceMeta.get('last-synced'))?.value) return 'Atualizando…';
     return 'Sincronizado';
   }
   async discardConflicts() {
@@ -481,6 +564,8 @@ export class WorkspaceClient {
       await this.db.workspaceOutbox.clear();
       await this.db.workspaceConflicts.clear();
       await this.db.workspaceRecords.clear();
+      await this.db.workspaceMeta.delete('snapshot-ready');
+      await this.db.workspaceMeta.delete('last-synced');
       await this.db.workspaceMeta.put({ key: 'cursor', value: 0 });
     });
     await this.pull();

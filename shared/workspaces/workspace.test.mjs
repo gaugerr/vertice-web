@@ -16,6 +16,102 @@ import { generateKeyPair, exportJWK, SignJWT } from 'jose';
 import { verifyWorkspaceLease } from './lease.mjs';
 import { workspaceHandler } from '../../supabase/functions/workspaces/handler.ts';
 const resources = [];
+test('reentrada com download interrompido não apresenta snapshot antigo como completo', async () => {
+  const f = await setup();
+  await f.owner.request('remove', { workspace_id: f.shared.id, user_id: DEMO_ACTORS[1].uid });
+  const invite = await f.owner.request('invite', {
+    workspace_id: f.shared.id,
+    email: DEMO_ACTORS[1].email,
+  });
+  await f.guest.request('accept', { token: invite.token });
+  const space = (await f.guest.request('list'))[0];
+  const c = new WorkspaceClient({
+    project: 'test',
+    actor: DEMO_ACTORS[1],
+    space,
+    transport: {
+      request: (action, input) =>
+        action === 'pull' ? Promise.reject(Error('interrupted')) : f.guest.request(action, input),
+    },
+  });
+  resources.push(c);
+  await expect(c.initialize({ preferCache: true })).rejects.toThrow('interrupted');
+  expect(await c.db.workspaceMeta.get('snapshot-ready')).toBeUndefined();
+});
+test('cache completo abre sem esperar rede, inclusive espaço vazio', async () => {
+  const f = await setup();
+  let requests = 0;
+  const client = new WorkspaceClient({
+    project: 'test',
+    actor: DEMO_ACTORS[0],
+    space: f.a.space,
+    transport: {
+      request: async () => {
+        requests++;
+        throw Error('network unavailable');
+      },
+    },
+  });
+  resources.push(client);
+  await client.initialize({ preferCache: true });
+  expect(requests).toBe(0);
+  expect(client.fromCache).toBe(true);
+  expect((await client.finance()).entries).toEqual([]);
+});
+test('cache expirado, revogado ou de outra geração não abre sem validação', async () => {
+  const f = await setup();
+  const original = (await f.a.db.workspaceMeta.get('access')).value;
+  for (const access of [
+    { ...original, expiresAt: 1 },
+    { ...original, generation: 99 },
+  ]) {
+    await f.a.db.workspaceMeta.put({ key: 'access', value: access });
+    const c = new WorkspaceClient({
+      project: 'test',
+      actor: DEMO_ACTORS[0],
+      space: f.a.space,
+      transport: {
+        request: async () => {
+          throw Error('offline');
+        },
+      },
+    });
+    resources.push(c);
+    await expect(c.initialize({ preferCache: true })).rejects.toBeDefined();
+  }
+  await f.a.db.workspaceMeta.put({ key: 'access', value: original });
+  await f.a.db.workspaceMeta.put({ key: 'revoked', value: true, generation: 1 });
+  await expect(f.a.assertRead()).rejects.toMatchObject({ code: 'removed' });
+});
+test('primeiro download incompleto não é cache pronto; falha não informa sincronizado', async () => {
+  const f = await setup();
+  await f.a.flush();
+  expect((await f.a.db.workspaceMeta.get('last-synced')).value).toBeGreaterThan(0);
+  f.online(false);
+  await f.a.flush();
+  expect(await f.a.status()).toBe('Não foi possível atualizar');
+  await f.a.db.workspaceMeta.delete('snapshot-ready');
+  const c = new WorkspaceClient({
+    project: 'test',
+    actor: DEMO_ACTORS[0],
+    space: f.a.space,
+    transport: {
+      request: async () => {
+        throw Error('offline');
+      },
+    },
+  });
+  resources.push(c);
+  await expect(c.initialize({ preferCache: true })).rejects.toThrow('offline');
+});
+test('sessão rejeitada bloqueia leitura mas preserva a fila', async () => {
+  const f = await setup();
+  f.online(false);
+  await f.a.commitFinance((s) => saveBudget(s, '2026-11', 'D01', 1));
+  await f.a.authenticationFailed();
+  await expect(f.a.finance()).rejects.toMatchObject({ code: 'unauthorized' });
+  expect(await f.a.db.workspaceOutbox.count()).toBe(1);
+});
 afterEach(() => {
   for (const r of resources.splice(0)) r.close?.();
 });
