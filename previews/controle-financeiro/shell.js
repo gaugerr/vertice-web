@@ -53,6 +53,7 @@ import './app.js';
       else b.removeAttribute('aria-current');
     });
     breadcrumb();
+    requestAnimationFrame(resizeShoppingFrame);
     if (save) {
       try {
         localStorage.setItem(key, JSON.stringify({ area, financialView }));
@@ -61,6 +62,21 @@ import './app.js';
       }
     }
   }
+  function resizeShoppingFrame() {
+    if (area !== 'shopping') return;
+    frame.style.minHeight = '0';
+    frame.style.height =
+      Math.max(100, window.innerHeight - frame.getBoundingClientRect().top) + 'px';
+  }
+  window.addEventListener('resize', resizeShoppingFrame);
+  const frameSizing = new ResizeObserver(resizeShoppingFrame);
+  for (const node of [
+    document.querySelector('header'),
+    document.querySelector('.area-strip'),
+    document.querySelector('.workspace-bar'),
+    document.querySelector('#workspace-message'),
+  ])
+    if (node) frameSizing.observe(node);
   function navigate(next, destination) {
     applyArea(next);
     const hash =
@@ -148,3 +164,5 @@ import './app.js';
     applyArea(area, false);
   }
 })();
+
+document.documentElement.dataset.workspaceReady = 'true';

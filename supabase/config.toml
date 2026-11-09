@@ -42,3 +42,6 @@ import_map = "./functions/deno.json"
 # Cakto uses HMAC, verified by the handler before any storage operation.
 verify_jwt = false
 import_map = "./functions/deno.json"
+
+[functions.workspaces]
+verify_jwt = false

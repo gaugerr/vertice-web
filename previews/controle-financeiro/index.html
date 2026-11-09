@@ -13,6 +13,7 @@
     <link rel="stylesheet" href="styles.css" />
     <link rel="stylesheet" href="shell.css" />
     <link rel="stylesheet" href="finance.css" />
+    <link rel="stylesheet" href="workspace.css" />
   </head>
   <body class="area-shopping">
     <a href="#main" class="skip">Pular para o conteúdo</a>
@@ -59,7 +60,26 @@
       ><span class="preview-hint">Dados de demonstração</span>
     </div>
 
+    <div class="workspace-bar">
+      <label
+        >Espaço<select id="workspace-selector" aria-label="Espaço ativo">
+          <option>Carregando…</option>
+        </select></label
+      ><button class="text-button" id="workspace-manage">Compartilhar</button
+      ><button class="text-button" id="workspace-login" hidden>Entrar com Google</button
+      ><button class="text-button" id="workspace-logout" hidden>Sair da conta</button
+      ><small id="workspace-sync" role="status">Verificando…</small>
+    </div>
+    <p id="workspace-message" role="status"></p>
     <main id="main">
+      <section class="panel" id="workspace-access-block" hidden>
+        <h2>Acesso ao espaço removido</h2>
+        <p>
+          Não é mais possível abrir ou sincronizar este espaço. As alterações pendentes foram
+          preservadas neste aparelho. Em Configurações, você pode baixar uma cópia de recuperação ou
+          escolher outro espaço.
+        </p>
+      </section>
       <section id="shopping-area" aria-label="Listas de compras">
         <iframe
           id="shopping-frame"
@@ -103,6 +123,27 @@
           </div>
         </div>
         <div class="main-grid">
+          <section class="panel" id="workspace-settings">
+            <h2>Seu espaço e o casal</h2>
+            <p class="workspace-demo-note">
+              Simulação local da preview. Não usa contas Google reais, não envia convites e não
+              compartilha dados pela internet. Use os perfis fictícios abaixo para testar.
+            </p>
+            <div id="workspace-settings-content"></div>
+            <button class="secondary" id="workspace-recovery" hidden>
+              Revisar alterações pendentes
+            </button>
+            <details class="workspace-demo-tools">
+              <summary>Testar com outra pessoa</summary>
+              <label>Conta da demonstração<select id="workspace-demo-actor"></select></label
+              ><label class="check-label"
+                ><input id="workspace-demo-offline" type="checkbox" />Simular aparelho sem
+                internet</label
+              ><button class="text-button" id="workspace-demo-license">
+                Simular licença inativa / reativar
+              </button>
+            </details>
+          </section>
           <section class="panel">
             <h2>Categorias financeiras</h2>
             <p class="panel-subtitle">
@@ -180,6 +221,7 @@
     <dialog id="financial-dialog"><form id="financial-form"></form></dialog>
     <dialog id="fixed-detail"><div id="fixed-detail-content"></div></dialog>
     <dialog id="goal-history"><div id="goal-history-content"></div></dialog>
+    <dialog id="workspace-dialog"><form id="workspace-form"></form></dialog>
     <dialog id="catalog-dialog">
       <div class="dialog-heading">
         <h2 id="catalog-title">Cadastros</h2>

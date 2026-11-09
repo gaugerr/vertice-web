@@ -2,6 +2,23 @@
 
 Preview fixo: https://preview-controle-financeiro.vertice-financeiro-preview.pages.dev
 
+## Espaço do casal — demonstração e homologação
+
+O seletor no cabeçalho separa Meu espaço e Nossa casa. Em Configurações, o titular
+pode criar o casal, gerar um link, copiar dados para o destino vazio e remover o
+participante. Os perfis de demonstração permitem testar titular e parceiro em duas
+abas do mesmo navegador. Não há convite real nem compartilhamento entre aparelhos
+na demonstração principal.
+
+Dados, rascunhos, fila de envio e backups ficam separados por usuário e espaço.
+Alterações offline são preservadas, conflitos exigem revisão e remoção bloqueia
+novos envios. Os dados antigos da preview são conservados e importados apenas no
+espaço pessoal fictício do titular. As regras financeiras existentes são mantidas.
+
+A entrada `/staging/` prepara o fluxo Google/autenticação real, mas fica desativada
+sem um projeto Supabase de homologação configurado. Documentação e testes completos:
+[Espaços pessoais e do casal](../../shared/workspaces/README.md).
+
 Menu ☰ troca entre Compras, Financeiro e Configurações. As abas inferiores Resumo,
 Lançamentos, Contas Fixas, Orçamento e Metas aparecem somente no Financeiro, no celular e no desktop.
 A última área é lembrada; o primeiro acesso abre Compras. Voltar/avançar respeita a navegação.

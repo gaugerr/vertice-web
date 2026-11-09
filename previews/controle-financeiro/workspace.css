@@ -1,0 +1,102 @@
+.workspace-bar {
+  display: flex;
+  align-items: center;
+  gap: 10px;
+  padding: 10px max(18px, calc((100vw - 1240px) / 2));
+  border-bottom: 1px solid #302837;
+  flex-wrap: wrap;
+  background: #17131d;
+}
+.workspace-bar label {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  margin: 0;
+  font-size: 12px;
+}
+.workspace-bar select {
+  margin: 0;
+  width: auto;
+  max-width: 200px;
+  padding: 8px;
+}
+.workspace-bar small {
+  color: #b7edce;
+  margin-left: auto;
+  font-size: 11px;
+}
+.workspace-bar button {
+  min-height: 44px;
+}
+.workspace-member {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 10px;
+  margin: 12px 0;
+}
+.workspace-member small {
+  display: block;
+  color: #a798b6;
+  margin-top: 5px;
+  overflow-wrap: anywhere;
+}
+.workspace-buttons {
+  display: flex;
+  gap: 8px;
+  flex-wrap: wrap;
+  margin: 12px 0;
+}
+#workspace-settings-content > button {
+  margin: 8px 6px 8px 0;
+}
+#workspace-message {
+  padding: 0 18px;
+  color: #b7edce;
+  font-size: 12px;
+  overflow-wrap: anywhere;
+}
+#workspace-dialog {
+  max-width: 480px;
+}
+#workspace-settings label {
+  margin-top: 16px;
+}
+#workspace-settings details {
+  margin-top: 16px;
+}
+#workspace-settings summary {
+  cursor: pointer;
+  padding: 10px 0;
+}
+.workspace-demo-note {
+  font-size: 11px;
+  color: #b8aacb;
+}
+.workspace-demo-tools {
+  margin-top: 20px;
+  border-top: 1px solid #302837;
+}
+.workspace-demo-tools button {
+  margin-top: 10px;
+}
+@media (max-width: 420px) {
+  .workspace-bar {
+    gap: 6px;
+  }
+  .workspace-bar select {
+    max-width: 170px;
+  }
+  .workspace-bar small {
+    width: 100%;
+    margin-left: 0;
+  }
+  .workspace-member {
+    align-items: flex-start;
+  }
+}
+[data-workspace-blocked='true'] #finance-area,
+[data-workspace-blocked='true'] #shopping-area,
+[data-workspace-blocked='true'] #finance-tabs {
+  display: none !important;
+}

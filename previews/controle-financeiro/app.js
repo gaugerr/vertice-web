@@ -1,3 +1,5 @@
+import { openPreviewWorkspace, WorkspaceFinanceStore } from './workspaces.js';
+import './workspace-ui.mjs';
 import {
   cents,
   initialState,
@@ -26,13 +28,7 @@ import {
   removeGoal,
 } from './finance-domain.mjs';
 import { createBackup, readBackup, BACKUP_LIMIT } from './finance-backup.mjs';
-import {
-  FinanceStore,
-  STORAGE_KEY,
-  LEGACY_KEY,
-  BACKUP_KEY,
-  PRE_RESTORE_KEY,
-} from './finance-store.mjs';
+import { STORAGE_KEY } from './finance-store.mjs';
 const $ = (s) => document.querySelector(s),
   esc = (s) =>
     String(s ?? '').replace(
@@ -57,11 +53,13 @@ const dateName = (d) =>
     year: 'numeric',
   });
 let store,
+  workspaceClient,
   state,
   loadError = '';
 try {
-  store = new FinanceStore(window.localStorage);
-  state = store.load();
+  workspaceClient = await openPreviewWorkspace();
+  store = new WorkspaceFinanceStore(workspaceClient);
+  state = await store.load();
 } catch (e) {
   loadError = e.message || 'O armazenamento do navegador está indisponível. Nada foi apagado.';
 }
@@ -113,8 +111,8 @@ function spend(id) {
     .filter((e) => e.type === 'expense' && e.categoryId === id)
     .reduce((n, e) => n + e.amount, 0);
 }
-function transact(action, message) {
-  state = store.commit(action);
+async function transact(action, message) {
+  state = await store.commit(action);
   render();
   if (message) toast(message);
 }
@@ -545,23 +543,15 @@ function refreshFormCatalogs() {
     m.innerHTML = catalogOptions('methods', current, undefined, m.required);
   }
 }
-function downloadPreserved() {
+async function downloadPreserved() {
   try {
-    const values = {
-      v2: window.localStorage.getItem(STORAGE_KEY),
-      v1: window.localStorage.getItem(LEGACY_KEY),
-      backup: window.localStorage.getItem(BACKUP_KEY),
-    };
-    const url = URL.createObjectURL(
-      new Blob([JSON.stringify(values, null, 2)], { type: 'application/json' }),
+    if (!workspaceClient) throw Error('Entre no espaço para recuperar seus registros.');
+    downloadJson(
+      'vertice-recuperacao-do-espaco.json',
+      JSON.stringify(await workspaceClient.recovery(), null, 2),
     );
-    const a = document.createElement('a');
-    a.href = url;
-    a.download = 'vertice-financeiro-dados-preservados.json';
-    a.click();
-    setTimeout(() => URL.revokeObjectURL(url), 1000);
-  } catch {
-    toast('O navegador bloqueou a leitura dos dados. Não limpe o armazenamento do site.');
+  } catch (error) {
+    toast(error.message);
   }
 }
 function downloadJson(name, raw) {
@@ -602,9 +592,10 @@ $('#finance-backup-file').onchange = async (e) => {
     $('#finance-backup-status').textContent = error.message;
   }
 };
-$('#export-before-restore').onclick = () => {
+$('#export-before-restore').onclick = async () => {
   try {
-    const raw = window.localStorage.getItem(PRE_RESTORE_KEY);
+    const previous = (await workspaceClient?.db.workspaceMeta.get('finance-before-restore'))?.value;
+    const raw = previous ? JSON.stringify(previous) : null;
     if (!raw) throw Error('Não há cópia anterior disponível.');
     downloadJson('vertice-financeiro-antes-da-restauracao.json', createBackup(JSON.parse(raw)));
   } catch (error) {
@@ -612,7 +603,8 @@ $('#export-before-restore').onclick = () => {
   }
 };
 try {
-  $('#export-before-restore').hidden = window.localStorage.getItem(PRE_RESTORE_KEY) === null;
+  $('#export-before-restore').hidden =
+    !(await workspaceClient?.db.workspaceMeta.get('finance-before-restore'));
 } catch {
   /* Existing recovery screen handles unavailable storage. */
 }
@@ -620,14 +612,14 @@ $('#export-finance').disabled = Boolean(loadError);
 $('#import-finance').disabled = Boolean(loadError);
 $('#new-entry').onclick = () =>
   view === 'fixed' ? openFixed() : view === 'goals' ? openGoal() : openEntry();
-$('#financial-form').addEventListener('submit', (e) => {
+$('#financial-form').addEventListener('submit', async (e) => {
   e.preventDefault();
   const f = new FormData(e.target),
     get = (k) => String(f.get(k) || ''),
     context = editing;
   try {
     if (context.kind === 'restore') {
-      state = store.restore(context.imported);
+      state = await store.restore(context.imported);
       render();
       $('#financial-dialog').close();
       $('#finance-backup-status').textContent =
@@ -636,7 +628,7 @@ $('#financial-form').addEventListener('submit', (e) => {
       toast('Financeiro restaurado neste navegador.');
       return;
     }
-    transact((s) => {
+    await transact((s) => {
       if (context.kind === 'entry')
         saveEntry(s, {
           id: context.id,
@@ -701,10 +693,10 @@ $('#financial-form').addEventListener('submit', (e) => {
     $('#financial-error').textContent = error.message;
   }
 });
-$('#catalog-form').addEventListener('submit', (e) => {
+$('#catalog-form').addEventListener('submit', async (e) => {
   e.preventDefault();
   try {
-    transact(
+    await transact(
       (s) =>
         saveCatalog(s, catalogKind, {
           id: $('#catalog-id').value || crypto.randomUUID(),
@@ -734,7 +726,7 @@ function changeMonth(n) {
     render();
   }
 }
-$('#reset').onclick = () => {
+$('#reset').onclick = async () => {
   if (loadError) {
     toast('Resolva a leitura dos dados antes de restaurar exemplos.');
     return;
@@ -745,7 +737,7 @@ $('#reset').onclick = () => {
     )
   )
     try {
-      transact((s) => {
+      await transact((s) => {
         const initial = initialState();
         for (const k of Object.keys(s)) if (k !== 'revision') delete s[k];
         Object.assign(s, initial);
@@ -775,7 +767,7 @@ document.addEventListener('change', (e) => {
     );
   }
 });
-document.addEventListener('click', (e) => {
+document.addEventListener('click', async (e) => {
   const b = e.target.closest('button');
   if (!b) return;
   try {
@@ -788,7 +780,7 @@ document.addEventListener('click', (e) => {
       render();
       window.scrollTo({ top: 0, behavior: 'smooth' });
     }
-    if (b.id === 'download-preserved') downloadPreserved();
+    if (b.id === 'download-preserved') await downloadPreserved();
     if (b.id === 'retry-load') window.location.reload();
     if (loadError) return;
     if (b.dataset.catalog) openCatalog(b.dataset.catalog);
@@ -808,7 +800,7 @@ document.addEventListener('click', (e) => {
       $('#catalog-type').disabled = false;
     }
     if (b.dataset.catalogToggle) {
-      transact(
+      await transact(
         (s) => toggleCatalog(s, catalogKind, b.dataset.catalogToggle),
         'Cadastro atualizado; o histórico foi preservado.',
       );
@@ -825,7 +817,7 @@ document.addEventListener('click', (e) => {
           '”? Essa ação não pode ser desfeita.',
       )
     )
-      transact((s) => {
+      await transact((s) => {
         s.entries = s.entries.filter((r) => r.id !== b.dataset.entryDelete);
       }, 'Lançamento excluído.');
     if (b.hasAttribute('data-new-fixed')) openFixed();
@@ -843,7 +835,7 @@ document.addEventListener('click', (e) => {
               'Desfazer todos os pagamentos desta competência? O valor previsto em vigor será utilizado novamente.',
             )
           )
-            transact((s) => undoFixed(s, id, month), 'Pagamento desfeito.');
+            await transact((s) => undoFixed(s, id, month), 'Pagamento desfeito.');
         } else if (action === 'adjust') {
           const r = fixedRows(state, month).find((r) => r.accountId === id);
           if (!r || r.paid || r.paidAmount)
@@ -880,7 +872,7 @@ document.addEventListener('click', (e) => {
       );
     if (b.dataset.goalEdit) openGoal(b.dataset.goalEdit);
     if (b.dataset.goalDelete && confirm('Excluir esta meta e seu histórico de aportes?'))
-      transact((s) => removeGoal(s, b.dataset.goalDelete), 'Meta excluída.');
+      await transact((s) => removeGoal(s, b.dataset.goalDelete), 'Meta excluída.');
     if (b.dataset.goal) openContribution(b.dataset.goal);
     if (b.dataset.goalHistory) openGoalHistory(b.dataset.goalHistory);
     if (b.dataset.contributionEdit) openContribution(b.dataset.goalId, b.dataset.contributionEdit);
@@ -888,7 +880,7 @@ document.addEventListener('click', (e) => {
       b.dataset.contributionDelete &&
       confirm('Desfazer este aporte? O valor será retirado apenas da meta.')
     ) {
-      transact(
+      await transact(
         (s) => removeContribution(s, b.dataset.goalId, b.dataset.contributionDelete),
         'Aporte desfeito.',
       );
@@ -916,7 +908,10 @@ document.addEventListener('click', (e) => {
           '? Os limites deste mês serão substituídos.',
       )
     )
-      transact((s) => copyPreviousBudget(s, month), 'Limites copiados somente para este mês.');
+      await transact(
+        (s) => copyPreviousBudget(s, month),
+        'Limites copiados somente para este mês.',
+      );
   } catch (error) {
     if ($('#catalog-dialog').open) $('#catalog-error').textContent = error.message;
     else toast(error.message);
@@ -933,3 +928,18 @@ window.addEventListener('storage', (e) => {
   }
 });
 render();
+
+workspaceClient?.onChange(async () => {
+  try {
+    const next = await workspaceClient.finance();
+    if (next.revision === state?.revision) return;
+    if ($('#financial-dialog').open || $('#catalog-dialog').open || $('#goal-history').open) {
+      toast('O financeiro mudou. Revise antes de salvar.');
+      return;
+    }
+    state = await store.load();
+    render();
+  } catch (error) {
+    toast(error.message);
+  }
+});

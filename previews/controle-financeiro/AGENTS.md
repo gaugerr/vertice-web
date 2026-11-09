@@ -10,7 +10,7 @@ Não altera as rotas, autenticação, banco, app de compras ou página de vendas
 - Build: node build.mjs. Saída: dist (não versionar).
 - Publicação automática: somente esta branch. Produção deste projeto desabilitada.
 - Usar o alias retornado pela Cloudflare para esta branch como endereço estável.
-- Financeiro: dados locais de demonstração em localStorage, chave vertice-finance-preview-v2.
+- Financeiro ativo e compras: IndexedDB por projeto/usuário/espaço, com fila transacional e conflitos. O titular fictício importa os dados antigos da preview uma vez; preservar o localStorage vertice-finance-preview-v2 e o IndexedDB antigos como fontes de recuperação.
 - Migrar v1 uma única vez, conservando a chave original e vertice-finance-preview-v1-backup. Nunca restaurar exemplos automaticamente se houver erro de leitura.
 - Categorias e pagamentos usam IDs estáveis; arquivar mantém as referências históricas. Não inferir categorias ou pagamentos ausentes nos dados antigos.
 - Contas fixas são versões mensais com ocorrências únicas por conta/competência. Pagamentos entram nos indicadores pela competência, preservando também a data real e o valor efetivo. Não somar o cadastro da recorrência aos lançamentos.
@@ -20,15 +20,17 @@ Não altera as rotas, autenticação, banco, app de compras ou página de vendas
 - Pendências anteriores são consultadas separadamente do resultado mensal; abrir o mês original mantém a competência. Comparação mensal usa os totais canônicos confirmados.
 - Metas têm saldo inicial e histórico de aportes com IDs/datas. Corrigir/subtrair aportes recalcula o progresso e nunca cria lançamentos implícitos. Preservar metas antigas sem inferir histórico.
 - Backups financeiros versionados não incluem Compras. Validar arquivo/referências/históricos antes de confirmar restauração; guardar cópia anterior antes de substituir. Não alterar dados em erro ou cancelamento. Migração futura para banco deve impor isolamento por usuário no servidor.
-- Compras: reutiliza telas/repositório reais de src/ através de shopping.tsx, com IndexedDB exclusivo vertice_shopping_navigation_preview_v1.
+- Compras: reutiliza telas/repositório reais de src/ através de shopping.tsx, agora com WorkspaceClient.shopping e banco isolado por espaço. O banco vertice_shopping_navigation_preview_v1 é lido somente para preservar a demonstração anterior do titular.
 - shell.js mantém o menu de áreas, breadcrumbs e abas inferiores apenas do Financeiro.
 - Abas: Resumo, Lançamentos, Contas Fixas, Orçamento e Metas. Cadastros editáveis ficam em Configurações e nos formulários.
 - O build instala as dependências fixadas da raiz se necessário e compila a entrada shopping com Vite. Não muda src/, login ou banco oficial.
-- Não inicializar service worker, OAuth ou conexões externas neste preview de demonstração.
+- Não inicializar service worker, OAuth ou conexões externas na demonstração principal. A entrada /staging/ fica desativada por padrão; pode usar Google/Supabase somente com projeto de homologação explícito, nunca o projeto de produção.
 - Preservar rascunhos de compras ao trocar de área: não desmontar o painel de compras.
-- Sem conexão ao Supabase, dados pessoais, login, bancos ou dados oficiais.
+- Sem conexão ao Supabase de produção, credenciais ou dados oficiais. Explicar que os convites da demonstração são locais. A configuração da homologação fica em shared/workspaces/README.md.
 - Manter o endereço e a origem para preservar alterações de demonstração no navegador.
 - Melhorias ficam nesta branch até o proprietário autorizar a integração ao app oficial.
+- Seletor de espaço não pode descartar rascunhos. Backup e recuperação devem respeitar usuário/espaço. Nunca reenviar fila de uma participação removida após novo convite.
+- Testes do casal: Vitest com shared/workspaces/vitest.config.mjs e fluxo mobile shared/workspaces/browser-check.mjs; o schema de homologação e verificador estão em supabase/drafts/shared-spaces.
 
 Validação a partir da raiz: node --test --test-isolation=none previews/controle-financeiro/finance-domain.test.mjs previews/controle-financeiro/finance-improvements.test.mjs; node previews/controle-financeiro/build.mjs.
 Testar cadastros, migração, falha de gravação, troca de mês, pagamento, reajuste,
