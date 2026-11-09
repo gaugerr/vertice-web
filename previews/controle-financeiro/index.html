@@ -4,17 +4,37 @@
     <meta charset="UTF-8" />
     <meta name="viewport" content="width=device-width,initial-scale=1" />
     <meta name="theme-color" content="#101014" />
-    <title>Vértice Financeiro · Preview</title>
+    <title>Vértice · Compras e Financeiro · Preview</title>
     <meta
       name="description"
       content="Uma primeira visão do seu controle financeiro no Vértice. Preview independente com dados de exemplo."
     />
     <link rel="icon" href="vertice.svg" />
     <link rel="stylesheet" href="styles.css" />
+    <link rel="stylesheet" href="shell.css" />
   </head>
-  <body>
+  <body class="area-shopping">
     <a href="#main" class="skip">Pular para o conteúdo</a>
     <header>
+      <button
+        class="menu-toggle"
+        id="menu-toggle"
+        aria-label="Abrir menu de áreas"
+        aria-controls="app-menu"
+        aria-expanded="false"
+      >
+        <svg
+          width="23"
+          height="23"
+          viewBox="0 0 24 24"
+          fill="none"
+          stroke="currentColor"
+          stroke-width="1.8"
+          aria-hidden="true"
+        >
+          <path d="M4 6h16M4 12h16M4 18h16" />
+        </svg>
+      </button>
       <div class="brand">
         <img src="vertice.svg" alt="" width="37" height="37" /><span>vértice<b>.</b></span
         ><span class="preview">PREVIEW</span>
@@ -32,57 +52,100 @@
         <div class="avatar" aria-label="Perfil de exemplo">V</div>
       </div>
     </header>
-    <aside class="sidebar">
-      <div>
-        <p class="nav-label">SEU VÉRTICE</p>
-        <nav aria-label="Área financeira">
-          <button data-view="overview" class="active"><span>◫</span> Visão geral</button
-          ><button data-view="transactions"><span>⇄</span> Lançamentos</button
-          ><button data-view="budget"><span>▤</span> Orçamento</button
-          ><button data-view="goals"><span>◎</span> Metas</button>
-        </nav>
-      </div>
-      <div class="sidebar-bottom">
-        <div class="small-mark">↗</div>
-        <h3>Um passo de cada vez.</h3>
-        <p>Organize o presente.<br />Abra espaço para seus planos.</p>
-        <div class="prototype-note">
-          Vértice Financeiro<br /><span>Primeiro conceito · v0.1</span>
-        </div>
-      </div>
-    </aside>
+    <div class="area-strip">
+      <button id="area-shortcut" aria-label="Trocar área pelo menu">Compras <span>⌄</span></button
+      ><span aria-hidden="true">/</span><span id="current-screen">Minhas listas</span
+      ><span class="preview-hint">Dados de demonstração</span>
+    </div>
+
     <main id="main">
-      <div class="page-heading">
-        <div>
-          <div class="eyebrow">VÉRTICE FINANCEIRO</div>
-          <h1 id="page-title">Seu dinheiro, em equilíbrio.</h1>
-          <p id="page-subtitle">
-            Um olhar simples para o que entra, o que sai e o que vem pela frente.
-          </p>
+      <section id="shopping-area" aria-label="Listas de compras">
+        <iframe
+          id="shopping-frame"
+          title="Vértice · Listas de compras"
+          src="shopping/index.html"
+          allow="clipboard-write"
+        ></iframe>
+      </section>
+      <section id="finance-area" hidden>
+        <div class="page-heading">
+          <div>
+            <div class="eyebrow">VÉRTICE FINANCEIRO</div>
+            <h1 id="page-title">Seu dinheiro, em equilíbrio.</h1>
+            <p id="page-subtitle">
+              Um olhar simples para o que entra, o que sai e o que vem pela frente.
+            </p>
+          </div>
+          <button class="primary" id="new-entry"><span>＋</span> Novo lançamento</button>
         </div>
-        <button class="primary" id="new-entry"><span>＋</span> Novo lançamento</button>
-      </div>
-      <div class="toolbar">
-        <div class="month-control">
-          <button id="prev-month" aria-label="Mês anterior">‹</button><span id="month"></span
-          ><button id="next-month" aria-label="Próximo mês">›</button>
+        <div class="toolbar">
+          <div class="month-control">
+            <button id="prev-month" aria-label="Mês anterior">‹</button><span id="month"></span
+            ><button id="next-month" aria-label="Próximo mês">›</button>
+          </div>
+          <span class="example-label"
+            >Dados de exemplo <span class="desktop-text">· explore à vontade</span></span
+          >
         </div>
-        <span class="example-label"
-          >Dados de exemplo <span class="desktop-text">· explore à vontade</span></span
-        >
-      </div>
-      <div id="content" aria-live="polite"></div>
-      <footer>
-        Preview independente do Vértice
-        <span>Dados fictícios, salvos apenas neste navegador.</span>
-      </footer>
+        <div id="content" aria-live="polite"></div>
+        <footer>
+          Preview independente do Vértice
+          <span>Dados fictícios, salvos apenas neste navegador.</span>
+        </footer>
+      </section>
+      <section id="settings-area" hidden>
+        <div class="page-heading">
+          <div>
+            <div class="eyebrow">VÉRTICE · PREVIEW</div>
+            <h1>Configurações</h1>
+            <p>Os dados deste ambiente são independentes do seu aplicativo oficial.</p>
+          </div>
+        </div>
+        <div class="main-grid">
+          <section class="panel">
+            <h2>Dados das compras</h2>
+            <p class="panel-subtitle">Exporte e restaure as listas criadas neste preview.</p>
+            <button class="secondary" id="shopping-settings">Abrir dados das compras</button>
+          </section>
+          <section class="panel">
+            <h2>Exemplos do financeiro</h2>
+            <p class="panel-subtitle">
+              Restaure as receitas, despesas, limites e metas de exemplo. Isso não altera as
+              compras.
+            </p>
+            <button class="secondary" id="finance-reset">Restaurar financeiro de exemplo</button>
+          </section>
+        </div>
+      </section>
     </main>
-    <nav class="mobile-nav" aria-label="Navegação móvel">
+    <nav hidden id="finance-tabs" class="mobile-nav" aria-label="Navegação móvel">
       <button data-view="overview" class="active">◫<small>Resumo</small></button
       ><button data-view="transactions">⇄<small>Lançamentos</small></button
       ><button data-view="budget">▤<small>Orçamento</small></button
       ><button data-view="goals">◎<small>Metas</small></button>
     </nav>
+    <dialog id="app-menu" class="area-drawer">
+      <div class="drawer-head">
+        <div class="brand">
+          <img src="vertice.svg" width="32" height="32" alt="" /><span>vértice<b>.</b></span>
+        </div>
+        <button class="icon-button" id="menu-close" aria-label="Fechar menu">×</button>
+      </div>
+      <p class="nav-label">ESCOLHA SUA ÁREA</p>
+      <nav aria-label="Áreas do Vértice">
+        <button data-area="shopping">
+          <span>🛒</span><span>Compras<small>Listas e compras anteriores</small></span></button
+        ><button data-area="finance">
+          <span>◫</span><span>Financeiro<small>Seu dinheiro em equilíbrio</small></span></button
+        ><button data-area="settings">
+          <span>⚙</span><span>Configurações<small>Dados deste preview</small></span>
+        </button>
+      </nav>
+      <div class="drawer-footer">
+        <span class="preview">PREVIEW</span>
+        <p>Compras e financeiro no mesmo Vértice.<br />Explore com dados de demonstração.</p>
+      </div>
+    </dialog>
     <dialog id="entry-dialog">
       <form id="entry-form">
         <div class="dialog-heading">
@@ -142,5 +205,6 @@
     </dialog>
     <div class="toast" id="toast" role="status"></div>
     <script src="app.js"></script>
+    <script src="shell.js"></script>
   </body>
 </html>

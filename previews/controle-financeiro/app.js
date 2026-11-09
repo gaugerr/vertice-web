@@ -195,6 +195,7 @@ function goals() {
   );
 }
 function render() {
+  window.dispatchEvent(new CustomEvent('vertice:finance-view', { detail: { view } }));
   const titles = {
     overview: [
       'Seu dinheiro, em equilíbrio.',
@@ -416,4 +417,9 @@ $('#adjust-form').onsubmit = (e) => {
     $('#adjust-error').textContent = err.message;
   }
 };
+window.addEventListener('vertice:finance-navigate', (event) => {
+  if (!['overview', 'transactions', 'budget', 'goals'].includes(event.detail?.view)) return;
+  view = event.detail.view;
+  render();
+});
 render();

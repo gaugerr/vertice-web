@@ -1,0 +1,17 @@
+/* Preview shell owns the app header and section switcher. Shopping screens stay original. */
+.finance-entry {
+  display: none;
+}
+.main-content {
+  max-width: 1120px;
+  margin: 0 auto;
+  padding: 24px 28px 70px;
+}
+.hero {
+  margin-top: 4px;
+}
+@media (max-width: 640px) {
+  .main-content {
+    padding: 20px 18px 60px;
+  }
+}
