@@ -12,6 +12,7 @@
     <link rel="icon" href="vertice.svg" />
     <link rel="stylesheet" href="styles.css" />
     <link rel="stylesheet" href="shell.css" />
+    <link rel="stylesheet" href="finance.css" />
   </head>
   <body class="area-shopping">
     <a href="#main" class="skip">Pular para o conteúdo</a>
@@ -103,6 +104,20 @@
         </div>
         <div class="main-grid">
           <section class="panel">
+            <h2>Categorias financeiras</h2>
+            <p class="panel-subtitle">
+              Padrões da planilha, com liberdade para criar, renomear e arquivar.
+            </p>
+            <button class="secondary" data-catalog="categories">Gerenciar categorias</button>
+          </section>
+          <section class="panel">
+            <h2>Formas de pagamento</h2>
+            <p class="panel-subtitle">
+              Personalize como você paga as despesas e recebe suas receitas.
+            </p>
+            <button class="secondary" data-catalog="methods">Gerenciar formas de pagamento</button>
+          </section>
+          <section class="panel">
             <h2>Dados das compras</h2>
             <p class="panel-subtitle">Exporte e restaure as listas criadas neste preview.</p>
             <button class="secondary" id="shopping-settings">Abrir dados das compras</button>
@@ -121,6 +136,7 @@
     <nav hidden id="finance-tabs" class="mobile-nav" aria-label="Navegação móvel">
       <button data-view="overview" class="active">◫<small>Resumo</small></button
       ><button data-view="transactions">⇄<small>Lançamentos</small></button
+      ><button data-view="fixed">▣<small>Contas Fixas</small></button
       ><button data-view="budget">▤<small>Orçamento</small></button
       ><button data-view="goals">◎<small>Metas</small></button>
     </nav>
@@ -146,65 +162,35 @@
         <p>Compras e financeiro no mesmo Vértice.<br />Explore com dados de demonstração.</p>
       </div>
     </dialog>
-    <dialog id="entry-dialog">
-      <form id="entry-form">
-        <div class="dialog-heading">
-          <div>
-            <div class="eyebrow">MOVIMENTE SEU MÊS</div>
-            <h2 id="form-title">Novo lançamento</h2>
-          </div>
-          <button type="button" class="icon-button" data-close aria-label="Fechar">×</button>
-        </div>
-        <input type="hidden" id="entry-id" />
-        <div class="type-switch">
-          <label
-            ><input type="radio" name="type" value="expense" checked /><span
-              >↗ Despesa</span
-            ></label
-          ><label><input type="radio" name="type" value="income" /><span>↙ Receita</span></label>
-        </div>
-        <label
-          >Descrição<input
-            id="description"
-            maxlength="80"
-            placeholder="Ex.: compra do mercado"
-            required
-        /></label>
-        <div class="form-grid">
-          <label
-            >Valor (R$)<input id="amount" inputmode="decimal" placeholder="0,00" required /></label
-          ><label>Data<input id="date" type="date" required /></label>
-        </div>
-        <label>Categoria<select id="category"></select></label
-        ><label class="check-label"
-          ><input type="checkbox" id="paid" checked /> Já foi pago ou recebido</label
+    <dialog id="financial-dialog"><form id="financial-form"></form></dialog>
+    <dialog id="fixed-detail"><div id="fixed-detail-content"></div></dialog>
+    <dialog id="catalog-dialog">
+      <div class="dialog-heading">
+        <h2 id="catalog-title">Cadastros</h2>
+        <button class="icon-button" data-close aria-label="Fechar">×</button>
+      </div>
+      <p class="muted">
+        Renomear mantém os vínculos. Arquivar retira a opção dos novos registros, sem apagar o
+        histórico. O tipo da categoria não muda depois da criação.
+      </p>
+      <form id="catalog-form">
+        <input id="catalog-id" type="hidden" /><label
+          >Nome<input id="catalog-name" maxlength="50" required /></label
+        ><label id="catalog-type-label"
+          >Tipo<select id="catalog-type">
+            <option value="expense">Despesa</option>
+            <option value="income">Receita</option>
+          </select></label
         >
-        <p class="error" id="form-error" role="alert"></p>
+        <p class="error" id="catalog-error" role="alert"></p>
         <div class="dialog-actions">
-          <button type="button" class="secondary" data-close>Cancelar</button
-          ><button class="primary" type="submit">Salvar lançamento</button>
+          <button class="secondary" type="button" id="catalog-new">Novo cadastro</button
+          ><button class="primary">Salvar cadastro</button>
         </div>
       </form>
-    </dialog>
-    <dialog id="adjust-dialog">
-      <form id="adjust-form">
-        <div class="dialog-heading">
-          <h2 id="adjust-title"></h2>
-          <button type="button" class="icon-button" data-close aria-label="Fechar">×</button>
-        </div>
-        <p id="adjust-help" class="muted"></p>
-        <label id="adjust-label"
-          >Valor (R$)<input id="adjust-amount" inputmode="decimal" required placeholder="0,00"
-        /></label>
-        <p class="error" id="adjust-error" role="alert"></p>
-        <div class="dialog-actions">
-          <button type="button" class="secondary" data-close>Cancelar</button
-          ><button class="primary">Salvar</button>
-        </div>
-      </form>
+      <div id="catalog-list"></div>
     </dialog>
     <div class="toast" id="toast" role="status"></div>
-    <script src="app.js"></script>
-    <script src="shell.js"></script>
+    <script type="module" src="shell.js"></script>
   </body>
 </html>

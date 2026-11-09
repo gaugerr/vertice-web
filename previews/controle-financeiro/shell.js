@@ -1,4 +1,4 @@
-'use strict';
+import './app.js';
 (() => {
   const menu = document.getElementById('app-menu');
   const toggle = document.getElementById('menu-toggle');
@@ -7,6 +7,7 @@
   const screens = {
     overview: 'Resumo',
     transactions: 'Lançamentos',
+    fixed: 'Contas Fixas',
     budget: 'Orçamento',
     goals: 'Metas',
   };

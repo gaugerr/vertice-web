@@ -10,9 +10,13 @@ Não altera as rotas, autenticação, banco, app de compras ou página de vendas
 - Build: node build.mjs. Saída: dist (não versionar).
 - Publicação automática: somente esta branch. Produção deste projeto desabilitada.
 - Usar o alias retornado pela Cloudflare para esta branch como endereço estável.
-- Financeiro: dados fictícios em localStorage, chave vertice-finance-preview-v1.
+- Financeiro: dados locais de demonstração em localStorage, chave vertice-finance-preview-v2.
+- Migrar v1 uma única vez, conservando a chave original e vertice-finance-preview-v1-backup. Nunca restaurar exemplos automaticamente se houver erro de leitura.
+- Categorias e pagamentos usam IDs estáveis; arquivar mantém as referências históricas. Não inferir categorias ou pagamentos ausentes nos dados antigos.
+- Contas fixas são versões mensais com ocorrências únicas por conta/competência. Pagamentos entram nos indicadores pela competência, preservando também a data real e o valor efetivo. Não somar o cadastro da recorrência aos lançamentos.
 - Compras: reutiliza telas/repositório reais de src/ através de shopping.tsx, com IndexedDB exclusivo vertice_shopping_navigation_preview_v1.
 - shell.js mantém o menu de áreas, breadcrumbs e abas inferiores apenas do Financeiro.
+- Abas: Resumo, Lançamentos, Contas Fixas, Orçamento e Metas. Cadastros editáveis ficam em Configurações e nos formulários.
 - O build instala as dependências fixadas da raiz se necessário e compila a entrada shopping com Vite. Não muda src/, login ou banco oficial.
 - Não inicializar service worker, OAuth ou conexões externas neste preview de demonstração.
 - Preservar rascunhos de compras ao trocar de área: não desmontar o painel de compras.
@@ -20,6 +24,7 @@ Não altera as rotas, autenticação, banco, app de compras ou página de vendas
 - Manter o endereço e a origem para preservar alterações de demonstração no navegador.
 - Melhorias ficam nesta branch até o proprietário autorizar a integração ao app oficial.
 
-Validação: node --check app.js; node build.mjs. Testar adição/edição/exclusão,
-validação monetária, troca de mês, pagamento, orçamento e metas quando afetados.
+Validação a partir da raiz: node --test --test-isolation=none previews/controle-financeiro/finance-domain.test.mjs; node previews/controle-financeiro/build.mjs.
+Testar cadastros, migração, falha de gravação, troca de mês, pagamento, reajuste,
+correção, desfazer pagamento, orçamento e metas quando afetados.
 Valores em centavos inteiros; preservar as contas e os textos de demonstração.

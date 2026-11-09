@@ -1,0 +1,334 @@
+#finance-tabs button {
+  width: 20%;
+  min-width: 0;
+  flex: 1;
+}
+#finance-tabs button small {
+  max-width: 100%;
+  font-size: 10px;
+  text-align: center;
+  line-height: 1.3;
+}
+#finance-tabs {
+  align-items: stretch;
+}
+#finance-tabs button {
+  min-height: 61px;
+}
+.competence-note {
+  font-size: 10px;
+  color: #a698b5;
+  line-height: 1.8;
+  margin: 14px 1px 23px;
+  max-width: 800px;
+}
+.record-note {
+  font-size: 10px;
+  color: #a79bb6;
+  line-height: 1.6;
+  margin-top: 7px;
+  white-space: pre-wrap;
+  overflow-wrap: anywhere;
+}
+.financial-filters {
+  display: grid;
+  grid-template-columns: repeat(3, minmax(0, 1fr));
+  gap: 12px;
+}
+.financial-filters > input {
+  grid-column: 1/-1;
+  min-width: 0;
+}
+.financial-filters label {
+  min-width: 0;
+  font-size: 10px;
+}
+.financial-filters select {
+  font-size: 11px;
+  padding: 10px;
+  min-width: 0;
+}
+.fixed-summary {
+  display: grid;
+  grid-template-columns: repeat(3, minmax(0, 1fr));
+  gap: 15px;
+}
+.fixed-summary article {
+  padding: 20px;
+  border: 1px solid var(--border);
+  border-radius: 12px;
+  background: #1d1825;
+  min-width: 0;
+}
+.fixed-summary small {
+  font-size: 11px;
+  color: #a294b2;
+}
+.fixed-summary strong {
+  display: block;
+  font-size: 23px;
+  margin-top: 13px;
+  letter-spacing: -0.5px;
+}
+.registered-account {
+  padding: 18px 0;
+  border-bottom: 1px solid var(--border);
+}
+.registered-account strong {
+  display: block;
+  font-size: 13px;
+  overflow-wrap: anywhere;
+}
+.registered-account small {
+  display: block;
+  font-size: 11px;
+  color: #a698b4;
+  margin: 8px 0;
+}
+.registered-account button {
+  margin-top: 6px;
+}
+.main-grid > div > .panel {
+  margin-bottom: 18px;
+}
+#financial-form > label,
+#catalog-form > label {
+  margin: 17px 0;
+}
+textarea {
+  font: inherit;
+  background: #17141e;
+  border: 1px solid #473c55;
+  border-radius: 8px;
+  color: #eee6f9;
+  padding: 12px;
+  width: 100%;
+  margin-top: 8px;
+  font-size: 13px;
+  resize: vertical;
+}
+.manage-link {
+  display: block;
+  margin: 0 0 13px auto;
+  font-size: 10px;
+}
+#catalog-dialog {
+  width: min(600px, calc(100% - 28px));
+  max-height: calc(100dvh - 30px);
+  overflow: auto;
+}
+#financial-dialog,
+#fixed-detail {
+  max-height: calc(100dvh - 30px);
+  overflow: auto;
+}
+.catalog-row {
+  display: flex;
+  align-items: center;
+  gap: 12px;
+  padding: 14px 0;
+  border-bottom: 1px solid var(--border);
+}
+.catalog-row > div {
+  flex: 1;
+  min-width: 0;
+}
+.catalog-row strong {
+  font-size: 12px;
+  display: block;
+  overflow-wrap: anywhere;
+}
+.catalog-row small {
+  font-size: 10px;
+  color: #a89ab7;
+  display: block;
+  margin-top: 5px;
+}
+.catalog-row .text-button {
+  font-size: 10px;
+}
+.catalog-row strong,
+.payment-history {
+  overflow-wrap: anywhere;
+}
+#catalog-list {
+  margin-top: 23px;
+}
+.detail-actions,
+.recovery-actions {
+  display: flex;
+  gap: 10px;
+  flex-wrap: wrap;
+  margin: 20px 0;
+}
+#fixed-detail h3 {
+  font-size: 13px;
+  margin: 25px 0 12px;
+}
+.version-history p,
+.payment-history {
+  padding: 12px 0;
+  font-size: 12px;
+  border-bottom: 1px solid var(--border);
+  line-height: 1.8;
+}
+.version-history small,
+.payment-history small {
+  display: block;
+  color: #a798b6;
+  font-size: 10px;
+}
+#financial-dialog .form-grid {
+  margin-bottom: 17px;
+}
+.transaction .txn-info {
+  align-self: center;
+}
+.financial-filters + div .transaction {
+  align-items: flex-start;
+}
+.financial-filters + div .txn-icon {
+  margin-top: 3px;
+}
+.financial-filters + div .txn-amount,
+.financial-filters + div .txn-actions {
+  margin-top: 8px;
+}
+.fixed-summary + .main-grid .transaction {
+  align-items: flex-start;
+}
+.fixed-summary + .main-grid .txn-amount {
+  margin-top: 4px;
+}
+.fixed-summary + .main-grid .txn-info strong {
+  line-height: 1.5;
+}
+.fixed-summary + .main-grid .txn-icon {
+  display: none;
+}
+#financial-dialog p.muted {
+  line-height: 1.8;
+  margin: 15px 0;
+}
+.recovery-actions .primary {
+  white-space: normal;
+}
+.recovery-actions + p {
+  margin-top: 20px;
+}
+#financial-dialog input[readonly] {
+  opacity: 0.65;
+}
+#catalog-form .dialog-actions {
+  margin-top: 16px;
+}
+.error {
+  line-height: 1.7;
+}
+#financial-dialog .dialog-heading h2,
+#fixed-detail .dialog-heading h2 {
+  overflow-wrap: anywhere;
+}
+.record-note:empty {
+  display: none;
+}
+@media (max-width: 640px) {
+  .financial-filters {
+    grid-template-columns: repeat(2, minmax(0, 1fr));
+  }
+  .fixed-summary {
+    gap: 8px;
+  }
+  .fixed-summary article {
+    padding: 15px 10px;
+  }
+  .fixed-summary small {
+    font-size: 10px;
+  }
+  .fixed-summary strong {
+    font-size: 19px;
+  }
+  .transaction {
+    flex-wrap: wrap;
+  }
+  .txn-info {
+    flex-basis: 35%;
+  }
+  .txn-actions {
+    margin-left: auto;
+  }
+  .record-note {
+    font-size: 10px;
+  }
+  .financial-filters + div .txn-actions {
+    flex-basis: 100%;
+    justify-content: flex-end;
+    margin-top: 0;
+  }
+  .fixed-summary + .main-grid .txn-actions {
+    width: 100%;
+    justify-content: flex-end;
+  }
+  .fixed-summary + .main-grid .txn-info {
+    flex-basis: 45%;
+  }
+  .catalog-row {
+    gap: 9px;
+  }
+  .catalog-row .text-button {
+    font-size: 9px;
+  }
+  .catalog-row strong {
+    font-size: 11px;
+  }
+  #finance-tabs {
+    padding-left: 5px;
+    padding-right: 5px;
+  }
+  #finance-tabs button {
+    padding: 6px 2px;
+    min-height: 58px;
+  }
+  #finance-tabs button small {
+    font-size: 9px;
+  }
+  .competence-note {
+    font-size: 10px;
+  }
+  .detail-actions {
+    flex-direction: column;
+  }
+  .detail-actions > button {
+    white-space: normal;
+    text-align: center;
+  }
+  .fixed-summary + .main-grid .panel-heading {
+    flex-wrap: wrap;
+  }
+}
+@media (max-width: 360px) {
+  .fixed-summary strong {
+    font-size: 16px;
+  }
+  .fixed-summary small {
+    font-size: 9px;
+  }
+  #finance-tabs button small {
+    font-size: 8px;
+  }
+  .txn-amount {
+    font-size: 10px;
+  }
+  .catalog-row {
+    flex-wrap: wrap;
+  }
+  .catalog-row > div {
+    flex-basis: 100%;
+  }
+  .form-grid {
+    grid-template-columns: 1fr 1fr;
+  }
+  .financial-filters label {
+    font-size: 9px;
+  }
+}

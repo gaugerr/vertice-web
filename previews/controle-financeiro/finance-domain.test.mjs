@@ -1,0 +1,268 @@
+import test from 'node:test';
+import assert from 'node:assert/strict';
+import {
+  emptyState,
+  initialState,
+  migrateV1,
+  saveEntry,
+  saveFixed,
+  saveCatalog,
+  toggleCatalog,
+  monthlyRows,
+  fixedRows,
+  totals,
+  payFixed,
+  correctPayment,
+  undoFixed,
+  adjustFixed,
+  endFixed,
+  dueDate,
+  validateState,
+  cents,
+} from './finance-domain.mjs';
+import { FinanceStore, STORAGE_KEY, LEGACY_KEY, BACKUP_KEY } from './finance-store.mjs';
+const account = (s, over = {}) =>
+  saveFixed(s, {
+    id: 'rent',
+    name: 'Aluguel',
+    startMonth: '2026-11',
+    endMonth: null,
+    from: '2026-11',
+    amount: 100000,
+    categoryId: 'D01',
+    paymentMethodId: 'P2',
+    dueDay: 31,
+    ...over,
+  });
+const memory = () => {
+  const m = new Map();
+  return { getItem: (k) => m.get(k) ?? null, setItem: (k, v) => m.set(k, v) };
+};
+test('centavos, datas civis e fevereiro inclusive bissexto', () => {
+  assert.equal(cents('120,50'), 12050);
+  for (const v of ['0', '1.200,50', '-3', '1,999']) assert.throws(() => cents(v));
+  assert.equal(dueDate('2027-02', 31), '2027-02-28');
+  assert.equal(dueDate('2028-02', 31), '2028-02-29');
+  assert.equal(dueDate('2026-04', 31), '2026-04-30');
+});
+test('recorrências em vigências, uma ocorrência por mês e sem mutação na consulta', () => {
+  const s = emptyState();
+  account(s, { endMonth: '2027-02' });
+  const before = JSON.stringify(s);
+  assert.equal(fixedRows(s, '2026-10').length, 0);
+  assert.equal(fixedRows(s, '2027-02').length, 1);
+  assert.equal(fixedRows(s, '2027-03').length, 0);
+  assert.equal(totals(monthlyRows(s, '2026-11')).expectedExpense, 100000);
+  fixedRows(s, '2026-11');
+  assert.equal(JSON.stringify(s), before);
+});
+test('pagamento em dezembro pertence à competência novembro; pagar não paga outro mês', () => {
+  const s = emptyState();
+  account(s);
+  payFixed(s, 'rent', '2026-11', {
+    date: '2026-12-05',
+    amount: 101000,
+    observation: 'Diferença conferida',
+  });
+  assert.equal(totals(monthlyRows(s, '2026-11')).expense, 101000);
+  assert.equal(totals(monthlyRows(s, '2026-12')).expense, 0);
+  assert.equal(fixedRows(s, '2026-11')[0].paymentDate, '2026-12-05');
+  assert.throws(() => payFixed(s, 'rent', '2026-11', { date: '2026-12-06', amount: 101000 }));
+  validateState(s);
+});
+test('reajuste preserva histórico pago e vigências antigas, ajustes pontuais não vazam', () => {
+  const s = emptyState();
+  account(s);
+  payFixed(s, 'rent', '2026-11', { date: '2026-11-30', amount: 100000 });
+  account(s, { from: '2026-11', amount: 120000 });
+  assert.equal(fixedRows(s, '2026-11')[0].amount, 100000);
+  assert.equal(fixedRows(s, '2026-12')[0].amount, 120000);
+  account(s, { from: '2027-01', amount: 130000 });
+  assert.equal(fixedRows(s, '2026-12')[0].amount, 120000);
+  adjustFixed(s, 'rent', '2026-12', 125000, 'Somente dezembro');
+  assert.equal(fixedRows(s, '2026-12')[0].amount, 125000);
+  assert.equal(fixedRows(s, '2027-01')[0].amount, 130000);
+  undoFixed(s, 'rent', '2026-11');
+  assert.equal(fixedRows(s, '2026-11')[0].paid, false);
+  assert.equal(fixedRows(s, '2026-11')[0].amount, 120000);
+  validateState(s);
+});
+test('correção altera data e valor sem trocar competência ou o cadastro histórico', () => {
+  const s = emptyState();
+  account(s);
+  payFixed(s, 'rent', '2026-11', { date: '2026-12-05', amount: 101000 });
+  account(s, { from: '2026-12', amount: 120000, categoryId: 'D02' });
+  correctPayment(s, 'rent', '2026-11', {
+    date: '2026-12-06',
+    amount: 102000,
+    observation: 'Valor conferido',
+  });
+  const row = fixedRows(s, '2026-11')[0];
+  assert.equal(row.amount, 102000);
+  assert.equal(row.paymentDate, '2026-12-06');
+  assert.equal(row.categoryId, 'D01');
+  assert.equal(row.observation, 'Valor conferido');
+  assert.equal(totals(monthlyRows(s, '2026-11')).expense, 102000);
+  assert.equal(totals(monthlyRows(s, '2026-12')).expense, 0);
+  assert.throws(() => correctPayment(s, 'rent', '2026-12', { date: '2026-12-06', amount: 1 }));
+  validateState(s);
+});
+test('término mantém competências pagas e não mostra novas pendências após o fim', () => {
+  const s = emptyState();
+  account(s);
+  payFixed(s, 'rent', '2027-01', { date: '2026-12-30', amount: 100000 });
+  endFixed(s, 'rent', '2026-12');
+  assert.equal(fixedRows(s, '2027-01')[0].paid, true);
+  assert.equal(fixedRows(s, '2027-02').length, 0);
+  assert.equal(fixedRows(s, '2026-12').length, 1);
+});
+test('cadastros têm IDs estáveis, nomes únicos, arquivo preserva vínculo e bloqueia novo uso', () => {
+  const s = emptyState();
+  saveCatalog(s, 'categories', { id: 'custom', name: 'Estudos', type: 'expense' });
+  saveEntry(s, {
+    id: 'e',
+    name: 'Curso',
+    amount: 4000,
+    date: '2026-11-10',
+    categoryId: 'custom',
+    paymentMethodId: 'P2',
+    type: 'expense',
+    paid: true,
+    observation: 'Curso mensal',
+  });
+  saveCatalog(s, 'categories', { id: 'custom', name: 'Cursos', type: 'income' });
+  assert.equal(s.categories.find((c) => c.id === 'custom').type, 'expense');
+  assert.equal(s.entries[0].categoryId, 'custom');
+  toggleCatalog(s, 'categories', 'custom');
+  assert.throws(() => saveEntry(s, { ...s.entries[0], id: 'new' }));
+  saveEntry(s, { ...s.entries[0], amount: 5000 });
+  saveCatalog(s, 'methods', { id: 'P2', name: 'Meu Pix' });
+  toggleCatalog(s, 'methods', 'P2');
+  saveEntry(s, { ...s.entries[0], amount: 6000 });
+  assert.throws(() => saveEntry(s, { ...s.entries[0], id: 'new2', categoryId: 'D01' }));
+  assert.throws(() => saveCatalog(s, 'methods', { id: 'p-new', name: ' meu pix ' }));
+  validateState(s);
+});
+test('migração conserva totais, metas, pendências, limites e categorias genéricas sem inferir', () => {
+  const old = {
+    entries: [
+      {
+        id: 'a',
+        name: 'Salário personalizado',
+        amount: 500000,
+        date: '2026-11-05',
+        category: 'Renda',
+        type: 'income',
+        paid: true,
+      },
+      {
+        id: 'b',
+        name: 'Mercado',
+        amount: 12345,
+        date: '2026-11-06',
+        category: 'Alimentação',
+        type: 'expense',
+        paid: false,
+      },
+    ],
+    budgets: { Alimentação: 90000, Moradia: 180000 },
+    goals: [{ id: 'g', name: 'Meta antiga', current: 50, target: 100 }],
+  };
+  const s = migrateV1(old);
+  assert.equal(totals(monthlyRows(s, '2026-11')).forecast, 487655);
+  assert.equal(s.categories.find((c) => c.id === s.entries[0].categoryId).name, 'Renda (legado)');
+  assert.equal(
+    s.categories.find((c) => c.id === s.entries[1].categoryId).name,
+    'Alimentação (legado)',
+  );
+  assert.equal(s.budgets[s.entries[1].categoryId], 90000);
+  assert.equal(s.entries[0].paymentMethodId, null);
+  assert.deepEqual(s.goals, old.goals);
+  assert.equal(s.fixedAccounts.length, 0);
+});
+test('armazenamento migra uma vez, preserva original e cópia, não reimporta após reload', () => {
+  const storage = memory();
+  const old = { entries: [], budgets: { Alimentação: 1 }, goals: [] };
+  const raw = JSON.stringify(old);
+  storage.setItem(LEGACY_KEY, raw);
+  const store = new FinanceStore(storage);
+  store.load();
+  assert.equal(storage.getItem(LEGACY_KEY), raw);
+  assert.equal(storage.getItem(BACKUP_KEY), raw);
+  store.commit((s) => account(s));
+  assert.equal(new FinanceStore(storage).load().fixedAccounts.length, 1);
+});
+test('erro ao salvar preserva estado anterior e falha de leitura nunca restaura exemplos', () => {
+  const storage = memory();
+  const store = new FinanceStore(storage);
+  store.load();
+  const old = JSON.stringify(store.state);
+  storage.setItem = () => {
+    throw Error('QuotaExceeded');
+  };
+  assert.throws(() => store.commit((s) => account(s)), /Não foi possível salvar/);
+  assert.equal(JSON.stringify(store.state), old);
+  const broken = memory();
+  broken.setItem(STORAGE_KEY, '{quebrou');
+  assert.throws(() => new FinanceStore(broken).load(), /Nada foi apagado/);
+  assert.equal(broken.getItem(STORAGE_KEY), '{quebrou');
+});
+test('gravação de outra aba impede sobrescrever os registros silenciosamente', () => {
+  const storage = memory();
+  const a = new FinanceStore(storage),
+    b = new FinanceStore(storage);
+  a.load();
+  b.load();
+  a.commit((s) => account(s));
+  assert.throws(() => b.commit((s) => account(s, { id: 'other' })), /outra aba/);
+  assert.equal(new FinanceStore(storage).load().fixedAccounts.length, 1);
+});
+test('avulsos e contas fixas compartilham os totais sem contar o cadastro da conta', () => {
+  const s = initialState();
+  const before = totals(monthlyRows(s, '2026-11'));
+  account(s);
+  const after = totals(monthlyRows(s, '2026-11'));
+  assert.equal(after.expectedExpense, before.expectedExpense + 100000);
+  assert.equal(after.expense, before.expense);
+  payFixed(s, 'rent', '2026-11', { date: '2026-11-30', amount: 100000 });
+  assert.equal(totals(monthlyRows(s, '2026-11')).expectedExpense, after.expectedExpense);
+  assert.equal(totals(monthlyRows(s, '2026-11')).expense, before.expense + 100000);
+});
+
+test('mês de início imutável, dia inválido e entradas incorretas não passam na validação', () => {
+  const s = emptyState();
+  account(s);
+  assert.throws(() => account(s, { startMonth: '2026-10', from: '2026-11' }));
+  assert.throws(() => account(emptyState(), { dueDay: 32 }));
+  assert.throws(() =>
+    saveEntry(s, {
+      id: 'bad',
+      name: 'Teste',
+      amount: 100,
+      date: '2026-02-31',
+      type: 'expense',
+      categoryId: 'D01',
+      paymentMethodId: 'P2',
+      paid: true,
+      observation: '',
+    }),
+  );
+});
+test('v1 corrompida e falha de gravação durante migração preservam a origem', () => {
+  const storage = memory();
+  storage.setItem(LEGACY_KEY, '{"entries":');
+  assert.throws(() => new FinanceStore(storage).load());
+  assert.equal(storage.getItem(LEGACY_KEY), '{"entries":');
+  assert.equal(storage.getItem(STORAGE_KEY), null);
+  const good = memory();
+  const raw = JSON.stringify({ entries: [], budgets: {}, goals: [] });
+  good.setItem(LEGACY_KEY, raw);
+  const set = good.setItem;
+  good.setItem = (key, v) => {
+    if (key === STORAGE_KEY) throw Error('Quota');
+    set(key, v);
+  };
+  assert.throws(() => new FinanceStore(good).load());
+  assert.equal(good.getItem(LEGACY_KEY), raw);
+  assert.equal(good.getItem(BACKUP_KEY), raw);
+});
