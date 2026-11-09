@@ -332,3 +332,22 @@ textarea {
     font-size: 9px;
   }
 }
+.transaction .txn-actions {
+  flex-wrap: wrap;
+  justify-content: flex-end;
+}
+.transaction .txn-actions button {
+  min-width: 44px;
+  min-height: 44px;
+  padding: 8px 10px;
+  border: 1px solid #393044;
+  border-radius: 8px;
+  font-size: 12px;
+}
+.transaction .txn-actions .danger-action {
+  color: #ffb7c7;
+}
+.transaction .txn-actions button:focus-visible {
+  outline: 2px solid #b59aff;
+  outline-offset: 2px;
+}

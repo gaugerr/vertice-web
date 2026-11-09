@@ -131,7 +131,7 @@ function row(e, full = false) {
     fixed = e.source === 'fixed';
   const source = fixed ? 'Conta fixa' : 'Avulso';
   const date = e.paymentDate ? `Pago em ${dateName(e.paymentDate)}` : dateName(e.date);
-  return `<article class="transaction"><span class="txn-icon ${e.type === 'income' ? 'income' : ''}" aria-hidden="true">${c.icon}</span><div class="txn-info"><strong>${esc(e.name)}</strong><small>${esc(c.name)}${!c.active ? ' · arquivada' : ''} · ${source}</small><small>${esc(method(e.paymentMethodId))} · ${date}</small>${e.observation ? `<p class="record-note">${esc(e.observation)}</p>` : ''}</div><div class="txn-amount ${e.type === 'income' ? 'green' : ''}">${e.type === 'income' ? '+' : '−'} ${money(e.amount)}<small>${e.paid ? (e.type === 'income' ? 'Recebido' : 'Pago') : 'Pendente'}</small></div>${full ? `<div class="txn-actions">${fixed ? `<button data-fixed-action="${e.paid ? 'correct' : 'pay'}" data-id="${esc(e.accountId)}" aria-label="${e.paid ? 'Corrigir pagamento de' : 'Pagar'} ${esc(e.name)}">${e.paid ? '✎' : '✓'}</button><button data-fixed-action="details" data-id="${esc(e.accountId)}" aria-label="Detalhes de ${esc(e.name)}">⋯</button>` : `<button data-entry-edit="${esc(e.id)}" aria-label="Editar ${esc(e.name)}">✎</button><button data-entry-delete="${esc(e.id)}" aria-label="Excluir ${esc(e.name)}">×</button>`}</div>` : ''}</article>`;
+  return `<article class="transaction"><span class="txn-icon ${e.type === 'income' ? 'income' : ''}" aria-hidden="true">${c.icon}</span><div class="txn-info"><strong>${esc(e.name)}</strong><small>${esc(c.name)}${!c.active ? ' · arquivada' : ''} · ${source}</small><small>${esc(method(e.paymentMethodId))} · ${date}</small>${e.observation ? `<p class="record-note">${esc(e.observation)}</p>` : ''}</div><div class="txn-amount ${e.type === 'income' ? 'green' : ''}">${e.type === 'income' ? '+' : '−'} ${money(e.amount)}<small>${e.paid ? (e.type === 'income' ? 'Recebido' : 'Pago') : 'Pendente'}</small></div>${full ? `<div class="txn-actions">${fixed ? `<button data-fixed-action="${e.paid ? 'correct' : 'pay'}" data-id="${esc(e.accountId)}" aria-label="${e.paid ? 'Corrigir pagamento de' : 'Pagar'} ${esc(e.name)}">${e.paid ? 'Corrigir' : 'Pagar'}</button><button data-fixed-action="details" data-id="${esc(e.accountId)}" aria-label="Detalhes de ${esc(e.name)}">Detalhes</button>` : `<button data-entry-edit="${esc(e.id)}" aria-label="Editar ${esc(e.name)}">Editar</button><button data-entry-copy="${esc(e.id)}" aria-label="Copiar ${esc(e.name)}">Copiar</button><button class="danger-action" data-entry-delete="${esc(e.id)}" aria-label="Excluir ${esc(e.name)}">Excluir</button>`}</div>` : ''}</article>`;
 }
 function distribution() {
   const list = state.categories
@@ -344,13 +344,27 @@ function showForm(kind, title, body, context = {}) {
     `<div class="dialog-heading"><h2>${title}</h2><button type="button" class="icon-button" data-close aria-label="Fechar">×</button></div>${body}<p id="financial-error" class="error" role="alert"></p><div class="dialog-actions"><button type="button" class="secondary" data-close>Cancelar</button><button type="submit" class="primary">${kind === 'pay' ? 'Confirmar pagamento' : 'Salvar'}</button></div>`;
   $('#financial-dialog').showModal();
 }
-function openEntry(id) {
-  const e = state.entries.find((e) => e.id === id),
+function openEntry(id, copy = false) {
+  const source = state.entries.find((e) => e.id === id);
+  const e =
+      copy && source
+        ? {
+            ...source,
+            id: crypto.randomUUID(),
+            paid: false,
+            categoryId: state.categories.find((c) => c.id === source.categoryId)?.active
+              ? source.categoryId
+              : null,
+            paymentMethodId: state.methods.find((m) => m.id === source.paymentMethodId)?.active
+              ? source.paymentMethodId
+              : null,
+          }
+        : source,
     type = e?.type || 'expense';
   showForm(
     'entry',
-    e ? 'Editar lançamento' : 'Novo lançamento',
-    `<label>Tipo<select name="type" id="entry-type">${option('expense', 'Despesa', type)}${option('income', 'Receita', type)}</select></label>${field('Descrição', 'name', e?.name || '', 'text', 'required maxlength="80"')}<div class="form-grid">${field('Valor (R$)', 'amount', e ? decimal(e.amount) : '', 'text', 'required inputmode="decimal"')}${field('Data de referência', 'date', e?.date || month + '-09', 'date', 'required')}</div><div id="entry-category">${categoryField(e?.categoryId, type)}</div><div id="entry-method">${methodField(e?.paymentMethodId, type)}</div><label class="check-label"><input name="paid" type="checkbox" ${!e || e.paid ? 'checked' : ''}> Já foi pago ou recebido</label>${noteField(e?.observation)}`,
+    copy ? 'Copiar lançamento' : e ? 'Editar lançamento' : 'Novo lançamento',
+    `${copy ? '<p class="muted">Revise a cópia antes de salvar. Ela começa pendente. Cadastros arquivados precisam ser substituídos.</p>' : ''}<label>Tipo<select name="type" id="entry-type">${option('expense', 'Despesa', type)}${option('income', 'Receita', type)}</select></label>${field('Descrição', 'name', e?.name || '', 'text', 'required maxlength="80"')}<div class="form-grid">${field('Valor (R$)', 'amount', e ? decimal(e.amount) : '', 'text', 'required inputmode="decimal"')}${field('Data de referência', 'date', e?.date || month + '-09', 'date', 'required')}</div><div id="entry-category">${categoryField(e?.categoryId, type)}</div><div id="entry-method">${methodField(e?.paymentMethodId, type)}</div><label class="check-label"><input name="paid" type="checkbox" ${!e || e.paid ? 'checked' : ''}> Já foi pago ou recebido</label>${noteField(e?.observation)}`,
     { id: e?.id || crypto.randomUUID() },
   );
 }
@@ -608,7 +622,15 @@ document.addEventListener('click', (e) => {
       refreshFormCatalogs();
     }
     if (b.dataset.entryEdit) openEntry(b.dataset.entryEdit);
-    if (b.dataset.entryDelete && confirm('Excluir este lançamento avulso?'))
+    if (b.dataset.entryCopy) openEntry(b.dataset.entryCopy, true);
+    if (
+      b.dataset.entryDelete &&
+      confirm(
+        'Excluir o lançamento “' +
+          state.entries.find((r) => r.id === b.dataset.entryDelete)?.name +
+          '”? Essa ação não pode ser desfeita.',
+      )
+    )
       transact((s) => {
         s.entries = s.entries.filter((r) => r.id !== b.dataset.entryDelete);
       }, 'Lançamento excluído.');
