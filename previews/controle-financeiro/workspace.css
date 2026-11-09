@@ -100,3 +100,16 @@
 [data-workspace-blocked='true'] #finance-tabs {
   display: none !important;
 }
+[data-workspace-auth-required='true'] #shopping-area,
+[data-workspace-auth-required='true'] #finance-area,
+[data-workspace-auth-required='true'] #settings-area,
+[data-workspace-auth-required='true'] #finance-tabs,
+[data-workspace-auth-required='true'] .workspace-bar,
+[data-workspace-auth-required='true'] .area-strip,
+[data-workspace-auth-required='true'] #menu-toggle {
+  display: none !important;
+}
+#workspace-login-panel {
+  margin: 24px auto;
+  max-width: 500px;
+}

@@ -1,5 +1,5 @@
 import { execFileSync } from 'node:child_process';
-import { readFileSync } from 'node:fs';
+import { readFileSync, readdirSync } from 'node:fs';
 export function postgresFixture(container) {
   const name = 'test_' + crypto.randomUUID().replaceAll('-', '');
   const docker = (args, input) =>
@@ -44,15 +44,18 @@ export function postgresFixture(container) {
  create schema auth;create table auth.users(id uuid primary key,email_confirmed_at timestamptz);create table auth.identities(user_id uuid references auth.users,provider text,identity_data jsonb);
  create function auth.uid() returns uuid language sql stable as $$select nullif(current_setting('request.jwt.claim.sub',true),'')::uuid$$;
  grant usage on schema auth to anon,authenticated,service_role;grant select on auth.users,auth.identities to service_role;
- create table public.licenses(user_id uuid unique references auth.users,status text);alter table public.licenses enable row level security;revoke all on public.licenses from public,anon,authenticated;grant select on public.licenses to authenticated;grant all on public.licenses to service_role;create policy own_license on public.licenses for select to authenticated using(user_id=(select auth.uid()));
  insert into auth.users values('11111111-1111-4111-8111-111111111111',now()),('22222222-2222-4222-8222-222222222222',now());
- insert into auth.identities values('11111111-1111-4111-8111-111111111111','google','{"email":"titular@exemplo.test","email_verified":true}'),('22222222-2222-4222-8222-222222222222','google','{"email":"parceiro@exemplo.test","email_verified":true}');
- insert into public.licenses values('11111111-1111-4111-8111-111111111111','active');`);
+ insert into auth.identities values('11111111-1111-4111-8111-111111111111','google','{"email":"titular@exemplo.test","email_verified":true}'),('22222222-2222-4222-8222-222222222222','google','{"email":"parceiro@exemplo.test","email_verified":true}');`);
+  const directory = new URL('../../supabase/migrations/', import.meta.url);
+  const migrations = readdirSync(directory)
+    .filter((f) => f.endsWith('.sql'))
+    .sort();
+  for (const file of migrations.filter(
+    (f) => !f.includes('enable_cakto_cron_scheduler') && !f.includes('workspace_preview_signing'),
+  ))
+    sql('begin;\n' + readFileSync(new URL(file, directory), 'utf8') + '\ncommit;');
   sql(
-    readFileSync(
-      new URL('../../supabase/drafts/shared-spaces/schema.sql', import.meta.url),
-      'utf8',
-    ),
+    "insert into public.licenses(email,user_id,status) values('titular@exemplo.test','11111111-1111-4111-8111-111111111111','active');",
   );
   return {
     command: async (actor, action, input) =>

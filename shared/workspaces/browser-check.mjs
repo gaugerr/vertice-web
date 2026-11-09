@@ -156,8 +156,18 @@ import assert from 'node:assert/strict';
     }
     const stage = await context.newPage();
     await stage.goto(base + 'staging/#configuracoes');
-    await stage.locator('#workspace-message').filter({ hasText: 'não foi configurada' }).waitFor();
-    assert(await stage.locator('#workspace-login').isDisabled());
+    if (process.env.EXPECT_CONNECTED_PREVIEW === '1') {
+      await stage.locator('#workspace-login-panel').waitFor({ state: 'visible' });
+      assert(await stage.locator('#workspace-login').isEnabled());
+      assert.equal(await stage.locator('#shopping-frame').getAttribute('src'), null);
+      assert.equal(await stage.locator('#workspace-selector').isVisible(), false);
+    } else {
+      await stage
+        .locator('#workspace-message')
+        .filter({ hasText: 'não foi configurada' })
+        .waitFor();
+      assert(await stage.locator('#workspace-login').isDisabled());
+    }
     assert.deepEqual(errors, []);
     await owner.setViewportSize({ width: 390, height: 844 });
     await go(owner, 'settings');

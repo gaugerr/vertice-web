@@ -1,7 +1,7 @@
 # Preview fixo de controle financeiro
 
 Este diretório contém o preview de navegação entre Compras e Financeiro.
-Não altera as rotas, autenticação, banco, app de compras ou página de vendas oficiais.
+Não publica mudanças na interface oficial. A entrada autenticada pode usar as novas tabelas do banco Vértice existente, conforme autorização explícita do proprietário; preservar Auth/licenças/Cakto.
 
 - Conta Cloudflare: ab0452392516e43ea097317ea48c57d5.
 - Projeto Pages: vertice-financeiro-preview.
@@ -23,10 +23,10 @@ Não altera as rotas, autenticação, banco, app de compras ou página de vendas
 - Compras: reutiliza telas/repositório reais de src/ através de shopping.tsx, agora com WorkspaceClient.shopping e banco isolado por espaço. O banco vertice_shopping_navigation_preview_v1 é lido somente para preservar a demonstração anterior do titular.
 - shell.js mantém o menu de áreas, breadcrumbs e abas inferiores apenas do Financeiro.
 - Abas: Resumo, Lançamentos, Contas Fixas, Orçamento e Metas. Cadastros editáveis ficam em Configurações e nos formulários.
-- O build instala as dependências fixadas da raiz se necessário e compila a entrada shopping com Vite. Não muda src/, login ou banco oficial.
-- Não inicializar service worker, OAuth ou conexões externas na demonstração principal. A entrada /staging/ fica desativada por padrão; pode usar Google/Supabase somente com projeto de homologação explícito, nunca o projeto de produção.
+- O build instala as dependências fixadas da raiz e compila compras com Vite. Alterações compartilhadas em src/ exigem testes. Não publicar a interface oficial nesta etapa.
+- Não inicializar service worker, OAuth ou conexões externas na demonstração principal. Somente /staging/ do endereço estável autorizado pode usar Google e o banco Vértice existente, com modo existing-project-preview explícito. Em builds locais, essa conexão fica desativada por padrão.
 - Preservar rascunhos de compras ao trocar de área: não desmontar o painel de compras.
-- Sem conexão ao Supabase de produção, credenciais ou dados oficiais. Explicar que os convites da demonstração são locais. A configuração da homologação fica em shared/workspaces/README.md.
+- Convites da demonstração são locais; os da entrada conectada são reais. Chave privada dedicada no Vault, nunca no frontend/Git. Não importar dados fictícios automaticamente. Configuração em docs/CONNECTED-PREVIEW.md.
 - Manter o endereço e a origem para preservar alterações de demonstração no navegador.
 - Melhorias ficam nesta branch até o proprietário autorizar a integração ao app oficial.
 - Seletor de espaço não pode descartar rascunhos. Backup e recuperação devem respeitar usuário/espaço. Nunca reenviar fila de uma participação removida após novo convite.

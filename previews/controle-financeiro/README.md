@@ -15,16 +15,17 @@ Alterações offline são preservadas, conflitos exigem revisão e remoção blo
 novos envios. Os dados antigos da preview são conservados e importados apenas no
 espaço pessoal fictício do titular. As regras financeiras existentes são mantidas.
 
-A entrada `/staging/` prepara o fluxo Google/autenticação real, mas fica desativada
-sem um projeto Supabase de homologação configurado. Documentação e testes completos:
+A entrada `/staging/` usa Google e o banco Vértice existente, somente no endereço
+estável autorizado. A demonstração principal permanece local. Documentação e testes completos:
 [Espaços pessoais e do casal](../../shared/workspaces/README.md).
 
 Menu ☰ troca entre Compras, Financeiro e Configurações. As abas inferiores Resumo,
 Lançamentos, Contas Fixas, Orçamento e Metas aparecem somente no Financeiro, no celular e no desktop.
 A última área é lembrada; o primeiro acesso abre Compras. Voltar/avançar respeita a navegação.
 
-As telas reais de compras são reutilizadas, com banco exclusivo de demonstração e sem
-alterar src/, autenticação, banco ou publicação oficiais. O painel de compras permanece
+As telas reais de compras são reutilizadas, com dados separados por ambiente/usuário/espaço. A interface oficial permanece
+inalterada. O formulário de preço também preserva o Enter digitado durante uma
+marcação em andamento. O painel de compras permanece
 montado durante a troca de área para preservar rascunhos. Nenhuma transferência automática de dados entre as áreas.
 
 ## Base financeira provisória

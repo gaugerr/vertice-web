@@ -52,14 +52,16 @@ mostram registros materializados; o Resumo do app inclui também os derivados.
 
 ## Backend e regras de acesso
 
-O schema em `supabase/drafts/shared-spaces/schema.sql` **substitui** o rascunho
-individual em `supabase/drafts/user-data`; não aplicar os dois juntos. Ele continua
-fora da pasta de migrações ativas. Tabelas de dados usam `workspace_id`, com
-referências compostas, autoria, versões e tombstones. Auth/licenças/Cakto não são alterados.
+O schema canônico está em `supabase/migrations`, com as migrações
+`20261109173641_shared_shopping_finance_workspaces` e
+`20261109180048_workspace_preview_signing`. Já foram aplicadas no projeto Vértice
+existente com autorização do proprietário. Os arquivos em `supabase/drafts` são
+históricos; não reaplicá-los. Tabelas usam `workspace_id`, autoria, versões e
+exclusões lógicas. Auth/licenças/Cakto permanecem preservados.
 
 Leitura direta passa por RLS e participação ativa. Apenas o serviço autenticado
 pode chamar `workspace_command` e gravar dados; o navegador não recebe privilégios
-de escrita direta. O helper privado `can_read` é o único `SECURITY DEFINER`: retorna
+de escrita direta. O helper privado `can_read` usa `SECURITY DEFINER` e retorna
 somente um booleano para `auth.uid()`, com caminho de busca vazio e sem execução
 anônima. Não aceita um ID arbitrário de usuário.
 
@@ -80,42 +82,37 @@ O serviço aceita ações `list`, `create`, `invite`, `inspect_invite`, `accept`
 6 MB; a fila local rejeita previamente conjuntos acima de 5.000 alterações/5 MB
 sem modificar os dados anteriores. Não usar `service_role` no frontend.
 
-## Homologação autenticada — configuração ainda necessária
+## Preview conectada autorizada
 
-O endereço `/staging/` é uma entrada real preparada para Google e Supabase, mas
-fica desativado enquanto não houver configuração explícita. O build e o runtime
-recusam o projeto de produção `wqutcsjdozcukwxvkbtc`. A preview principal continua
-fictícia mesmo após configurar o endereço de homologação.
+A entrada `/staging/` do endereço estável usa o banco Vértice existente. Essa
+conexão foi autorizada expressamente para evitar um projeto Supabase adicional.
+A demonstração principal continua fictícia, sem importar dados para a conta real.
+O build só ativa o arquivo público `connected-preview.json` na branch autorizada
+Cloudflare; o runtime exige origem, projeto, endpoint e modo explícitos.
 
-1. Disponibilizar um projeto Supabase de homologação separado, com Auth e a
-   estrutura de licenças existente. Não copiar usuários, dados pessoais, segredos
-   ou credenciais/webhooks Cakto de produção.
-2. Validar o schema nesse projeto e executar os advisors antes de aplicar. Não
-   colocar automaticamente o rascunho no pipeline de produção.
-3. Configurar o Google para o projeto de homologação e registrar o retorno
-   `https://<preview-host>/staging/`. Usar duas contas de teste; conceder licença
-   somente ao titular, exclusivamente no banco de homologação.
-4. Gerar uma chave ES256 exclusiva. Guardar o JWK privado somente como
-   `WORKSPACE_SIGNING_JWK` na Edge Function. A chave pública deve corresponder à
-   chave usada no frontend. Não reutilizar nem publicar o segredo da licença oficial.
-5. Implantar `workspaces` somente na homologação, com imports de
-   `supabase/functions/deno.json`. Configurar `WORKSPACES_ENABLED=true`,
-   `WORKSPACE_ALLOWED_ORIGINS` com o host exato da preview e `ACCESS_ISSUER` com a
-   URL do projeto de homologação. `verify_jwt=false` é intencional: a função valida
-   o JWT explicitamente; desabilitar o gateway não desabilita a autenticação.
-6. Configurar o build da preview com `VITE_WORKSPACE_STAGING_URL`,
-   `VITE_WORKSPACE_STAGING_PUBLISHABLE_KEY` e `VITE_WORKSPACE_STAGING_PUBLIC_JWK`.
-   O build rejeita chave de serviço e JWK privado. São valores públicos; nenhum
-   segredo deve ter prefixo `VITE_`.
-7. Validar com Google e dois aparelhos antes de qualquer integração oficial.
-   A restauração de backups pessoais no espaço pessoal da homologação permite
-   testar migração explícita. Não importar a demonstração fictícia automaticamente.
+Google usa PKCE e armazenamento separado. A sessão é estabelecida antes de montar
+o iframe de compras. Registrar o retorno exato nos Redirect URLs do Supabase,
+preservando os endereços existentes; não alterar Site URL/provedor Google/Cakto.
+Os plugins atuais não expõem a edição dessa configuração de Auth.
 
-Ainda não foram executados login Google real, configuração de provider, piloto
-em dois aparelhos ou ativação de nuvem. Esses passos dependem desse ambiente e
-das contas de teste. A implementação e os testes locais não afirmam que isso já ocorreu.
-O uso offline exige os arquivos do app previamente carregados; a integração oficial
-deverá incluir os novos módulos no preparo da PWA existente.
+A chave ES256 dedicada está criptografada no Vault (`vertice-workspace-signing-v1`).
+O backend acessa somente esse segredo por uma função privada `SECURITY DEFINER`,
+com `search_path` vazio e verificação explícita de JWT `service_role`. Um wrapper
+RPC com direitos do invocador também é exclusivo do serviço. Navegadores não podem
+executar essas funções. A chave de licença existente não é lida ou rotacionada.
+Somente a chave pública entra no frontend. A Edge Function `workspaces` pode usar
+`WORKSPACE_SIGNING_JWK` e `WORKSPACE_ISSUER` próprios quando configurados; nenhum
+segredo `ACCESS_*` é necessário para seu funcionamento.
+
+O endpoint foi habilitado somente para a origem exata da preview. Ele usa
+`auth.getUser` para autenticar todas as solicitações de dados. A publicação não
+ativa a interface oficial, não faz importação automática e não concede licenças.
+O uso offline exige arquivos previamente carregados; a integração oficial precisa
+incluir esses módulos no preparo da PWA.
+
+Procedimentos, resultados e piloto: [Preview conectada](../../docs/CONNECTED-PREVIEW.md).
+A publicação/sondas sem sessão não comprovam login Google real nem sincronização
+entre aparelhos; validar com duas contas antes da liberação oficial.
 
 ## Validação reproduzível
 

@@ -1,6 +1,7 @@
 import { mkdir, copyFile, access, readFile, writeFile } from 'node:fs/promises';
 import { fileURLToPath } from 'node:url';
 import { execFileSync } from 'node:child_process';
+import { validateConnection } from '../../shared/workspaces/connection.mjs';
 const root = fileURLToPath(new URL('.', import.meta.url));
 const repo = fileURLToPath(new URL('../../', import.meta.url));
 await mkdir(root + 'dist', { recursive: true });
@@ -41,40 +42,53 @@ execFileSync(
   [repo + 'node_modules/vite/bin/vite.js', 'build', '--config', root + 'workspace.vite.config.mjs'],
   { cwd: repo, stdio: 'inherit' },
 );
-// The authenticated entrypoint stays disabled without an explicit, non-production project.
-const stagingUrl = (process.env.VITE_WORKSPACE_STAGING_URL ?? '').replace(/\/$/, '');
-if (stagingUrl.includes('wqutcsjdozcukwxvkbtc'))
-  throw Error('Do not connect the preview to production.');
-const enabled = Boolean(
-  stagingUrl &&
+// Only the authorized branch on Cloudflare activates the connection to the existing DB.
+let config = {
+  enabled: false,
+  url: '',
+  endpoint: '',
+  issuer: '',
+  publishableKey: '',
+  publicKey: null,
+};
+if (
+  process.env.CF_PAGES_BRANCH === 'preview/controle-financeiro' &&
+  process.env.VITE_WORKSPACE_DISABLE_REAL !== '1'
+) {
+  config = JSON.parse(await readFile(root + 'connected-preview.json', 'utf8'));
+  validateConnection(config, config.allowedOrigin);
+  if (!config.publishableKey.startsWith('sb_publishable_')) throw Error('Use a publishable key.');
+} else {
+  const url = (process.env.VITE_WORKSPACE_STAGING_URL ?? '').replace(/\/$/, '');
+  if (url.includes('wqutcsjdozcukwxvkbtc'))
+    throw Error('Use the explicit connected preview configuration.');
+  if (
+    url &&
     process.env.VITE_WORKSPACE_STAGING_PUBLISHABLE_KEY &&
-    process.env.VITE_WORKSPACE_STAGING_PUBLIC_JWK,
-);
-if (enabled) {
-  const jwk = JSON.parse(process.env.VITE_WORKSPACE_STAGING_PUBLIC_JWK);
-  if (jwk.d || jwk.kty !== 'EC' || jwk.crv !== 'P-256' || !jwk.x || !jwk.y)
-    throw Error('Use only a public ES256 workspace signing key.');
-  const value = process.env.VITE_WORKSPACE_STAGING_PUBLISHABLE_KEY;
-  let role;
-  try {
-    role = JSON.parse(Buffer.from(value.split('.')[1], 'base64url').toString()).role;
-  } catch {
-    /* New publishable keys are not JWTs. */
+    process.env.VITE_WORKSPACE_STAGING_PUBLIC_JWK
+  ) {
+    config = {
+      enabled: true,
+      url,
+      endpoint: url + '/functions/v1/workspaces',
+      issuer: url,
+      publishableKey: process.env.VITE_WORKSPACE_STAGING_PUBLISHABLE_KEY,
+      publicKey: JSON.parse(process.env.VITE_WORKSPACE_STAGING_PUBLIC_JWK),
+    };
+    validateConnection(config, 'https://isolated-preview.example');
+    let role;
+    try {
+      role = JSON.parse(
+        Buffer.from(config.publishableKey.split('.')[1], 'base64url').toString(),
+      ).role;
+    } catch {
+      /* New public keys are not JWTs. */
+    }
+    if (!config.publishableKey.startsWith('sb_publishable_') && role !== 'anon')
+      throw Error('Never publish a service key.');
   }
-  if (!value.startsWith('sb_publishable_') && role !== 'anon')
-    throw Error('Use only a publishable key, never a service role key.');
 }
-await writeFile(
-  root + 'dist/staging-config.json',
-  JSON.stringify({
-    enabled,
-    url: stagingUrl,
-    publishableKey: enabled ? process.env.VITE_WORKSPACE_STAGING_PUBLISHABLE_KEY : '',
-    endpoint: stagingUrl ? stagingUrl + '/functions/v1/workspaces' : '',
-    publicKey: enabled ? JSON.parse(process.env.VITE_WORKSPACE_STAGING_PUBLIC_JWK) : null,
-    issuer: stagingUrl,
-  }),
-);
+await writeFile(root + 'dist/staging-config.json', JSON.stringify(config));
 await mkdir(root + 'dist/staging', { recursive: true });
 for (const file of [
   'index.html',
@@ -96,7 +110,7 @@ for (const file of [
     await writeFile(
       root + 'dist/staging/' + file,
       html
-        .replace('src="shopping/index.html"', 'src="/shopping/index.html"')
+        .replace('data-src="shopping/index.html"', 'data-src="/shopping/index.html"')
         .replace('Vértice · Compras e Financeiro · Preview', 'Vértice · Homologação do casal'),
     );
   } else await copyFile(root + 'dist/' + file, root + 'dist/staging/' + file);

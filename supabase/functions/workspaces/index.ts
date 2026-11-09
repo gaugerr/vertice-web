@@ -1,10 +1,28 @@
 import { importJWK, SignJWT } from 'jose';
 import { service } from '../_shared/http.ts';
 import { workspaceHandler } from './handler.ts';
+import { previewOrigin } from './deployment.ts';
+let keyPromise: ReturnType<typeof importJWK> | undefined;
+async function signingKey() {
+  if (!keyPromise) {
+    keyPromise = (async () => {
+      const configured = Deno.env.get('WORKSPACE_SIGNING_JWK');
+      const { data, error } = configured
+        ? { data: JSON.parse(configured), error: null }
+        : await service.rpc('workspace_signing_jwk');
+      if (error || !data?.d) throw Error('Signing is not configured');
+      return importJWK(data, 'ES256');
+    })();
+    keyPromise.catch(() => {
+      keyPromise = undefined;
+    });
+  }
+  return keyPromise;
+}
 Deno.serve((req) =>
   workspaceHandler(req, {
-    enabled: Deno.env.get('WORKSPACES_ENABLED') === 'true',
-    allowedOrigins: (Deno.env.get('WORKSPACE_ALLOWED_ORIGINS') ?? '')
+    enabled: Deno.env.get('WORKSPACES_ENABLED') !== 'false',
+    allowedOrigins: (Deno.env.get('WORKSPACE_ALLOWED_ORIGINS') ?? previewOrigin)
       .split(',')
       .map((s) => s.trim())
       .filter(Boolean),
@@ -43,9 +61,7 @@ Deno.serve((req) =>
         (n) => n.toString(16).padStart(2, '0'),
       ).join(''),
     sign: async (actor, origin, access) => {
-      const jwk = JSON.parse(Deno.env.get('WORKSPACE_SIGNING_JWK') ?? 'null');
-      if (!jwk?.d) throw Error('Signing is not configured');
-      const key = await importJWK(jwk, 'ES256');
+      const key = await signingKey();
       const now = Math.floor(Date.now() / 1000);
       return new SignJWT({
         workspaceId: access.workspace_id,
@@ -55,7 +71,7 @@ Deno.serve((req) =>
       })
         .setProtectedHeader({ alg: 'ES256', typ: 'JWT', kid: 'vertice-workspace-v1' })
         .setSubject(actor)
-        .setIssuer(Deno.env.get('ACCESS_ISSUER') ?? Deno.env.get('SUPABASE_URL')!)
+        .setIssuer(Deno.env.get('WORKSPACE_ISSUER') ?? Deno.env.get('SUPABASE_URL')!)
         .setAudience(origin)
         .setIssuedAt(now)
         .setExpirationTime(now + (access.kind === 'shared' ? 86400 : 604800))

@@ -21,12 +21,20 @@ const actor = environment.actor ?? { uid: 'unauthenticated', email: '', name: ''
 $('#workspace-login').hidden = environment.mode !== 'staging' || Boolean(environment.actor);
 $('#workspace-login').disabled = !environment.configured;
 $('#workspace-logout').hidden = environment.mode !== 'staging' || !environment.actor;
-$('#workspace-login').onclick = () => void environment.login?.();
+$('#workspace-login').onclick = async () => {
+  try {
+    await environment.login?.();
+  } catch (error) {
+    feedback(error.message);
+  }
+};
 $('#workspace-logout').onclick = () => void environment.logout?.();
 if (environment.mode === 'staging') {
   $('.workspace-demo-tools').hidden = true;
   $('.workspace-demo-note').textContent = environment.configured
-    ? 'Homologação autenticada em projeto separado. Compartilhe somente dados de teste.'
+    ? environment.connectionMode === 'existing-project-preview'
+      ? 'Preview conectada ao seu Vértice. Os dados salvos aqui vão para a nuvem da sua conta. A demonstração local fica no endereço principal.'
+      : 'Homologação autenticada em projeto separado. Compartilhe somente dados de teste.'
     : 'Homologação autenticada desativada. Configure um projeto de testes separado antes de usar Google e sincronização entre aparelhos.';
 }
 const feedback = (message) => {
@@ -95,12 +103,18 @@ async function render() {
       (access && access.generation !== client?.space.generation),
   );
   document.body.dataset.workspaceBlocked = String(revoked);
+  document.body.dataset.workspaceAuthRequired = String(
+    environment.mode === 'staging' && !environment.actor,
+  );
+  $('#workspace-login-panel').hidden = environment.mode !== 'staging' || Boolean(environment.actor);
+  $('#workspace-login-start').disabled = !environment.configured;
+  $('#workspace-login-start').onclick = () => $('#workspace-login').click();
   $('#workspace-access-block').hidden = !revoked;
   if (!environment.actor) {
     feedback(
       environment.configured
         ? 'Entre com Google para abrir o espaço ou aceitar o convite.'
-        : 'A homologação ainda não foi configurada.',
+        : (environment.connectionError ?? 'A homologação ainda não foi configurada.'),
     );
     $('#workspace-settings-content').textContent =
       'Use a demonstração local no endereço principal da preview.';
@@ -130,7 +144,9 @@ async function render() {
   if (!shared) {
     content += actor.licensed
       ? '<button class="primary" id="workspace-create">Compartilhar com alguém</button>'
-      : '<p>Aceite o link de convite usando a conta da demonstração Parceiro.</p>';
+      : environment.mode === 'demo'
+        ? '<p>Aceite o link de convite usando a conta da demonstração Parceiro.</p>'
+        : '<p>Use o link recebido da outra pessoa para entrar no espaço compartilhado. Para ter seu espaço pessoal, entre com a conta Google vinculada à sua compra.</p>';
   } else {
     const data = await transport.request('members', { workspace_id: shared.id });
     content += `<h3>${esc(shared.name)}</h3><p class="muted">Compras e todo o financeiro deste espaço são visíveis para os dois.</p>${data.members.map((m) => `<div class="workspace-member"><div><strong>${esc(m.display_name ?? m.name)}</strong><small>${m.role === 'owner' ? 'Titular' : 'Participante'} · ${esc(m.email)}</small></div>${shared.role === 'owner' && m.role !== 'owner' ? `<button class="secondary" data-workspace-remove="${esc(m.user_id)}">Remover</button>` : ''}</div>`).join('')}`;
@@ -447,8 +463,4 @@ try {
   feedback(e.message);
 }
 await render().catch((e) => feedback(e.message));
-if (environment.mode === 'staging' && environment.actor) {
-  const frame = $('#shopping-frame');
-  frame.src = frame.src.split('?')[0] + '?auth-ready=1';
-}
 if (location.hash.startsWith('#convite?')) await inspectInvite();

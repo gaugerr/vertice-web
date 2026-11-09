@@ -1,5 +1,6 @@
 import { createClient } from '@supabase/supabase-js';
 import { HttpWorkspaceTransport } from './http.mjs';
+import { validateConnection } from './connection.mjs';
 export async function stagingEnvironment() {
   let config;
   try {
@@ -12,16 +13,18 @@ export async function stagingEnvironment() {
     );
   }
   if (!config.enabled) return { mode: 'staging', actor: null, transport: null, configured: false };
-  const url = new URL(config.url),
-    endpoint = new URL(config.endpoint);
-  if (
-    url.protocol !== 'https:' ||
-    !url.hostname.endsWith('.supabase.co') ||
-    url.hostname === 'wqutcsjdozcukwxvkbtc.supabase.co' ||
-    endpoint.origin !== url.origin ||
-    endpoint.pathname !== '/functions/v1/workspaces'
-  )
-    throw Error('Use somente um projeto Supabase de homologação separado.');
+  let url;
+  try {
+    ({ url } = validateConnection(config, location.origin));
+  } catch (error) {
+    return {
+      mode: 'staging',
+      actor: null,
+      transport: null,
+      configured: false,
+      connectionError: error.message,
+    };
+  }
   const client = createClient(config.url, config.publishableKey, {
     auth: {
       persistSession: true,
@@ -41,7 +44,10 @@ export async function stagingEnvironment() {
     history.replaceState({}, '', u);
     sessionStorage.removeItem('vertice_staging_invite_hash');
   }
-  const { data, error } = await client.auth.getUser();
+  const { data: cached } = await client.auth.getSession();
+  const { data, error } = cached.session
+    ? await client.auth.getUser()
+    : { data: { user: null }, error: null };
   let user = data.user;
   if (!user && (!navigator.onLine || error?.name === 'AuthRetryableFetchError'))
     user = (await client.auth.getSession()).data.session?.user;
@@ -54,6 +60,7 @@ export async function stagingEnvironment() {
   });
   return {
     mode: 'staging',
+    connectionMode: config.connectionMode,
     project: 'staging_' + url.hostname.split('.')[0],
     configured: true,
     actor: user
@@ -78,7 +85,8 @@ export async function stagingEnvironment() {
     },
     logout: async () => {
       await client.auth.signOut({ scope: 'local' });
-      location.reload();
+      sessionStorage.removeItem('vertice_staging_invite_hash');
+      location.assign('/staging/');
     },
   };
 }

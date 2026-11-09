@@ -1,4 +1,10 @@
 import './app.js';
+import { workspaceEnvironment } from './workspaces.js';
+const environment = await workspaceEnvironment();
+// OAuth must finish in the parent before the iframe reads the shared session.
+if (environment.actor)
+  document.getElementById('shopping-frame').src =
+    document.getElementById('shopping-frame').dataset.src;
 (() => {
   const menu = document.getElementById('app-menu');
   const toggle = document.getElementById('menu-toggle');

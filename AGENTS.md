@@ -163,6 +163,15 @@ Há dois armazenamentos distintos: **compras no IndexedDB do aparelho** e
 arquivo independente, copiado/baixado pelo comprador. Não mover compras para o
 Supabase nem integrar a planilha como efeito colateral de alterações de interface.
 
+A base aditiva de compras/financeiro/casal está na migração
+`shared_shopping_finance_workspaces`; contrato e validação em
+[Banco de espaços](docs/WORKSPACE-DATABASE.md). Ela não ativa sincronização no app,
+não importa dados locais e não modifica Auth/licenças/Cakto. Escrita nova somente
+por serviço autenticado via `workspace_command`; leitura com RLS por participação.
+Teste isolado: `POSTGRES_CONTAINER=<container-sem-rede> node tools/test-workspaces-db.mjs`.
+Nunca apontar fixtures para produção nem reexecutar o rascunho da preview em cima
+dessa migração.
+
 - Dexie está na **versão 5**: `lists`, `categories`, `items` e recibos `migrations`.
   Migrações futuras incrementam a versão e preservam registros; não apagar/recriar
   banco, alterar nomes ou limpar armazenamento para resolver mudanças de interface.
