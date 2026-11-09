@@ -1,5 +1,9 @@
 # Validação da base de dados — 09/11/2026
 
+> **Estado atual e retomada por IA (09/11/2026):** leia [AI-HANDOFF](AI-HANDOFF.md).
+> App oficial, demonstração local e preview conectada são ambientes distintos.
+> Resultados e instruções anteriores abaixo devem ser interpretados no contexto do ambiente e da data; o handoff registra as pendências atuais.
+
 Migração aplicada: `20261109173641_shared_shopping_finance_workspaces`.
 Projeto: Vértice (`wqutcsjdozcukwxvkbtc`). Nenhum projeto ou branch Supabase pago
 foi criado. O projeto Docery não foi alterado.

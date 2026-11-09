@@ -1,5 +1,9 @@
 # Vértice — guia do projeto
 
+> **Estado atual e retomada por IA (09/11/2026):** leia [AI-HANDOFF](docs/AI-HANDOFF.md).
+> App oficial, demonstração local e preview conectada são ambientes distintos.
+> Resultados e instruções anteriores abaixo devem ser interpretados no contexto do ambiente e da data; o handoff registra as pendências atuais.
+
 ## Comece aqui: contexto e conexões
 
 Guia para retomar o projeto sem o histórico do chat. Estado operacional conferido

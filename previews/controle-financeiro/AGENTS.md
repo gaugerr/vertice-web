@@ -1,5 +1,9 @@
 # Preview fixo de controle financeiro
 
+> **Estado atual e retomada por IA (09/11/2026):** leia [AI-HANDOFF](../../docs/AI-HANDOFF.md).
+> App oficial, demonstração local e preview conectada são ambientes distintos.
+> Resultados e instruções anteriores abaixo devem ser interpretados no contexto do ambiente e da data; o handoff registra as pendências atuais.
+
 Este diretório contém o preview de navegação entre Compras e Financeiro.
 Não publica mudanças na interface oficial. A entrada autenticada pode usar as novas tabelas do banco Vértice existente, conforme autorização explícita do proprietário; preservar Auth/licenças/Cakto.
 

@@ -1,5 +1,9 @@
 # Vértice — Preview de Compras e Financeiro
 
+> **Estado atual e retomada por IA (09/11/2026):** leia [AI-HANDOFF](../../docs/AI-HANDOFF.md).
+> App oficial, demonstração local e preview conectada são ambientes distintos.
+> Resultados e instruções anteriores abaixo devem ser interpretados no contexto do ambiente e da data; o handoff registra as pendências atuais.
+
 Preview fixo: https://preview-controle-financeiro.vertice-financeiro-preview.pages.dev
 
 ## Espaço do casal — demonstração e homologação

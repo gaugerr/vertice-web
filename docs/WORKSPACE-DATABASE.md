@@ -1,5 +1,9 @@
 # Banco de compras, financeiro e casal
 
+> **Estado atual e retomada por IA (09/11/2026):** leia [AI-HANDOFF](AI-HANDOFF.md).
+> App oficial, demonstração local e preview conectada são ambientes distintos.
+> Resultados e instruções anteriores abaixo devem ser interpretados no contexto do ambiente e da data; o handoff registra as pendências atuais.
+
 ## Escopo desta etapa
 
 A migração `shared_shopping_finance_workspaces` adiciona a estrutura ao projeto

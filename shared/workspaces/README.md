@@ -1,5 +1,9 @@
 # Espaços pessoais e do casal
 
+> **Estado atual e retomada por IA (09/11/2026):** leia [AI-HANDOFF](../../docs/AI-HANDOFF.md).
+> App oficial, demonstração local e preview conectada são ambientes distintos.
+> Resultados e instruções anteriores abaixo devem ser interpretados no contexto do ambiente e da data; o handoff registra as pendências atuais.
+
 Implementação experimental, desativada no aplicativo oficial. A preview principal
 usa exclusivamente um servidor de demonstração em IndexedDB e três identidades
 fictícias. Não há Google, envio de convite, Cakto nem compartilhamento entre

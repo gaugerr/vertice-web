@@ -1,5 +1,9 @@
 # Operações do Vértice
 
+> **Estado atual e retomada por IA (09/11/2026):** leia [AI-HANDOFF](AI-HANDOFF.md).
+> App oficial, demonstração local e preview conectada são ambientes distintos.
+> Resultados e instruções anteriores abaixo devem ser interpretados no contexto do ambiente e da data; o handoff registra as pendências atuais.
+
 Guia para um novo chat/agente com acesso ao repositório, sem depender de arquivos
 temporários ou do histórico da conversa. Última conferência: **29/10/2026 UTC**.
 Estado observado é um registro datado, não substitui consultar os serviços.
