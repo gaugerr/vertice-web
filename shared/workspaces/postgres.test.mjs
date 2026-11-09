@@ -105,14 +105,12 @@ test.skipIf(!process.env.POSTGRES_CONTAINER)(
       }).initialize();
       clients.push(source);
       await source.commitFinance((s) => saveBudget(s, '2026-11', 'D01', 10000));
-      const copiedList = await source
-        .shopping()
-        .createListWithCategories({
-          storeName: 'Lista pessoal copiada',
-          date: '2026-11-09',
-          description: '',
-          budgetCents: null,
-        });
+      const copiedList = await source.shopping().createListWithCategories({
+        storeName: 'Lista pessoal copiada',
+        date: '2026-11-09',
+        description: '',
+        budgetCents: null,
+      });
       await source.flush();
       const copyInput = {
         workspace_id: space.id,
