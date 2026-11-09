@@ -90,11 +90,12 @@ bloqueia o conteúdo, preservando recuperação. Formulários abertos não são 
 
 Commits: `cdf30c0` conexão real; `e627f4f` cache; `099840e` corrige prontidão do
 PostgreSQL na CI (aguardar servidor TCP final, não socket temporário). Confirmar HEAD
-remoto; bot de formatação pode criar commits. Deploys Cloudflare confirmaram sucesso
-com o bundle novo no endereço imutável. Porém, a última consulta ao alias fixo ainda
-retornava o bundle ANTIGO, sem `snapshot-ready`. Duas publicações automáticas e uma
-manual adicional foram concluídas. Isso permanece pendência de disponibilização;
-não afirmar que a melhoria já está acessível no link fixo sem conferir novamente.
+remoto; bot de formatação pode criar commits. A pendência de alias foi resolvida:
+em 09/11/2026 23:37 UTC, o endereço fixo respondeu com o bundle de 568.369 bytes,
+contendo `snapshot-ready` e `account-shopping-v1:`. Commit `5ab6440` adiciona a
+importação automática de Compras vinculadas à conta. O build local e 27 testes
+passaram; o teste PostgreSQL foi omitido nesta execução (nenhuma mudança SQL).
+CI desse commit: regressão do banco aprovada, Web/Access em execução na consulta.
 
 Usuário confirmou persistência no mesmo Google em aba anônima ao usar `/staging/`.
 Antes usava a raiz demonstrativa, causando aparente divergência. O casal apareceu
@@ -110,8 +111,8 @@ resultado de código; ler o job atual. Não generalizar resultados históricos.
 
 ## Próximos passos, em ordem
 
-1. Resolver/conferir o alias fixo servindo o novo bundle; preservar origem e dados
-   locais. Não remover deployments antigos ou alterar infraestrutura oficial por tentativa.
+1. Alias fixo conferido com o bundle novo. Preservar origem e dados locais;
+   não remover deployments antigos ou alterar infraestrutura oficial por tentativa.
 2. Completar teste real do casal, offline/reconexão e concorrência com duas contas.
 3. Importação local implementada em `shared/workspaces/local-import.mjs`: somente
    Compras do IndexedDB `vertice_web_<projeto>_<uid>` para Meu espaço, após
