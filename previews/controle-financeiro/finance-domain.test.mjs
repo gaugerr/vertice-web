@@ -12,6 +12,7 @@ import {
   fixedRows,
   totals,
   summaryTotals,
+  overviewData,
   payFixed,
   correctPayment,
   undoFixed,
@@ -428,4 +429,34 @@ test('resumo vazio e saldo negativo usam apenas valores confirmados', () => {
     observation: '',
   });
   assert.equal(summaryTotals(s, '2026-11').balance, -100);
+});
+
+test('resumo agrega orçamento existente e top cinco com Outros sem duplicar categorias', () => {
+  const s = emptyState();
+  for (let i = 0; i < 7; i++)
+    saveEntry(s, {
+      id: 'e' + i,
+      name: 'Despesa',
+      type: 'expense',
+      amount: (7 - i) * 100,
+      categoryId: 'D' + String(i + 1).padStart(2, '0'),
+      paid: true,
+      date: '2026-11-01',
+      paymentMethodId: 'P2',
+      observation: '',
+    });
+  s.monthlyBudgets = { '2026-11': { D01: 1000, D02: 0 } };
+  const data = overviewData(s, '2026-11');
+  assert.equal(data.budget.limit, 1000);
+  assert.equal(data.budget.used, 1300);
+  assert.equal(data.budget.remaining, -300);
+  assert.equal(data.budget.outside, 1500);
+  assert.equal(data.categories.length, 6);
+  assert.deepEqual(data.otherIds, ['D06', 'D07']);
+  assert.equal(data.categories[5].value, 300);
+  assert.equal(
+    data.categories.reduce((sum, c) => sum + c.value, 0),
+    2800,
+  );
+  assert.equal(overviewData(s, '2026-10').budget.defined, false);
 });

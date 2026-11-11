@@ -23,7 +23,7 @@ import assert from 'node:assert/strict';
   const go = async (p, area) => {
     await ready(p);
     await p.getByRole('button', { name: 'Abrir menu de áreas' }).click();
-    await p.locator(`[data-area=${area}]`).click();
+    await p.locator(`#app-menu nav[aria-label="Áreas do Vértice"] [data-area=${area}]`).click();
   };
   const save = async (p) => p.locator('#financial-form button[type=submit]').click();
   try {

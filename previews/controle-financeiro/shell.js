@@ -12,6 +12,8 @@ if (environment.actor)
   const names = { shopping: 'Compras', finance: 'Financeiro', settings: 'Configurações' };
   const screens = {
     overview: 'Resumo',
+    analysis: 'Análises',
+    wealth: 'Patrimônio',
     transactions: 'Lançamentos',
     fixed: 'Contas Fixas',
     budget: 'Orçamento',
@@ -22,6 +24,7 @@ if (environment.actor)
     shoppingScreen = 'Minhas listas',
     financialView = 'overview';
   const openMenu = () => {
+    applyArea(area, false);
     menu.showModal();
     toggle.setAttribute('aria-expanded', 'true');
   };
@@ -53,8 +56,13 @@ if (environment.actor)
     document.getElementById('settings-area').hidden = next !== 'settings';
     document.getElementById('finance-tabs').hidden = next !== 'finance';
     menu.querySelectorAll('[data-area]').forEach((b) => {
-      b.classList.toggle('active', b.dataset.area === next);
-      if (b.dataset.area === next) b.setAttribute('aria-current', 'page');
+      const active =
+        b.dataset.area === next &&
+        (b.dataset.financeView
+          ? b.dataset.financeView === financialView
+          : next !== 'finance' || !['analysis', 'wealth'].includes(financialView));
+      b.classList.toggle('active', active);
+      if (active) b.setAttribute('aria-current', 'page');
       else b.removeAttribute('aria-current');
     });
     breadcrumb();
@@ -118,8 +126,18 @@ if (environment.actor)
   menu.addEventListener('close', () => toggle.setAttribute('aria-expanded', 'false'));
   menu.addEventListener('click', (e) => {
     const b = e.target.closest('[data-area]');
-    if (b) navigate(b.dataset.area);
-    else if (e.target === menu) closeMenu();
+    if (b) {
+      if (
+        b.dataset.financeView ||
+        (b.dataset.area === 'finance' && ['analysis', 'wealth'].includes(financialView))
+      ) {
+        financialView = b.dataset.financeView || 'overview';
+        window.dispatchEvent(
+          new CustomEvent('vertice:finance-navigate', { detail: { view: financialView } }),
+        );
+      }
+      navigate(b.dataset.area);
+    } else if (e.target === menu) closeMenu();
   });
   window.addEventListener('vertice:finance-view', (e) => {
     financialView = e.detail.view;

@@ -461,6 +461,47 @@ export function summaryTotals(s, month) {
     .reduce((sum, r) => sum + (r.paidAmount ?? (r.paid ? r.amount : 0)), 0);
   return { ...totals(rows), invested };
 }
+export function overviewData(s, month) {
+  const rows = monthlyRows(s, month);
+  const limits = budgetsFor(s, month);
+  const expenses = rows.filter((r) => r.type === 'expense');
+  const planned = (id) =>
+    expenses.filter((r) => r.categoryId === id).reduce((sum, r) => sum + r.amount, 0);
+  const limit = Object.values(limits).reduce((sum, value) => sum + value, 0);
+  const used = Object.keys(limits).reduce((sum, id) => sum + planned(id), 0);
+  const categories = s.categories
+    .filter((c) => c.type === 'expense')
+    .map((c) => ({
+      ...c,
+      value: expenses
+        .filter((r) => r.categoryId === c.id)
+        .reduce((sum, r) => sum + (r.paidAmount ?? (r.paid ? r.amount : 0)), 0),
+    }))
+    .filter((c) => c.value > 0)
+    .sort((a, b) => b.value - a.value || a.id.localeCompare(b.id));
+  const otherIds = categories.slice(5).map((c) => c.id);
+  const grouped = categories.slice(0, 5);
+  if (otherIds.length)
+    grouped.push({
+      id: '__overview_others__',
+      name: 'Outros',
+      color: '#8f879e',
+      value: categories.slice(5).reduce((sum, c) => sum + c.value, 0),
+    });
+  return {
+    budget: {
+      defined: Object.keys(limits).length > 0,
+      limit,
+      used,
+      remaining: limit - used,
+      outside: expenses
+        .filter((r) => limits[r.categoryId] == null)
+        .reduce((sum, r) => sum + r.amount, 0),
+    },
+    categories: grouped,
+    otherIds,
+  };
+}
 export function adjacentMonth(month, step) {
   if (!validMonth(month) || !Number.isInteger(step)) throw Error('Mês inválido.');
   const d = new Date(month + '-15T12:00:00Z');

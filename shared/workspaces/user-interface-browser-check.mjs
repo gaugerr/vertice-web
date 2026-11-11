@@ -15,7 +15,7 @@ try {
     page.locator('html[data-workspace-ready=true]').waitFor({ state: 'attached' });
   const go = async (area) => {
     await page.getByRole('button', { name: 'Abrir menu de áreas' }).click();
-    await page.locator(`[data-area=${area}]`).click();
+    await page.locator(`#app-menu nav[aria-label="Áreas do Vértice"] [data-area=${area}]`).click();
   };
   const clean = async () => {
     assert.doesNotMatch(

@@ -1,7 +1,25 @@
 # Retomada do Vértice por outro modelo
 
-Atualizado em 09/11/2026 (America/Sao_Paulo). Registro de estado observado, não
+Atualizado em 11/11/2026 (America/Sao_Paulo). Registro de estado observado, não
 substitui consultas atuais aos serviços. Começar por este arquivo e AGENTS.md.
+
+## Resumo reorganizado — 11/11/2026
+
+Substitui a apresentação minimalista anterior. Ordem: saldo disponível (Não
+informado, por escolha do proprietário, sem estimativa bancária), resultado
+mensal separado e entradas/saídas, orçamento, cinco últimos lançamentos, até três
+contas futuras do mês, gastos pagos em cinco categorias + Outros, comparação.
+Orçamento resume os limites por categoria existentes e os gastos pagos/previstos
+apenas nessas categorias; avisa sobre gastos fora dos limites. Não cria limite
+global implícito. Zero e orçamento excedido continuam válidos.
+
+Categorias e Outros abrem os filtros existentes de Lançamentos. O gráfico semanal
+fica em Análises; investimentos mensais e metas existentes ficam em Patrimônio,
+ambos no menu. Não tratar investimentos do mês/metas como patrimônio acumulado.
+Novo lançamento flutua acima das abas no celular. Nenhum schema ou saldo inicial
+foi adicionado. `overviewData` agrupa dados sem persistir uma segunda cópia.
+Validação focada: teste do agrupamento/orçamento, build/lint e navegador para
+ordem, saldos, agrupamento/filtros, acessos, botão e larguras 280/390/1440.
 
 ## Menu compacto — 11/11/2026
 

@@ -6,6 +6,7 @@ import {
   fixedRows,
   totals,
   summaryTotals,
+  overviewData,
   saveCatalog,
   toggleCatalog,
   saveEntry,
@@ -87,6 +88,8 @@ const screens = {
   ],
   budget: ['Um plano para o seu mês.', 'Limites por categoria para acompanhar suas escolhas.'],
   goals: ['Espaço para os seus planos.', 'Pequenos passos para os objetivos que fazem sentido.'],
+  analysis: ['Análises', 'Acompanhe a evolução das entradas e saídas.'],
+  wealth: ['Patrimônio', 'Investimentos e metas, sem estimar seu patrimônio total.'],
 };
 function toast(message) {
   $('#toast').textContent = message;
@@ -135,17 +138,32 @@ function stats() {
     )}</div><p class="competence-note">Por competência · uma conta paga em outro mês continua no mês de referência. O saldo do período não é um extrato bancário.</p>`;
 }
 function overviewBalance() {
-  const t = summaryTotals(state, month);
-  return `<section class="overview-balance" aria-label="Resumo financeiro do mês"><div class="overview-total"><span>Saldo restante</span><strong class="${t.balance < 0 ? 'pink' : ''}">${money(t.balance)}</strong><small>Entradas menos saídas confirmadas no mês</small></div><div class="overview-indicators">${[
-    ['Entradas', t.income, 'green', 'Receitas recebidas'],
-    ['Saídas', t.expense, 'pink', 'Inclui investimentos'],
-    ['Saldo investido', t.invested, 'purple', 'Neste mês'],
+  const t = totals(rows());
+  return `<section class="overview-balance" aria-label="Saldos e movimentação mensal"><div class="available-balance"><span>Saldo disponível</span><strong>Não informado</strong><small>Saldo real não cadastrado.</small></div><div class="monthly-result"><span>Resultado do mês</span><strong class="${t.balance < 0 ? 'pink' : 'green'}">${money(t.balance)}</strong><small>Recebidos menos pagos · não é saldo bancário</small></div><div class="overview-indicators">${[
+    ['Entradas', t.income, 'green'],
+    ['Saídas', t.expense, 'pink'],
   ]
     .map(
-      ([label, amount, color, note]) =>
-        `<div><span>${label}</span><strong class="${color}">${money(amount)}</strong><small>${note}</small></div>`,
+      ([label, amount, color]) =>
+        `<div><span>${label} do mês</span><strong class="${color}">${money(amount)}</strong><small>${label === 'Entradas' ? 'Recebidas' : 'Pagas'}</small></div>`,
     )
     .join('')}</div></section>`;
+}
+function monthlyBudget() {
+  const b = overviewData(state, month).budget;
+  const percent = b.limit ? Math.min(100, Math.round((b.used / b.limit) * 100)) : b.used ? 100 : 0;
+  return `<section class="panel summary-budget" aria-label="Orçamento mensal"><div class="recent-heading"><h2>Orçamento mensal</h2>${to(b.defined ? 'Ajustar' : 'Definir', 'budget')}</div>${b.defined ? `<div class="budget-line"><span>${money(b.used)} de ${money(b.limit)}</span><strong class="${b.remaining < 0 ? 'pink' : 'green'}">${b.remaining < 0 ? 'Excedeu' : 'Restam'} ${money(Math.abs(b.remaining))}</strong></div><div class="track" role="progressbar" aria-label="Uso do orçamento" aria-valuemin="0" aria-valuemax="100" aria-valuenow="${percent}"><div style="width:${percent}%;background:var(--${b.remaining < 0 ? 'pink' : 'purple'})"></div></div><small>Soma dos limites por categoria · despesas pagas e previstas.${b.outside ? ` ${money(b.outside)} em categorias sem limite, fora desta barra.` : ''}</small>` : '<p class="muted">Defina limites por categoria para acompanhar quanto ainda pode gastar.</p>'}</section>`;
+}
+function categorySpending() {
+  const list = overviewData(state, month).categories;
+  const total = list.reduce((sum, c) => sum + c.value, 0);
+  return panel(
+    'Gastos por categoria',
+    'Despesas pagas no mês. Toque para ver os lançamentos.',
+    list.length
+      ? `<div class="category-ranking">${list.map((c) => `<button data-category-history="${esc(c.id)}"><span>${esc(c.name)}</span><strong>${money(c.value)}</strong><span class="category-meter" aria-hidden="true"><i style="width:${Math.round((c.value / total) * 100)}%;background:${esc(c.color)}"></i></span></button>`).join('')}</div>`
+      : empty('Nenhuma despesa paga neste mês.'),
+  );
 }
 function recentTransactions() {
   const recent = rows().slice(0, 5);
@@ -314,17 +332,17 @@ function openGoalHistory(id) {
 }
 function bills() {
   const pending = rows()
-    .filter((e) => e.type === 'expense' && !e.paid)
+    .filter((e) => e.type === 'expense' && !e.paid && e.date >= today())
     .sort((a, b) => a.date.localeCompare(b.date));
   return pending.length
     ? pending
-        .slice(0, 4)
+        .slice(0, 3)
         .map(
           (e) =>
             `<div class="bill"><div class="bill-date">${e.date.slice(-2)}<small>${e.source === 'fixed' ? 'FIXA' : 'AVULSA'}</small></div><div class="bill-info">${esc(e.name)}<small>${e.date < today() ? 'Atrasada · ' : ''}${esc(method(e.paymentMethodId))}</small></div><div class="bill-value">${money(e.remainingAmount ?? e.amount)}${e.source === 'fixed' ? `<button data-fixed-action="pay" data-id="${e.accountId}">Pagar competência</button>` : `<button data-entry-edit="${esc(e.id)}">Editar pagamento</button>`}</div></div>`,
         )
         .join('')
-    : empty('Tudo em dia. Nenhuma conta pendente neste mês.');
+    : empty('Nenhuma conta a vencer neste mês.');
 }
 function option(value, label, selected) {
   return `<option value="${esc(value)}" ${value === selected ? 'selected' : ''}>${esc(label)}</option>`;
@@ -338,7 +356,7 @@ function transactionFilters() {
     .map(([v, t]) => option(v, t, filters.type))
     .join(
       '',
-    )}</select></label><label>Categoria<select data-filter="category">${option('all', 'Todas', filters.category)}${state.categories.map((c) => option(c.id, c.name + (!c.active ? ' (arquivada)' : ''), filters.category)).join('')}</select></label><label>Pagamento<select data-filter="method">${option('all', 'Todas as formas', filters.method)}${option('none', 'Não informado', filters.method)}${state.methods.map((m) => option(m.id, m.name + (!m.active ? ' (arquivada)' : ''), filters.method)).join('')}</select></label><label>Situação<select data-filter="status">${[
+    )}</select></label><label>Categoria<select data-filter="category">${option('all', 'Todas', filters.category)}${filters.category === '__overview_others__' ? option('__overview_others__', 'Outros (agrupados)', filters.category) : ''}${state.categories.map((c) => option(c.id, c.name + (!c.active ? ' (arquivada)' : ''), filters.category)).join('')}</select></label><label>Pagamento<select data-filter="method">${option('all', 'Todas as formas', filters.method)}${option('none', 'Não informado', filters.method)}${state.methods.map((m) => option(m.id, m.name + (!m.active ? ' (arquivada)' : ''), filters.method)).join('')}</select></label><label>Situação<select data-filter="status">${[
     ['all', 'Todas'],
     ['pending', 'Pendente'],
     ['paid', 'Pago / Recebido'],
@@ -356,7 +374,10 @@ function renderTransactions() {
   const list = rows().filter(
     (e) =>
       (filters.type === 'all' || e.type === filters.type) &&
-      (filters.category === 'all' || e.categoryId === filters.category) &&
+      (filters.category === 'all' ||
+        (filters.category === '__overview_others__'
+          ? overviewData(state, month).otherIds.includes(e.categoryId)
+          : e.categoryId === filters.category)) &&
       (filters.method === 'all' ||
         (filters.method === 'none' ? !e.paymentMethodId : e.paymentMethodId === filters.method)) &&
       (filters.status === 'all' || (filters.status === 'paid' ? e.paid : !e.paid)) &&
@@ -419,10 +440,22 @@ function render() {
   if (view === 'overview')
     $('#content').innerHTML =
       overviewBalance() +
+      monthlyBudget() +
       recentTransactions() +
-      oldPending() +
-      monthComparison() +
-      `<div class="main-grid">${panel('Seu mês em movimento', 'Entradas e saídas confirmadas por competência.', chart())}${panel('Para onde vai seu dinheiro', 'Despesas pagas e previstas, incluindo contas fixas.', distribution())}${panel('Contas para lembrar', 'Acompanhe o que ainda está pendente.', bills(), to('Contas fixas', 'fixed'))}${panel('Seu orçamento', 'Limites para comprar com mais clareza.', budgetRows(true), to('Planejar', 'budget'))}${panel('Um plano mais perto', 'Seus objetivos.', goals(true), to('Ver metas', 'goals'))}</div>`;
+      panel(
+        'Contas próximas do vencimento',
+        'Até três próximas contas do mês selecionado.',
+        bills() +
+          (rows().some((r) => r.type === 'expense' && !r.paid && r.date < today())
+            ? '<button class="text-button" data-pending-history>Ver contas pendentes e atrasadas</button>'
+            : '') +
+          (oldPending()
+            ? `<details class="summary-old-pending"><summary>Pendências de meses anteriores</summary>${oldPending()}</details>`
+            : ''),
+        to('Ver todas', 'transactions'),
+      ) +
+      categorySpending() +
+      monthComparison();
   else if (view === 'transactions') {
     $('#content').innerHTML =
       stats() +
@@ -437,6 +470,25 @@ function render() {
     $('#content').innerHTML =
       stats() +
       `<div class="main-grid">${panel('Orçamento por categoria', 'Limites de ' + monthName().toLowerCase() + '. Alterações valem somente para este mês.', budgetRows(), '<button class="text-button" id="copy-budget">Copiar mês anterior</button>')}${panel('Visão do mês', 'Despesas pagas e previstas, sem duplicar recorrências.', distribution())}</div>`;
+  else if (view === 'analysis')
+    $('#content').innerHTML = panel(
+      'Evolução semanal',
+      'Entradas e saídas confirmadas por semana.',
+      chart(),
+    );
+  else if (view === 'wealth')
+    $('#content').innerHTML =
+      panel(
+        'Investimentos registrados',
+        'Valor pago no mês em Reserva e Investimentos. Não representa patrimônio acumulado.',
+        `<strong class="wealth-value purple">${money(summaryTotals(state, month).invested)}</strong>`,
+      ) +
+      panel(
+        'Metas e valores guardados',
+        'Os valores das metas são independentes dos lançamentos.',
+        goals(true),
+        to('Gerenciar metas', 'goals'),
+      );
   else
     $('#content').innerHTML =
       `<div class="main-grid">${panel('Suas metas', 'Acompanhe quanto já conseguiu guardar.', goals())}</div>`;
@@ -774,6 +826,19 @@ document.addEventListener('click', async (e) => {
     if (b.hasAttribute('data-close')) {
       b.closest('dialog').close();
       return;
+    }
+    if (b.dataset.categoryHistory || b.hasAttribute('data-pending-history')) {
+      Object.assign(filters, {
+        query: '',
+        category: b.dataset.categoryHistory || 'all',
+        method: 'all',
+        status: b.hasAttribute('data-pending-history') ? 'pending' : 'all',
+        source: 'all',
+        type: 'expense',
+      });
+      view = 'transactions';
+      render();
+      window.scrollTo({ top: 0, behavior: 'smooth' });
     }
     if (b.dataset.view) {
       view = b.dataset.view;

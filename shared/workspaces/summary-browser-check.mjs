@@ -1,83 +1,88 @@
 import { chromium } from '@playwright/test';
 import assert from 'node:assert/strict';
-import { emptyState, saveEntry } from '../../previews/controle-financeiro/finance-domain.mjs';
+import {
+  emptyState,
+  saveEntry,
+  saveBudget,
+} from '../../previews/controle-financeiro/finance-domain.mjs';
 const state = emptyState();
 const month = new Date().toISOString().slice(0, 7);
-for (const [i, [name, type, amount, categoryId, paid]] of [
-  ['Salário', 'income', 300000, 'R01', true],
-  ['Projeto extra', 'income', 50000, 'R02', true],
-  ['Aluguel', 'expense', 120000, 'D01', true],
-  ['Compras do mês', 'expense', 23000, 'D03', true],
-  ['Reserva mensal', 'expense', 40000, 'D15', true],
-  ['Internet', 'expense', 10000, 'D02', true],
-  ['Café com amigos', 'expense', 2000, 'D08', false],
-].entries())
+for (let i = 0; i < 8; i++)
   saveEntry(state, {
-    id: 'entry' + i,
-    name,
-    type,
-    amount,
-    categoryId,
-    paid,
+    id: 'e' + i,
+    name: 'Despesa ' + i,
+    type: 'expense',
+    amount: (8 - i) * 10000,
+    categoryId: 'D' + String(i + 1).padStart(2, '0'),
+    paid: i !== 7,
     date: month + '-' + String(i + 1).padStart(2, '0'),
     paymentMethodId: 'P2',
     observation: '',
   });
+saveEntry(state, {
+  id: 'income',
+  name: 'Receita',
+  type: 'income',
+  amount: 500000,
+  categoryId: 'R01',
+  paid: true,
+  date: month + '-01',
+  paymentMethodId: 'P2',
+  observation: '',
+});
+saveBudget(state, month, 'D01', 100000);
 state.revision = 0;
 const browser = await chromium.launch({
   executablePath: '/usr/bin/chromium',
   args: ['--no-sandbox'],
 });
 try {
-  const page = await browser.newPage({ viewport: { width: 390, height: 844 } });
+  const p = await browser.newPage({ viewport: { width: 390, height: 844 } });
   const errors = [];
-  page.on('pageerror', (e) => errors.push(e.message));
-  await page.addInitScript((state) => {
+  p.on('pageerror', (e) => errors.push(e.message));
+  await p.addInitScript((state) => {
     if (!localStorage.getItem('vertice-finance-preview-v2'))
       localStorage.setItem('vertice-finance-preview-v2', JSON.stringify(state));
   }, state);
-  await page.goto((process.env.PREVIEW_URL ?? 'http://127.0.0.1:5197/') + '#financeiro/overview');
-  await page.locator('.overview-total strong').filter({ hasText: '1.570,00' }).waitFor();
-  assert.match(
-    await page.locator('.overview-indicators').innerText(),
-    /3\.500,00[\s\S]*1\.930,00[\s\S]*400,00/,
-  );
-  assert.equal(await page.locator('.recent-transactions li').count(), 5);
-  assert.equal(
-    await page.locator('.recent-transactions li strong').first().textContent(),
-    'Café com amigos',
-  );
-  assert.match(await page.locator('.recent-transactions li').first().innerText(), /Pendente/);
-  assert.equal(
-    await page
-      .locator('.recent-transactions')
-      .evaluate((node) => node.previousElementSibling.className),
-    'overview-balance',
-  );
-  await page.getByRole('heading', { name: 'Seu mês em movimento', exact: true }).waitFor();
-  await page.getByRole('heading', { name: 'Comparar com o mês anterior', exact: true }).waitFor();
-  for (const width of [280, 390, 768, 1440]) {
-    await page.setViewportSize({ width, height: 900 });
-    assert(
-      await page.evaluate(() => document.documentElement.scrollWidth <= innerWidth),
-      'overflow ' + width,
-    );
-    if (width === 390 || width === 1440)
-      await page.screenshot({ path: `/tmp/vertice-summary-${width}.png`, fullPage: true });
+  await p.goto((process.env.PREVIEW_URL ?? 'http://127.0.0.1:5199/') + '#financeiro/overview');
+  await p.locator('.available-balance strong').filter({ hasText: 'Não informado' }).waitFor();
+  assert.match(await p.locator('.monthly-result').innerText(), /1.500,00/);
+  assert.match(await p.locator('.summary-budget').innerText(), /Restam.*200,00/s);
+  assert.equal(await p.locator('[role=progressbar]').getAttribute('aria-valuenow'), '80');
+  assert.equal(await p.locator('.recent-transactions li').count(), 5);
+  assert.equal(await p.locator('.category-ranking button').count(), 6);
+  assert.equal(await p.locator('#content .line-chart').count(), 0);
+  const order = await p
+    .locator('#content')
+    .evaluate((el) => [...el.children].map((n) => n.className));
+  assert.match(order[0], /overview-balance/);
+  assert.match(order[1], /summary-budget/);
+  assert.match(order[2], /recent-transactions/);
+  await p.locator('[data-category-history=D01]').click();
+  assert.equal(await p.locator('#transaction-list .transaction').count(), 1);
+  await p.locator('#finance-tabs [data-view=overview]').click();
+  await p.locator('[data-category-history=__overview_others__]').click();
+  assert.equal(await p.locator('#transaction-list .transaction').count(), 2);
+  await p.locator('#menu-toggle').click();
+  await p.locator('[data-finance-view=analysis]').click();
+  await p.locator('.line-chart').waitFor();
+  await p.locator('#menu-toggle').click();
+  await p.locator('[data-finance-view=wealth]').click();
+  await p.getByRole('heading', { name: 'Investimentos registrados', exact: true }).waitFor();
+  await p.locator('#finance-tabs [data-view=overview]').click();
+  for (const width of [280, 390, 1440]) {
+    await p.setViewportSize({ width, height: 844 });
+    assert(await p.evaluate(() => document.documentElement.scrollWidth <= innerWidth));
+    if (width === 390)
+      await p.screenshot({ path: '/tmp/vertice-reorganized-overview.png', fullPage: true });
   }
-  await page.locator('.recent-heading [data-view=transactions]').click();
-  assert.equal(await page.locator('#transaction-list .transaction').count(), 7);
-  await page.locator('#finance-tabs [data-view=overview]').click();
-  await page.locator('#prev-month').click();
-  assert.match(await page.locator('.overview-total strong').innerText(), /0,00/);
-  assert.equal(await page.locator('.recent-transactions li').count(), 0);
-  await page.locator('#next-month').click();
-  assert.equal(await page.locator('.recent-transactions li').count(), 5);
-  await page.reload();
-  await page.locator('.overview-total strong').filter({ hasText: '1.570,00' }).waitFor();
+  await p.setViewportSize({ width: 390, height: 844 });
+  await p.evaluate(() => scrollTo(0, document.body.scrollHeight));
+  await p.locator('#new-entry').click();
+  await p.locator('#financial-form [name=name]').waitFor();
   assert.deepEqual(errors, []);
   console.log(
-    'PASS: indicadores confirmados, investimentos sem dupla contagem, últimos cinco por data, pendência, gráficos/comparação preservados, Ver todos, troca de mês, persistência e layouts 280–1440.',
+    'PASS: saldo não informado/resultado mensal, orçamento, ordem, últimos cinco, top 5/Outros com filtros, Análises/Patrimônio e CTA mobile; 280/390/1440.',
   );
 } finally {
   await browser.close();
