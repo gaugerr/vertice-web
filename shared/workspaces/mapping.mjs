@@ -405,7 +405,13 @@ export function changesBetween(before, after) {
           JSON.stringify(normalizeValue(k, row.body[k])),
       )
     )
-      changes.push({ ...row, expected_version: prior?.body.row_version ?? 0 });
+      changes.push({
+        ...row,
+        // Updates preserve omitted columns on the server. Explicitly revive a
+        // reused ID, such as a payment confirmed again after being undone.
+        body: { ...row.body, deleted_at: null },
+        expected_version: prior?.body.row_version ?? 0,
+      });
   }
   for (const [key, row] of old)
     if (!row.body.deleted_at && !next.has(key))

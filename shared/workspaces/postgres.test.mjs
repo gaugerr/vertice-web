@@ -11,6 +11,7 @@ import {
   saveBudget,
   saveFixed,
   payFixed,
+  undoFixed,
   totals,
   monthlyRows,
 } from '../../previews/controle-financeiro/finance-domain.mjs';
@@ -178,6 +179,18 @@ test.skipIf(!process.env.POSTGRES_CONTAINER)(
       const current = await a.finance();
       expect(totals(monthlyRows(current, '2026-11')).expense).toBe(6000);
       expect(totals(monthlyRows(current, '2026-11')).expectedExpense).toBe(10000);
+      await second.load();
+      await second.commit((s) => undoFixed(s, 'bill', '2026-11'));
+      await b.flush();
+      await a.refresh();
+      expect(totals(monthlyRows(await a.finance(), '2026-11')).expense).toBe(0);
+      await second.load();
+      await second.commit((s) =>
+        payFixed(s, 'bill', '2026-11', { date: '2026-12-06', amount: 10000 }),
+      );
+      await b.flush();
+      await a.refresh();
+      expect(totals(monthlyRows(await a.finance(), '2026-11')).expense).toBe(10000);
       expect(await a.status()).toBe('Sincronizado');
       expect(await b.status()).toBe('Sincronizado');
     } finally {
