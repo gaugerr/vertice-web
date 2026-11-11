@@ -41,7 +41,28 @@
         <img src="vertice.svg" alt="" width="37" height="37" /><span>vértice<b>.</b></span>
       </div>
       <div class="header-right">
-        <div class="avatar" aria-label="Perfil">V</div>
+        <button
+          id="sync-toggle"
+          class="icon-button"
+          popovertarget="sync-panel"
+          aria-label="Sincronização: verificando"
+          title="Sincronização"
+        >
+          <svg
+            id="sync-icon"
+            width="21"
+            height="21"
+            viewBox="0 0 24 24"
+            fill="none"
+            stroke="currentColor"
+            stroke-width="1.8"
+            stroke-linecap="round"
+            stroke-linejoin="round"
+            aria-hidden="true"
+          >
+            <path d="M20 7a9 9 0 0 0-15-2L2 8m0-5v5h5M4 17a9 9 0 0 0 15 2l3-3m0 5v-5h-5" />
+          </svg>
+        </button>
       </div>
     </header>
     <div class="area-strip">
@@ -49,16 +70,6 @@
       ><span aria-hidden="true">/</span><span id="current-screen">Minhas listas</span>
     </div>
 
-    <div class="workspace-bar">
-      <label
-        >Espaço<select id="workspace-selector" aria-label="Espaço ativo">
-          <option>Carregando…</option>
-        </select></label
-      ><button class="text-button" id="workspace-manage">Compartilhar</button
-      ><button class="text-button" id="workspace-login" hidden>Entrar com Google</button
-      ><button class="text-button" id="workspace-logout" hidden>Sair da conta</button
-      ><small id="workspace-sync" role="status">Verificando…</small>
-    </div>
     <p id="workspace-message" role="status"></p>
     <main id="main">
       <section class="panel" id="workspace-access-block" hidden>
@@ -176,20 +187,28 @@
         </div>
         <button class="icon-button" id="menu-close" aria-label="Fechar menu">×</button>
       </div>
-      <p class="nav-label">ESCOLHA SUA ÁREA</p>
       <nav aria-label="Áreas do Vértice">
-        <button data-area="shopping">
-          <span>🛒</span><span>Compras<small>Listas e compras anteriores</small></span></button
-        ><button data-area="finance">
-          <span>◫</span><span>Financeiro<small>Seu dinheiro em equilíbrio</small></span></button
-        ><button data-area="settings">
-          <span>⚙</span><span>Configurações<small>Conta, cadastros e backups</small></span>
-        </button>
+        <button data-area="shopping"><span>🛒</span><span>Compras</span></button
+        ><button data-area="finance"><span>◫</span><span>Financeiro</span></button
+        ><button data-area="settings"><span>⚙</span><span>Configurações</span></button>
       </nav>
-      <div class="drawer-footer">
-        <p>Compras e financeiro no mesmo Vértice.</p>
+      <div class="workspace-bar">
+        <label
+          >Espaço<select id="workspace-selector" aria-label="Espaço ativo">
+            <option>Carregando…</option>
+          </select></label
+        ><button class="text-button" id="workspace-manage">Compartilhar</button
+        ><button class="text-button" id="workspace-login" hidden>Entrar com Google</button
+        ><button class="text-button" id="workspace-logout" hidden>Sair</button>
       </div>
+      <p id="workspace-menu-message" role="status"></p>
     </dialog>
+    <div id="sync-panel" popover>
+      <h2>Sincronização</h2>
+      <p id="workspace-sync" role="status">Verificando…</p>
+      <p id="sync-last" class="muted">Aguardando a primeira sincronização completa</p>
+      <button class="text-button" id="sync-review" hidden>Revisar pendências</button>
+    </div>
     <dialog id="financial-dialog"><form id="financial-form"></form></dialog>
     <dialog id="fixed-detail"><div id="fixed-detail-content"></div></dialog>
     <dialog id="goal-history"><div id="goal-history-content"></div></dialog>

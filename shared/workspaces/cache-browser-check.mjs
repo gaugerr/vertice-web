@@ -137,17 +137,17 @@ try {
   page.on('pageerror', (e) => errors.push(e.message));
   await page.goto(origin + '/staging/#financeiro/transactions');
   await page.getByText('Despesa preservada', { exact: true }).waitFor();
-  await page.locator('#workspace-sync').filter({ hasText: 'Sincronizado' }).waitFor();
+  await page.locator('#sync-toggle[title="Sincronizado"]').waitFor();
   hold = true;
   const previous = calls;
   await page.reload({ waitUntil: 'domcontentloaded' });
   await page.getByText('Despesa preservada', { exact: true }).waitFor({ timeout: 1000 });
   assert.equal(calls, previous, 'Cache must paint before pending API replies');
-  await page.locator('#workspace-sync').filter({ hasText: 'Atualizando' }).waitFor();
+  await page.locator('#sync-toggle[title^="Atualizando"]').waitFor();
   await page.locator('#new-entry').click();
   await page.locator('#financial-form [name=name]').fill('Rascunho preservado');
   release();
-  await page.locator('#workspace-sync').filter({ hasText: 'Sincronizado' }).waitFor();
+  await page.locator('#sync-toggle[title="Sincronizado"]').waitFor();
   assert.equal(
     await page.locator('#financial-form [name=name]').inputValue(),
     'Rascunho preservado',

@@ -78,7 +78,6 @@ if (environment.actor)
   for (const node of [
     document.querySelector('header'),
     document.querySelector('.area-strip'),
-    document.querySelector('.workspace-bar'),
     document.querySelector('#workspace-message'),
   ])
     if (node) frameSizing.observe(node);

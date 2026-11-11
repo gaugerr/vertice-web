@@ -30,6 +30,7 @@ $('#workspace-login').onclick = async () => {
 $('#workspace-logout').onclick = () => void environment.logout?.();
 const feedback = (message) => {
   $('#workspace-message').textContent = message;
+  $('#workspace-menu-message').textContent = message;
 };
 function personal() {
   return spaces.find((s) => s.kind === 'personal');
@@ -163,16 +164,37 @@ async function render(force = false) {
       .join('') || '<option>Sem espaço</option>';
   $('#workspace-selector').disabled =
     spaces.filter((s) => s.status === 'active').length < 2 && current?.status !== 'closed';
-  $('#workspace-sync').textContent = client ? await client.status() : 'Aceite um convite';
+  const status =
+    current && !current.writable
+      ? 'Somente consulta'
+      : client
+        ? await client.status()
+        : 'Aceite um convite';
   const lastSynced = (await client?.db.workspaceMeta.get('last-synced'))?.value;
-  $('#workspace-sync').title = lastSynced
+  $('#workspace-sync').textContent = status;
+  $('#sync-last').textContent = lastSynced
     ? 'Última sincronização completa: ' + new Date(lastSynced).toLocaleString('pt-BR')
     : 'Aguardando a primeira sincronização completa';
-  if (lastSynced)
-    $('#workspace-sync').textContent +=
-      ' · ' +
-      new Date(lastSynced).toLocaleTimeString('pt-BR', { hour: '2-digit', minute: '2-digit' });
-  if (current && !current.writable) $('#workspace-sync').textContent = 'Somente consulta';
+  const kind =
+    status === 'Sincronizado'
+      ? 'synced'
+      : status.startsWith('Atualizando')
+        ? 'syncing'
+        : status === 'Sem conexão'
+          ? 'offline'
+          : 'attention';
+  const paths = {
+    synced: '<path d="m5 12 4 4L19 6"/>',
+    syncing: '<path d="M20 7a9 9 0 0 0-15-2L2 8m0-5v5h5M4 17a9 9 0 0 0 15 2l3-3m0 5v-5h-5"/>',
+    offline:
+      '<path d="m3 3 18 18M7 7a6 6 0 0 0-1 9H5a4 4 0 0 1-1-8m7-4a6 6 0 0 1 7 5h1a4 4 0 0 1 2 7M10 17h5"/>',
+    attention: '<path d="m12 3 10 18H2ZM12 9v4m0 4h.01"/>',
+  };
+  $('#sync-toggle').dataset.state = kind;
+  $('#sync-toggle').setAttribute('aria-label', 'Sincronização: ' + status);
+  $('#sync-toggle').title = status;
+  $('#sync-icon').innerHTML = paths[kind];
+  $('#sync-review').hidden = status !== 'Precisa de atenção';
   let content = '<p>Seu login pessoal continua separado do espaço compartilhado.</p>';
   actor.licensed =
     environment.mode === 'demo'
@@ -249,7 +271,12 @@ async function inspectInvite() {
     );
   }
 }
+$('#sync-review').onclick = () => {
+  $('#sync-panel').hidePopover();
+  $('#workspace-recovery').click();
+};
 $('#workspace-manage').onclick = () => {
+  $('#app-menu').close();
   location.hash = 'configuracoes';
   $('#workspace-settings').scrollIntoView({ behavior: 'smooth' });
 };

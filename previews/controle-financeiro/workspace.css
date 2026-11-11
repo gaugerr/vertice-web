@@ -1,32 +1,90 @@
 .workspace-bar {
-  display: flex;
-  align-items: center;
-  gap: 10px;
-  padding: 10px max(18px, calc((100vw - 1240px) / 2));
-  border-bottom: 1px solid #302837;
-  flex-wrap: wrap;
-  background: #17131d;
+  display: grid;
+  gap: 8px;
+  margin-top: 20px;
+  padding-top: 18px;
+  border-top: 1px solid #302837;
 }
 .workspace-bar label {
-  display: flex;
-  align-items: center;
+  display: grid;
   gap: 8px;
   margin: 0;
-  font-size: 12px;
+  font-size: 11px;
+  color: #a798b6;
 }
 .workspace-bar select {
+  width: 100%;
+  min-width: 0;
   margin: 0;
-  width: auto;
-  max-width: 200px;
-  padding: 8px;
-}
-.workspace-bar small {
-  color: #b7edce;
-  margin-left: auto;
-  font-size: 11px;
+  padding: 10px;
+  font-size: 12px;
 }
 .workspace-bar button {
   min-height: 44px;
+  text-align: left;
+  padding: 8px 10px;
+}
+#sync-toggle {
+  display: grid;
+  place-items: center;
+  width: 44px;
+  height: 44px;
+  color: #b19aef;
+}
+#sync-toggle[data-state='synced'] {
+  color: #b7edce;
+}
+#sync-toggle[data-state='offline'] {
+  color: #a798b6;
+}
+#sync-toggle[data-state='attention'] {
+  color: #e0bd8e;
+}
+#sync-toggle[data-state='syncing'] svg {
+  animation: sync-spin 1.6s linear infinite;
+}
+@keyframes sync-spin {
+  to {
+    transform: rotate(360deg);
+  }
+}
+@media (prefers-reduced-motion: reduce) {
+  #sync-toggle[data-state='syncing'] svg {
+    animation: none;
+  }
+}
+#sync-panel {
+  position: fixed;
+  inset: 78px 16px auto auto;
+  margin: 0;
+  padding: 18px;
+  width: min(300px, calc(100vw - 32px));
+  border: 1px solid #473c55;
+  border-radius: 12px;
+  background: #17131e;
+  color: #eee6f9;
+  box-shadow: 0 12px 36px #0006;
+}
+#sync-panel h2 {
+  font-size: 14px;
+  margin: 0 0 12px;
+}
+#sync-panel p {
+  font-size: 12px;
+  line-height: 1.6;
+  margin: 8px 0;
+}
+#sync-panel button {
+  min-height: 44px;
+}
+#workspace-message:empty,
+#workspace-menu-message:empty {
+  display: none;
+}
+#workspace-menu-message {
+  color: #b7edce;
+  font-size: 12px;
+  line-height: 1.6;
 }
 .workspace-member {
   display: flex;
@@ -106,7 +164,8 @@
 [data-workspace-auth-required='true'] #finance-tabs,
 [data-workspace-auth-required='true'] .workspace-bar,
 [data-workspace-auth-required='true'] .area-strip,
-[data-workspace-auth-required='true'] #menu-toggle {
+[data-workspace-auth-required='true'] #menu-toggle,
+[data-workspace-auth-required='true'] #sync-toggle {
   display: none !important;
 }
 #workspace-login-panel {

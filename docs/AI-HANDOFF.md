@@ -3,6 +3,18 @@
 Atualizado em 09/11/2026 (America/Sao_Paulo). Registro de estado observado, não
 substitui consultas atuais aos serviços. Começar por este arquivo e AGENTS.md.
 
+## Menu compacto — 11/11/2026
+
+Seletor de espaço, Compartilhar e Sair ficam dentro do menu lateral (280 px,
+máximo 85vw), sem descrições das áreas nem rodapé promocional. Removida a faixa
+superior. O cabeçalho tem ícone acessível de sincronização; toque abre popover
+nativo com estado, última sincronização e revisão de pendências quando aplicável.
+Mantidos os IDs internos, proteções de troca com rascunho e handlers existentes.
+Mensagens vazias não ocupam espaço; bloqueios de troca também aparecem no menu.
+Validação focada: build, lint dos fontes alterados e navegador para menu,
+troca de espaço/rascunho e estados do indicador. Sem reexecutar suítes financeiras
+ou de banco por esta alteração de apresentação.
+
 ## Resumo minimalista — 11/11/2026
 
 Resumo destaca Saldo restante (recebidos menos pagos), com Entradas, Saídas e

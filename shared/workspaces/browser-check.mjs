@@ -13,6 +13,7 @@ import assert from 'node:assert/strict';
   const base = process.env.PREVIEW_URL ?? 'http://127.0.0.1:5195/';
   const ready = (p) => p.locator('html[data-workspace-ready=true]').waitFor({ state: 'attached' });
   const select = async (p, id) => {
+    await p.getByRole('button', { name: 'Abrir menu de áreas' }).click();
     await Promise.all([
       p.waitForNavigation({ waitUntil: 'domcontentloaded' }),
       p.locator('#workspace-selector').selectOption(id),
@@ -101,7 +102,7 @@ import assert from 'node:assert/strict';
     await f.locator('[name=categoryId]').selectOption('D01');
     await f.locator('[name=paymentMethodId]').selectOption('P2');
     await save(guest);
-    await guest.locator('#workspace-sync').filter({ hasText: 'Pendente de envio' }).waitFor();
+    await guest.locator('#sync-toggle[title="Pendente de envio"]').waitFor();
     assert.equal(await owner.getByText('Despesa offline', { exact: true }).count(), 0);
     await guest.evaluate(() => {
       localStorage.setItem('vertice_demo_offline_22222222-2222-4222-8222-222222222222', 'false');
@@ -119,8 +120,10 @@ import assert from 'node:assert/strict';
       .locator('#workspace-selector option')
       .filter({ hasText: 'Meu espaço' })
       .getAttribute('value');
+    await owner.getByRole('button', { name: 'Abrir menu de áreas' }).click();
     await owner.locator('#workspace-selector').selectOption(personalId);
-    await owner.locator('#workspace-message').filter({ hasText: 'Salve ou feche' }).waitFor();
+    await owner.locator('#workspace-menu-message').filter({ hasText: 'Salve ou feche' }).waitFor();
+    await owner.locator('#menu-close').click();
     assert.equal(await ownerFrame.getByLabel('Nome da lista').inputValue(), 'Rascunho do casal');
     owner.once('dialog', (d) => d.accept());
     await ownerFrame.getByRole('button', { name: 'Cancelar', exact: true }).click();
