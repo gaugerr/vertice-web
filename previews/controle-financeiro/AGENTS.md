@@ -43,3 +43,10 @@ Valores em centavos inteiros. A interface deve ter os textos finais do produto, 
 controles de simulação ou restauração de exemplos. Primeiro acesso vazio usa
 `emptyState()`; preservar registros existentes, backups reais e recuperação.
 Não renomear identificadores internos de armazenamento ao limpar a interface.
+
+Contas/cartões/séries estão em `finance-ledger.mjs`. Registros financeiros novos
+usam `ledger_version: 2`; preservar compatibilidade e RLS do workspace. Saldo
+inicial não é receita, transferências não entram no resultado, pagamento de fatura
+liquida compras existentes sem duplicar despesas. Dia do fechamento pertence à
+fatura seguinte. Testes críticos: `finance-ledger.test.mjs`,
+`shared/workspaces/ledger-postgres.test.mjs` e `ledger-browser-check.mjs`.

@@ -1,3 +1,14 @@
+import {
+  stopSeries,
+  saveMonthlyLimit,
+  saveWallet,
+  saveCard,
+  saveMove,
+  saveLedgerEntry,
+  deleteLedgerEntry,
+  walletBalance,
+  invoice,
+} from './finance-ledger.mjs';
 import { planningViews, financeGroup } from './finance-navigation.mjs';
 import { openPreviewWorkspace, WorkspaceFinanceStore } from './workspaces.js';
 import './workspace-ui.mjs';
@@ -10,7 +21,6 @@ import {
   overviewData,
   saveCatalog,
   toggleCatalog,
-  saveEntry,
   saveFixed,
   payFixed,
   correctPayment,
@@ -81,6 +91,8 @@ const filters = {
 const screens = {
   overview: ['Início', ''],
   more: ['Mais', ''],
+  wallets: ['Contas e saldos', 'Saldos manuais calculados apenas com os movimentos vinculados.'],
+  cards: ['Cartões e faturas', 'Compras por competência e pagamentos sem duplicar despesas.'],
   transactions: [
     'Cada movimento conta.',
     'Lançamentos avulsos e contas fixas, juntos e sem duplicidade.',
@@ -152,7 +164,7 @@ function overviewBalance() {
 function monthlyBudget() {
   const b = overviewData(state, month).budget;
   const percent = b.limit ? Math.min(100, Math.round((b.used / b.limit) * 100)) : b.used ? 100 : 0;
-  return `<section class="panel summary-budget" aria-label="Orçamento mensal"><div class="recent-heading"><h2>Orçamento mensal</h2>${to(b.defined ? 'Ajustar' : 'Definir', 'budget')}</div>${b.defined ? `<div class="budget-line"><span>${money(b.used)} de ${money(b.limit)}</span><strong class="${b.remaining < 0 ? 'pink' : 'green'}">${b.remaining < 0 ? 'Excedeu' : 'Restam'} ${money(Math.abs(b.remaining))}</strong></div><div class="track" role="progressbar" aria-label="Uso do orçamento" aria-valuemin="0" aria-valuemax="100" aria-valuenow="${percent}"><div style="width:${percent}%;background:var(--${b.remaining < 0 ? 'pink' : 'purple'})"></div></div><small>Soma dos limites por categoria · despesas pagas e previstas.${b.outside ? ` ${money(b.outside)} em categorias sem limite, fora desta barra.` : ''}</small>` : '<p class="muted">Defina limites por categoria para acompanhar quanto ainda pode gastar.</p>'}</section>`;
+  return `<section class="panel summary-budget" aria-label="Orçamento mensal"><div class="recent-heading"><h2>Orçamento mensal</h2>${to(b.defined ? 'Ajustar' : 'Definir', 'budget')}</div>${b.defined ? `<div class="budget-line"><span>${money(b.used)} de ${money(b.limit)}</span><strong class="${b.remaining < 0 ? 'pink' : 'green'}">${b.remaining < 0 ? 'Excedeu' : 'Restam'} ${money(Math.abs(b.remaining))}</strong></div><div class="track" role="progressbar" aria-label="Uso do orçamento" aria-valuemin="0" aria-valuemax="100" aria-valuenow="${percent}"><div style="width:${percent}%;background:var(--${b.remaining < 0 ? 'pink' : 'purple'})"></div></div><small>${b.scope === 'global' ? 'Limite total do mês' : 'Soma dos limites por categoria'} · despesas pagas e previstas.${b.outside ? ` ${money(b.outside)} em categorias sem limite, fora desta barra.` : ''}</small>` : '<p class="muted">Defina limites por categoria para acompanhar quanto ainda pode gastar.</p>'}</section>`;
 }
 function categorySpending() {
   const list = overviewData(state, month).categories;
@@ -176,7 +188,7 @@ function recentTransactions() {
               : e.paidAmount
                 ? ` · Parcial: pago ${money(e.paidAmount)}`
                 : ' · Pendente';
-            return `<li><div><strong>${esc(e.name)}</strong><small>${dateName(e.date)}${status}</small></div><span class="${e.type === 'income' ? 'green' : 'pink'}">${e.type === 'income' ? '+' : '−'} ${money(e.amount)}</span></li>`;
+            return `<li><div><strong>${esc(e.name)}${e.seriesId ? ` · ${e.seriesIndex}/${e.seriesCount}` : ''}</strong><small>${dateName(e.date)}${status}</small></div><span class="${e.type === 'income' ? 'green' : 'pink'}">${e.type === 'income' ? '+' : '−'} ${money(e.amount)}</span></li>`;
           })
           .join('')}</ul>`
       : `<div class="empty"><p>Comece pelo seu primeiro lançamento</p><button class="text-button" data-new-entry>＋ Novo lançamento</button></div>`
@@ -202,7 +214,7 @@ function row(e, full = false) {
   const date = e.paymentDate
     ? `${e.paid ? 'Pago' : 'Último pagamento'} em ${dateName(e.paymentDate)}`
     : dateName(e.date);
-  return `<article class="transaction"><span class="txn-icon ${e.type === 'income' ? 'income' : ''}" aria-hidden="true">${esc(c.icon)}</span><div class="txn-info"><strong>${esc(e.name)}</strong><small>${esc(c.name)}${!c.active ? ' · arquivada' : ''} · ${source}</small><small>${esc(method(e.paymentMethodId))} · ${date}</small>${e.observation ? `<p class="record-note">${esc(e.observation)}</p>` : ''}</div><div class="txn-amount ${e.type === 'income' ? 'green' : ''}">${e.type === 'income' ? '+' : '−'} ${money(e.amount)}<small>${e.paid ? (e.type === 'income' ? 'Recebido' : 'Pago') : e.paidAmount ? `Parcial · pago ${money(e.paidAmount)} · resta ${money(e.remainingAmount)}` : 'Pendente'}</small></div>${full ? `<div class="txn-actions">${fixed ? `<button data-fixed-action="${e.paid ? 'correct' : 'pay'}" data-id="${esc(e.accountId)}" aria-label="${e.paid ? 'Corrigir pagamento de' : 'Pagar'} ${esc(e.name)}" title="${e.paid ? 'Corrigir pagamento' : 'Pagar'}">${actionIcon(e.paid ? 'edit' : 'check')}</button><button data-fixed-action="details" data-id="${esc(e.accountId)}" aria-label="Detalhes de ${esc(e.name)}" title="Detalhes">${actionIcon('more')}</button>` : `<button data-entry-edit="${esc(e.id)}" aria-label="Editar ${esc(e.name)}" title="Editar">${actionIcon('edit')}</button><button data-entry-copy="${esc(e.id)}" aria-label="Copiar ${esc(e.name)}" title="Copiar">${actionIcon('copy')}</button><button class="danger-action" data-entry-delete="${esc(e.id)}" aria-label="Excluir ${esc(e.name)}" title="Excluir">${actionIcon('trash')}</button>`}</div>` : ''}</article>`;
+  return `<article class="transaction"><span class="txn-icon ${e.type === 'income' ? 'income' : ''}" aria-hidden="true">${esc(c.icon)}</span><div class="txn-info"><strong>${esc(e.name)}${e.seriesId ? ` · ${e.seriesIndex}/${e.seriesCount}` : ''}</strong><small>${esc(c.name)}${!c.active ? ' · arquivada' : ''} · ${source}</small><small>${esc(method(e.paymentMethodId))} · ${date}</small>${e.observation ? `<p class="record-note">${esc(e.observation)}</p>` : ''}</div><div class="txn-amount ${e.type === 'income' ? 'green' : ''}">${e.type === 'income' ? '+' : '−'} ${money(e.amount)}<small>${e.paid ? (e.type === 'income' ? 'Recebido' : 'Pago') : e.paidAmount ? `Parcial · pago ${money(e.paidAmount)} · resta ${money(e.remainingAmount)}` : 'Pendente'}</small></div>${full ? `<div class="txn-actions">${fixed ? `<button data-fixed-action="${e.paid ? 'correct' : 'pay'}" data-id="${esc(e.accountId)}" aria-label="${e.paid ? 'Corrigir pagamento de' : 'Pagar'} ${esc(e.name)}" title="${e.paid ? 'Corrigir pagamento' : 'Pagar'}">${actionIcon(e.paid ? 'edit' : 'check')}</button><button data-fixed-action="details" data-id="${esc(e.accountId)}" aria-label="Detalhes de ${esc(e.name)}" title="Detalhes">${actionIcon('more')}</button>` : `<button data-entry-edit="${esc(e.id)}" aria-label="Editar ${esc(e.name)}" title="Editar">${actionIcon('edit')}</button><button data-entry-copy="${esc(e.id)}" aria-label="Copiar ${esc(e.name)}" title="Copiar">${actionIcon('copy')}</button><button class="danger-action" data-entry-delete="${esc(e.id)}" aria-label="Excluir ${esc(e.name)}" title="Excluir">${actionIcon('trash')}</button>`}</div>` : ''}</article>`;
 }
 function distribution() {
   const list = state.categories
@@ -384,8 +396,15 @@ function renderTransactions() {
       (filters.source === 'all' || e.source === filters.source) &&
       [e.name, e.observation]
         .join(' ')
+        .normalize('NFD')
+        .replace(/\p{Diacritic}/gu, '')
         .toLocaleLowerCase('pt-BR')
-        .includes(filters.query.toLocaleLowerCase('pt-BR')),
+        .includes(
+          filters.query
+            .normalize('NFD')
+            .replace(/\p{Diacritic}/gu, '')
+            .toLocaleLowerCase('pt-BR'),
+        ),
   );
   $('#transaction-list').innerHTML = list.length
     ? list.map((e) => row(e, true)).join('')
@@ -419,8 +438,8 @@ function render() {
   $('#page-subtitle').hidden = !screens[view][1];
   $('#page-subtitle').textContent = screens[view][1];
   $('#month').textContent = monthName();
-  $('#finance-area .toolbar').hidden = ['goals', 'more'].includes(view);
-  $('#new-entry').hidden = view === 'more';
+  $('#finance-area .toolbar').hidden = ['goals', 'more', 'wallets'].includes(view);
+  $('#new-entry').hidden = ['more', 'wallets', 'cards'].includes(view);
   if (planningViews.includes(view)) planningView = view;
   $('#planning-tabs').hidden = !planningViews.includes(view);
   document.querySelectorAll('#planning-tabs [data-view]').forEach((b) => {
@@ -476,7 +495,7 @@ function render() {
   else if (view === 'budget')
     $('#content').innerHTML =
       stats() +
-      `<div class="main-grid">${panel('Orçamento por categoria', 'Limites de ' + monthName().toLowerCase() + '. Alterações valem somente para este mês.', budgetRows(), '<button class="text-button" id="copy-budget">Copiar mês anterior</button>')}</div>`;
+      `<div class="main-grid">${panel('Limite total do mês', 'Independente dos limites por categoria.', state.monthlyLimits?.[month] != null ? `<strong class="wealth-value">${money(state.monthlyLimits[month])}</strong>` : '<p class="muted">Nenhum limite total definido.</p>', '<button class="text-button" data-monthly-limit>Ajustar limite mensal</button>')}${panel('Orçamento por categoria', 'Limites de ' + monthName().toLowerCase() + '. Alterações valem somente para este mês.', budgetRows(), '<button class="text-button" id="copy-budget">Copiar mês anterior</button>')}</div>`;
   else if (view === 'analysis')
     $('#content').innerHTML =
       stats() +
@@ -486,7 +505,9 @@ function render() {
       monthComparison();
   else if (view === 'more')
     $('#content').innerHTML =
-      `<section class="panel more-links" aria-label="Mais opções do financeiro"><button data-settings-section="workspace-settings">Conta e compartilhamento <span>›</span></button><button data-catalog="methods">Formas de pagamento <span>›</span></button><button data-view="wealth">Patrimônio <span>›</span></button><button data-catalog="categories">Categorias <span>›</span></button><button data-settings-section="settings-area">Configurações e backups <span>›</span></button></section>`;
+      `<section class="panel more-links" aria-label="Mais opções do financeiro"><button data-view="wallets">Contas bancárias e saldos <span>›</span></button><button data-view="cards">Cartões e faturas <span>›</span></button><button data-settings-section="workspace-settings">Conta e compartilhamento <span>›</span></button><button data-catalog="methods">Formas de pagamento <span>›</span></button><button data-view="wealth">Patrimônio <span>›</span></button><button data-catalog="categories">Categorias <span>›</span></button><button data-settings-section="settings-area">Configurações e backups <span>›</span></button></section>`;
+  else if (view === 'wallets') $('#content').innerHTML = walletsPage();
+  else if (view === 'cards') $('#content').innerHTML = cardsPage();
   else if (view === 'wealth')
     $('#content').innerHTML =
       panel(
@@ -530,28 +551,173 @@ function showForm(kind, title, body, context = {}) {
     `<div class="dialog-heading"><h2>${title}</h2><button type="button" class="icon-button" data-close aria-label="Fechar">×</button></div>${body}<p id="financial-error" class="error" role="alert"></p><div class="dialog-actions"><button type="button" class="secondary" data-close>Cancelar</button><button type="submit" class="primary">${kind === 'pay' ? 'Confirmar pagamento' : kind === 'restore' ? 'Restaurar backup' : 'Salvar'}</button></div>`;
   $('#financial-dialog').showModal();
 }
+function entryDefaults(type) {
+  const active = state.entries
+    .filter(
+      (e) =>
+        e.type === type &&
+        state.categories.some((c) => c.id === e.categoryId && c.active) &&
+        state.methods.some((m) => m.id === e.paymentMethodId && m.active),
+    )
+    .sort((a, b) => b.date.localeCompare(a.date));
+  const previous = active[0];
+  return {
+    categoryId:
+      previous?.categoryId ??
+      state.categories.find(
+        (c) => c.active && c.type === type && c.id === (type === 'expense' ? 'D16' : 'R04'),
+      )?.id ??
+      state.categories.find((c) => c.active && c.type === type)?.id,
+    paymentMethodId:
+      previous?.paymentMethodId ??
+      state.methods.find((m) => m.active && m.id === 'P2')?.id ??
+      state.methods.find((m) => m.active)?.id,
+    walletId:
+      previous?.walletId && state.wallets?.some((w) => w.id === previous.walletId && w.active)
+        ? previous.walletId
+        : '',
+  };
+}
+function walletOptions(current = '') {
+  return (
+    option('', 'Sem conta vinculada', current) +
+    (state.wallets ?? [])
+      .filter((w) => w.active || w.id === current)
+      .map((w) => option(w.id, w.name + (w.active ? '' : ' (arquivada)'), current))
+      .join('')
+  );
+}
+function cardOptions(current = '') {
+  return (
+    option('', 'Não usar cartão cadastrado', current) +
+    (state.cards ?? [])
+      .filter((c) => c.active || c.id === current)
+      .map((c) => option(c.id, c.name + (c.active ? '' : ' (arquivado)'), current))
+      .join('')
+  );
+}
 function openEntry(id, copy = false) {
-  const source = state.entries.find((e) => e.id === id);
-  const e =
-      copy && source
-        ? {
-            ...source,
-            id: crypto.randomUUID(),
-            paid: false,
-            categoryId: state.categories.find((c) => c.id === source.categoryId)?.active
-              ? source.categoryId
-              : null,
-            paymentMethodId: state.methods.find((m) => m.id === source.paymentMethodId)?.active
-              ? source.paymentMethodId
-              : null,
-          }
-        : source,
-    type = e?.type || 'expense';
+  const original = state.entries.find((e) => e.id === id);
+  const source = copy ? null : original;
+  const type = original?.type ?? 'expense';
+  const defaults = entryDefaults(type);
+  const date =
+    original?.purchaseDate ??
+    original?.date ??
+    (today().startsWith(month)
+      ? today()
+      : month +
+        '-' +
+        String(
+          Math.min(
+            Number(today().slice(8)),
+            new Date(Number(month.slice(0, 4)), Number(month.slice(5)), 0).getDate(),
+          ),
+        ).padStart(2, '0'));
+  const e = original ?? defaults;
   showForm(
     'entry',
-    copy ? 'Copiar lançamento' : e ? 'Editar lançamento' : 'Novo lançamento',
-    `${copy ? '<p class="muted">Revise a cópia antes de salvar. Ela começa pendente. Cadastros arquivados precisam ser substituídos.</p>' : ''}<label>Tipo<select name="type" id="entry-type">${option('expense', 'Despesa', type)}${option('income', 'Receita', type)}</select></label>${field('Descrição', 'name', e?.name || '', 'text', 'required maxlength="80"')}<div class="form-grid">${field('Valor (R$)', 'amount', e ? decimal(e.amount) : '', 'text', 'required inputmode="decimal"')}${field('Data de referência', 'date', e?.date || month + '-09', 'date', 'required')}</div><div id="entry-category">${categoryField(e?.categoryId, type)}</div><div id="entry-method">${methodField(e?.paymentMethodId, type, Boolean(source && !copy && source.paymentMethodId === null))}</div><label class="check-label"><input name="paid" type="checkbox" ${!e || e.paid ? 'checked' : ''}> Já foi pago ou recebido</label>${noteField(e?.observation)}`,
-    { id: e?.id || crypto.randomUUID() },
+    copy ? 'Copiar lançamento' : source ? 'Editar lançamento' : 'Novo lançamento',
+    `<label>Tipo<select name="type" id="entry-type">${option('expense', 'Despesa', type)}${option('income', 'Receita', type)}</select></label>${field('Valor (R$)', 'amount', original ? decimal(original.amount) : '', 'text', 'required inputmode="decimal"')}${field('Descrição', 'name', original?.name ?? '', 'text', 'required maxlength="80" list="entry-names"')}<datalist id="entry-names">${[
+      ...new Set(state.entries.filter((r) => r.type === type).map((r) => r.name)),
+    ]
+      .slice(0, 50)
+      .map((name) => `<option value="${esc(name)}"></option>`)
+      .join(
+        '',
+      )}</datalist><div id="entry-category">${categoryField(e.categoryId, type)}</div><label class="check-label"><input name="paid" type="checkbox" ${!copy && (!original || original.paid) ? 'checked' : ''}> Já foi pago ou recebido</label><details class="entry-details" ${source ? 'open' : ''}><summary>Data, pagamento e mais opções</summary>${field('Data de referência / compra', 'date', date, 'date', 'required')}<div id="entry-method">${methodField(e.paymentMethodId, type, Boolean(source && source.paymentMethodId === null))}</div><label>Conta<select name="walletId">${walletOptions(e.walletId)}</select></label><label>Cartão de crédito<select name="cardId">${cardOptions(original?.cardId)}</select></label><p class="muted">Com cartão cadastrado, a compra entra na fatura; pague a fatura para baixar as despesas. Não vincule também uma conta à compra.</p>${!source ? `<label>Frequência<select name="seriesMode"><option value="single">Uma vez</option><option value="installments">Parcelar o valor total</option><option value="repeat">Repetir valor mensalmente</option></select></label>${field('Número de parcelas / meses', 'seriesCount', 2, 'number', 'min="2" max="120"')}<p class="muted">Parcelas dividem o valor total. Repetições usam o mesmo valor em cada mês; somente a primeira pode começar paga.</p>` : source.seriesId ? `<p class="muted">Esta edição altera somente esta parcela/ocorrência; pagamentos anteriores e outras competências são preservados.</p><button type="button" class="text-button danger-action" data-series-stop="${esc(source.id)}">Encerrar parcelas/repetições em aberto</button>` : ''}${noteField(original?.observation)}</details>`,
+    { id: source?.id ?? crypto.randomUUID(), isNew: !source, source },
+  );
+  $('#financial-form [name=amount]').focus();
+}
+function openWallet(id) {
+  const w = state.wallets?.find((w) => w.id === id);
+  showForm(
+    'wallet',
+    w ? 'Editar conta' : 'Nova conta',
+    `${field('Nome', 'name', w?.name ?? '', 'text', 'required maxlength="80"')}${field('Saldo inicial (R$)', 'amount', decimal(w?.openingBalance ?? 0), 'text', 'required inputmode="decimal"')}${field('Data do saldo inicial', 'date', w?.openingDate ?? today(), 'date', 'required')}<p class="muted">Informe o saldo antes dos movimentos dessa data. Esse valor não é uma receita. Saldos consideram somente movimentos vinculados à conta.</p>`,
+    { id: w?.id ?? crypto.randomUUID(), source: w },
+  );
+}
+function openCard(id) {
+  const c = state.cards?.find((c) => c.id === id);
+  showForm(
+    'card',
+    c ? 'Editar cartão' : 'Novo cartão',
+    `${field('Nome', 'name', c?.name ?? '', 'text', 'required maxlength="80"')}<div class="form-grid">${field('Dia do fechamento', 'closingDay', c?.closingDay ?? 20, 'number', 'required min="1" max="31"')}${field('Dia do vencimento', 'dueDay', c?.dueDay ?? 5, 'number', 'required min="1" max="31"')}</div><p class="muted">Compras no dia do fechamento entram na fatura seguinte. Sem conexão automática com o banco; confira os valores com sua fatura.</p>`,
+    { id: c?.id ?? crypto.randomUUID(), source: c },
+  );
+}
+function openTransfer() {
+  if ((state.wallets ?? []).filter((w) => w.active).length < 2)
+    throw Error('Cadastre duas contas ativas para transferir.');
+  showForm(
+    'transfer',
+    'Transferir entre contas',
+    `<label>De<select name="fromWalletId" required>${walletOptions()}</select></label><label>Para<select name="toWalletId" required>${walletOptions()}</select></label>${field('Valor (R$)', 'amount', '', 'text', 'required inputmode="decimal"')}${field('Data', 'date', today(), 'date', 'required')}<p class="muted">Transferências movimentam os saldos; não são receitas nem despesas.</p>`,
+    { id: crypto.randomUUID() },
+  );
+}
+function openInvoice(cardId) {
+  const i = invoice(state, cardId, month);
+  if (i.remaining <= 0) throw Error('Não há saldo a pagar nesta fatura.');
+  if (!(state.wallets ?? []).some((w) => w.active))
+    throw Error('Cadastre uma conta para pagar a fatura.');
+  showForm(
+    'invoice',
+    'Pagar fatura',
+    `<p>${esc(state.cards.find((c) => c.id === cardId).name)} · ${monthName()}</p>${field('Valor do pagamento (R$)', 'amount', decimal(i.remaining), 'text', 'required inputmode="decimal"')}<label>Debitar da conta<select name="fromWalletId" required>${walletOptions()}</select></label>${field('Data do pagamento', 'date', today(), 'date', 'required')}<p class="muted">O pagamento baixa as compras existentes e debita a conta uma vez. Pagamentos parciais mantêm o restante pendente.</p>`,
+    { id: crypto.randomUUID(), cardId, month },
+  );
+}
+function walletsPage() {
+  return (
+    `<div class="workspace-buttons"><button class="primary" data-wallet-new>＋ Nova conta</button><button class="secondary" data-transfer>Transferir</button></div>` +
+    (state.wallets ?? [])
+      .map((w) =>
+        panel(
+          w.name,
+          w.active ? 'Conta ativa' : 'Arquivada',
+          `<strong class="wealth-value">${money(walletBalance(state, w.id, today()))}</strong><small>Saldo inicial em ${dateName(w.openingDate)} · apenas movimentos vinculados até hoje.</small><div class="workspace-buttons"><button class="text-button" data-wallet-edit="${esc(w.id)}">Editar</button><button class="text-button" data-wallet-toggle="${esc(w.id)}">${w.active ? 'Arquivar' : 'Reativar'}</button></div>`,
+        ),
+      )
+      .join('') +
+    (!(state.wallets ?? []).length
+      ? empty(
+          'Cadastre sua primeira conta para acompanhar o saldo. Não há dados bancários automáticos.',
+        )
+      : '') +
+    panel(
+      'Transferências e pagamentos de fatura',
+      'Estes movimentos não criam receitas ou despesas.',
+      (state.moves ?? [])
+        .slice()
+        .sort((a, b) => b.date.localeCompare(a.date))
+        .slice(0, 20)
+        .map(
+          (m) =>
+            `<div class="old-pending-row"><div><strong>${m.kind === 'invoice' ? 'Pagamento de fatura' : 'Transferência'}</strong><small>${dateName(m.date)} · ${money(m.amount)}</small></div><button class="text-button" data-move-delete="${esc(m.id)}">Desfazer</button></div>`,
+        )
+        .join('') || empty('Nenhum movimento registrado.'),
+    )
+  );
+}
+function cardsPage() {
+  return (
+    '<button class="primary" data-card-new>＋ Novo cartão</button>' +
+    (state.cards ?? [])
+      .map((c) => {
+        const i = invoice(state, c.id, month);
+        return panel(
+          c.name,
+          `${c.active ? 'Ativo' : 'Arquivado'} · fecha dia ${c.closingDay} · vence dia ${c.dueDay}`,
+          `<div class="fixed-summary"><article><small>Fatura</small><strong>${money(i.total)}</strong></article><article><small>Pago</small><strong class="green">${money(i.paid)}</strong></article><article><small>Restante</small><strong>${money(i.remaining)}</strong></article></div><div class="workspace-buttons">${i.remaining > 0 ? `<button class="primary" data-invoice-pay="${esc(c.id)}">Pagar fatura</button>` : ''}<button class="text-button" data-card-edit="${esc(c.id)}">Editar</button><button class="text-button" data-card-toggle="${esc(c.id)}">${c.active ? 'Arquivar' : 'Reativar'}</button></div>${i.entries.map((e) => `<div class="old-pending-row"><span>${esc(e.name)}${e.seriesId ? ` · ${e.seriesIndex}/${e.seriesCount}` : ''}</span><strong>${money(e.amount)}</strong></div>`).join('') || empty('Nenhuma compra nesta competência.')}`,
+        );
+      })
+      .join('') +
+    (!(state.cards ?? []).length
+      ? empty('Cadastre um cartão para organizar compras e faturas. Não há dados automáticos.')
+      : '')
   );
 }
 function fixedVersion(a, m) {
@@ -580,7 +746,7 @@ function openPayment(id, correction = false) {
       : r.paidAmount
         ? 'Pagar valor restante'
         : 'Pagar competência',
-    `<p class="muted">${esc(r.name)} · competência ${monthName()} · vencimento ${dateName(r.date)}. O pagamento continuará neste mês de referência.</p><div class="form-grid">${field(correcting ? 'Total pago acumulado (R$)' : 'Valor deste pagamento (R$)', 'amount', decimal(correcting ? r.paidAmount : r.remainingAmount), 'text', 'required inputmode="decimal"')}${field('Data real do pagamento', 'date', correcting ? r.paymentDate : today(), 'date', 'required')}</div><p class="muted">Total da conta: ${money(payment?.snapshot.amount ?? r.amount)} · já pago: ${money(r.paidAmount)} · restante: ${money(r.remainingAmount)}.${correcting ? ' A correção substitui o total acumulado, não soma outro pagamento.' : ' Este valor será somado aos pagamentos anteriores.'}</p><label class="check-label"><input name="settle" type="checkbox" ${correcting && r.paid && r.paidAmount < payment.snapshot.amount ? 'checked' : ''}> Quitar o restante com desconto</label><p class="muted">Se pagar menos, o restante continua pendente. Marque a opção somente se a diferença foi dispensada.</p>${noteField(r.observation)}`,
+    `<p class="muted">${esc(r.name)} · competência ${monthName()} · vencimento ${dateName(r.date)}. O pagamento continuará neste mês de referência.</p><div class="form-grid">${field(correcting ? 'Total pago acumulado (R$)' : 'Valor deste pagamento (R$)', 'amount', decimal(correcting ? r.paidAmount : r.remainingAmount), 'text', 'required inputmode="decimal"')}${field('Data real do pagamento', 'date', correcting ? r.paymentDate : today(), 'date', 'required')}</div><p class="muted">Total da conta: ${money(payment?.snapshot.amount ?? r.amount)} · já pago: ${money(r.paidAmount)} · restante: ${money(r.remainingAmount)}.${correcting ? ' A correção substitui o total acumulado, não soma outro pagamento.' : ' Este valor será somado aos pagamentos anteriores.'}</p><label class="check-label"><input name="settle" type="checkbox" ${correcting && r.paid && r.paidAmount < payment.snapshot.amount ? 'checked' : ''}> Quitar o restante com desconto</label><p class="muted">Se pagar menos, o restante continua pendente. Marque a opção somente se a diferença foi dispensada.</p><label>Debitar da conta<select name="walletId">${walletOptions()}</select></label>${noteField(r.observation)}`,
     { id, month },
   );
 }
@@ -667,7 +833,7 @@ $('#finance-backup-file').onchange = async (e) => {
     showForm(
       'restore',
       'Restaurar backup financeiro',
-      `<p>O arquivo contém <strong>${imported.entries.length} lançamentos</strong>, <strong>${imported.fixedAccounts.length} contas fixas</strong> e <strong>${imported.goals.length} metas</strong>.</p><p>Ao confirmar, o financeiro deste navegador será substituído. Uma cópia dos dados atuais será guardada antes da troca. As listas de compras permanecem separadas.</p>`,
+      `<p>O arquivo contém <strong>${imported.entries.length} lançamentos</strong>, <strong>${imported.fixedAccounts.length} contas fixas</strong> e <strong>${imported.goals.length} metas</strong>.</p><p>Ao confirmar, o financeiro do espaço ativo será substituído. Uma cópia dos dados atuais será guardada antes da troca. As listas de compras permanecem separadas.</p>`,
       { imported },
     );
     $('#finance-backup-status').textContent = 'Confira o conteúdo e confirme a restauração.';
@@ -695,8 +861,21 @@ $('#export-finance').disabled = Boolean(loadError);
 $('#import-finance').disabled = Boolean(loadError);
 $('#new-entry').onclick = () =>
   view === 'fixed' ? openFixed() : view === 'goals' ? openGoal() : openEntry();
+$('#financial-form').addEventListener(
+  'invalid',
+  (e) => {
+    const details = e.target.closest('details');
+    if (details) details.open = true;
+  },
+  true,
+);
+let savingFinancial = false;
 $('#financial-form').addEventListener('submit', async (e) => {
   e.preventDefault();
+  if (savingFinancial) return;
+  savingFinancial = true;
+  const submit = e.target.querySelector('button[type=submit]');
+  submit.disabled = true;
   const f = new FormData(e.target),
     get = (k) => String(f.get(k) || ''),
     context = editing;
@@ -711,69 +890,143 @@ $('#financial-form').addEventListener('submit', async (e) => {
       toast('Backup restaurado. Acompanhe o envio na sincronização.');
       return;
     }
-    await transact((s) => {
-      if (context.kind === 'entry')
-        saveEntry(s, {
-          id: context.id,
-          name: get('name'),
-          amount: cents(get('amount')),
-          date: get('date'),
-          categoryId: get('categoryId'),
-          paymentMethodId: get('paymentMethodId') || null,
-          type: get('type'),
-          paid: f.has('paid'),
-          observation: get('observation'),
-        });
-      else if (context.kind === 'fixed')
-        saveFixed(s, {
-          id: context.id,
-          name: get('name'),
-          amount: cents(get('amount')),
-          startMonth: get('startMonth'),
-          endMonth: get('endMonth') || null,
-          from: get('from') || get('startMonth'),
-          dueDay: Number(get('dueDay')),
-          categoryId: get('categoryId'),
-          paymentMethodId: get('paymentMethodId') || null,
-          observation: get('observation'),
-        });
-      else if (context.kind === 'pay' || context.kind === 'correct')
-        (context.kind === 'pay' ? payFixed : correctPayment)(s, context.id, context.month, {
-          date: get('date'),
-          amount: cents(get('amount')),
-          observation: get('observation'),
-          settle: f.has('settle'),
-        });
-      else if (context.kind === 'adjust')
-        adjustFixed(s, context.id, context.month, cents(get('amount')), get('observation'));
-      else if (context.kind === 'end') endFixed(s, context.id, get('endMonth'));
-      else if (context.kind === 'budget')
-        saveBudget(
-          s,
-          context.month,
-          context.id,
-          get('amount').trim() ? cents(get('amount'), { allowZero: true }) : null,
-        );
-      else if (context.kind === 'goal-edit')
-        saveGoal(s, {
-          id: context.id,
-          name: get('name'),
-          target: cents(get('target')),
-          subtitle: get('subtitle'),
-          openingAmount: get('openingAmount')
-            ? cents(get('openingAmount'), { allowZero: true })
-            : 0,
-        });
-      else if (context.kind === 'goal')
-        saveContribution(s, context.id, {
-          id: context.contributionId,
-          amount: cents(get('amount')),
-          date: get('date'),
-        });
-    }, 'Salvo. Acompanhe o envio na sincronização.');
+    await transact(
+      (s) => {
+        if (context.kind === 'monthly-limit')
+          saveMonthlyLimit(
+            s,
+            context.month,
+            get('amount').trim() ? cents(get('amount'), { allowZero: true }) : null,
+          );
+        else if (context.kind === 'wallet')
+          saveWallet(s, {
+            id: context.id,
+            name: get('name'),
+            openingBalance:
+              cents(get('amount').replace(/^-/, ''), { allowZero: true }) *
+              (get('amount').trim().startsWith('-') ? -1 : 1),
+            openingDate: get('date'),
+            active: context.source?.active ?? true,
+          });
+        else if (context.kind === 'card')
+          saveCard(s, {
+            id: context.id,
+            name: get('name'),
+            closingDay: Number(get('closingDay')),
+            dueDay: Number(get('dueDay')),
+            active: context.source?.active ?? true,
+          });
+        else if (context.kind === 'transfer')
+          saveMove(s, {
+            id: context.id,
+            kind: 'transfer',
+            fromWalletId: get('fromWalletId'),
+            toWalletId: get('toWalletId'),
+            amount: cents(get('amount')),
+            date: get('date'),
+          });
+        else if (context.kind === 'invoice')
+          saveMove(s, {
+            id: context.id,
+            kind: 'invoice',
+            fromWalletId: get('fromWalletId'),
+            cardId: context.cardId,
+            month: context.month,
+            amount: cents(get('amount')),
+            date: get('date'),
+          });
+        else if (context.kind === 'entry')
+          saveLedgerEntry(
+            s,
+            {
+              id: context.id,
+              name: get('name'),
+              amount: cents(get('amount')),
+              date: get('date'),
+              categoryId: get('categoryId'),
+              paymentMethodId: get('paymentMethodId') || null,
+              type: get('type'),
+              paid: f.has('paid'),
+              observation: get('observation'),
+              ...(context.source?.seriesId
+                ? Object.fromEntries(
+                    ['seriesId', 'seriesKind', 'seriesIndex', 'seriesCount'].map((k) => [
+                      k,
+                      context.source[k],
+                    ]),
+                  )
+                : {}),
+              ...(get('walletId') ? { walletId: get('walletId') } : {}),
+              ...(get('cardId')
+                ? {
+                    cardId: get('cardId'),
+                    purchaseDate: get('date'),
+                    date: context.source?.date ?? get('date'),
+                  }
+                : {}),
+            },
+            { mode: get('seriesMode') || 'single', count: Number(get('seriesCount') || 1) },
+          );
+        else if (context.kind === 'fixed')
+          saveFixed(s, {
+            id: context.id,
+            name: get('name'),
+            amount: cents(get('amount')),
+            startMonth: get('startMonth'),
+            endMonth: get('endMonth') || null,
+            from: get('from') || get('startMonth'),
+            dueDay: Number(get('dueDay')),
+            categoryId: get('categoryId'),
+            paymentMethodId: get('paymentMethodId') || null,
+            observation: get('observation'),
+          });
+        else if (context.kind === 'pay' || context.kind === 'correct')
+          (context.kind === 'pay' ? payFixed : correctPayment)(s, context.id, context.month, {
+            date: get('date'),
+            amount: cents(get('amount')),
+            observation: get('observation'),
+            settle: f.has('settle'),
+            walletId: get('walletId') || null,
+          });
+        else if (context.kind === 'adjust')
+          adjustFixed(s, context.id, context.month, cents(get('amount')), get('observation'));
+        else if (context.kind === 'end') endFixed(s, context.id, get('endMonth'));
+        else if (context.kind === 'budget')
+          saveBudget(
+            s,
+            context.month,
+            context.id,
+            get('amount').trim() ? cents(get('amount'), { allowZero: true }) : null,
+          );
+        else if (context.kind === 'goal-edit')
+          saveGoal(s, {
+            id: context.id,
+            name: get('name'),
+            target: cents(get('target')),
+            subtitle: get('subtitle'),
+            openingAmount: get('openingAmount')
+              ? cents(get('openingAmount'), { allowZero: true })
+              : 0,
+          });
+        else if (context.kind === 'goal')
+          saveContribution(s, context.id, {
+            id: context.contributionId,
+            amount: cents(get('amount')),
+            date: get('date'),
+          });
+      },
+      context.kind === 'entry'
+        ? context.source
+          ? 'Lançamento atualizado. Acompanhe a sincronização.'
+          : 'Lançamento registrado. Acompanhe a sincronização.'
+        : 'Salvo. Acompanhe a sincronização.',
+    );
     $('#financial-dialog').close();
   } catch (error) {
     $('#financial-error').textContent = error.message;
+  } finally {
+    savingFinancial = false;
+    if (submit.isConnected) submit.disabled = false;
   }
 });
 $('#catalog-form').addEventListener('submit', async (e) => {
@@ -821,13 +1074,33 @@ document.addEventListener('change', (e) => {
     renderTransactions();
   }
   if (e.target.id === 'entry-type') {
-    const old = $('#entry-method select').value;
-    $('#entry-category').innerHTML = categoryField(null, e.target.value);
+    const defaults = entryDefaults(e.target.value);
+    const old = editing?.isNew ? defaults.paymentMethodId : $('#entry-method select').value;
+    $('#entry-category').innerHTML = categoryField(
+      editing?.isNew ? defaults.categoryId : null,
+      e.target.value,
+    );
     $('#entry-method').innerHTML = methodField(
       old,
       e.target.value,
       state.entries.find((r) => r.id === editing?.id)?.paymentMethodId === null,
     );
+    if (e.target.value === 'income') $('#financial-form [name=cardId]').value = '';
+  }
+  if (e.target.name === 'cardId' && e.target.value) {
+    $('#financial-form [name=walletId]').value = '';
+    $('#financial-form [name=paid]').checked = false;
+  }
+  if (e.target.name === 'name' && editing?.isNew && editing.kind === 'entry') {
+    const type = $('#entry-type').value;
+    const previous = state.entries.find(
+      (r) =>
+        r.type === type &&
+        r.name.trim().toLocaleLowerCase('pt-BR') ===
+          e.target.value.trim().toLocaleLowerCase('pt-BR'),
+    );
+    if (previous && state.categories.some((c) => c.id === previous.categoryId && c.active))
+      $('#entry-category select').value = previous.categoryId;
   }
 });
 document.addEventListener('click', async (e) => {
@@ -856,6 +1129,55 @@ document.addEventListener('click', async (e) => {
       render();
       window.scrollTo({ top: 0, behavior: 'smooth' });
     }
+    if (b.hasAttribute('data-monthly-limit'))
+      showForm(
+        'monthly-limit',
+        'Limite total do mês',
+        field(
+          'Limite (R$)',
+          'amount',
+          state.monthlyLimits?.[month] != null ? decimal(state.monthlyLimits[month]) : '',
+          'text',
+          'inputmode="decimal"',
+        ) +
+          '<p class="muted">Vazio remove o limite total; zero é um limite válido. Limites por categoria são preservados.</p>',
+        { month },
+      );
+    if (
+      b.dataset.seriesStop &&
+      confirm(
+        'Excluir esta e as próximas parcelas/repetições em aberto? Valores já pagos e faturas com pagamento serão preservados.',
+      )
+    ) {
+      await transact(
+        (s) => stopSeries(s, b.dataset.seriesStop),
+        'Série encerrada; pagamentos preservados.',
+      );
+      $('#financial-dialog').close();
+    }
+    if (b.hasAttribute('data-wallet-new')) openWallet();
+    if (b.dataset.walletEdit) openWallet(b.dataset.walletEdit);
+    if (b.hasAttribute('data-card-new')) openCard();
+    if (b.dataset.cardEdit) openCard(b.dataset.cardEdit);
+    if (b.hasAttribute('data-transfer')) openTransfer();
+    if (b.dataset.invoicePay) openInvoice(b.dataset.invoicePay);
+    if (b.dataset.walletToggle)
+      await transact((s) => {
+        const w = s.wallets.find((w) => w.id === b.dataset.walletToggle);
+        w.active = !w.active;
+      }, 'Conta atualizada. O histórico foi preservado.');
+    if (b.dataset.cardToggle)
+      await transact((s) => {
+        const c = s.cards.find((c) => c.id === b.dataset.cardToggle);
+        c.active = !c.active;
+      }, 'Cartão atualizado. O histórico foi preservado.');
+    if (
+      b.dataset.moveDelete &&
+      confirm('Desfazer este movimento? Saldos e baixas da fatura serão recalculados.')
+    )
+      await transact((s) => {
+        s.moves = s.moves.filter((m) => m.id !== b.dataset.moveDelete);
+      }, 'Movimento desfeito.');
     if (b.id === 'download-preserved') await downloadPreserved();
     if (b.id === 'retry-load') window.location.reload();
     if (loadError) return;
@@ -894,7 +1216,7 @@ document.addEventListener('click', async (e) => {
       )
     )
       await transact((s) => {
-        s.entries = s.entries.filter((r) => r.id !== b.dataset.entryDelete);
+        deleteLedgerEntry(s, b.dataset.entryDelete);
       }, 'Lançamento excluído.');
     if (b.hasAttribute('data-new-entry')) openEntry();
     if (b.hasAttribute('data-new-fixed')) openFixed();

@@ -320,6 +320,7 @@ export class WorkspaceClient {
       throw new WorkspaceError('conflict', 'Revise as alterações pendentes antes de continuar.');
     const op = {
       id: crypto.randomUUID(),
+      ledger_version: 2,
       createdAt: this.clock(),
       status: 'pending',
       generation: this.space.generation,
@@ -330,6 +331,18 @@ export class WorkspaceClient {
     for (const c of changes) {
       const existing = await this.db.workspaceRecords.get(keyOf(c.entity, c.id));
       c.expected_version = existing?.confirmedVersion ?? 0;
+      if (c.entity === 'finance_moves' && c.body.card_id) {
+        const parent = await this.db.workspaceRecords.get(keyOf('finance_cards', c.body.card_id));
+        if (
+          parent &&
+          !op.guards.some((g) => g.entity === 'finance_cards' && g.id === c.body.card_id)
+        )
+          op.guards.push({
+            entity: 'finance_cards',
+            id: c.body.card_id,
+            expected_version: parent.confirmedVersion ?? 0,
+          });
+      }
       if (['finance_payments', 'finance_goal_contributions'].includes(c.entity)) {
         const entity = c.entity === 'finance_payments' ? 'finance_entries' : 'finance_goals',
           id = c.body.entry_id ?? c.body.goal_id,

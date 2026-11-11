@@ -324,6 +324,7 @@ $('#workspace-form').onsubmit = async (e) => {
         workspace_id: shared.id,
         source_id: source.id,
         area: f.get('copyArea'),
+        ledger_version: 2,
         operation_id: e.target.dataset.operationId,
       });
       $('#workspace-dialog').close();

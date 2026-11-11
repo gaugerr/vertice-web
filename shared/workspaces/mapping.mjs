@@ -1,3 +1,4 @@
+import { invoiceAllocations } from '../../previews/controle-financeiro/finance-ledger.mjs';
 import { emptyState, validateState } from '../../previews/controle-financeiro/finance-domain.mjs';
 export const ENTITIES = [
   'shopping_lists',
@@ -5,6 +6,9 @@ export const ENTITIES = [
   'shopping_items',
   'finance_categories',
   'finance_payment_methods',
+  'finance_wallets',
+  'finance_cards',
+  'finance_moves',
   'finance_fixed_accounts',
   'finance_fixed_versions',
   'finance_entries',
@@ -31,6 +35,31 @@ export function financeRows(s) {
     });
   for (const p of s.methods)
     add('finance_payment_methods', p.id, { name: p.name, is_archived: !p.active });
+  for (const w of s.wallets ?? [])
+    add('finance_wallets', w.id, {
+      name: w.name,
+      opening_balance_cents: w.openingBalance,
+      opening_date: w.openingDate,
+      is_archived: !w.active,
+    });
+  for (const c of s.cards ?? [])
+    add('finance_cards', c.id, {
+      name: c.name,
+      closing_day: c.closingDay,
+      due_day: c.dueDay,
+      is_archived: !c.active,
+    });
+  for (const m of s.moves ?? [])
+    add('finance_moves', m.id, {
+      kind: m.kind,
+      from_wallet_id: m.fromWalletId,
+      to_wallet_id: m.toWalletId ?? null,
+      card_id: m.cardId ?? null,
+      invoice_month: m.month ? m.month + '-01' : null,
+      amount_cents: m.amount,
+      movement_date: m.date,
+      observation: m.observation ?? '',
+    });
   for (const a of s.fixedAccounts) {
     add('finance_fixed_accounts', a.id, {
       name: a.name,
@@ -50,6 +79,23 @@ export function financeRows(s) {
   }
   for (const e of s.entries) {
     add('finance_entries', e.id, {
+      ...(e.walletId || e.cardId || e.seriesId
+        ? {
+            extra: Object.fromEntries(
+              [
+                'walletId',
+                'cardId',
+                'purchaseDate',
+                'seriesId',
+                'seriesKind',
+                'seriesIndex',
+                'seriesCount',
+              ]
+                .filter((k) => e[k] != null)
+                .map((k) => [k, e[k]]),
+            ),
+          }
+        : {}),
       source: 'manual',
       kind: e.type,
       name: e.name,
@@ -64,8 +110,9 @@ export function financeRows(s) {
       fixed_version_id: null,
       shopping_list_id: null,
     });
-    if (e.paid)
+    if (e.paid && !e.cardId)
       add('finance_payments', e.id + ':confirm', {
+        ...(e.walletId ? { wallet_id: e.walletId } : {}),
         entry_id: e.id,
         payment_date: e.date,
         movement_type: 'payment',
@@ -111,6 +158,7 @@ export function financeRows(s) {
       history.forEach((h, i) =>
         add('finance_payments', id + ':payment:' + i, {
           entry_id: id,
+          ...(h.walletId ? { wallet_id: h.walletId } : {}),
           payment_date: h.date,
           movement_type: h.amount > 0 ? 'payment' : 'adjustment',
           amount_cents: h.amount,
@@ -120,10 +168,28 @@ export function financeRows(s) {
       );
     }
   }
+  for (const { move, entry, amount } of invoiceAllocations(s))
+    add('finance_payments', move.id + ':' + entry.id, {
+      entry_id: entry.id,
+      payment_date: move.date,
+      movement_type: 'payment',
+      amount_cents: amount,
+      observation: 'Pagamento de fatura',
+      sequence_no: 0,
+      wallet_id: null,
+      invoice_move_id: move.id,
+    });
   for (const [c, v] of Object.entries(s.budgets))
     if (v !== null) add('finance_budget_defaults', c, { category_id: c, limit_cents: v });
-  for (const [m, limits] of Object.entries(s.monthlyBudgets ?? {})) {
-    add('finance_budget_months', monthId(m), { month: m + '-01' });
+  for (const m of new Set([
+    ...Object.keys(s.monthlyBudgets ?? {}),
+    ...Object.keys(s.monthlyLimits ?? {}),
+  ])) {
+    const limits = s.monthlyBudgets?.[m] ?? {};
+    add('finance_budget_months', monthId(m), {
+      month: m + '-01',
+      total_limit_cents: s.monthlyLimits?.[m] ?? null,
+    });
     for (const [c, v] of Object.entries(limits))
       add('finance_budget_limits', m + ':' + c, {
         budget_month_id: monthId(m),
@@ -150,6 +216,36 @@ export function financeRows(s) {
 export function readFinance(records) {
   const s = emptyState(),
     get = (e) => records.filter((r) => r.entity === e && !r.body.deleted_at).map((r) => r.body);
+  const wallets = get('finance_wallets'),
+    cards = get('finance_cards'),
+    moves = get('finance_moves');
+  if (wallets.length)
+    s.wallets = wallets.map((w) => ({
+      id: w.id,
+      name: w.name,
+      openingBalance: Number(w.opening_balance_cents),
+      openingDate: w.opening_date,
+      active: !w.is_archived,
+    }));
+  if (cards.length)
+    s.cards = cards.map((c) => ({
+      id: c.id,
+      name: c.name,
+      closingDay: Number(c.closing_day),
+      dueDay: Number(c.due_day),
+      active: !c.is_archived,
+    }));
+  if (moves.length)
+    s.moves = moves.map((m) => ({
+      id: m.id,
+      kind: m.kind,
+      fromWalletId: m.from_wallet_id,
+      ...(m.to_wallet_id ? { toWalletId: m.to_wallet_id } : {}),
+      ...(m.card_id ? { cardId: m.card_id, month: m.invoice_month.slice(0, 7) } : {}),
+      amount: Number(m.amount_cents),
+      date: m.movement_date,
+      observation: m.observation,
+    }));
   const cats = get('finance_categories'),
     methods = get('finance_payment_methods');
   if (cats.length)
@@ -195,6 +291,10 @@ export function readFinance(records) {
       settled = paid >= amount - Number(e.settlement_discount_cents ?? 0);
     if (e.source !== 'fixed') {
       s.entries.push({
+        ...(e.extra ?? {}),
+        ...(e.extra?.cardId
+          ? { paidAmount: paid, remainingAmount: Math.max(0, amount - paid) }
+          : {}),
         id: e.id,
         name: e.name,
         type: e.kind,
@@ -231,6 +331,7 @@ export function readFinance(records) {
         settled,
         snapshot,
         history: ps.map((p) => ({
+          ...(p.wallet_id ? { walletId: p.wallet_id } : {}),
           date: p.payment_date,
           amount: Number(p.amount_cents),
           observation: p.observation,
@@ -242,6 +343,11 @@ export function readFinance(records) {
   s.budgets = Object.fromEntries(
     get('finance_budget_defaults').map((b) => [b.category_id, Number(b.limit_cents)]),
   );
+  const totalsByMonth = get('finance_budget_months').filter((m) => m.total_limit_cents != null);
+  if (totalsByMonth.length)
+    s.monthlyLimits = Object.fromEntries(
+      totalsByMonth.map((m) => [m.month.slice(0, 7), Number(m.total_limit_cents)]),
+    );
   s.monthlyBudgets = {};
   const limits = get('finance_budget_limits');
   for (const b of get('finance_budget_months'))
