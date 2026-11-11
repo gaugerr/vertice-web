@@ -39,4 +39,7 @@ Não publica mudanças na interface oficial. A entrada autenticada pode usar as 
 Validação a partir da raiz: node --test --test-isolation=none previews/controle-financeiro/finance-domain.test.mjs previews/controle-financeiro/finance-improvements.test.mjs; node previews/controle-financeiro/build.mjs.
 Testar cadastros, migração, falha de gravação, troca de mês, pagamento, reajuste,
 correção, desfazer pagamento, orçamento e metas quando afetados.
-Valores em centavos inteiros; preservar as contas e os textos de demonstração.
+Valores em centavos inteiros. A interface deve ter os textos finais do produto, sem
+controles de simulação ou restauração de exemplos. Primeiro acesso vazio usa
+`emptyState()`; preservar registros existentes, backups reais e recuperação.
+Não renomear identificadores internos de armazenamento ao limpar a interface.

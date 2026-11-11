@@ -4,6 +4,11 @@
 > App oficial, demonstração local e preview conectada são ambientes distintos.
 > Resultados e instruções anteriores abaixo devem ser interpretados no contexto do ambiente e da data; o handoff registra as pendências atuais.
 
+A interface em `preview/controle-financeiro` usa textos finais do produto; não
+reintroduzir badges ou ferramentas de demonstração nem restaurar exemplos.
+Primeiro acesso sem registros começa vazio; preservar dados, backups e os
+identificadores internos. Detalhes e validação em `docs/AI-HANDOFF.md`.
+
 ## Comece aqui: contexto e conexões
 
 Guia para retomar o projeto sem o histórico do chat. Estado operacional conferido

@@ -109,9 +109,7 @@ for (const file of [
     const html = await readFile(root + 'dist/' + file, 'utf8');
     await writeFile(
       root + 'dist/staging/' + file,
-      html
-        .replace('data-src="shopping/index.html"', 'data-src="/shopping/index.html"')
-        .replace('Vértice · Compras e Financeiro · Preview', 'Vértice · Homologação do casal'),
+      html.replace('data-src="shopping/index.html"', 'data-src="/shopping/index.html"'),
     );
   } else await copyFile(root + 'dist/' + file, root + 'dist/staging/' + file);
 }

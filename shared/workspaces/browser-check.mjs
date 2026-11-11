@@ -30,6 +30,7 @@ import assert from 'node:assert/strict';
     await owner.locator('#workspace-create').waitFor();
     await owner.locator('#workspace-create').click();
     await owner.locator('#workspace-form [name=name]').fill('Nossa casa de teste');
+    await owner.locator('#workspace-form [name=email]').fill('parceiro@exemplo.test');
     await owner.locator('#workspace-form button[type=submit]').click();
     await owner.locator('#workspace-invite-link').waitFor();
     const link = await owner.locator('#workspace-invite-link').inputValue();
@@ -90,9 +91,9 @@ import assert from 'node:assert/strict';
       .getByText('Despesa do casal', { exact: true })
       .waitFor();
     assert.match(await owner.locator('.stats').textContent(), /60,00/);
-    await go(guest, 'settings');
-    await guest.locator('.workspace-demo-tools summary').click();
-    await guest.locator('#workspace-demo-offline').check();
+    await guest.evaluate(() =>
+      localStorage.setItem('vertice_demo_offline_22222222-2222-4222-8222-222222222222', 'true'),
+    );
     await go(guest, 'finance');
     await guest.locator('#new-entry').click();
     await f.locator('[name=name]').fill('Despesa offline');
@@ -102,8 +103,10 @@ import assert from 'node:assert/strict';
     await save(guest);
     await guest.locator('#workspace-sync').filter({ hasText: 'Pendente de envio' }).waitFor();
     assert.equal(await owner.getByText('Despesa offline', { exact: true }).count(), 0);
-    await go(guest, 'settings');
-    await guest.locator('#workspace-demo-offline').uncheck();
+    await guest.evaluate(() => {
+      localStorage.setItem('vertice_demo_offline_22222222-2222-4222-8222-222222222222', 'false');
+      window.dispatchEvent(new Event('online'));
+    });
     await owner
       .locator('#transaction-list')
       .getByText('Despesa offline', { exact: true })
@@ -164,7 +167,7 @@ import assert from 'node:assert/strict';
     } else {
       await stage
         .locator('#workspace-message')
-        .filter({ hasText: 'não foi configurada' })
+        .filter({ hasText: 'Não foi possível conectar' })
         .waitFor();
       assert(await stage.locator('#workspace-login').isDisabled());
     }

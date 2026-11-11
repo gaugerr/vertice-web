@@ -19,7 +19,9 @@ export function validateConnection(config, origin) {
       config.allowedOrigin !== CONNECTED_ORIGIN ||
       origin !== CONNECTED_ORIGIN
     )
-      throw Error('A conexão ao banco Vértice está liberada somente na preview autorizada.');
+      throw Error(
+        'Não foi possível conectar sua conta neste endereço. Abra o Vértice pelo endereço autorizado.',
+      );
   }
   const jwk = config.publicKey;
   if (!jwk || jwk.d || jwk.kty !== 'EC' || jwk.crv !== 'P-256' || !jwk.x || !jwk.y)

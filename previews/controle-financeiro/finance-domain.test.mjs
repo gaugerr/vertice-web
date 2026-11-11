@@ -345,3 +345,18 @@ test('v1 corrompida e falha de gravação durante migração preservam a origem'
   assert.equal(good.getItem(LEGACY_KEY), raw);
   assert.equal(good.getItem(BACKUP_KEY), raw);
 });
+
+test('primeiro acesso começa vazio e não recria exemplos ao reabrir', () => {
+  const values = new Map();
+  const storage = {
+    getItem: (key) => values.get(key) ?? null,
+    setItem: (key, value) => values.set(key, value),
+  };
+  for (let i = 0; i < 2; i++) {
+    const state = new FinanceStore(storage).load();
+    assert.deepEqual(state.entries, []);
+    assert.deepEqual(state.fixedAccounts, []);
+    assert.deepEqual(state.goals, []);
+    assert.deepEqual(state.occurrences, {});
+  }
+});

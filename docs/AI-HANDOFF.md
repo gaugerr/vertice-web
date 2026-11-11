@@ -3,6 +3,35 @@
 Atualizado em 09/11/2026 (America/Sao_Paulo). Registro de estado observado, não
 substitui consultas atuais aos serviços. Começar por este arquivo e AGENTS.md.
 
+## Interface para o usuário — 11/11/2026
+
+A interface da branch `preview/controle-financeiro` não mostra mais badges, avisos,
+títulos ou ferramentas de preview/demonstração. Foram removidos os botões e o
+handler de restauração de exemplos, troca de perfis fictícios, simulação offline
+e licença, além do link para demonstração na entrada Google. Primeiro acesso sem
+registros usa `emptyState()`, nunca `initialState()` com exemplos. Registros já
+armazenados e fontes legadas são preservados; não limpar armazenamento para
+atualizar a interface. Categorias e formas padrão continuam disponíveis.
+
+Backups reais, cópia anterior à restauração, recuperação de pendências e formato
+existente de backup continuam compatíveis. Mensagens de salvamento orientam a
+acompanhar a sincronização, sem prometer confirmação remota imediata. A origem,
+o caminho `/staging/`, os identificadores de armazenamento e as restrições técnicas
+de conexão permanecem. O servidor local de demonstração continua apenas como
+infraestrutura isolada de teste; não foi conectado ao banco real.
+
+Validação: 29 testes financeiros, 28 de sincronização, ESLint, build; navegador
+com conta vazia/com dados, pagamento/desfazer/reconfirmar, backup/importação/cópia
+anterior, compras, configurações e larguras 280–1440. Fluxos de casal, offline,
+reconexão, isolamento/remoção e cache autorizado também conferidos com identidades
+sintéticas. Scripts `shared/workspaces/user-interface-browser-check.mjs`,
+`browser-check.mjs` e `cache-browser-check.mjs`. Não usa conta Google real nem
+altera pagamentos de clientes. O piloto real do casal continua pendente.
+
+A correção anterior de pagamento está no commit `174079f`: comandos que reativam
+IDs excluídos enviam `deleted_at: null`, evitando que pagamentos reconfirmados
+voltem a pendentes. Regressão PostgreSQL desse commit aprovada na CI.
+
 ## Produto e ambientes
 
 - Repositório: `gaugerr/vertice-web`. `main` continua com o app oficial de compras

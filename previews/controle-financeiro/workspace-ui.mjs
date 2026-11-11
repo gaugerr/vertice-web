@@ -2,7 +2,6 @@ import {
   WorkspaceClient,
   openPreviewWorkspace,
   workspaceEnvironment,
-  DEMO_ACTORS,
   selectionKey,
 } from './workspaces.js';
 const $ = (s) => document.querySelector(s),
@@ -29,14 +28,6 @@ $('#workspace-login').onclick = async () => {
   }
 };
 $('#workspace-logout').onclick = () => void environment.logout?.();
-if (environment.mode === 'staging') {
-  $('.workspace-demo-tools').hidden = true;
-  $('.workspace-demo-note').textContent = environment.configured
-    ? environment.connectionMode === 'existing-project-preview'
-      ? 'Preview conectada ao seu Vértice. Os dados salvos aqui vão para a nuvem da sua conta. A demonstração local fica no endereço principal.'
-      : 'Homologação autenticada em projeto separado. Compartilhe somente dados de teste.'
-    : 'Homologação autenticada desativada. Configure um projeto de testes separado antes de usar Google e sincronização entre aparelhos.';
-}
 const feedback = (message) => {
   $('#workspace-message').textContent = message;
 };
@@ -152,10 +143,11 @@ async function render(force = false) {
     feedback(
       environment.configured
         ? 'Entre com Google para abrir o espaço ou aceitar o convite.'
-        : (environment.connectionError ?? 'A homologação ainda não foi configurada.'),
+        : (environment.connectionError ??
+            'Não foi possível conectar sua conta. Tente novamente em instantes.'),
     );
     $('#workspace-settings-content').textContent =
-      'Use a demonstração local no endereço principal da preview.';
+      'Entre com Google para acessar seu espaço e seus backups.';
     return;
   }
   await refreshSpaces();
@@ -190,9 +182,7 @@ async function render(force = false) {
   if (!shared) {
     content += actor.licensed
       ? '<button class="primary" id="workspace-create">Compartilhar com alguém</button>'
-      : environment.mode === 'demo'
-        ? '<p>Aceite o link de convite usando a conta da demonstração Parceiro.</p>'
-        : '<p>Use o link recebido da outra pessoa para entrar no espaço compartilhado. Para ter seu espaço pessoal, entre com a conta Google vinculada à sua compra.</p>';
+      : '<p>Use o link recebido da outra pessoa para entrar no espaço compartilhado. Para ter seu espaço pessoal, entre com a conta Google vinculada à sua compra.</p>';
   } else {
     const data = memberDetails.get(shared.id);
     if (!data) content += '<p class="muted">Atualizando participantes…</p>';
@@ -200,9 +190,9 @@ async function render(force = false) {
       content += `<h3>${esc(shared.name)}</h3><p class="muted">Compras e todo o financeiro deste espaço são visíveis para os dois.</p>${data.members.map((m) => `<div class="workspace-member"><div><strong>${esc(m.display_name ?? m.name)}</strong><small>${m.role === 'owner' ? 'Titular' : 'Participante'} · ${esc(m.email)}</small></div>${shared.role === 'owner' && m.role !== 'owner' ? `<button class="secondary" data-workspace-remove="${esc(m.user_id)}">Remover</button>` : ''}</div>`).join('')}`;
       if (shared.role === 'owner') {
         if (data.members.length < 2)
-          content += `<label>E-mail Google do convidado<input id="workspace-invite-email" type="email" value="${esc(data.pending[0]?.email ?? (environment.mode === 'demo' ? DEMO_ACTORS[1].email : ''))}"></label><button class="secondary" id="workspace-invite">${data.pending.length ? 'Gerar novo convite' : 'Gerar convite'}</button>${data.pending.length ? '<button class="text-button" id="workspace-revoke">Cancelar convite</button>' : ''}`;
+          content += `<label>E-mail Google do convidado<input id="workspace-invite-email" type="email" value="${esc(data.pending[0]?.email ?? '')}"></label><button class="secondary" id="workspace-invite">${data.pending.length ? 'Gerar novo convite' : 'Gerar convite'}</button>${data.pending.length ? '<button class="text-button" id="workspace-revoke">Cancelar convite</button>' : ''}`;
         if (lastInvite)
-          content += `<label>Link do convite<input id="workspace-invite-link" readonly value="${esc(lastInvite)}"></label><div class="workspace-buttons"><button class="primary" id="workspace-share">Compartilhar convite</button><button class="secondary" id="workspace-copy-link">Copiar link</button>${environment.mode === 'demo' ? '<button class="text-button" id="workspace-test-invite">Abrir convite de teste</button>' : ''}</div>`;
+          content += `<label>Link do convite<input id="workspace-invite-link" readonly value="${esc(lastInvite)}"></label><div class="workspace-buttons"><button class="primary" id="workspace-share">Compartilhar convite</button><button class="secondary" id="workspace-copy-link">Copiar link</button></div>`;
         if (personal())
           content +=
             '<button class="secondary" id="workspace-copy-data">Copiar meus dados para o casal</button>';
@@ -215,12 +205,6 @@ async function render(force = false) {
   if (archives.length)
     content += `<details><summary>Espaços encerrados</summary>${archives.map((s) => `<button class="text-button" data-workspace-open="${s.id}">${esc(s.name)} · consultar e exportar</button>`).join('')}</details>`;
   $('#workspace-settings-content').innerHTML = content;
-  $('#workspace-demo-actor').innerHTML = DEMO_ACTORS.map(
-    (a) =>
-      `<option value="${a.uid}" ${a.uid === actor.uid ? 'selected' : ''}>${esc(a.name)} · ${esc(a.email)}</option>`,
-  ).join('');
-  $('#workspace-demo-offline').checked =
-    localStorage.getItem('vertice_demo_offline_' + actor.uid) === 'true';
   $('#workspace-recovery').hidden = !client || (await client.status()) !== 'Precisa de atenção';
 }
 function dialog(title, body, submit) {
@@ -246,7 +230,7 @@ async function inspectInvite() {
     const invite = await transport.request('inspect_invite', { token });
     dialog(
       'Entrar em ' + invite.name,
-      `<p>${esc(invite.owner)} convidou você para compartilhar listas e todo o financeiro de <strong>${esc(invite.name)}</strong>.</p><p>Você está usando ${esc(actor.email)}.</p>${environment.mode === 'demo' ? '<p class="muted">Demonstração local: não é um convite real nem exige login Google nesta preview.</p>' : ''}<input name="inviteToken" type="hidden" value="${esc(token)}">`,
+      `<p>${esc(invite.owner)} convidou você para compartilhar listas e todo o financeiro de <strong>${esc(invite.name)}</strong>.</p><p>Você está usando ${esc(actor.email)}.</p><input name="inviteToken" type="hidden" value="${esc(token)}">`,
       'Entrar no espaço',
     );
   } catch (e) {
@@ -260,8 +244,8 @@ async function inspectInvite() {
     }
     dialog(
       'Convite do casal',
-      `<p>${esc(e.message)}</p><label>Conta da demonstração<select id="workspace-invite-actor">${DEMO_ACTORS.map((a) => `<option value="${a.uid}" ${a.uid === actor.uid ? 'selected' : ''}>${esc(a.name)} · ${esc(a.email)}</option>`).join('')}</select></label><input name="retryInvite" type="hidden" value="1">`,
-      'Testar com esta conta',
+      `<p>${esc(e.message)}</p><input name="recoveryClose" type="hidden" value="1">`,
+      'Fechar',
     );
   }
 }
@@ -270,36 +254,6 @@ $('#workspace-manage').onclick = () => {
   $('#workspace-settings').scrollIntoView({ behavior: 'smooth' });
 };
 $('#workspace-selector').onchange = (e) => void activate(e.target.value);
-$('#workspace-demo-actor').onchange = async (e) => {
-  if (!(await canSwitch())) return;
-  await client?.flush();
-  sessionStorage.setItem('vertice_demo_actor', e.target.value);
-  location.reload();
-};
-$('#workspace-demo-offline').onchange = async (e) => {
-  localStorage.setItem('vertice_demo_offline_' + actor.uid, String(e.target.checked));
-  feedback(
-    e.target.checked
-      ? 'Modo offline de teste: alterações ficam salvas neste aparelho.'
-      : 'Conexão de teste retomada.',
-  );
-  if (!e.target.checked) await client?.flush();
-  await render().catch(() => {});
-};
-$('#workspace-demo-license').onclick = async () => {
-  try {
-    await transport.request('demo_license', {
-      active: Boolean($('#workspace-demo-license').dataset.inactive),
-    });
-    $('#workspace-demo-license').dataset.inactive = $('#workspace-demo-license').dataset.inactive
-      ? ''
-      : 'true';
-    await client?.refresh();
-    await render(true);
-  } catch (e) {
-    feedback(e.message);
-  }
-};
 $('#workspace-form').onsubmit = async (e) => {
   e.preventDefault();
   if (creating) return;
@@ -314,11 +268,6 @@ $('#workspace-form').onsubmit = async (e) => {
     }
     if (f.has('recoveryClose')) {
       $('#workspace-dialog').close();
-      return;
-    }
-    if (f.has('retryInvite')) {
-      sessionStorage.setItem('vertice_demo_actor', $('#workspace-invite-actor').value);
-      location.reload();
       return;
     }
     if (f.has('inviteToken')) {
@@ -380,7 +329,7 @@ document.addEventListener('click', async (e) => {
     if (b.id === 'workspace-create')
       dialog(
         'Compartilhar com alguém',
-        `<label>Nome do espaço<input name="name" value="Nossa casa" required maxlength="60"></label><label>E-mail Google do convidado<input name="email" type="email" value="${environment.mode === 'demo' ? 'parceiro@exemplo.test' : ''}" required></label><p>Vocês compartilharão as listas e todo o financeiro deste espaço. Os seus dados pessoais ficam separados.</p>`,
+        `<label>Nome do espaço<input name="name" value="Nossa casa" required maxlength="60"></label><label>E-mail Google do convidado<input name="email" type="email" value="" required></label><p>Vocês compartilharão as listas e todo o financeiro deste espaço. Os seus dados pessoais ficam separados.</p>`,
         'Criar espaço e convite',
       );
     if (b.id === 'workspace-invite') {
@@ -409,10 +358,6 @@ document.addEventListener('click', async (e) => {
         await navigator.clipboard.writeText(lastInvite);
         feedback('Link copiado para compartilhar.');
       }
-    }
-    if (b.id === 'workspace-test-invite') {
-      location.hash = lastInvite.split('#')[1];
-      await inspectInvite();
     }
     if (b.dataset.workspaceOpen) await activate(b.dataset.workspaceOpen);
     if (

@@ -1,4 +1,4 @@
-import { initialState, migrateV1, validateState } from './finance-domain.mjs';
+import { emptyState, migrateV1, validateState } from './finance-domain.mjs';
 export const STORAGE_KEY = 'vertice-finance-preview-v2';
 export const LEGACY_KEY = 'vertice-finance-preview-v1';
 export const BACKUP_KEY = LEGACY_KEY + '-backup';
@@ -32,7 +32,7 @@ export class FinanceStore {
           );
         }
         if (this.storage.getItem(BACKUP_KEY) === null) this.storage.setItem(BACKUP_KEY, legacy);
-      } else next = initialState();
+      } else next = emptyState();
       next.revision = 0;
       validateState(next);
       this.storage.setItem(STORAGE_KEY, JSON.stringify(next));
@@ -44,7 +44,7 @@ export class FinanceStore {
     if (!this.state) throw Error('Abra os dados financeiros antes de salvar.');
     const current = this.storage.getItem(STORAGE_KEY);
     if (current === null)
-      throw Error('Os dados financeiros mudaram. Reabra o preview antes de salvar.');
+      throw Error('Os dados financeiros mudaram. Atualize a página antes de salvar.');
     const latest = validateState(JSON.parse(current));
     if (latest.revision !== this.state.revision)
       throw Error(

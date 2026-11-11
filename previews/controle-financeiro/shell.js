@@ -41,8 +41,8 @@ if (environment.actor)
         ? screens[financialView]
         : area === 'shopping'
           ? shoppingScreen
-          : 'Dados do preview';
-    document.title = `${names[area]} · Vértice Preview`;
+          : 'Conta e dados';
+    document.title = `${names[area]} · Vértice`;
   }
   function applyArea(next, save = true) {
     if (!Object.hasOwn(names, next)) next = 'shopping';
@@ -52,7 +52,6 @@ if (environment.actor)
     document.getElementById('finance-area').hidden = next !== 'finance';
     document.getElementById('settings-area').hidden = next !== 'settings';
     document.getElementById('finance-tabs').hidden = next !== 'finance';
-    document.getElementById('reset').hidden = next !== 'finance';
     menu.querySelectorAll('[data-area]').forEach((b) => {
       b.classList.toggle('active', b.dataset.area === next);
       if (b.dataset.area === next) b.setAttribute('aria-current', 'page');
@@ -145,9 +144,6 @@ if (environment.actor)
   document
     .getElementById('shopping-settings')
     .addEventListener('click', () => navigate('shopping', '/settings'));
-  document
-    .getElementById('finance-reset')
-    .addEventListener('click', () => document.getElementById('reset').click());
   window.addEventListener('popstate', readLocation);
   window.addEventListener('hashchange', readLocation);
   document.getElementById('main').tabIndex = -1;

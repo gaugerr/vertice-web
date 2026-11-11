@@ -4,10 +4,10 @@
     <meta charset="UTF-8" />
     <meta name="viewport" content="width=device-width,initial-scale=1" />
     <meta name="theme-color" content="#101014" />
-    <title>Vértice · Compras e Financeiro · Preview</title>
+    <title>Vértice · Compras e Financeiro</title>
     <meta
       name="description"
-      content="Uma primeira visão do seu controle financeiro no Vértice. Preview independente com dados de exemplo."
+      content="Organize suas compras e seu financeiro, acompanhe contas e planeje seus objetivos."
     />
     <link rel="icon" href="vertice.svg" />
     <link rel="stylesheet" href="styles.css" />
@@ -38,26 +38,15 @@
         </svg>
       </button>
       <div class="brand">
-        <img src="vertice.svg" alt="" width="37" height="37" /><span>vértice<b>.</b></span
-        ><span class="preview">PREVIEW</span>
+        <img src="vertice.svg" alt="" width="37" height="37" /><span>vértice<b>.</b></span>
       </div>
       <div class="header-right">
-        <span class="sample"><i></i> Ambiente de demonstração</span
-        ><button
-          class="icon-button"
-          id="reset"
-          aria-label="Restaurar dados de exemplo"
-          title="Restaurar exemplos"
-        >
-          ↺
-        </button>
-        <div class="avatar" aria-label="Perfil de exemplo">V</div>
+        <div class="avatar" aria-label="Perfil">V</div>
       </div>
     </header>
     <div class="area-strip">
       <button id="area-shortcut" aria-label="Trocar área pelo menu">Compras <span>⌄</span></button
-      ><span aria-hidden="true">/</span><span id="current-screen">Minhas listas</span
-      ><span class="preview-hint">Dados de demonstração</span>
+      ><span aria-hidden="true">/</span><span id="current-screen">Minhas listas</span>
     </div>
 
     <div class="workspace-bar">
@@ -91,7 +80,6 @@
           Use a conta vinculada à sua compra. A pessoa convidada pode entrar com a própria conta
           Google.
         </p>
-        <a href="/">Abrir demonstração local</a>
       </section>
       <section id="shopping-area" aria-label="Listas de compras">
         <iframe
@@ -117,50 +105,30 @@
             <button id="prev-month" aria-label="Mês anterior">‹</button><span id="month"></span
             ><button id="next-month" aria-label="Próximo mês">›</button>
           </div>
-          <span class="example-label"
-            >Dados de exemplo <span class="desktop-text">· explore à vontade</span></span
-          >
         </div>
         <div id="content" aria-live="polite"></div>
-        <footer>
-          Preview independente do Vértice
-          <span>Dados fictícios, salvos apenas neste navegador.</span>
-        </footer>
+        <footer>vértice. <span>Compras e financeiro em equilíbrio.</span></footer>
       </section>
       <section id="settings-area" hidden>
         <div class="page-heading">
           <div>
-            <div class="eyebrow">VÉRTICE · PREVIEW</div>
+            <div class="eyebrow">VÉRTICE</div>
             <h1>Configurações</h1>
-            <p>Os dados deste ambiente são independentes do seu aplicativo oficial.</p>
+            <p>Gerencie seu espaço, seus cadastros e seus backups.</p>
           </div>
         </div>
         <div class="main-grid">
           <section class="panel" id="workspace-settings">
             <h2>Seu espaço e o casal</h2>
-            <p class="workspace-demo-note">
-              Simulação local da preview. Não usa contas Google reais, não envia convites e não
-              compartilha dados pela internet. Use os perfis fictícios abaixo para testar.
-            </p>
             <div id="workspace-settings-content"></div>
             <button class="secondary" id="workspace-recovery" hidden>
               Revisar alterações pendentes
             </button>
-            <details class="workspace-demo-tools">
-              <summary>Testar com outra pessoa</summary>
-              <label>Conta da demonstração<select id="workspace-demo-actor"></select></label
-              ><label class="check-label"
-                ><input id="workspace-demo-offline" type="checkbox" />Simular aparelho sem
-                internet</label
-              ><button class="text-button" id="workspace-demo-license">
-                Simular licença inativa / reativar
-              </button>
-            </details>
           </section>
           <section class="panel">
             <h2>Categorias financeiras</h2>
             <p class="panel-subtitle">
-              Padrões da planilha, com liberdade para criar, renomear e arquivar.
+              Crie, renomeie e arquive categorias sem perder o histórico.
             </p>
             <button class="secondary" data-catalog="categories">Gerenciar categorias</button>
           </section>
@@ -173,7 +141,7 @@
           </section>
           <section class="panel">
             <h2>Dados das compras</h2>
-            <p class="panel-subtitle">Exporte e restaure as listas criadas neste preview.</p>
+            <p class="panel-subtitle">Exporte suas listas ou restaure um backup no espaço ativo.</p>
             <button class="secondary" id="shopping-settings">Abrir dados das compras</button>
           </section>
           <section class="panel">
@@ -190,14 +158,6 @@
             </div>
             <input id="finance-backup-file" type="file" accept=".json,application/json" hidden />
             <p id="finance-backup-status" role="status" class="muted"></p>
-          </section>
-          <section class="panel">
-            <h2>Exemplos do financeiro</h2>
-            <p class="panel-subtitle">
-              Restaure as receitas, despesas, limites e metas de exemplo. Isso não altera as
-              compras.
-            </p>
-            <button class="secondary" id="finance-reset">Restaurar financeiro de exemplo</button>
           </section>
         </div>
       </section>
@@ -223,12 +183,11 @@
         ><button data-area="finance">
           <span>◫</span><span>Financeiro<small>Seu dinheiro em equilíbrio</small></span></button
         ><button data-area="settings">
-          <span>⚙</span><span>Configurações<small>Dados deste preview</small></span>
+          <span>⚙</span><span>Configurações<small>Conta, cadastros e backups</small></span>
         </button>
       </nav>
       <div class="drawer-footer">
-        <span class="preview">PREVIEW</span>
-        <p>Compras e financeiro no mesmo Vértice.<br />Explore com dados de demonstração.</p>
+        <p>Compras e financeiro no mesmo Vértice.</p>
       </div>
     </dialog>
     <dialog id="financial-dialog"><form id="financial-form"></form></dialog>

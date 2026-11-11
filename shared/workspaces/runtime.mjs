@@ -41,9 +41,7 @@ export function workspaceEnvironment() {
 async function initialize() {
   const environment = await workspaceEnvironment();
   if (!environment.configured)
-    throw Error(
-      'A homologação autenticada ainda não foi configurada. A demonstração local continua disponível no endereço principal da preview.',
-    );
+    throw Error('Não foi possível conectar sua conta. Tente novamente em instantes.');
   if (!environment.actor) throw Error('Entre com Google para abrir ou aceitar um espaço.');
   const { actor, transport } = environment;
   const spacesKey = `vertice_spaces_${environment.project}_${actor.uid}`;

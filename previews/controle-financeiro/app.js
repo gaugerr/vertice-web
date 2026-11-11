@@ -2,7 +2,6 @@ import { openPreviewWorkspace, WorkspaceFinanceStore } from './workspaces.js';
 import './workspace-ui.mjs';
 import {
   cents,
-  initialState,
   monthlyRows,
   fixedRows,
   totals,
@@ -389,6 +388,13 @@ function render() {
   }
   if (view === 'overview')
     $('#content').innerHTML =
+      (state.entries.length || state.fixedAccounts.length || state.goals.length
+        ? ''
+        : panel(
+            'Comece pelo seu primeiro lançamento',
+            'Registre uma receita ou despesa para acompanhar seu mês.',
+            '<button class="primary" data-new-entry>＋ Novo lançamento</button>',
+          )) +
       stats() +
       oldPending() +
       monthComparison() +
@@ -625,7 +631,7 @@ $('#financial-form').addEventListener('submit', async (e) => {
       $('#finance-backup-status').textContent =
         'Backup restaurado. A cópia anterior está disponível para download.';
       $('#export-before-restore').hidden = false;
-      toast('Financeiro restaurado neste navegador.');
+      toast('Backup restaurado. Acompanhe o envio na sincronização.');
       return;
     }
     await transact((s) => {
@@ -687,7 +693,7 @@ $('#financial-form').addEventListener('submit', async (e) => {
           amount: cents(get('amount')),
           date: get('date'),
         });
-    }, 'Salvo neste navegador.');
+    }, 'Salvo. Acompanhe o envio na sincronização.');
     $('#financial-dialog').close();
   } catch (error) {
     $('#financial-error').textContent = error.message;
@@ -726,26 +732,6 @@ function changeMonth(n) {
     render();
   }
 }
-$('#reset').onclick = async () => {
-  if (loadError) {
-    toast('Resolva a leitura dos dados antes de restaurar exemplos.');
-    return;
-  }
-  if (
-    confirm(
-      'Restaurar o financeiro de exemplo? Isso remove os lançamentos, cadastros e contas fixas deste preview. As compras não serão alteradas.',
-    )
-  )
-    try {
-      await transact((s) => {
-        const initial = initialState();
-        for (const k of Object.keys(s)) if (k !== 'revision') delete s[k];
-        Object.assign(s, initial);
-      }, 'Exemplos financeiros restaurados.');
-    } catch (error) {
-      toast(error.message);
-    }
-};
 document.addEventListener('input', (e) => {
   if (e.target.id === 'search') {
     filters.query = e.target.value;
@@ -820,6 +806,7 @@ document.addEventListener('click', async (e) => {
       await transact((s) => {
         s.entries = s.entries.filter((r) => r.id !== b.dataset.entryDelete);
       }, 'Lançamento excluído.');
+    if (b.hasAttribute('data-new-entry')) openEntry();
     if (b.hasAttribute('data-new-fixed')) openFixed();
     if (b.dataset.fixedAction) {
       const id = b.dataset.id,

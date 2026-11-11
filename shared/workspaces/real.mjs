@@ -57,7 +57,7 @@ export async function stagingEnvironment() {
   const code = new URL(location.href).searchParams.get('code');
   if (code) {
     const { error } = await client.auth.exchangeCodeForSession(code);
-    if (error) throw Error('Não foi possível concluir o login de homologação.');
+    if (error) throw Error('Não foi possível concluir o login com Google.');
     localStorage.removeItem('vertice_workspace_signed_out');
     const u = new URL(location.href);
     u.searchParams.delete('code');

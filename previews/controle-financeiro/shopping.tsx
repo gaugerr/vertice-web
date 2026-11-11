@@ -79,9 +79,9 @@ async function boot() {
       <>
         <BackLink to="/">Minhas listas</BackLink>
         <div className="page-heading">
-          <p className="eyebrow">DADOS DO PREVIEW</p>
-          <h1>Suas compras de teste</h1>
-          <p>Exporte e restaure somente as listas deste ambiente de demonstração.</p>
+          <p className="eyebrow">DADOS DAS COMPRAS</p>
+          <h1>Backup das suas compras</h1>
+          <p>Exporte suas listas ou restaure um backup no espaço ativo.</p>
         </div>
         <BackupPanel />
       </>
@@ -106,7 +106,7 @@ async function boot() {
     })
     .catch(() => {
       document.getElementById('root')!.textContent =
-        'Não foi possível abrir as compras de demonstração. Seus registros foram preservados. Tente reabrir o preview.';
+        'Não foi possível abrir suas compras. Seus registros foram preservados. Tente atualizar a página.';
     });
   window.addEventListener('message', (event) => {
     if (event.origin !== window.location.origin || event.source !== window.parent) return;
