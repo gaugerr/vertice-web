@@ -1,3 +1,4 @@
+import { validateLedger } from './finance-ledger.mjs';
 // Pure financial rules. No browser, storage or official app dependencies.
 export const MAX_AMOUNT = 9_999_999_999;
 export const expenseNames = [
@@ -380,7 +381,12 @@ export function monthlyRows(s, month) {
     ...fixedRows(s, month),
   ].sort((a, b) => b.date.localeCompare(a.date) || a.id.localeCompare(b.id));
 }
-export function payFixed(s, id, month, { date, amount, observation: note = '', settle = false }) {
+export function payFixed(
+  s,
+  id,
+  month,
+  { date, amount, observation: note = '', settle = false, walletId = null },
+) {
   const row = fixedRows(s, month).find((r) => r.accountId === id);
   if (!row || row.paid) throw Error('Esta competência não está disponível para pagamento.');
   if (!validDate(date)) throw Error('Informe a data real do pagamento.');
@@ -396,7 +402,10 @@ export function payFixed(s, id, month, { date, amount, observation: note = '', s
     amount: total,
     settled: settle || total >= row.amount,
     snapshot: old ? { ...old.snapshot, observation: note } : { ...row, observation: note },
-    history: [...(old?.history || []), { date, amount, observation: note }],
+    history: [
+      ...(old?.history || []),
+      { date, amount, observation: note, ...(walletId ? { walletId } : {}) },
+    ],
   };
   s.occurrences[key] = record;
 }
@@ -490,13 +499,20 @@ export function overviewData(s, month) {
     });
   return {
     budget: {
-      defined: Object.keys(limits).length > 0,
-      limit,
-      used,
-      remaining: limit - used,
-      outside: expenses
-        .filter((r) => limits[r.categoryId] == null)
-        .reduce((sum, r) => sum + r.amount, 0),
+      defined: s.monthlyLimits?.[month] != null || Object.keys(limits).length > 0,
+      scope: s.monthlyLimits?.[month] != null ? 'global' : 'categories',
+      limit: s.monthlyLimits?.[month] ?? limit,
+      used:
+        s.monthlyLimits?.[month] != null ? expenses.reduce((sum, e) => sum + e.amount, 0) : used,
+      remaining:
+        (s.monthlyLimits?.[month] ?? limit) -
+        (s.monthlyLimits?.[month] != null ? expenses.reduce((sum, e) => sum + e.amount, 0) : used),
+      outside:
+        s.monthlyLimits?.[month] != null
+          ? 0
+          : expenses
+              .filter((r) => limits[r.categoryId] == null)
+              .reduce((sum, r) => sum + r.amount, 0),
     },
     categories: grouped,
     otherIds,
@@ -530,6 +546,10 @@ export function copyPreviousBudget(s, month) {
   if (!prev) throw Error('Não há mês anterior disponível.');
   s.monthlyBudgets ??= {};
   s.monthlyBudgets[month] = { ...budgetsFor(s, prev) };
+  if (s.monthlyLimits) {
+    if (s.monthlyLimits[prev] != null) s.monthlyLimits[month] = s.monthlyLimits[prev];
+    else delete s.monthlyLimits[month];
+  }
 }
 export function overdueRows(s, referenceMonth, asOf) {
   if (!validMonth(referenceMonth) || !validDate(asOf)) throw Error('Data inválida.');
@@ -769,13 +789,14 @@ export function validateState(s) {
       if (sum !== g.current) throw Error('Histórico diverge do valor guardado.');
     }
   }
+  validateLedger(s);
   return s;
 }
 export function correctPayment(
   s,
   id,
   month,
-  { date, amount, observation: note = '', settle = false },
+  { date, amount, observation: note = '', settle = false, walletId = null },
 ) {
   const payment = s.occurrences[id + ':' + month]?.payment;
   if (!payment) throw Error('Pagamento não encontrado.');
@@ -785,7 +806,13 @@ export function correctPayment(
   const history = payment.history || [
     { date: payment.date, amount: payment.amount, observation: payment.snapshot.observation },
   ];
-  history.push({ date, amount: amount - payment.amount, observation: note });
+  const adjustedWallet = walletId ?? history.at(-1)?.walletId;
+  history.push({
+    date,
+    amount: amount - payment.amount,
+    observation: note,
+    ...(adjustedWallet ? { walletId: adjustedWallet } : {}),
+  });
   payment.history = history;
   payment.settled = settle || amount >= payment.snapshot.amount;
   payment.date = date;

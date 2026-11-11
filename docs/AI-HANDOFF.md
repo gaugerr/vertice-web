@@ -3,6 +3,57 @@
 Atualizado em 11/11/2026 (America/Sao_Paulo). Registro de estado observado, não
 substitui consultas atuais aos serviços. Começar por este arquivo e AGENTS.md.
 
+## Registro rápido, contas, cartões e séries — 11/11/2026
+
+**Preparado na branch `feat/finance-ledger`, ainda não ativado na preview.** A
+revisão automática rejeitou aplicar a migração ao Supabase hospedado por falta de
+autorização explícita para a mudança persistente no banco real e no comando
+compartilhado. Nenhuma alteração foi aplicada ao banco ou à Edge Function.
+Aguardar autorização do proprietário para a migração e atualização somente de
+`workspaces`, antes de integrar esta branch à `preview/controle-financeiro`.
+A implementação usa PostgreSQL descartável sem rede e dados sintéticos nos testes.
+
+O proprietário autorizou estes recursos nesta etapa, substituindo a restrição
+anterior de não criar cartões/parcelamentos. Formulário comum começa com valor,
+descrição e categoria sugerida; tipo, data e pagamento usam histórico/dia civil.
+Data, conta/cartão, frequência e observação ficam em detalhes. Não prometer dez
+segundos para qualquer pessoa/rede: o teste automatizado valida o caminho de dois
+campos sem seleções obrigatórias adicionais. Busca ignora acentos.
+
+`finance-ledger.mjs`: contas manuais com saldo inicial (não receita), transferências
+fora de receitas/despesas, cartões com fechamento/vencimento, parcelas e repetições
+mensais de 2 a 120 meses. Parcelas distribuem centavos exatos; somente a primeira
+pode começar paga. Receita recorrente é uma série finita explícita; contas fixas
+continuam com a recorrência mensal existente. Edição altera uma ocorrência;
+encerrar série preserva pagamentos e faturas já parcialmente pagas.
+
+Compra no dia do fechamento entra na fatura seguinte, conforme escolha do usuário.
+As competências seguem o vencimento de cada fatura, não o mês do pagamento bancário.
+Pagamentos parciais de fatura geram baixas vinculadas às compras, sem novo lançamento
+de despesa; a conta é debitada uma vez pelo movimento de fatura. Alocação FIFO
+determinística. Reverter pagamentos precede edição de compras de fatura já paga.
+Saldos até hoje incluem apenas movimentos vinculados, posteriores ao saldo inicial.
+Não há Open Finance, conciliação automática, rotativo, cálculo de juros ou importação
+bancária. Não inferir dívidas/despesas antigas de um meio genérico Cartão de Crédito.
+
+Orçamento admite limite total mensal independente das categorias, inclusive zero,
+e cópia para o mês seguinte. Metas existentes continuam independentes; guardar uma
+meta não cria débito bancário automaticamente.
+
+Migração `20261111223526_finance_accounts_cards_series`: adiciona `finance_wallets`,
+`finance_cards`, `finance_moves`, metadata `finance_entries.extra`, vínculos de baixa
+em `finance_payments` e `finance_budget_months.total_limit_cents`. RLS por espaço e
+escrita pelo comando do serviço. `workspace_command` mantém assinatura, envolve o
+comando anterior em validação, e protege dados novos contra clientes antigos.
+Operações novas enviam `ledger_version: 2`; filas antigas sem dados novos continuam
+válidas. Não recriar tabelas, reimportar exemplos ou reaplicar a migração. Sessões,
+Auth/licenças/Cakto e jobs não foram alterados.
+
+Backups mantêm compatibilidade com o formato existente e incluem os campos novos.
+Testes críticos em `finance-ledger.test.mjs`, `shared/workspaces/ledger-postgres.test.mjs`
+e `ledger-browser-check.mjs`: competências/centavos, repetição, transferências,
+fatura parcial/reversão, saldos, duplicidade, concorrência e fluxo mobile/backup.
+
 ## Navegação financeira em cinco acessos — 11/11/2026
 
 Inventário anterior: Resumo, Lançamentos, Orçamento, Contas Fixas, Metas,
@@ -124,7 +175,7 @@ voltem a pendentes. Regressão PostgreSQL desse commit aprovada na CI.
 
 ## Decisões do produto
 
-Manter facilidade de uso; não adicionar cartões/faturas/parcelamentos nesta fase.
+Manter facilidade de uso; contas/cartões/parcelamentos manuais foram autorizados na atualização de 11/11/2026, conforme o registro acima.
 Menu de áreas troca Compras/Financeiro; abas inferiores pertencem ao Financeiro.
 Categorias e formas de pagamento editáveis, contas fixas versionadas, pagamentos
 parciais/correções, orçamento mensal, metas/aportes, resumo e backups já existem

@@ -24,6 +24,10 @@ const actions = new Set([
   'copy',
 ]);
 const codes: Record<string, [number, string]> = {
+  client_update_required: [
+    409,
+    'Atualize a página para continuar com os novos recursos financeiros. Seus dados foram preservados.',
+  ],
   removed: [403, 'Você não participa mais deste espaço.'],
   forbidden: [403, 'Este espaço está disponível somente para consulta.'],
   generation: [403, 'Sua participação mudou. Reabra o espaço.'],
