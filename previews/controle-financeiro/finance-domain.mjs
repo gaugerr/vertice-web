@@ -444,6 +444,23 @@ export function totals(rows) {
     throw Error('O total ultrapassou o limite seguro.');
   return values;
 }
+// Investments are part of paid expenses, never an additional balance deduction.
+export function summaryTotals(s, month) {
+  const rows = monthlyRows(s, month);
+  const investmentCategories = new Set(
+    s.categories
+      .filter(
+        (c) =>
+          c.type === 'expense' &&
+          (c.id === 'D15' || normalize(c.name) === normalize('Reserva e Investimentos')),
+      )
+      .map((c) => c.id),
+  );
+  const invested = rows
+    .filter((r) => r.type === 'expense' && investmentCategories.has(r.categoryId))
+    .reduce((sum, r) => sum + (r.paidAmount ?? (r.paid ? r.amount : 0)), 0);
+  return { ...totals(rows), invested };
+}
 export function adjacentMonth(month, step) {
   if (!validMonth(month) || !Number.isInteger(step)) throw Error('Mês inválido.');
   const d = new Date(month + '-15T12:00:00Z');

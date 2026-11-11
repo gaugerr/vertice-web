@@ -5,6 +5,7 @@ import {
   monthlyRows,
   fixedRows,
   totals,
+  summaryTotals,
   saveCatalog,
   toggleCatalog,
   saveEntry,
@@ -75,10 +76,7 @@ const filters = {
   type: 'all',
 };
 const screens = {
-  overview: [
-    'Seu dinheiro, em equilíbrio.',
-    'Entradas, saídas e contas do mês, sem perder o que vem pela frente.',
-  ],
+  overview: ['Resumo', ''],
   transactions: [
     'Cada movimento conta.',
     'Lançamentos avulsos e contas fixas, juntos e sem duplicidade.',
@@ -135,6 +133,36 @@ function stats() {
     .join(
       '',
     )}</div><p class="competence-note">Por competência · uma conta paga em outro mês continua no mês de referência. O saldo do período não é um extrato bancário.</p>`;
+}
+function overviewBalance() {
+  const t = summaryTotals(state, month);
+  return `<section class="overview-balance" aria-label="Resumo financeiro do mês"><div class="overview-total"><span>Saldo restante</span><strong class="${t.balance < 0 ? 'pink' : ''}">${money(t.balance)}</strong><small>Entradas menos saídas confirmadas no mês</small></div><div class="overview-indicators">${[
+    ['Entradas', t.income, 'green', 'Receitas recebidas'],
+    ['Saídas', t.expense, 'pink', 'Inclui investimentos'],
+    ['Saldo investido', t.invested, 'purple', 'Neste mês'],
+  ]
+    .map(
+      ([label, amount, color, note]) =>
+        `<div><span>${label}</span><strong class="${color}">${money(amount)}</strong><small>${note}</small></div>`,
+    )
+    .join('')}</div></section>`;
+}
+function recentTransactions() {
+  const recent = rows().slice(0, 5);
+  return `<section class="recent-transactions" aria-labelledby="recent-title"><div class="recent-heading"><h2 id="recent-title">Últimos lançamentos</h2>${to('Ver todos', 'transactions')}</div>${
+    recent.length
+      ? `<ul>${recent
+          .map((e) => {
+            const status = e.paid
+              ? ''
+              : e.paidAmount
+                ? ` · Parcial: pago ${money(e.paidAmount)}`
+                : ' · Pendente';
+            return `<li><div><strong>${esc(e.name)}</strong><small>${dateName(e.date)}${status}</small></div><span class="${e.type === 'income' ? 'green' : 'pink'}">${e.type === 'income' ? '+' : '−'} ${money(e.amount)}</span></li>`;
+          })
+          .join('')}</ul>`
+      : `<div class="empty"><p>Comece pelo seu primeiro lançamento</p><button class="text-button" data-new-entry>＋ Novo lançamento</button></div>`
+  }</section>`;
 }
 function empty(message) {
   return `<div class="empty">${message}</div>`;
@@ -365,7 +393,9 @@ function errorPage() {
 }
 function render() {
   window.dispatchEvent(new CustomEvent('vertice:finance-view', { detail: { view } }));
+  $('#finance-area').dataset.view = view;
   $('#page-title').textContent = screens[view][0];
+  $('#page-subtitle').hidden = !screens[view][1];
   $('#page-subtitle').textContent = screens[view][1];
   $('#month').textContent = monthName();
   $('#finance-area .toolbar').hidden = view === 'goals';
@@ -388,27 +418,11 @@ function render() {
   }
   if (view === 'overview')
     $('#content').innerHTML =
-      (state.entries.length || state.fixedAccounts.length || state.goals.length
-        ? ''
-        : panel(
-            'Comece pelo seu primeiro lançamento',
-            'Registre uma receita ou despesa para acompanhar seu mês.',
-            '<button class="primary" data-new-entry>＋ Novo lançamento</button>',
-          )) +
-      stats() +
+      overviewBalance() +
+      recentTransactions() +
       oldPending() +
       monthComparison() +
-      `<div class="main-grid">${panel('Seu mês em movimento', 'Entradas e saídas confirmadas por competência.', chart())}${panel('Para onde vai seu dinheiro', 'Despesas pagas e previstas, incluindo contas fixas.', distribution())}${panel(
-        'Últimos lançamentos',
-        'Uma única visão para avulsos e recorrentes.',
-        rows().length
-          ? rows()
-              .slice(0, 5)
-              .map((e) => row(e))
-              .join('')
-          : empty('Nenhum lançamento neste mês.'),
-        to('Ver todos', 'transactions'),
-      )}${panel('Contas para lembrar', 'Acompanhe o que ainda está pendente.', bills(), to('Contas fixas', 'fixed'))}${panel('Seu orçamento', 'Limites para comprar com mais clareza.', budgetRows(true), to('Planejar', 'budget'))}${panel('Um plano mais perto', 'Seus objetivos.', goals(true), to('Ver metas', 'goals'))}</div>`;
+      `<div class="main-grid">${panel('Seu mês em movimento', 'Entradas e saídas confirmadas por competência.', chart())}${panel('Para onde vai seu dinheiro', 'Despesas pagas e previstas, incluindo contas fixas.', distribution())}${panel('Contas para lembrar', 'Acompanhe o que ainda está pendente.', bills(), to('Contas fixas', 'fixed'))}${panel('Seu orçamento', 'Limites para comprar com mais clareza.', budgetRows(true), to('Planejar', 'budget'))}${panel('Um plano mais perto', 'Seus objetivos.', goals(true), to('Ver metas', 'goals'))}</div>`;
   else if (view === 'transactions') {
     $('#content').innerHTML =
       stats() +

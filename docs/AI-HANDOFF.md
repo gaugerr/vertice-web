@@ -3,6 +3,26 @@
 Atualizado em 09/11/2026 (America/Sao_Paulo). Registro de estado observado, não
 substitui consultas atuais aos serviços. Começar por este arquivo e AGENTS.md.
 
+## Resumo minimalista — 11/11/2026
+
+Resumo destaca Saldo restante (recebidos menos pagos), com Entradas, Saídas e
+Saldo investido compactos. Investido é o valor efetivamente pago no mês em
+Reserva e Investimentos (ID padrão D15 preservado ao renomear/arquivar; também
+reconhece o nome exato de uma categoria importada). Inclui parciais pela
+competência, não soma metas e não desconta investimentos novamente do saldo.
+Não representa patrimônio acumulado. Regras em `summaryTotals` no domínio.
+
+Os cinco últimos lançamentos do mês vêm de `monthlyRows`, em ordem decrescente
+de data de referência, logo abaixo dos indicadores. Pendências/parciais ficam
+identificadas; Ver todos abre Lançamentos. Gráficos, comparação mensal, orçamento,
+contas pendentes e metas continuam abaixo. As outras telas mantêm os indicadores
+anteriores. Sem migração ou alteração dos dados persistidos.
+
+Validação: 31 testes financeiros, 28 de sincronização, build/lint/formatação;
+`shared/workspaces/summary-browser-check.mjs` verifica os cálculos visíveis,
+lista de cinco, navegação, troca de mês, persistência e larguras 280–1440.
+O fluxo existente de interface/backups/pagamentos também foi validado.
+
 ## Interface para o usuário — 11/11/2026
 
 A interface da branch `preview/controle-financeiro` não mostra mais badges, avisos,

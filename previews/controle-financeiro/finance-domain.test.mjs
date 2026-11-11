@@ -11,6 +11,7 @@ import {
   monthlyRows,
   fixedRows,
   totals,
+  summaryTotals,
   payFixed,
   correctPayment,
   undoFixed,
@@ -359,4 +360,72 @@ test('primeiro acesso começa vazio e não recria exemplos ao reabrir', () => {
     assert.deepEqual(state.goals, []);
     assert.deepEqual(state.occurrences, {});
   }
+});
+
+test('resumo mantém totais canônicos e investimento confirmado por competência, sem duplicar metas', () => {
+  const s = emptyState();
+  const entry = (id, type, amount, categoryId, paid, date = '2026-11-10') =>
+    saveEntry(s, {
+      id,
+      name: id,
+      type,
+      amount,
+      categoryId,
+      paid,
+      date,
+      paymentMethodId: 'P2',
+      observation: '',
+    });
+  entry('salario', 'income', 300000, 'R01', true);
+  entry('pendente', 'income', 50000, 'R01', false);
+  entry('mercado', 'expense', 20000, 'D03', true);
+  entry('investimento', 'expense', 50000, 'D15', true);
+  entry('investimento-pendente', 'expense', 10000, 'D15', false);
+  entry('mes-anterior', 'expense', 90000, 'D15', true, '2026-10-10');
+  saveFixed(s, {
+    id: 'reserva',
+    name: 'Aporte mensal',
+    startMonth: '2026-11',
+    from: '2026-11',
+    endMonth: null,
+    amount: 20000,
+    dueDay: 5,
+    categoryId: 'D15',
+    paymentMethodId: 'P2',
+  });
+  payFixed(s, 'reserva', '2026-11', { amount: 5000, date: '2026-12-01' });
+  s.goals.push({ id: 'goal', name: 'Reserva', target: 1000000, current: 900000, subtitle: '' });
+  const summary = summaryTotals(s, '2026-11');
+  assert.equal(summary.income, 300000);
+  assert.equal(summary.expense, 75000);
+  assert.equal(summary.balance, 225000);
+  assert.equal(summary.invested, 55000);
+  assert.deepEqual(
+    Object.fromEntries(Object.entries(summary).filter(([key]) => key !== 'invested')),
+    totals(monthlyRows(s, '2026-11')),
+  );
+  const category = s.categories.find((c) => c.id === 'D15');
+  category.name = 'Minha reserva';
+  category.active = false;
+  assert.equal(summaryTotals(s, '2026-11').invested, 55000);
+  undoFixed(s, 'reserva', '2026-11');
+  assert.equal(summaryTotals(s, '2026-11').invested, 50000);
+});
+
+test('resumo vazio e saldo negativo usam apenas valores confirmados', () => {
+  const s = emptyState();
+  assert.equal(summaryTotals(s, '2026-11').invested, 0);
+  assert.equal(summaryTotals(s, '2026-11').balance, 0);
+  saveEntry(s, {
+    id: 'despesa',
+    name: 'Despesa',
+    type: 'expense',
+    amount: 100,
+    categoryId: 'D01',
+    paid: true,
+    date: '2026-11-10',
+    paymentMethodId: 'P2',
+    observation: '',
+  });
+  assert.equal(summaryTotals(s, '2026-11').balance, -100);
 });
