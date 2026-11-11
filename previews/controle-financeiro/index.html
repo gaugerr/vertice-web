@@ -117,6 +117,10 @@
             ><button id="next-month" aria-label="Próximo mês">›</button>
           </div>
         </div>
+        <nav id="planning-tabs" class="planning-tabs" aria-label="Planejamento" hidden>
+          <button data-view="budget">Orçamentos</button
+          ><button data-view="fixed">Contas fixas</button><button data-view="goals">Metas</button>
+        </nav>
         <div id="content" aria-live="polite"></div>
         <footer>vértice. <span>Compras e financeiro em equilíbrio.</span></footer>
       </section>
@@ -174,11 +178,11 @@
       </section>
     </main>
     <nav hidden id="finance-tabs" class="mobile-nav" aria-label="Navegação móvel">
-      <button data-view="overview" class="active">◫<small>Resumo</small></button
-      ><button data-view="transactions">⇄<small>Lançamentos</small></button
-      ><button data-view="fixed">▣<small>Contas Fixas</small></button
-      ><button data-view="budget">▤<small>Orçamento</small></button
-      ><button data-view="goals">◎<small>Metas</small></button>
+      <button data-view="overview" class="active">⌂<small>Início</small></button>
+      <button data-view="transactions">⇄<small>Lançamentos</small></button>
+      <button data-view="planning">▤<small>Planejamento</small></button>
+      <button data-view="analysis">↗<small>Análises</small></button>
+      <button data-view="more">···<small>Mais</small></button>
     </nav>
     <dialog id="app-menu" class="area-drawer">
       <div class="drawer-head">
@@ -190,14 +194,8 @@
       <nav aria-label="Áreas do Vértice">
         <button data-area="shopping"><span>🛒</span><span>Compras</span></button
         ><button data-area="finance"><span>◫</span><span>Financeiro</span></button
-        ><button data-area="settings"><span>⚙</span><span>Configurações</span></button>
-      </nav>
-      <nav class="finance-extra-nav" aria-label="Mais do financeiro">
-        <button data-area="finance" data-finance-view="analysis">
-          <span>↗</span><span>Análises</span>
-        </button>
-        <button data-area="finance" data-finance-view="wealth">
-          <span>◇</span><span>Patrimônio</span>
+        ><button data-area="finance" data-finance-view="more">
+          <span>···</span><span>Mais</span>
         </button>
       </nav>
       <div class="workspace-bar">

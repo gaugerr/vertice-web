@@ -1,3 +1,4 @@
+import { planningViews, financeGroup } from './finance-navigation.mjs';
 import { openPreviewWorkspace, WorkspaceFinanceStore } from './workspaces.js';
 import './workspace-ui.mjs';
 import {
@@ -67,7 +68,8 @@ try {
 let view = 'overview',
   month = today().slice(0, 7),
   editing = null,
-  catalogKind = 'categories';
+  catalogKind = 'categories',
+  planningView = 'budget';
 const filters = {
   query: '',
   category: 'all',
@@ -77,17 +79,15 @@ const filters = {
   type: 'all',
 };
 const screens = {
-  overview: ['Resumo', ''],
+  overview: ['Início', ''],
+  more: ['Mais', ''],
   transactions: [
     'Cada movimento conta.',
     'Lançamentos avulsos e contas fixas, juntos e sem duplicidade.',
   ],
-  fixed: [
-    'Contas fixas, mês a mês.',
-    'Cadastre uma vez. Acompanhe cada competência e seu pagamento.',
-  ],
-  budget: ['Um plano para o seu mês.', 'Limites por categoria para acompanhar suas escolhas.'],
-  goals: ['Espaço para os seus planos.', 'Pequenos passos para os objetivos que fazem sentido.'],
+  fixed: ['Planejamento', ''],
+  budget: ['Planejamento', ''],
+  goals: ['Planejamento', ''],
   analysis: ['Análises', 'Acompanhe a evolução das entradas e saídas.'],
   wealth: ['Patrimônio', 'Investimentos e metas, sem estimar seu patrimônio total.'],
 };
@@ -139,7 +139,7 @@ function stats() {
 }
 function overviewBalance() {
   const t = totals(rows());
-  return `<section class="overview-balance" aria-label="Saldos e movimentação mensal"><div class="available-balance"><span>Saldo disponível</span><strong>Não informado</strong><small>Saldo real não cadastrado.</small></div><div class="monthly-result"><span>Resultado do mês</span><strong class="${t.balance < 0 ? 'pink' : 'green'}">${money(t.balance)}</strong><small>Recebidos menos pagos · não é saldo bancário</small></div><div class="overview-indicators">${[
+  return `<section class="overview-balance" aria-label="Saldos e movimentação mensal"><div class="monthly-result"><span>Resultado do mês</span><strong class="${t.balance < 0 ? 'pink' : 'green'}">${money(t.balance)}</strong><small>Recebidos menos pagos · não é saldo bancário</small></div><div class="overview-indicators">${[
     ['Entradas', t.income, 'green'],
     ['Saídas', t.expense, 'pink'],
   ]
@@ -419,7 +419,15 @@ function render() {
   $('#page-subtitle').hidden = !screens[view][1];
   $('#page-subtitle').textContent = screens[view][1];
   $('#month').textContent = monthName();
-  $('#finance-area .toolbar').hidden = view === 'goals';
+  $('#finance-area .toolbar').hidden = ['goals', 'more'].includes(view);
+  $('#new-entry').hidden = view === 'more';
+  if (planningViews.includes(view)) planningView = view;
+  $('#planning-tabs').hidden = !planningViews.includes(view);
+  document.querySelectorAll('#planning-tabs [data-view]').forEach((b) => {
+    const active = b.dataset.view === view;
+    b.classList.toggle('active', active);
+    b.setAttribute('aria-pressed', String(active));
+  });
   $('#new-entry').textContent =
     view === 'fixed'
       ? '＋ Nova conta fixa'
@@ -429,8 +437,8 @@ function render() {
   $('#new-entry').disabled = Boolean(loadError);
   document.querySelectorAll('[data-catalog]').forEach((b) => (b.disabled = Boolean(loadError)));
   document.querySelectorAll('#finance-tabs [data-view]').forEach((b) => {
-    b.classList.toggle('active', b.dataset.view === view);
-    if (b.dataset.view === view) b.setAttribute('aria-current', 'page');
+    b.classList.toggle('active', b.dataset.view === financeGroup(view));
+    if (b.dataset.view === financeGroup(view)) b.setAttribute('aria-current', 'page');
     else b.removeAttribute('aria-current');
   });
   if (loadError) {
@@ -454,8 +462,7 @@ function render() {
             : ''),
         to('Ver todas', 'transactions'),
       ) +
-      categorySpending() +
-      monthComparison();
+      categorySpending();
   else if (view === 'transactions') {
     $('#content').innerHTML =
       stats() +
@@ -469,13 +476,17 @@ function render() {
   else if (view === 'budget')
     $('#content').innerHTML =
       stats() +
-      `<div class="main-grid">${panel('Orçamento por categoria', 'Limites de ' + monthName().toLowerCase() + '. Alterações valem somente para este mês.', budgetRows(), '<button class="text-button" id="copy-budget">Copiar mês anterior</button>')}${panel('Visão do mês', 'Despesas pagas e previstas, sem duplicar recorrências.', distribution())}</div>`;
+      `<div class="main-grid">${panel('Orçamento por categoria', 'Limites de ' + monthName().toLowerCase() + '. Alterações valem somente para este mês.', budgetRows(), '<button class="text-button" id="copy-budget">Copiar mês anterior</button>')}</div>`;
   else if (view === 'analysis')
-    $('#content').innerHTML = panel(
-      'Evolução semanal',
-      'Entradas e saídas confirmadas por semana.',
-      chart(),
-    );
+    $('#content').innerHTML =
+      stats() +
+      panel('Evolução semanal', 'Entradas e saídas confirmadas por semana.', chart()) +
+      panel('Distribuição das despesas', 'Despesas pagas e previstas do mês.', distribution()) +
+      categorySpending() +
+      monthComparison();
+  else if (view === 'more')
+    $('#content').innerHTML =
+      `<section class="panel more-links" aria-label="Mais opções do financeiro"><button data-settings-section="workspace-settings">Conta e compartilhamento <span>›</span></button><button data-catalog="methods">Formas de pagamento <span>›</span></button><button data-view="wealth">Patrimônio <span>›</span></button><button data-catalog="categories">Categorias <span>›</span></button><button data-settings-section="settings-area">Configurações e backups <span>›</span></button></section>`;
   else if (view === 'wealth')
     $('#content').innerHTML =
       panel(
@@ -486,8 +497,8 @@ function render() {
       panel(
         'Metas e valores guardados',
         'Os valores das metas são independentes dos lançamentos.',
-        goals(true),
-        to('Gerenciar metas', 'goals'),
+        '<p class="muted">Acompanhe seus valores guardados na aba Metas de Planejamento.</p>',
+        to('Ver metas', 'goals'),
       );
   else
     $('#content').innerHTML =
@@ -841,7 +852,7 @@ document.addEventListener('click', async (e) => {
       window.scrollTo({ top: 0, behavior: 'smooth' });
     }
     if (b.dataset.view) {
-      view = b.dataset.view;
+      view = b.dataset.view === 'planning' ? planningView : b.dataset.view;
       render();
       window.scrollTo({ top: 0, behavior: 'smooth' });
     }

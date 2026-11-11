@@ -23,7 +23,11 @@ import assert from 'node:assert/strict';
   const go = async (p, area) => {
     await ready(p);
     await p.getByRole('button', { name: 'Abrir menu de áreas' }).click();
-    await p.locator(`#app-menu nav[aria-label="Áreas do Vértice"] [data-area=${area}]`).click();
+    if (area === 'settings') {
+      await p.locator('[data-finance-view=more]').click();
+      await p.locator('[data-settings-section=settings-area]').click();
+    } else
+      await p.locator(`#app-menu nav[aria-label="Áreas do Vértice"] [data-area=${area}]`).click();
   };
   const save = async (p) => p.locator('#financial-form button[type=submit]').click();
   try {
@@ -153,7 +157,10 @@ import assert from 'node:assert/strict';
       await owner.setViewportSize({ width, height: 900 });
       await go(owner, 'finance');
       for (const view of ['overview', 'transactions', 'fixed', 'budget', 'goals']) {
-        await owner.locator(`#finance-tabs [data-view=${view}]`).click();
+        if (['fixed', 'budget', 'goals'].includes(view)) {
+          await owner.locator('#finance-tabs [data-view=planning]').click();
+          await owner.locator(`#planning-tabs [data-view=${view}]`).click();
+        } else await owner.locator(`#finance-tabs [data-view=${view}]`).click();
         assert(
           await owner.evaluate(() => document.documentElement.scrollWidth <= innerWidth),
           'overflow ' + width + ' ' + view,

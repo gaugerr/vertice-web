@@ -45,7 +45,8 @@ try {
       localStorage.setItem('vertice-finance-preview-v2', JSON.stringify(state));
   }, state);
   await p.goto((process.env.PREVIEW_URL ?? 'http://127.0.0.1:5199/') + '#financeiro/overview');
-  await p.locator('.available-balance strong').filter({ hasText: 'Não informado' }).waitFor();
+  await p.locator('.monthly-result').waitFor();
+  assert.equal(await p.locator('.available-balance').count(), 0);
   assert.match(await p.locator('.monthly-result').innerText(), /1.500,00/);
   assert.match(await p.locator('.summary-budget').innerText(), /Restam.*200,00/s);
   assert.equal(await p.locator('[role=progressbar]').getAttribute('aria-valuenow'), '80');
@@ -63,11 +64,10 @@ try {
   await p.locator('#finance-tabs [data-view=overview]').click();
   await p.locator('[data-category-history=__overview_others__]').click();
   assert.equal(await p.locator('#transaction-list .transaction').count(), 2);
-  await p.locator('#menu-toggle').click();
-  await p.locator('[data-finance-view=analysis]').click();
+  await p.locator('#finance-tabs [data-view=analysis]').click();
   await p.locator('.line-chart').waitFor();
-  await p.locator('#menu-toggle').click();
-  await p.locator('[data-finance-view=wealth]').click();
+  await p.locator('#finance-tabs [data-view=more]').click();
+  await p.locator('#content [data-view=wealth]').click();
   await p.getByRole('heading', { name: 'Investimentos registrados', exact: true }).waitFor();
   await p.locator('#finance-tabs [data-view=overview]').click();
   for (const width of [280, 390, 1440]) {

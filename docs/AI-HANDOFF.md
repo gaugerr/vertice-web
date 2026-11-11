@@ -3,6 +3,29 @@
 Atualizado em 11/11/2026 (America/Sao_Paulo). Registro de estado observado, não
 substitui consultas atuais aos serviços. Começar por este arquivo e AGENTS.md.
 
+## Navegação financeira em cinco acessos — 11/11/2026
+
+Inventário anterior: Resumo, Lançamentos, Orçamento, Contas Fixas, Metas,
+Análises, Patrimônio e Configurações. Não existem contas bancárias nem faturas de
+cartões; conta Google/compartilhamento e formas de pagamento são os recursos reais.
+
+Nova barra: Início, Lançamentos, Planejamento, Análises e Mais. Planejamento
+reutiliza Orçamentos, Contas fixas e Metas em abas internas, com os mesmos
+formulários. Análises concentra gráfico semanal, distribuição e comparação;
+Início mantém apenas resumos e os três valores (resultado mensal, entradas e
+saídas), sem bloco de saldo inicial/disponível não informado. Mais abre conta,
+formas de pagamento, patrimônio, categorias e configurações/backups existentes.
+Patrimônio aponta às metas em Planejamento sem replicar sua gestão.
+
+`finance-navigation.mjs` centraliza grupos e rotas. Canônicas: `home`,
+`transactions`, `planning/budget|fixed|goals`, `analysis`, `more`, `more/wealth`,
+após `#financeiro/`. Aliases antigos `overview`, `budget`, `fixed`, `goals`,
+`wealth`, `analysis` e `transactions` continuam funcionando; `#configuracoes`
+permanece. Voltar/Avançar usa histórico; renderizações de dados não empilham rotas.
+IDs das telas, formulários, bancos e backups são preservados. Sem migrações.
+Validação focada: teste do mapeamento de rotas, build/lint e navegador para cinco
+acessos, abas internas, cadastros/backups, histórico e aliases em 280/390/1440 px.
+
 ## Resumo reorganizado — 11/11/2026
 
 Substitui a apresentação minimalista anterior. Ordem: saldo disponível (Não

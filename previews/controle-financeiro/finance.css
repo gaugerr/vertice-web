@@ -721,3 +721,63 @@ textarea {
   min-height: 0;
   padding: 16px 0;
 }
+
+/* Three confirmed values; no bank balance or opening balance is inferred. */
+.overview-balance {
+  grid-template-columns: 1fr;
+}
+.monthly-result {
+  text-align: center;
+}
+.overview-indicators {
+  margin: 0;
+}
+.planning-tabs {
+  display: flex;
+  gap: 6px;
+  margin: 12px 0 20px;
+  padding: 5px;
+  background: #201a29;
+  border-radius: 10px;
+}
+.planning-tabs button {
+  flex: 1;
+  min-width: 0;
+  min-height: 44px;
+  padding: 10px 6px;
+  font-size: 12px;
+  color: #b5a9c4;
+  border-radius: 7px;
+  background: transparent;
+}
+.planning-tabs button.active {
+  background: #3b2b4e;
+  color: #eee6f9;
+}
+.more-links {
+  padding: 4px 18px;
+}
+.more-links button {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 12px;
+  width: 100%;
+  min-height: 56px;
+  padding: 15px 0;
+  background: transparent;
+  color: #eee6f9;
+  text-align: left;
+  font-size: 13px;
+}
+.more-links button + button {
+  border-top: 1px solid var(--border);
+}
+.more-links button span {
+  color: var(--purple);
+}
+@media (max-width: 360px) {
+  .planning-tabs button {
+    font-size: 10px;
+  }
+}

@@ -15,7 +15,13 @@ try {
     page.locator('html[data-workspace-ready=true]').waitFor({ state: 'attached' });
   const go = async (area) => {
     await page.getByRole('button', { name: 'Abrir menu de áreas' }).click();
-    await page.locator(`#app-menu nav[aria-label="Áreas do Vértice"] [data-area=${area}]`).click();
+    if (area === 'settings') {
+      await page.locator('[data-finance-view=more]').click();
+      await page.locator('[data-settings-section=settings-area]').click();
+    } else
+      await page
+        .locator(`#app-menu nav[aria-label="Áreas do Vértice"] [data-area=${area}]`)
+        .click();
   };
   const clean = async () => {
     assert.doesNotMatch(
@@ -39,7 +45,8 @@ try {
   await form.locator('[name=paymentMethodId]').selectOption('P2');
   await form.locator('[type=submit]').click();
   await page.getByText('Despesa preservada', { exact: true }).waitFor();
-  await page.locator('#finance-tabs [data-view=fixed]').click();
+  await page.locator('#finance-tabs [data-view=planning]').click();
+  await page.locator('#planning-tabs [data-view=fixed]').click();
   await page.locator('#new-entry').click();
   for (const [name, value] of Object.entries({ name: 'Aluguel', amount: '1226' }))
     await form.locator(`[name=${name}]`).fill(value);
@@ -81,12 +88,16 @@ try {
   await page.reload();
   await ready();
   await go('finance');
-  await page.locator('#finance-tabs [data-view=fixed]').click();
+  await page.locator('#finance-tabs [data-view=planning]').click();
+  await page.locator('#planning-tabs [data-view=fixed]').click();
   await page.getByRole('button', { name: 'Corrigir pagamento de Aluguel', exact: true }).waitFor();
   for (const width of [280, 390, 768, 1440]) {
     await page.setViewportSize({ width, height: 900 });
     for (const view of ['overview', 'transactions', 'fixed', 'budget', 'goals']) {
-      await page.locator(`#finance-tabs [data-view=${view}]`).click();
+      if (['fixed', 'budget', 'goals'].includes(view)) {
+        await page.locator('#finance-tabs [data-view=planning]').click();
+        await page.locator(`#planning-tabs [data-view=${view}]`).click();
+      } else await page.locator(`#finance-tabs [data-view=${view}]`).click();
       await clean();
     }
     await go('settings');

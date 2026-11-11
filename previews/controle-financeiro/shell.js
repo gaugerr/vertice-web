@@ -1,3 +1,4 @@
+import { financeTitles, financeRoute, financeView } from './finance-navigation.mjs';
 import './app.js';
 import { workspaceEnvironment } from './workspaces.js';
 const environment = await workspaceEnvironment();
@@ -10,19 +11,12 @@ if (environment.actor)
   const toggle = document.getElementById('menu-toggle');
   const frame = document.getElementById('shopping-frame');
   const names = { shopping: 'Compras', finance: 'Financeiro', settings: 'Configurações' };
-  const screens = {
-    overview: 'Resumo',
-    analysis: 'Análises',
-    wealth: 'Patrimônio',
-    transactions: 'Lançamentos',
-    fixed: 'Contas Fixas',
-    budget: 'Orçamento',
-    goals: 'Metas',
-  };
+  const screens = financeTitles;
   const key = 'vertice_navigation_preview_v1';
   let area = 'shopping',
     shoppingScreen = 'Minhas listas',
-    financialView = 'overview';
+    financialView = 'overview',
+    enteringFinance = false;
   const openMenu = () => {
     applyArea(area, false);
     menu.showModal();
@@ -54,7 +48,14 @@ if (environment.actor)
     document.getElementById('shopping-area').hidden = next !== 'shopping';
     document.getElementById('finance-area').hidden = next !== 'finance';
     document.getElementById('settings-area').hidden = next !== 'settings';
-    document.getElementById('finance-tabs').hidden = next !== 'finance';
+    document.getElementById('finance-tabs').hidden = !['finance', 'settings'].includes(next);
+    if (next === 'settings')
+      document.querySelectorAll('#finance-tabs [data-view]').forEach((b) => {
+        const active = b.dataset.view === 'more';
+        b.classList.toggle('active', active);
+        if (active) b.setAttribute('aria-current', 'page');
+        else b.removeAttribute('aria-current');
+      });
     menu.querySelectorAll('[data-area]').forEach((b) => {
       const active =
         b.dataset.area === next &&
@@ -93,7 +94,7 @@ if (environment.actor)
     applyArea(next);
     const hash =
       next === 'finance'
-        ? 'financeiro/' + financialView
+        ? 'financeiro/' + financeRoute(financialView)
         : next === 'settings'
           ? 'configuracoes'
           : 'compras';
@@ -109,9 +110,10 @@ if (environment.actor)
     else document.getElementById('main').focus({ preventScroll: true });
   }
   function readLocation() {
-    const [part, tab] = location.hash.slice(1).split('/');
-    if (part === 'financeiro' && Object.hasOwn(screens, tab)) {
-      financialView = tab;
+    const [part, ...segments] = location.hash.slice(1).split('/');
+    const targetView = financeView(segments.join('/'));
+    if (part === 'financeiro' && targetView) {
+      financialView = targetView;
       window.dispatchEvent(
         new CustomEvent('vertice:finance-navigate', { detail: { view: financialView } }),
       );
@@ -120,6 +122,19 @@ if (environment.actor)
       part === 'financeiro' ? 'finance' : part === 'configuracoes' ? 'settings' : 'shopping',
     );
   }
+  document.addEventListener('click', (e) => {
+    const b = e.target.closest('[data-settings-section]');
+    if (b) {
+      navigate('settings');
+      document.getElementById(b.dataset.settingsSection)?.scrollIntoView({ behavior: 'smooth' });
+    }
+  });
+  document.getElementById('finance-tabs').addEventListener('click', (e) => {
+    if (e.target.closest('[data-view]') && area !== 'finance') {
+      enteringFinance = true;
+      applyArea('finance');
+    }
+  });
   toggle.addEventListener('click', openMenu);
   document.getElementById('area-shortcut').addEventListener('click', openMenu);
   document.getElementById('menu-close').addEventListener('click', closeMenu);
@@ -140,6 +155,7 @@ if (environment.actor)
     } else if (e.target === menu) closeMenu();
   });
   window.addEventListener('vertice:finance-view', (e) => {
+    const changed = financialView !== e.detail.view;
     financialView = e.detail.view;
     breadcrumb();
     if (area === 'finance') {
@@ -148,7 +164,9 @@ if (environment.actor)
       } catch {
         /* Optional state. */
       }
-      history.replaceState({ area }, '', '#financeiro/' + financialView);
+      if (changed || enteringFinance)
+        history.pushState({ area }, '', '#financeiro/' + financeRoute(financialView));
+      enteringFinance = false;
     }
   });
   window.addEventListener('message', (e) => {
