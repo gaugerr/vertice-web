@@ -432,7 +432,6 @@ main#main:focus {
   }
 }
 
-
 /* Keep area choices snug around their labels instead of stretching across the drawer. */
 .area-drawer {
   width: min(240px, 80vw);
