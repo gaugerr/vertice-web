@@ -1,11 +1,4 @@
 import { financeTitles, financeRoute, financeView } from './finance-navigation.mjs';
-import './app.js';
-import { workspaceEnvironment } from './workspaces.js';
-const environment = await workspaceEnvironment();
-// OAuth must finish in the parent before the iframe reads the shared session.
-if (environment.actor)
-  document.getElementById('shopping-frame').src =
-    document.getElementById('shopping-frame').dataset.src;
 (() => {
   const menu = document.getElementById('app-menu');
   const toggle = document.getElementById('menu-toggle');
@@ -201,5 +194,22 @@ if (environment.actor)
     applyArea(area, false);
   }
 })();
+
+// Bind navigation before waiting for authentication, IndexedDB or network bootstrap.
+// A slow staging session must never leave the header and drawer inert.
+void Promise.all([
+  import('./app.js'),
+  import('./workspaces.js').then(({ workspaceEnvironment }) => workspaceEnvironment()),
+])
+  .then(([, environment]) => {
+    // OAuth must finish in the parent before the iframe reads the shared session.
+    if (environment.actor)
+      document.getElementById('shopping-frame').src =
+        document.getElementById('shopping-frame').dataset.src;
+  })
+  .catch((error) => {
+    const message = document.getElementById('workspace-message');
+    if (message) message.textContent = error?.message || 'Não foi possível iniciar o espaço.';
+  });
 
 document.documentElement.dataset.workspaceReady = 'true';
