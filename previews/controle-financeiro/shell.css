@@ -300,3 +300,69 @@ main#main:focus {
     padding: 4px;
   }
 }
+
+
+/* Mobile drawer refinement: preserve every destination and action, improve grouping. */
+.area-drawer {
+  padding: 18px 16px 24px;
+  overscroll-behavior: contain;
+}
+.drawer-head {
+  margin-bottom: 16px;
+}
+.area-drawer nav {
+  display: grid;
+  gap: 6px;
+}
+.area-drawer nav button {
+  min-height: 52px;
+  padding: 10px 12px;
+  border-radius: 14px;
+}
+.area-drawer nav button.active {
+  background: #2b2235;
+  box-shadow: inset 3px 0 0 var(--purple, #b69bff);
+  color: #e0d2ff;
+}
+.area-drawer nav button:focus-visible,
+.area-drawer .workspace-bar button:focus-visible {
+  outline: 2px solid #b69bff;
+  outline-offset: 3px;
+}
+.area-drawer .workspace-bar {
+  margin: 24px 0 0;
+  padding: 18px 0 0;
+  gap: 8px;
+}
+.area-drawer .workspace-bar label {
+  gap: 9px;
+}
+.area-drawer .workspace-bar select {
+  width: 100%;
+  max-width: none;
+  min-height: 48px;
+  padding: 10px 12px;
+  border-radius: 13px;
+}
+.area-drawer .workspace-bar button {
+  width: 100%;
+  min-height: 44px;
+  justify-content: flex-start;
+  border-radius: 11px;
+  padding: 9px 12px;
+}
+.area-drawer .workspace-bar button:hover {
+  background: #25202e;
+}
+#workspace-logout {
+  margin-top: 2px;
+}
+@media (max-width: 420px) {
+  .area-drawer {
+    width: min(320px, 88vw);
+    padding-inline: 16px;
+  }
+  .area-drawer .workspace-bar select {
+    max-width: none;
+  }
+}
