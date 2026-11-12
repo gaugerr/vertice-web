@@ -1,197 +1,61 @@
 # Vértice
 
-> **Estado atual e retomada por IA (09/11/2026):** leia [AI-HANDOFF](docs/AI-HANDOFF.md).
-> App oficial, demonstração local e preview conectada são ambientes distintos.
-> Resultados e instruções anteriores abaixo devem ser interpretados no contexto do ambiente e da data; o handoff registra as pendências atuais.
+Aplicativo de compras e ferramentas financeiras, em evolução para um ecossistema com espaços pessoais e compartilhados, sincronização entre dispositivos e gestão financeira.
 
-Aplicativo de listas de compras em React, TypeScript, Vite e Tailwind CSS 4. Os dados ficam no IndexedDB, através do Dexie, e o aplicativo foi estruturado para funcionar offline após o primeiro carregamento completo.
+> **Importante:** o aplicativo oficial e o ecossistema em desenvolvimento são ambientes diferentes. O conteúdo da branch de preview não está automaticamente disponível no app oficial.
 
-Este projeto é independente do Flutter. Não substitui automaticamente o site já publicado.
+## Estado do produto
 
-**[Abrir o aplicativo publicado](https://app.usevertice.app.br)** · [Resultados da validação](docs/VALIDATION.md)
+| Ambiente | Branch / projeto | O que contém |
+|---|---|---|
+| App oficial | main · Cloudflare Pages use-vertice | Compras, acesso Google/licença e central de modelos financeiros Google Sheets/Excel. Compras permanecem locais no navegador. |
+| Página de vendas | main · Cloudflare Pages vertice-kit | Site comercial. Não misturar alterações do app com este projeto. |
+| Ecossistema em desenvolvimento | preview/controle-financeiro · PR #28 (draft) | Compras + Financeiro, espaços pessoais/compartilhados, fila offline, sincronização e conflitos. Ainda não integrado ao app oficial. |
+| Preview de demonstração | raiz do endereço de preview | Dados fictícios locais, sem conexão com a conta real. |
+| Preview conectada | mesmo endereço + /staging/ | Homologação autorizada com Google e banco Supabase Vértice. Pode conter dados reais. |
 
-## Executar
+O PR #29 foi integrado à branch de preview. A descrição do PR #28 registra migrações e validações nessa branch. Isso não significa que o ecossistema foi publicado na main.
 
-Use Node 24 LTS e npm. O modo local `legacy` não precisa de conta de serviço. Para testar o acesso obrigatório, configure as variáveis de `.env.example` conforme [SETUP.md](docs/access/SETUP.md).
+## Começar
 
-```sh
-nvm use
-npm ci
-npm run dev
-```
+Requisitos: Node 24 LTS e npm.
 
-Em um checkout inicial que ainda não contenha `package-lock.json`, execute `npm install` uma vez e versione o lockfile gerado. As dependências diretas já estão fixadas no `package.json`. A CI exige o lockfile.
+    nvm use
+    npm ci
+    npm run dev
 
-```sh
-npm run typecheck
-npm run lint
-npm test
-npm run build
-npm run preview
-```
+Verificações da aplicação React:
 
-O build está em `dist`. O orçamento de JavaScript de 250 KiB gzip inclui também os módulos carregados sob demanda; o build informa os tamanhos e falha se esse orçamento for ultrapassado. Para formatar: `npm run format`. Para testes em modo observação: `npm run test:watch`.
+    npm run typecheck
+    npm run lint
+    npm test
+    npm run build
 
-## O que está implementado
+Para executar o app financeiro/compartilhado da preview, consulte o guia de retomada e o README em previews/controle-financeiro. O build específico é executado de dentro dessa pasta com node build.mjs.
 
-- Listas com nome, data civil e descrição opcional; criação, edição e exclusão.
-- Seis categorias padrão por lista, criadas transacionalmente.
-- Inclusão rápida de itens, edição de nome/preço/quantidade/unidade e marcação como comprado.
-- Marca e conteúdo da embalagem opcionais, nome exibido automaticamente e detalhes preservados nas cópias.
-- Filtros de itens pendentes e comprados.
-- Finalização com revisão, consulta das compras anteriores e reabertura para correção.
-- Cópia de listas com produtos desmarcados, quantidades preservadas e preços zerados.
-- Totais em reais com aritmética decimal e arredondamento por item.
-- Orçamento opcional por lista, saldo global entre categorias e avisos discretos a partir de 80% do limite.
-- Comparador offline de duas embalagens por peso, volume ou unidades, com acesso no início e nas categorias.
-- IndexedDB com consultas reativas, transações e atualização entre abas.
-- Exportação e restauração de backups JSON; importação do formato Flutter v1.
-- Manifesto e ícones instaláveis; service worker de produção com cache e atualização por confirmação.
-- Avisos de conectividade, preparo offline e alterações não salvas.
-- Interface em português, tema escuro, roxo e verde, com layout para celular e desktop.
+## Mapa do código
 
-A `main` inclui login Google, licenças vitalícias manuais, administração, autorização offline assinada de até sete dias, dados separados por conta e transferência confirmada das listas antigas. O build de produção na Cloudflare Pages exige login e licença; o desenvolvimento local usa `legacy` por padrão. [Configuração do acesso](docs/access/SETUP.md) · [Primeiro passo no Google](docs/access/GOOGLE.md) · [Validação de segurança](docs/access/VALIDATION.md).
+- src/domain: modelos, schemas e regras de domínio de compras.
+- src/data: IndexedDB/Dexie, repositórios e backups locais.
+- src/features: telas e componentes por funcionalidade.
+- src/access: autenticação Google, licenças e administração.
+- src/pwa: instalação, cache, conectividade e atualização.
+- previews/controle-financeiro: shell da preview, Financeiro e integração visual com Compras.
+- shared/workspaces: armazenamento por espaço, outbox, sincronização, conflitos e transporte.
+- supabase/migrations e supabase/functions: banco, políticas e funções de servidor.
+- docs: arquitetura, operação, validação e handoff.
 
-Checkout, webhooks de compra e sincronização das compras na nuvem continuam para uma etapa futura. O login atual controla a licença; não faz backup das listas no Supabase.
+## Documentação
 
-## Organização
+Comece por [índice da documentação](docs/README.md). Para retomar o desenvolvimento com outra IA, leia [docs/AI-HANDOFF.md](docs/AI-HANDOFF.md) e depois [AGENTS.md](AGENTS.md).
 
-```text
-src/app/                  inicialização, serviços e rotas
-src/access/               login, licença offline, administração e migração por conta
-supabase/                 migrações, funções de servidor e testes de permissões
-src/domain/               entidades, contratos, validações e cálculos
-src/data/database/        versão e índices do IndexedDB
-src/data/repositories/    consultas e operações transacionais
-src/data/backup/          validação, conversão e arquivos de backup
-src/features/             telas e componentes por função
-src/shared/               componentes, hooks e utilitários comuns
-src/pwa/                  instalação, conectividade e atualização
-src/styles/               Tailwind 4, tokens e estilos
-e2e/                      cenários de navegador no build de produção
-tools/                    medição do build e servidor exclusivo de testes
-```
+## Princípios que não podem ser quebrados
 
-Componentes executam operações pela interface `ShoppingRepository`. O repositório Dexie implementa esse contrato e concentra transações. As telas não escrevem diretamente nas tabelas. O IndexedDB é a fonte dos registros; não há cópia global paralela em Redux/Zustand.
+1. Não confundir main, preview de demonstração e preview conectada.
+2. Não integrar o PR #28 ao app oficial sem homologação e autorização explícita.
+3. Não apagar, recriar ou migrar bancos para resolver problemas de interface.
+4. Não expor segredos, service_role, tokens, chaves privadas ou dados pessoais.
+5. Preservar Auth, licenças, Cakto, dados existentes, IDs, backups e compatibilidade.
+6. Não afirmar que há sincronização no app oficial: ela está na branch do ecossistema, ainda não integrada.
 
-As consultas `useLiveQuery` observam as leituras do repositório. Formulários mantêm apenas seus rascunhos no React. Editar campos de um produto não altera seu estado de compra, preservando marcações feitas por outra aba.
-
-## Dados e cálculos
-
-O banco está na versão Dexie 5. No modo local mantém o nome `vertice_web`; com acesso obrigatório, cada conta usa `vertice_web_<projeto>_<uid>`, e o banco antigo é preservado como origem da transferência confirmada. Os registros de migração são internos; os backups de compras continuam v5 e não contêm credenciais. Os bancos contêm listas, categorias e itens. As chaves são UUIDs e as relações são verificadas pelo repositório. IndexedDB não tem chaves estrangeiras; criação e exclusão compostas, cópia, finalização e restauração usam transações explícitas.
-
-Preço e quantidade são strings decimais canônicas. `big.js` calcula o produto, arredonda cada linha para centavos usando metade para cima e soma somente os itens comprados. Os cálculos verificam o limite de inteiros seguros. A unidade não altera a fórmula.
-
-Datas de compra são strings civis `YYYY-MM-DD`, sem conversão UTC na apresentação. `createdAt` e `updatedAt` são instantes UTC ISO. Migrações futuras devem incrementar a versão Dexie e preservar registros; nunca recriar o banco para atualizar a interface.
-
-## Offline e instalação
-
-O service worker não é registrado no desenvolvimento. Para testar a experiência real:
-
-```sh
-npm run build
-npm run preview
-```
-
-Abra o endereço local com internet e aguarde **Pronto para usar offline**. A partir daí, o aplicativo, as rotas e os recursos estáticos ficam em cache, e as compras são lidas e gravadas no IndexedDB. O primeiro acesso completo precisa de conexão. No modo com licença, também é preciso entrar com Google e obter uma autorização online. A licença é vitalícia; a autorização offline dura até sete dias desde a validação. Expirar essa autorização bloqueia novas alterações e preserva os dados e a edição aberta.
-
-No Chrome, use Instalar Vértice quando o navegador oferecer essa opção, ou o menu de instalação. No iPhone, use Compartilhar → Adicionar à Tela de Início. A instalação no iPhone físico exige validação no aparelho; um teste de WebKit no computador não comprova essa etapa.
-
-`online.txt` não é armazenado pelo service worker. A verificação usa uma requisição sem cache ao abrir/retomar a página e periodicamente enquanto visível. O estado de conexão, por si só, não bloqueia gravações locais enquanto a autorização offline estiver válida.
-
-Quando uma nova versão estiver instalada e aguardando, aparece uma ação de atualização. O aplicativo solicita confirmação se houver rascunhos e aguarda gravações locais em andamento antes de recarregar. O cache do aplicativo é separado dos registros no IndexedDB.
-
-O navegador pode negar armazenamento persistente, limitar espaço ou apagar dados. Limpar os dados do site, usar outro domínio, outro navegador ou outro aparelho não transporta os registros. Exporte backups regularmente. Se o banco não abrir, o app exibe erro; não passa silenciosamente para armazenamento temporário.
-
-## Backup e migração do Flutter
-
-Em Dados e aplicativo, exporte um JSON e guarde fora do armazenamento do site. O novo formato usa `format: "vertice-backup"`, `version: 5`, `exportedAt`, `lists`, `categories` e `items`. Cada lista inclui orçamento, estado, mercado opcional e datas; cada produto inclui marca e conteúdo da embalagem, ambos opcionais.
-
-A importação aceita formatos v1 (Flutter), v2 (web sem orçamento), v3 (web com orçamento), v4 (finalização) e v5 (detalhes dos produtos). Listas anteriores à v4 são importadas em andamento; v1/v2 recebem orçamento nulo e v3 preserva seu limite. Produtos anteriores à v5 recebem marca e embalagem nulas; nenhum detalhe é inferido do nome. Valida até 10 MiB, no máximo 50 mil registros em cada coleção, tipos, duplicatas, relações e coerência das finalizações. Antes de substituir, exibe quantidades e pede confirmação. Toda a substituição é transacional; uma falha não deve deixar um banco parcialmente restaurado.
-
-## Marca e embalagem
-
-Ao marcar um produto, o preço continua selecionado e Enter permite salvar sem preencher os detalhes. Marca e embalagem (g, kg, ml, L ou un) ficam visíveis em “Detalhes opcionais”. A prévia aparece apenas quando algum detalhe está preenchido e mostra o nome resultante; a lista só muda após salvar. O nome base fica separado: Café, Marca X e 500 g aparecem como **Café · Marca X · 500 g**. Limpar a marca ou o conteúdo remove somente esse detalhe.
-
-A quantidade comprada e o conteúdo de cada embalagem são independentes: três pacotes de 500 g a R$ 18,90 custam R$ 56,70. O conteúdo não multiplica o preço e não altera compras cobradas por kg/L. Peso e volume admitem até três casas decimais; conteúdo em unidades exige contagem inteira positiva. O tamanho é exibido na unidade escolhida, sem conversão automática.
-
-Copiar uma lista preserva marca e embalagem, mas zera preços e desmarca os produtos. Cada cópia pode ser alterada independentemente. Salvar apenas o preço preserva detalhes modificados em outra aba; compras finalizadas continuam exigindo reabertura para edição. A migração Dexie 3 → 4 preserva os produtos existentes com detalhes nulos. O fluxo funciona offline; histórico e avisos automáticos de comparação ficam para uma próxima etapa.
-
-## Finalizar e copiar compras
-
-No resumo geral da lista, use **Finalizar compra** para conferir total, produtos comprados/não comprados, orçamento, mercado opcional e data da compra. Pelo menos um produto deve estar comprado e todos os comprados precisam de preço maior que zero. Os não comprados permanecem identificados na lista, sem entrar no total. Apenas dados salvos entram na revisão; mudanças em outra aba exigem nova conferência.
-
-Listas finalizadas ficam na aba **Finalizadas**, somente para consulta. **Reabrir compra** libera correções sem perder os valores; finalizar novamente atualiza a mesma compra, sem duplicar registros. A proteção também existe no repositório, para impedir gravações de abas antigas. O banco Dexie evolui para a versão 3, preservando dados anteriores e marcando as listas existentes como em andamento.
-
-**Copiar lista**, nos cartões e no resumo, cria outra lista independente, aberta, com todos os produtos e categorias, mantendo quantidades/unidades. Preços são zerados e todos os produtos ficam desmarcados. Nome, data, descrição e orçamento podem ser ajustados antes de confirmar. Mercado e dados de finalização não são copiados. Todas essas operações funcionam offline; nenhuma depende de conta ou serviço externo.
-
-## Orçamento da compra
-
-Informe um limite opcional ao criar ou editar uma lista, ou use Definir/Ajustar orçamento durante a compra. Para remover o limite, limpe o campo e salve. O orçamento considera apenas itens marcados como pegos, com preços e quantidades já salvos; filtros e categorias não restringem o gasto global.
-
-A partir de 80% aparece um aviso discreto; em 100%, Limite atingido; acima disso, o valor excedente. Nenhum aviso bloqueia a compra. O banco IndexedDB evolui da versão 1 para 2 mantendo os registros e atribuindo orçamento nulo às listas anteriores. O fluxo funciona offline e atualiza outras abas abertas.
-
-## Qual compensa?
-
-Use Comparar no início ou dentro de uma categoria. Informe o preço da embalagem e seu conteúdo em duas opções. O resultado compara preço por kg, litro ou unidade, informa empate ou a alternativa mais barata e calcula economia relativa à mais cara. Compara somente preço por quantidade; qualidade, concentração e rendimento ficam a seu critério.
-
-Os cálculos usam decimais exatos e produtos cruzados; o arredondamento ocorre só na apresentação. Peso aceita g/kg, volume aceita ml/L e unidades exigem contagem inteira. Preços devem ser positivos com até duas casas decimais; conteúdo admite até três casas para peso e volume. Use vírgula ou ponto decimal, sem separadores de milhares.
-
-Cada tipo mantém seus próprios campos durante a sessão da aba, inclusive ao fechar o painel, mudar de categoria e recarregar. Limpar comparação apaga somente o tipo atual. A chave versionada do sessionStorage é exclusiva da ferramenta; se o navegador bloquear esse armazenamento, o preenchimento continua em memória e o app informa a limitação. O comparador não grava no IndexedDB, não altera produtos/orçamentos e não entra no backup. Não depende de internet, IA ou serviços externos após o app estar preparado para uso offline.
-
-No Flutter, exporte o backup existente e importe o arquivo aqui. Os IDs numéricos antigos são mapeados para UUIDs mantendo referências. Preços e quantidades são preservados como decimais; o estado 0/1 vira booleano. Datas legadas em milissegundos são interpretadas no fuso local do navegador que importa. Confira a data se estiver migrando entre fusos diferentes.
-
-O app não lê diretamente o banco SQLite/WASM do Flutter e não oferece mesclagem de backups nesta versão. Restaurar substitui todo o conteúdo atual.
-
-## Testes
-
-```sh
-npm test
-npx playwright install --with-deps chromium webkit
-npm run build
-npm run test:e2e
-```
-
-Vitest cobre regras financeiras, validações, transações, relacionamentos, backups e preservação de formulários em falhas. Playwright usa o build real em Chromium e WebKit para CRUD, foco, backups, rotas, duas abas e 100 itens. Os cenários de fechamento/reabertura offline e ciclo de atualização do service worker rodam em Chromium.
-
-O servidor `tools/serve-test.mjs` é exclusivo de testes e inclui um endpoint que muda o service worker em memória. Ele não faz parte de `dist` nem da publicação na Cloudflare Pages.
-
-Consulte [VALIDATION.md](docs/VALIDATION.md) para o estado efetivamente verificado. Arquivos de testes escritos não significam testes aprovados.
-
-## Hospedagem na Cloudflare Pages
-
-Produção e previews são publicados exclusivamente na Cloudflare Pages.
-App: <https://app.usevertice.app.br>, projeto `use-vertice`.
-Página de vendas: <https://usevertice.app.br>, projeto `vertice-kit`.
-
-- Instalação: `npm ci`, Node 24.
-- App: raiz `/`, build `node tools/build-cloudflare.mjs`, saída `dist`.
-- Vendas: raiz `/marketing`, build `node build.mjs`, saída `dist`.
-- App em produção e preview exige login Google e licença.
-- Previews manuais devem informar branch e commit; a nova origem e seu callback
-  precisam estar autorizados no Supabase, sem curingas.
-
-Rotas SPA e cache ficam em `public/_redirects` e `public/_headers`.
-Consulte [CLOUDFLARE.md](docs/CLOUDFLARE.md) para configuração e validação.
-
-O arquivo `vercel.json` contém somente `git.deploymentEnabled=false`, para
-bloquear deploys automáticos de uma integração antiga até sua desconexão externa.
-Não é configuração de hospedagem do app. Não recriar projetos ou previews lá.
-
-## Para quem vem do Flutter
-
-Veja [FLUTTER-TO-WEB.md](docs/FLUTTER-TO-WEB.md). A evolução para nuvem está descrita em [FUTURE-SYNC.md](docs/FUTURE-SYNC.md).
-
-### Referência do último preço
-
-Nos formulários rápido e de edição, produtos com nome, marca e embalagem completos podem mostrar a última compra compatível: preço por unidade de cobrança, mercado, data e diferença em relação ao preço digitado. A referência considera somente itens comprados de outras listas finalizadas. Reabrir ou excluir uma compra retira seus preços; copiar uma lista não cria histórico. O histórico é derivado dos dados existentes e acompanha a restauração do backup v5, sem nova tabela ou migração.
-
-Nome e marca ignoram caixa, espaços extras e representação Unicode; não há aproximação de nomes. Embalagens equivalentes em g/kg ou ml/L coincidem, mas tamanhos diferentes e unidades de cobrança diferentes permanecem separados. A seleção prioriza data da compra, finalização, atualização do item e identificador. Funciona offline e não altera os totais, o preço digitado ou o foco do teclado.
-
-### Sugestões compactas ao adicionar
-
-Após dois caracteres, o campo de adicionar pode mostrar até três linhas de produtos de compras finalizadas, incluindo itens sem marca ou embalagem. A busca usa o início do nome e ignora acentos, caixa e espaços extras. Combinações equivalentes são deduplicadas; produtos já presentes em qualquer categoria da lista ficam ocultos, mantendo variantes diferentes disponíveis.
-
-Tocar numa sugestão copia nome, marca, embalagem e unidade de cobrança para a categoria aberta, com quantidade 1, preço zero e estado não comprado. Enter no campo e o botão + continuam adicionando somente o texto digitado. O teclado mantém o foco durante o salvamento; textos novos não são apagados por operações anteriores. Escape fecha as sugestões, e Tab permite escolher uma opção pelo teclado. A conferência de duplicados acontece dentro da transação, protegendo contra adições simultâneas de outra aba.
-
-As sugestões funcionam offline, acompanham finalização, reabertura, exclusão e restauração de compras e reutilizam as tabelas de compras e o backup v5. Não há consulta ao banco a cada tecla nem preenchimento automático de preços.
+Estado e validações são datados. Consulte GitHub Actions, Cloudflare e Supabase antes de operações ou decisões de publicação.
