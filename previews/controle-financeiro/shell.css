@@ -431,3 +431,23 @@ main#main:focus {
     padding-inline: 12px;
   }
 }
+
+
+/* Keep area choices snug around their labels instead of stretching across the drawer. */
+.area-drawer {
+  width: min(240px, 80vw);
+}
+.area-drawer nav {
+  justify-items: start;
+}
+.area-drawer nav button {
+  width: fit-content;
+  min-width: 148px;
+  max-width: 100%;
+  justify-content: flex-start;
+}
+@media (max-width: 420px) {
+  .area-drawer {
+    width: min(240px, 80vw);
+  }
+}
