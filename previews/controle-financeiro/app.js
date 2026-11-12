@@ -16,7 +16,6 @@ import {
   cents,
   monthlyRows,
   fixedRows,
-  totals,
   summaryTotals,
   overviewData,
   saveCatalog,
@@ -89,7 +88,7 @@ const filters = {
   type: 'all',
 };
 const screens = {
-  overview: ['Início', ''],
+  overview: ['Resumo', ''],
   more: ['Mais', ''],
   wallets: ['Contas e saldos', 'Saldos manuais calculados apenas com os movimentos vinculados.'],
   cards: ['Cartões e faturas', 'Compras por competência e pagamentos sem duplicar despesas.'],
@@ -133,33 +132,26 @@ function panel(title, subtitle, body, action = '') {
 }
 const to = (label, destination) =>
   `<button class="text-button" data-view="${destination}">${label} ↗</button>`;
-function stats() {
-  const t = totals(rows());
-  return `<div class="stats">${[
-    ['Saldo do período', t.balance, 'Recebidos menos pagos nesta competência', '', true],
-    ['Entradas recebidas', t.income, 'Somente entradas confirmadas', 'green'],
-    ['Saídas pagas', t.expense, 'Avulsos e contas fixas pagas', 'pink'],
-    ['Saldo previsto', t.forecast, 'Inclui pendências do mês', 'purple'],
-  ]
-    .map(
-      ([label, value, note, color, accent]) =>
-        `<article class="stat ${accent ? 'accent' : ''}"><div class="stat-top">${label}</div><strong class="${color}">${money(value)}</strong><small>${note}</small></article>`,
-    )
-    .join(
-      '',
-    )}</div><p class="competence-note">Por competência · uma conta paga em outro mês continua no mês de referência. O saldo do período não é um extrato bancário.</p>`;
+function stats(selectedRows) {
+  return (
+    overviewBalance(selectedRows) +
+    `<p class="competence-note">Saldo projetado: ${money(summaryTotals(state, month, selectedRows).forecast)} · inclui receitas e despesas previstas na competência.</p>`
+  );
 }
-function overviewBalance() {
-  const t = totals(rows());
-  return `<section class="overview-balance" aria-label="Saldos e movimentação mensal"><div class="monthly-result"><span>Resultado do mês</span><strong class="${t.balance < 0 ? 'pink' : 'green'}">${money(t.balance)}</strong><small>Recebidos menos pagos · não é saldo bancário</small></div><div class="overview-indicators">${[
-    ['Entradas', t.income, 'green'],
-    ['Saídas', t.expense, 'pink'],
+function overviewBalance(selectedRows) {
+  const t = summaryTotals(state, month, selectedRows);
+  return `<section class="overview-balance" aria-label="Saldos e movimentação mensal"><div class="monthly-result"><span>Quanto sobrou no mês</span><strong class="${t.remainingAfterSaving < 0 ? 'pink' : 'green'}">${money(t.remainingAfterSaving)}</strong><small>Resultado antes de guardar: ${money(t.resultBeforeSaving)}</small></div><div class="overview-indicators">${[
+    ['Receitas', t.income, 'green'],
+    ['Despesas', t.operatingExpense, 'pink'],
+    ['Guardado', t.invested, 'purple'],
   ]
     .map(
       ([label, amount, color]) =>
-        `<div><span>${label} do mês</span><strong class="${color}">${money(amount)}</strong><small>${label === 'Entradas' ? 'Recebidas' : 'Pagas'}</small></div>`,
+        `<div><span>${label}</span><strong class="${color}">${money(amount)}</strong><small>${label === 'Guardado' ? 'Reserva e investimentos' : 'Confirmadas'}</small></div>`,
     )
-    .join('')}</div></section>`;
+    .join(
+      '',
+    )}</div><details class="competence-note"><summary>Como calculamos</summary><p>Resultado do mês: receitas menos despesas confirmadas, sem a reserva. Quanto sobrou: resultado menos Reserva e Investimentos, descontada uma única vez. Aportes em metas são independentes. Valores por competência, sem representar saldo bancário.</p></details></section>`;
 }
 function monthlyBudget() {
   const b = overviewData(state, month).budget;
@@ -289,7 +281,9 @@ function oldPending() {
   );
 }
 function monthComparison() {
-  const { previous, current, prior, hasPrior } = compareMonths(state, month);
+  const { previous, hasPrior } = compareMonths(state, month);
+  const current = summaryTotals(state, month);
+  const prior = previous ? summaryTotals(state, previous) : null;
   if (!previous) return '';
   if (!hasPrior)
     return panel(
@@ -302,7 +296,7 @@ function monthComparison() {
   return panel(
     'Comparar com o mês anterior',
     monthName(previous),
-    `<div class="month-comparison">${line('Entradas recebidas', current.income, prior.income)}${line('Saídas pagas', current.expense, prior.expense)}${line('Resultado do mês', current.balance, prior.balance)}</div><p class="muted">Valores confirmados por competência. O mês em andamento pode estar incompleto.</p>`,
+    `<div class="month-comparison">${line('Entradas recebidas', current.income, prior.income)}${line('Despesas pagas', current.operatingExpense, prior.operatingExpense)}${line('Guardado', current.invested, prior.invested)}${line('Resultado do mês', current.resultBeforeSaving, prior.resultBeforeSaving)}${line('Restante após guardar', current.remainingAfterSaving, prior.remainingAfterSaving)}</div><p class="muted">Valores confirmados por competência. O mês em andamento pode estar incompleto.</p>`,
   );
 }
 function openGoal(id) {
@@ -409,6 +403,7 @@ function renderTransactions() {
   $('#transaction-list').innerHTML = list.length
     ? list.map((e) => row(e, true)).join('')
     : empty('Nenhum lançamento encontrado. Experimente outros filtros.');
+  $('#transaction-indicators').innerHTML = stats(list);
 }
 function fixedPage() {
   const list = fixedRows(state, month),
@@ -468,7 +463,6 @@ function render() {
     $('#content').innerHTML =
       overviewBalance() +
       monthlyBudget() +
-      recentTransactions() +
       panel(
         'Contas próximas do vencimento',
         'Até três próximas contas do mês selecionado.',
@@ -481,10 +475,12 @@ function render() {
             : ''),
         to('Ver todas', 'transactions'),
       ) +
-      categorySpending();
+      recentTransactions() +
+      categorySpending() +
+      monthComparison();
   else if (view === 'transactions') {
     $('#content').innerHTML =
-      stats() +
+      '<div id="transaction-indicators" aria-label="Indicadores dos lançamentos filtrados"></div>' +
       panel(
         'Lançamentos de ' + monthName().toLowerCase(),
         'Contas fixas são identificadas para não serem registradas novamente como avulsos.',
@@ -495,6 +491,7 @@ function render() {
   else if (view === 'budget')
     $('#content').innerHTML =
       stats() +
+      monthlyBudget() +
       `<div class="main-grid">${panel('Limite total do mês', 'Independente dos limites por categoria.', state.monthlyLimits?.[month] != null ? `<strong class="wealth-value">${money(state.monthlyLimits[month])}</strong>` : '<p class="muted">Nenhum limite total definido.</p>', '<button class="text-button" data-monthly-limit>Ajustar limite mensal</button>')}${panel('Orçamento por categoria', 'Limites de ' + monthName().toLowerCase() + '. Alterações valem somente para este mês.', budgetRows(), '<button class="text-button" id="copy-budget">Copiar mês anterior</button>')}</div>`;
   else if (view === 'analysis')
     $('#content').innerHTML =
@@ -601,19 +598,7 @@ function openEntry(id, copy = false) {
   const source = copy ? null : original;
   const type = original?.type ?? 'expense';
   const defaults = entryDefaults(type);
-  const date =
-    original?.purchaseDate ??
-    original?.date ??
-    (today().startsWith(month)
-      ? today()
-      : month +
-        '-' +
-        String(
-          Math.min(
-            Number(today().slice(8)),
-            new Date(Number(month.slice(0, 4)), Number(month.slice(5)), 0).getDate(),
-          ),
-        ).padStart(2, '0'));
+  const date = original?.purchaseDate ?? original?.date ?? today();
   const e = original ?? defaults;
   showForm(
     'entry',
@@ -625,7 +610,7 @@ function openEntry(id, copy = false) {
       .map((name) => `<option value="${esc(name)}"></option>`)
       .join(
         '',
-      )}</datalist><div id="entry-category">${categoryField(e.categoryId, type)}</div><label class="check-label"><input name="paid" type="checkbox" ${!copy && (!original || original.paid) ? 'checked' : ''}> Já foi pago ou recebido</label><details class="entry-details" ${source ? 'open' : ''}><summary>Data, pagamento e mais opções</summary>${field('Data de referência / compra', 'date', date, 'date', 'required')}<div id="entry-method">${methodField(e.paymentMethodId, type, Boolean(source && source.paymentMethodId === null))}</div><label>Conta<select name="walletId">${walletOptions(e.walletId)}</select></label><label>Cartão de crédito<select name="cardId">${cardOptions(original?.cardId)}</select></label><p class="muted">Com cartão cadastrado, a compra entra na fatura; pague a fatura para baixar as despesas. Não vincule também uma conta à compra.</p>${!source ? `<label>Frequência<select name="seriesMode"><option value="single">Uma vez</option><option value="installments">Parcelar o valor total</option><option value="repeat">Repetir valor mensalmente</option></select></label>${field('Número de parcelas / meses', 'seriesCount', 2, 'number', 'min="2" max="120"')}<p class="muted">Parcelas dividem o valor total. Repetições usam o mesmo valor em cada mês; somente a primeira pode começar paga.</p>` : source.seriesId ? `<p class="muted">Esta edição altera somente esta parcela/ocorrência; pagamentos anteriores e outras competências são preservados.</p><button type="button" class="text-button danger-action" data-series-stop="${esc(source.id)}">Encerrar parcelas/repetições em aberto</button>` : ''}${noteField(original?.observation)}</details>`,
+      )}</datalist><div id="entry-category">${categoryField(e.categoryId, type)}</div><label class="check-label"><input name="paid" type="checkbox" ${!copy && (!original || original.paid) ? 'checked' : ''}> Já foi pago ou recebido</label><div id="entry-method">${methodField(e.paymentMethodId, type, Boolean(source && source.paymentMethodId === null))}</div>${field('Data', 'date', date, 'date', 'required')}<details class="entry-details"><summary>Parcelar, repetir e mais opções</summary><label>Conta<select name="walletId">${walletOptions(e.walletId)}</select></label><label>Cartão de crédito<select name="cardId">${cardOptions(original?.cardId)}</select></label><p class="muted">Crédito pode ser usado sem cadastrar cartão. Ao vincular um cartão, a compra entra na fatura; pague a fatura para baixar as despesas. Não vincule também uma conta à compra.</p>${!source ? `<label>Frequência<select name="seriesMode"><option value="single">Uma vez</option><option value="installments">Parcelar o valor total</option><option value="repeat">Repetir valor mensalmente</option></select></label>${field('Número de parcelas / meses', 'seriesCount', 2, 'number', 'min="2" max="120"')}<p class="muted">Parcelas dividem o valor total. Repetições usam o mesmo valor em cada mês; somente a primeira pode começar paga.</p>` : source.seriesId ? `<p class="muted">Esta edição altera somente esta parcela/ocorrência; pagamentos anteriores e outras competências são preservados.</p><button type="button" class="text-button danger-action" data-series-stop="${esc(source.id)}">Encerrar parcelas/repetições em aberto</button>` : ''}${noteField(original?.observation)}</details>`,
     { id: source?.id ?? crypto.randomUUID(), isNew: !source, source },
   );
   $('#financial-form [name=amount]').focus();

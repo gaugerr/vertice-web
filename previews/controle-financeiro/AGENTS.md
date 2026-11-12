@@ -26,7 +26,7 @@ Não publica mudanças na interface oficial. A entrada autenticada pode usar as 
 - Backups financeiros versionados não incluem Compras. Validar arquivo/referências/históricos antes de confirmar restauração; guardar cópia anterior antes de substituir. Não alterar dados em erro ou cancelamento. Migração futura para banco deve impor isolamento por usuário no servidor.
 - Compras: reutiliza telas/repositório reais de src/ através de shopping.tsx, agora com WorkspaceClient.shopping e banco isolado por espaço. O banco vertice_shopping_navigation_preview_v1 é lido somente para preservar a demonstração anterior do titular.
 - shell.js mantém o menu de áreas, breadcrumbs e abas inferiores apenas do Financeiro.
-- Navegação: Início, Lançamentos, Planejamento (Orçamentos/Contas fixas/Metas), Análises e Mais. `finance-navigation.mjs` preserva aliases antigos; cadastros/configurações continuam acessíveis por Mais e pelos formulários.
+- Navegação: Resumo, Lançamentos, Planejamento (Orçamentos/Contas fixas/Metas) e Análises. Mais permanece no menu lateral. `finance-navigation.mjs` preserva aliases antigos; cadastros/configurações continuam acessíveis por Mais e pelos formulários.
 - O build instala as dependências fixadas da raiz e compila compras com Vite. Alterações compartilhadas em src/ exigem testes. Não publicar a interface oficial nesta etapa.
 - Não inicializar service worker, OAuth ou conexões externas na demonstração principal. Somente /staging/ do endereço estável autorizado pode usar Google e o banco Vértice existente, com modo existing-project-preview explícito. Em builds locais, essa conexão fica desativada por padrão.
 - Preservar rascunhos de compras ao trocar de área: não desmontar o painel de compras.
@@ -50,3 +50,9 @@ inicial não é receita, transferências não entram no resultado, pagamento de 
 liquida compras existentes sem duplicar despesas. Dia do fechamento pertence à
 fatura seguinte. Testes críticos: `finance-ledger.test.mjs`,
 `shared/workspaces/ledger-postgres.test.mjs` e `ledger-browser-check.mjs`.
+
+Indicadores visuais usam `summaryTotals`: resultado antes de guardar exclui Reserva
+e Investimentos das despesas comuns; restante já desconta reserva uma única vez.
+Metas são independentes. Preservar totals/expense/balance legados e o protocolo;
+não migrar dados para alterar a apresentação. Métodos de pagamento/data visíveis;
+crédito genérico não exige cartão. Configurações adicionais preservam séries/vínculos.

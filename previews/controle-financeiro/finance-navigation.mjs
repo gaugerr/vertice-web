@@ -1,6 +1,6 @@
 export const planningViews = ['budget', 'fixed', 'goals'];
 export const financeTitles = {
-  overview: 'Início',
+  overview: 'Resumo',
   transactions: 'Lançamentos',
   budget: 'Planejamento · Orçamentos',
   fixed: 'Planejamento · Contas fixas',

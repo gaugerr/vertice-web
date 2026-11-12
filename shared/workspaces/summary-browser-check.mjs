@@ -58,7 +58,8 @@ try {
     .evaluate((el) => [...el.children].map((n) => n.className));
   assert.match(order[0], /overview-balance/);
   assert.match(order[1], /summary-budget/);
-  assert.match(order[2], /recent-transactions/);
+  assert.match(order[2], /panel/);
+  assert.match(order[3], /recent-transactions/);
   await p.locator('[data-category-history=D01]').click();
   assert.equal(await p.locator('#transaction-list .transaction').count(), 1);
   await p.locator('#finance-tabs [data-view=overview]').click();
@@ -66,7 +67,8 @@ try {
   assert.equal(await p.locator('#transaction-list .transaction').count(), 2);
   await p.locator('#finance-tabs [data-view=analysis]').click();
   await p.locator('.line-chart').waitFor();
-  await p.locator('#finance-tabs [data-view=more]').click();
+  await p.locator('#menu-toggle').click();
+  await p.locator('[data-finance-view=more]').click();
   await p.locator('#content [data-view=wealth]').click();
   await p.getByRole('heading', { name: 'Investimentos registrados', exact: true }).waitFor();
   await p.locator('#finance-tabs [data-view=overview]').click();
@@ -82,7 +84,7 @@ try {
   await p.locator('#financial-form [name=name]').waitFor();
   assert.deepEqual(errors, []);
   console.log(
-    'PASS: saldo não informado/resultado mensal, orçamento, ordem, últimos cinco, top 5/Outros com filtros, Análises/Patrimônio e CTA mobile; 280/390/1440.',
+    'PASS: resultado mensal, orçamento, ordem, últimos cinco, top 5/Outros com filtros, Análises/Patrimônio e CTA mobile; 280/390/1440.',
   );
 } finally {
   await browser.close();

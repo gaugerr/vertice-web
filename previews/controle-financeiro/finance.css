@@ -1,5 +1,5 @@
 #finance-tabs button {
-  width: 20%;
+  width: 25%;
   min-width: 0;
   flex: 1;
 }
@@ -800,4 +800,14 @@ textarea {
 #finance-area[data-view='wallets'] #content > .panel,
 #finance-area[data-view='cards'] #content > .panel {
   margin-top: 18px;
+}
+
+/* Keep the three monthly values aligned on small screens. */
+.overview-balance .overview-indicators {
+  grid-template-columns: repeat(3, minmax(0, 1fr));
+  gap: 8px;
+}
+.overview-balance .competence-note {
+  margin-bottom: 0;
+  text-align: left;
 }

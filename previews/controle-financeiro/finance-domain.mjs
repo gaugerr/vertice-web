@@ -454,8 +454,8 @@ export function totals(rows) {
   return values;
 }
 // Investments are part of paid expenses, never an additional balance deduction.
-export function summaryTotals(s, month) {
-  const rows = monthlyRows(s, month);
+export function summaryTotals(s, month, selectedRows = monthlyRows(s, month)) {
+  const rows = selectedRows;
   const investmentCategories = new Set(
     s.categories
       .filter(
@@ -468,7 +468,16 @@ export function summaryTotals(s, month) {
   const invested = rows
     .filter((r) => r.type === 'expense' && investmentCategories.has(r.categoryId))
     .reduce((sum, r) => sum + (r.paidAmount ?? (r.paid ? r.amount : 0)), 0);
-  return { ...totals(rows), invested };
+  const t = totals(rows);
+  // Savings recorded as expenses are already deducted from balance. Goals remain
+  // independent: no implicit debit or guessing whether an entry matches an aporte.
+  return {
+    ...t,
+    invested,
+    operatingExpense: t.expense - invested,
+    resultBeforeSaving: t.balance + invested,
+    remainingAfterSaving: t.balance,
+  };
 }
 export function overviewData(s, month) {
   const rows = monthlyRows(s, month);

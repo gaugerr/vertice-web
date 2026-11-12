@@ -3,6 +3,43 @@
 Atualizado em 11/11/2026 (America/Sao_Paulo). Registro de estado observado, não
 substitui consultas atuais aos serviços. Começar por este arquivo e AGENTS.md.
 
+## Simplificação e indicadores consistentes — 12/11/2026
+
+Esta revisão substitui a apresentação/navegação descrita nas seções históricas abaixo.
+Auditoria: o Financeiro é o app DOM em `previews/controle-financeiro`, com regras
+puras em `finance-domain.mjs`/`finance-ledger.mjs`, persistência transacional e fila
+em `shared/workspaces/core.mjs`, mapeamento normalizado em `mapping.mjs` e comando
+SQL por espaço. Schema/migração existente revisados; nenhuma mudança no banco.
+
+- Barra principal: Resumo, Lançamentos, Planejamento e Análises. Mais continua no
+  menu lateral, com categorias, métodos, patrimônio e configurações/backups.
+  Contas/cartões já existentes permanecem acessíveis ali para preservar recursos
+  e registros. Nenhuma expansão bancária foi adicionada; aliases/rotas preservados.
+- `summaryTotals` é a fonte dos indicadores em Resumo, Lançamentos e Análises.
+  `operatingExpense`: despesa paga sem Reserva e Investimentos; `resultBeforeSaving`:
+  receitas menos essa despesa; `remainingAfterSaving`: resultado menos reserva.
+  `expense`/`balance` legados continuam incluindo reserva, sem mudar o protocolo.
+  Investimentos já eram despesas: nunca descontar duas vezes. Aportes de metas
+  permanecem independentes, sem inferir vínculos ou criar débitos automaticamente.
+  Lançamentos usa os mesmos cálculos sobre as linhas filtradas, inclusive na busca.
+  Orçamento continua considerando despesas pagas e previstas, incluindo reserva;
+  projeção considera receitas/despesas previstas, sem duplicar pagamentos de fatura.
+- Resumo: restante, receitas/despesas/guardado, orçamento, vencimentos, últimos cinco,
+  categorias e comparação. Explicação de cálculo recolhida; gráfico semanal em Análises.
+  Indicadores e orçamento restante reutilizados nas demais telas pertinentes.
+- Método de pagamento e data ficam visíveis no formulário. Novos registros começam
+  no dia atual; edições/cópias preservam data. Crédito genérico funciona sem cartão.
+  Parcelamento, recorrência, observações e vínculos opcionais ficam nas opções adicionais.
+- Preservados dados, IDs, metas, parcelamentos, recorrências, histórico, backups,
+  autenticação, licenças, Cakto, RLS, compartilhamento, fila offline e conflitos.
+  Sem dados fictícios, exclusões ou alterações no app oficial/página de vendas.
+- Validação: 44 testes financeiros/rotas, 28 de persistência/sincronização; build,
+  ESLint e diff. Duas suítes PostgreSQL opcionais não executadas nesta revisão
+  de interface/domínio. Playwright: conta vazia/com dados, registro rápido, crédito
+  sem cartão, edição/exclusão, busca/filtros/indicadores, orçamento, parcelas/faturas
+  existentes, recarga/backup, navegação e ausência de overflow em 280/390/1440 px.
+  Casos de pessoas reais e sessões Google devem ser revisados pelo titular em /staging/.
+
 ## Registro rápido, contas, cartões e séries — 11/11/2026
 
 **Ativado na versão de revisão.** O proprietário autorizou explicitamente a

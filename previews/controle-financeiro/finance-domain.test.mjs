@@ -402,7 +402,9 @@ test('resumo mantém totais canônicos e investimento confirmado por competênci
   assert.equal(summary.balance, 225000);
   assert.equal(summary.invested, 55000);
   assert.deepEqual(
-    Object.fromEntries(Object.entries(summary).filter(([key]) => key !== 'invested')),
+    Object.fromEntries(
+      Object.keys(totals(monthlyRows(s, '2026-11'))).map((key) => [key, summary[key]]),
+    ),
     totals(monthlyRows(s, '2026-11')),
   );
   const category = s.categories.find((c) => c.id === 'D15');
@@ -459,4 +461,52 @@ test('resumo agrega orçamento existente e top cinco com Outros sem duplicar cat
     2800,
   );
   assert.equal(overviewData(s, '2026-10').budget.defined, false);
+});
+
+test('indicadores distinguem despesas, reserva e resultado sem descontar duas vezes', () => {
+  const s = emptyState();
+  const add = (id, type, amount, categoryId, paid = true) =>
+    saveEntry(s, {
+      id,
+      type,
+      amount,
+      categoryId,
+      paid,
+      name: id,
+      date: '2026-11-12',
+      paymentMethodId: 'P2',
+      observation: '',
+    });
+  add('receita', 'income', 100000, 'R01');
+  add('despesa', 'expense', 30000, 'D01');
+  add('reserva', 'expense', 20000, 'D15');
+  add('pendente', 'expense', 10000, 'D02', false);
+  s.goals.push({
+    id: 'g',
+    name: 'Meta',
+    target: 500000,
+    current: 90000,
+    openingAmount: 90000,
+    contributions: [],
+  });
+  const t = summaryTotals(s, '2026-11');
+  assert.equal(t.operatingExpense, 30000);
+  assert.equal(t.resultBeforeSaving, 70000);
+  assert.equal(t.invested, 20000);
+  assert.equal(t.remainingAfterSaving, 50000);
+  assert.equal(t.forecast, 40000);
+  const filtered = summaryTotals(
+    s,
+    '2026-11',
+    monthlyRows(s, '2026-11').filter((r) => r.categoryId === 'D15'),
+  );
+  assert.equal(filtered.invested, 20000);
+  assert.equal(filtered.operatingExpense, 0);
+  assert.equal(filtered.remainingAfterSaving, -20000);
+  assert.equal(overviewData(s, '2026-11').budget.used, 0);
+  s.entries.find((e) => e.id === 'reserva').amount = 15000;
+  assert.equal(summaryTotals(s, '2026-11').remainingAfterSaving, 55000);
+  s.entries = s.entries.filter((e) => e.id !== 'reserva');
+  assert.equal(summaryTotals(s, '2026-11').remainingAfterSaving, 70000);
+  assert.equal(summaryTotals(s, '2026-12').remainingAfterSaving, 0);
 });

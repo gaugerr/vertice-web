@@ -32,8 +32,18 @@ try {
   await p.locator('#search').fill('cafe');
   assert.equal(await p.locator('#transaction-list .transaction').count(), 1);
   await p.locator('[data-entry-edit]').click();
+  assert(await form.locator('[name=paymentMethodId]').isVisible());
+  assert(await form.locator('[name=date]').isVisible());
+  await form.locator('[name=paymentMethodId]').selectOption('P4');
   await form.locator('[name=name]').fill('Café corrigido');
   await save();
+  assert.match(await p.locator('#transaction-indicators').innerText(), /12,50/);
+  const credit = await p.evaluate(async () => {
+    const c = await (await import('/workspaces.js')).openPreviewWorkspace();
+    return (await c.finance()).entries.find((e) => e.name === 'Café corrigido');
+  });
+  assert.equal(credit.paymentMethodId, 'P4');
+  assert(!credit.cardId);
   p.once('dialog', (d) => d.accept());
   await p.locator('[data-entry-delete]').click();
   await p.locator('#transaction-list .transaction').waitFor({ state: 'hidden' });
@@ -41,7 +51,8 @@ try {
   await p.locator('[data-monthly-limit]').click();
   await form.locator('[name=amount]').fill('1000');
   await save();
-  await p.locator('#finance-tabs [data-view=more]').click();
+  await p.locator('#menu-toggle').click();
+  await p.locator('[data-finance-view=more]').click();
   await p.locator('#content [data-view=wallets]').click();
   for (const name of ['Conta A', 'Conta B']) {
     await p.locator('[data-wallet-new]').click();
@@ -66,7 +77,8 @@ try {
   await form.locator('[name=toWalletId]').selectOption(walletB);
   await form.locator('[name=amount]').fill('100');
   await save();
-  await p.locator('#finance-tabs [data-view=more]').click();
+  await p.locator('#menu-toggle').click();
+  await p.locator('[data-finance-view=more]').click();
   await p.locator('#content [data-view=cards]').click();
   await p.locator('[data-card-new]').click();
   await form.locator('[name=name]').fill('Cartão A');
@@ -95,7 +107,8 @@ try {
     snapshot.entries.reduce((n, e) => n + e.amount, 0),
     10000,
   );
-  await p.locator('#finance-tabs [data-view=more]').click();
+  await p.locator('#menu-toggle').click();
+  await p.locator('[data-finance-view=more]').click();
   await p.locator('#content [data-view=cards]').click();
   for (let i = 0; i < 12; i++) {
     const current = await p.locator('#month').innerText();
@@ -107,7 +120,8 @@ try {
   await p.locator('[data-invoice-pay]').click();
   await form.locator('[name=fromWalletId]').selectOption(wallet);
   await save();
-  await p.locator('#finance-tabs [data-view=more]').click();
+  await p.locator('#menu-toggle').click();
+  await p.locator('[data-finance-view=more]').click();
   await p.locator('#content [data-view=wallets]').click();
   const balances = await p.locator('.wealth-value').allTextContents();
   assert(balances.some((s) => s.includes('866,66')));
@@ -115,7 +129,8 @@ try {
   await p.reload();
   await p.locator('html[data-workspace-ready=true]').waitFor({ state: 'attached' });
   await p.locator('[data-transfer]').waitFor();
-  await p.locator('#finance-tabs [data-view=more]').click();
+  await p.locator('#menu-toggle').click();
+  await p.locator('[data-finance-view=more]').click();
   await p.locator('[data-settings-section=settings-area]').click();
   const download = p.waitForEvent('download');
   await p.locator('#export-finance').click();
