@@ -3,6 +3,7 @@
 Este documento trata da **integração do ecossistema da preview ao aplicativo oficial**. A sincronização por workspace já existe na branch de desenvolvimento; não descreva mais essa parte como se ainda fosse apenas uma proposta.
 
 Estado em 12/11/2026:
+
 - main: compras locais em IndexedDB/Dexie; login Google controla acesso/licença, não sincroniza compras.
 - preview/controle-financeiro: Compras + Financeiro, espaços, Supabase, outbox, sincronização, conflitos e backups em desenvolvimento/homologação.
 - PR #28: draft, ainda não integrado ao main.

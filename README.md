@@ -6,13 +6,13 @@ Aplicativo de compras e ferramentas financeiras, em evolução para um ecossiste
 
 ## Estado do produto
 
-| Ambiente | Branch / projeto | O que contém |
-|---|---|---|
-| App oficial | main · Cloudflare Pages use-vertice | Compras, acesso Google/licença e central de modelos financeiros Google Sheets/Excel. Compras permanecem locais no navegador. |
-| Página de vendas | main · Cloudflare Pages vertice-kit | Site comercial. Não misturar alterações do app com este projeto. |
+| Ambiente                       | Branch / projeto                             | O que contém                                                                                                                        |
+| ------------------------------ | -------------------------------------------- | ----------------------------------------------------------------------------------------------------------------------------------- |
+| App oficial                    | main · Cloudflare Pages use-vertice          | Compras, acesso Google/licença e central de modelos financeiros Google Sheets/Excel. Compras permanecem locais no navegador.        |
+| Página de vendas               | main · Cloudflare Pages vertice-kit          | Site comercial. Não misturar alterações do app com este projeto.                                                                    |
 | Ecossistema em desenvolvimento | preview/controle-financeiro · PR #28 (draft) | Compras + Financeiro, espaços pessoais/compartilhados, fila offline, sincronização e conflitos. Ainda não integrado ao app oficial. |
-| Preview de demonstração | raiz do endereço de preview | Dados fictícios locais, sem conexão com a conta real. |
-| Preview conectada | mesmo endereço + /staging/ | Homologação autorizada com Google e banco Supabase Vértice. Pode conter dados reais. |
+| Preview de demonstração        | raiz do endereço de preview                  | Dados fictícios locais, sem conexão com a conta real.                                                                               |
+| Preview conectada              | mesmo endereço + /staging/                   | Homologação autorizada com Google e banco Supabase Vértice. Pode conter dados reais.                                                |
 
 O PR #29 foi integrado à branch de preview. A descrição do PR #28 registra migrações e validações nessa branch. Isso não significa que o ecossistema foi publicado na main.
 

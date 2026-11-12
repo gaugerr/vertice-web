@@ -74,6 +74,7 @@ A sincronização não deve duplicar regras de domínio. O financeiro usa centav
 Recursos documentados na preview: lançamentos, categorias e formas de pagamento, orçamento mensal total e por categoria, contas fixas, metas/aportes, contas manuais, transferências, cartões/faturas, parcelas e recorrências.
 
 Regras importantes:
+
 - Dinheiro em centavos inteiros; parcelas distribuem centavos sem perda.
 - Saldo inicial de conta não é receita; transferência não é receita nem despesa.
 - Pagamento de fatura baixa compras vinculadas e não cria uma segunda despesa.
@@ -87,6 +88,7 @@ Regras importantes:
 Projeto Supabase autorizado: Vértice, ref wqutcsjdozcukwxvkbtc, região us-east-1. Não tocar no projeto Docery.
 
 Migrações registradas no handoff:
+
 - 20261109173641_shared_shopping_finance_workspaces
 - 20261109180048_workspace_preview_signing
 - 20261111225724_finance_accounts_cards_series
@@ -94,6 +96,7 @@ Migrações registradas no handoff:
 A migração 20261111225724 foi aplicada na homologação conforme registro do PR #28 e não deve ser reaplicada. Antes de qualquer alteração, consultar o histórico real do Supabase e os arquivos em supabase/migrations.
 
 Regras:
+
 - RLS limita leitura aos participantes autorizados.
 - Escritas passam pela Edge Function workspaces e pelo comando privilegiado workspace_command.
 - O serviço deriva o ator da sessão validada; não aceitar UID do cliente.
@@ -105,6 +108,7 @@ Regras:
 ## 6. Build e validação
 
 Raiz:
+
 - Node 24 LTS e npm.
 - npm ci
 - npm run typecheck
@@ -113,10 +117,11 @@ Raiz:
 - npm run build
 
 Preview financeira:
+
 - Build específico: executar node build.mjs em previews/controle-financeiro.
-- Testes financeiros/rotas: finance-domain.test.mjs, finance-improvements.test.mjs, finance-ledger.test.mjs e demais arquivos *.test.mjs da pasta.
+- Testes financeiros/rotas: finance-domain.test.mjs, finance-improvements.test.mjs, finance-ledger.test.mjs e demais arquivos \*.test.mjs da pasta.
 - Testes de workspace/PostgreSQL: shared/workspaces/vitest.config.mjs, ledger-postgres.test.mjs e tools/test-workspaces-db.mjs conforme ambiente isolado.
-- E2E e verificações de navegador estão em e2e/, e2e-hosted/ e shared/workspaces/*browser-check.mjs.
+- E2E e verificações de navegador estão em e2e/, e2e-hosted/ e shared/workspaces/\*browser-check.mjs.
 
 A descrição do PR #28 registra, em revisões recentes, build, ESLint, Playwright, 44 testes financeiros/rotas e 28 testes de persistência/sincronização aprovados. Ela também registra que duas suítes PostgreSQL opcionais não foram executadas na última revisão visual. Consulte o run mais recente antes de declarar CI verde. Teste sintético não substitui piloto com duas contas reais e dois dispositivos.
 
