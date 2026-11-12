@@ -1,3 +1,4 @@
+import { icon } from './ui.mjs';
 import {
   WorkspaceClient,
   openPreviewWorkspace,
@@ -233,7 +234,7 @@ function dialog(title, body, submit) {
   const d = $('#workspace-dialog');
   delete $('#workspace-form').dataset.createId;
   $('#workspace-form').innerHTML =
-    `<div class="dialog-heading"><h2>${esc(title)}</h2><button type="button" class="icon-button" data-workspace-close-dialog aria-label="Fechar">×</button></div>${body}<p class="error" id="workspace-form-error" role="alert"></p><div class="dialog-actions"><button type="button" class="secondary" data-workspace-close-dialog>Cancelar</button><button class="primary" type="submit">${esc(submit)}</button></div>`;
+    `<div class="dialog-heading"><h2>${esc(title)}</h2><button type="button" class="icon-button" data-workspace-close-dialog aria-label="Fechar">${icon('close')}</button></div>${body}<p class="error" id="workspace-form-error" role="alert"></p><div class="dialog-actions"><button type="button" class="secondary" data-workspace-close-dialog>Cancelar</button><button class="primary" type="submit">${esc(submit)}</button></div>`;
   d.showModal();
 }
 async function makeInvite(shared, email) {

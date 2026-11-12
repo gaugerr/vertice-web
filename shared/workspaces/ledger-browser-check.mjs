@@ -45,6 +45,7 @@ try {
   assert.equal(credit.paymentMethodId, 'P4');
   assert(!credit.cardId);
   p.once('dialog', (d) => d.accept());
+  await p.locator('.row-menu > summary').click();
   await p.locator('[data-entry-delete]').click();
   await p.locator('#transaction-list .transaction').waitFor({ state: 'hidden' });
   await p.locator('#finance-tabs [data-view=planning]').click();

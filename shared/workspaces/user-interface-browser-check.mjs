@@ -20,7 +20,9 @@ try {
       await page.locator('[data-settings-section=settings-area]').click();
     } else
       await page
-        .locator(`#app-menu nav[aria-label="Áreas do Vértice"] [data-area=${area}]`)
+        .locator(
+          `#app-menu nav[aria-label="Áreas do Vértice"] [data-area=${area}]:not([data-finance-view])`,
+        )
         .click();
   };
   const clean = async () => {

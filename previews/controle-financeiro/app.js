@@ -1,3 +1,4 @@
+import { icon, hydrateIcons } from './ui.mjs';
 import {
   stopSeries,
   saveMonthlyLimit,
@@ -92,14 +93,11 @@ const screens = {
   more: ['Mais', ''],
   wallets: ['Contas e saldos', 'Saldos manuais calculados apenas com os movimentos vinculados.'],
   cards: ['Cartões e faturas', 'Compras por competência e pagamentos sem duplicar despesas.'],
-  transactions: [
-    'Cada movimento conta.',
-    'Lançamentos avulsos e contas fixas, juntos e sem duplicidade.',
-  ],
+  transactions: ['Lançamentos', ''],
   fixed: ['Planejamento', ''],
   budget: ['Planejamento', ''],
   goals: ['Planejamento', ''],
-  analysis: ['Análises', 'Acompanhe a evolução das entradas e saídas.'],
+  analysis: ['Análises', ''],
   wealth: ['Patrimônio', 'Investimentos e metas, sem estimar seu patrimônio total.'],
 };
 function toast(message) {
@@ -131,7 +129,7 @@ function panel(title, subtitle, body, action = '') {
   return `<section class="panel"><div class="panel-heading"><div><h2>${title}</h2>${subtitle ? `<p class="panel-subtitle">${subtitle}</p>` : ''}</div>${action}</div>${body}</section>`;
 }
 const to = (label, destination) =>
-  `<button class="text-button" data-view="${destination}">${label} ↗</button>`;
+  `<button class="text-button" data-view="${destination}">${label}${icon('right')}</button>`;
 function stats(selectedRows) {
   return (
     overviewBalance(selectedRows) +
@@ -183,30 +181,21 @@ function recentTransactions() {
             return `<li><div><strong>${esc(e.name)}${e.seriesId ? ` · ${e.seriesIndex}/${e.seriesCount}` : ''}</strong><small>${dateName(e.date)}${status}</small></div><span class="${e.type === 'income' ? 'green' : 'pink'}">${e.type === 'income' ? '+' : '−'} ${money(e.amount)}</span></li>`;
           })
           .join('')}</ul>`
-      : `<div class="empty"><p>Comece pelo seu primeiro lançamento</p><button class="text-button" data-new-entry>＋ Novo lançamento</button></div>`
+      : `<div class="empty"><p>Comece pelo seu primeiro lançamento</p><button class="text-button" data-new-entry>${icon('plus')} Novo lançamento</button></div>`
   }</section>`;
 }
 function empty(message) {
   return `<div class="empty">${message}</div>`;
 }
-function actionIcon(name) {
-  const paths = {
-    edit: '<path d="m16 3 5 5-12 12H4v-5Z"/><path d="m14 5 5 5"/>',
-    copy: '<rect x="8" y="8" width="12" height="13" rx="2"/><path d="M16 8V5a2 2 0 0 0-2-2H5a2 2 0 0 0-2 2v9a2 2 0 0 0 2 2h3"/>',
-    trash: '<path d="M3 6h18M9 6V3h6v3M5 6l1 15h12l1-15M10 10v7M14 10v7"/>',
-    check: '<path d="m5 12 4 4L19 6"/>',
-    more: '<circle cx="5" cy="12" r="1"/><circle cx="12" cy="12" r="1"/><circle cx="19" cy="12" r="1"/>',
-  };
-  return `<svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true" focusable="false">${paths[name]}</svg>`;
-}
+const actionIcon = icon;
 function row(e, full = false) {
   const c = category(e.categoryId),
     fixed = e.source === 'fixed';
-  const source = fixed ? 'Conta fixa' : 'Avulso';
+  const source = fixed ? ' · Conta fixa' : e.seriesId ? ' · Série' : '';
   const date = e.paymentDate
     ? `${e.paid ? 'Pago' : 'Último pagamento'} em ${dateName(e.paymentDate)}`
     : dateName(e.date);
-  return `<article class="transaction"><span class="txn-icon ${e.type === 'income' ? 'income' : ''}" aria-hidden="true">${esc(c.icon)}</span><div class="txn-info"><strong>${esc(e.name)}${e.seriesId ? ` · ${e.seriesIndex}/${e.seriesCount}` : ''}</strong><small>${esc(c.name)}${!c.active ? ' · arquivada' : ''} · ${source}</small><small>${esc(method(e.paymentMethodId))} · ${date}</small>${e.observation ? `<p class="record-note">${esc(e.observation)}</p>` : ''}</div><div class="txn-amount ${e.type === 'income' ? 'green' : ''}">${e.type === 'income' ? '+' : '−'} ${money(e.amount)}<small>${e.paid ? (e.type === 'income' ? 'Recebido' : 'Pago') : e.paidAmount ? `Parcial · pago ${money(e.paidAmount)} · resta ${money(e.remainingAmount)}` : 'Pendente'}</small></div>${full ? `<div class="txn-actions">${fixed ? `<button data-fixed-action="${e.paid ? 'correct' : 'pay'}" data-id="${esc(e.accountId)}" aria-label="${e.paid ? 'Corrigir pagamento de' : 'Pagar'} ${esc(e.name)}" title="${e.paid ? 'Corrigir pagamento' : 'Pagar'}">${actionIcon(e.paid ? 'edit' : 'check')}</button><button data-fixed-action="details" data-id="${esc(e.accountId)}" aria-label="Detalhes de ${esc(e.name)}" title="Detalhes">${actionIcon('more')}</button>` : `<button data-entry-edit="${esc(e.id)}" aria-label="Editar ${esc(e.name)}" title="Editar">${actionIcon('edit')}</button><button data-entry-copy="${esc(e.id)}" aria-label="Copiar ${esc(e.name)}" title="Copiar">${actionIcon('copy')}</button><button class="danger-action" data-entry-delete="${esc(e.id)}" aria-label="Excluir ${esc(e.name)}" title="Excluir">${actionIcon('trash')}</button>`}</div>` : ''}</article>`;
+  return `<article class="transaction"><span class="txn-icon ${e.type === 'income' ? 'income' : ''}" aria-hidden="true">${esc(c.icon)}</span><div class="txn-info"><strong>${esc(e.name)}${e.seriesId ? ` · ${e.seriesIndex}/${e.seriesCount}` : ''}</strong><small>${esc(c.name)}${!c.active ? ' · arquivada' : ''}${source}</small><small>${esc(method(e.paymentMethodId))} · ${date}</small>${e.observation ? `<p class="record-note">${esc(e.observation)}</p>` : ''}</div><div class="txn-amount ${e.type === 'income' ? 'green' : ''}">${e.type === 'income' ? '+' : '−'} ${money(e.amount)}<small>${e.paid ? (e.type === 'income' ? 'Recebido' : 'Pago') : e.paidAmount ? `Parcial · pago ${money(e.paidAmount)} · resta ${money(e.remainingAmount)}` : 'Pendente'}</small></div>${full ? `<div class="txn-actions">${fixed ? `<button data-fixed-action="${e.paid ? 'correct' : 'pay'}" data-id="${esc(e.accountId)}" aria-label="${e.paid ? 'Corrigir pagamento de' : 'Pagar'} ${esc(e.name)}" title="${e.paid ? 'Corrigir pagamento' : 'Pagar'}">${actionIcon(e.paid ? 'edit' : 'check')}</button><button data-fixed-action="details" data-id="${esc(e.accountId)}" aria-label="Detalhes de ${esc(e.name)}" title="Detalhes">${actionIcon('more')}</button>` : `<button data-entry-edit="${esc(e.id)}" aria-label="Editar ${esc(e.name)}" title="Editar">${actionIcon('edit')}</button><details class="row-menu"><summary aria-label="Mais ações de ${esc(e.name)}">${icon('more')}</summary><div class="row-menu-items"><button data-entry-copy="${esc(e.id)}">${icon('copy')}Copiar</button><button class="danger-action" data-entry-delete="${esc(e.id)}">${icon('trash')}Excluir</button></div></details>`}</div>` : ''}</article>`;
 }
 function distribution() {
   const list = state.categories
@@ -239,7 +228,7 @@ function chart() {
     b = series('expense'),
     max = Math.max(1, ...a, ...b),
     points = (values) => values.map((v, i) => `${45 + i * 115},${170 - (v / max) * 135}`).join(' ');
-  return `<div class="chart-legend"><span>● Entradas</span><span class="purple">● Saídas</span></div><svg class="line-chart" viewBox="0 0 550 210" role="img" aria-label="Entradas e saídas pagas agrupadas por semana da competência">${[35, 80, 125, 170].map((y) => `<line x1="40" y1="${y}" x2="520" y2="${y}" stroke="#302837" stroke-dasharray="4 5"/>`).join('')}<polyline points="${points(a)}" fill="none" stroke="#b7edce" stroke-width="2.5"/><polyline points="${points(b)}" fill="none" stroke="#b19aef" stroke-width="2.5"/>${[1, 2, 3, 4, 5].map((v, i) => `<text x="${45 + i * 115}" y="204" fill="#9e91ae" text-anchor="middle" font-size="11">${v}ª sem.</text>`).join('')}</svg><p class="muted">Pagos e recebidos · semana da data de referência, não da compensação bancária.</p>`;
+  return `<div class="chart-legend"><span>● Entradas</span><span class="pink">● Saídas</span></div><svg class="line-chart" viewBox="0 0 550 210" role="img" aria-label="Entradas e saídas pagas agrupadas por semana da competência">${[35, 80, 125, 170].map((y) => `<line x1="40" y1="${y}" x2="520" y2="${y}" stroke="#302837" stroke-dasharray="4 5"/>`).join('')}<polyline points="${points(a)}" fill="none" stroke="#b7edce" stroke-width="2.5"/><polyline points="${points(b)}" fill="none" stroke="#efaab7" stroke-width="2.5"/>${[1, 2, 3, 4, 5].map((v, i) => `<text x="${45 + i * 115}" y="204" fill="#9e91ae" text-anchor="middle" font-size="11">${v}ª sem.</text>`).join('')}</svg><p class="muted">Valores confirmados por semana da competência.</p>`;
 }
 function budgetRows(compact = false) {
   const limits = budgetsFor(state, month);
@@ -264,7 +253,7 @@ function goals(compact = false) {
       ? list
           .map(
             (g) =>
-              `<article class="goal"><div class="goal-heading"><h3>${esc(g.name)}</h3>${compact ? '' : `<div class="txn-actions"><button data-goal-edit="${esc(g.id)}" aria-label="Editar meta ${esc(g.name)}" title="Editar meta">${actionIcon('edit')}</button><button class="danger-action" data-goal-delete="${esc(g.id)}" aria-label="Excluir meta ${esc(g.name)}" title="Excluir meta">${actionIcon('trash')}</button></div>`}</div><p>${esc(g.subtitle || '')}</p><div class="goal-total">${money(g.current)} <small>de ${money(g.target)}</small></div><div class="track"><div style="width:${Math.min(100, (g.current / g.target) * 100)}%;background:var(--mint)"></div></div><div class="goal-actions"><span>${Math.round((g.current / g.target) * 100)}% do caminho</span><button class="text-button" data-goal="${esc(g.id)}">＋ Guardar um valor</button></div>${compact ? '' : `<button class="text-button" data-goal-history="${esc(g.id)}">Ver aportes</button>`}</article>`,
+              `<article class="goal"><div class="goal-heading"><h3>${esc(g.name)}</h3>${compact ? '' : `<div class="txn-actions"><button data-goal-edit="${esc(g.id)}" aria-label="Editar meta ${esc(g.name)}" title="Editar meta">${actionIcon('edit')}</button><button class="danger-action" data-goal-delete="${esc(g.id)}" aria-label="Excluir meta ${esc(g.name)}" title="Excluir meta">${actionIcon('trash')}</button></div>`}</div><p>${esc(g.subtitle || '')}</p><div class="goal-total">${money(g.current)} <small>de ${money(g.target)}</small></div><div class="track"><div style="width:${Math.min(100, (g.current / g.target) * 100)}%;background:var(--mint)"></div></div><div class="goal-actions"><span>${Math.round((g.current / g.target) * 100)}% do caminho</span><button class="text-button" data-goal="${esc(g.id)}">${icon('plus')} Guardar</button></div>${compact ? '' : `<button class="text-button" data-goal-history="${esc(g.id)}">Ver aportes</button>`}</article>`,
           )
           .join('')
       : empty('Crie uma meta para começar a guardar.')) +
@@ -322,7 +311,7 @@ function openContribution(goalId, id) {
 function openGoalHistory(id) {
   const g = state.goals.find((g) => g.id === id);
   $('#goal-history-content').innerHTML =
-    `<div class="dialog-heading"><h2>Aportes · ${esc(g.name)}</h2><button class="icon-button" data-close aria-label="Fechar">×</button></div><p class="muted">Já guardado antes deste histórico: ${money(g.openingAmount ?? g.current)}.</p>${
+    `<div class="dialog-heading"><h2>Aportes · ${esc(g.name)}</h2><button class="icon-button" data-close aria-label="Fechar">${icon('close')}</button></div><p class="muted">Já guardado antes deste histórico: ${money(g.openingAmount ?? g.current)}.</p>${
       g.contributions?.length
         ? g.contributions
             .slice()
@@ -354,7 +343,7 @@ function option(value, label, selected) {
   return `<option value="${esc(value)}" ${value === selected ? 'selected' : ''}>${esc(label)}</option>`;
 }
 function transactionFilters() {
-  return `<div class="filters financial-filters"><input id="search" type="search" value="${esc(filters.query)}" aria-label="Buscar lançamento" placeholder="Buscar lançamento…"><label>Tipo<select data-filter="type">${[
+  return `<div class="filter-toolbar"><label class="search-field">${icon('search')}<input id="search" type="search" value="${esc(filters.query)}" aria-label="Buscar lançamento" placeholder="Buscar lançamento…"></label><button class="text-button" data-clear-filters hidden>Limpar</button></div><details class="filter-details"><summary>${icon('filter')} Filtros <span id="filter-count"></span>${icon('down')}</summary><div class="filters financial-filters"><label>Tipo<select data-filter="type">${[
     ['all', 'Todos'],
     ['expense', 'Despesas'],
     ['income', 'Receitas'],
@@ -374,7 +363,7 @@ function transactionFilters() {
     ['fixed', 'Contas fixas'],
   ]
     .map(([v, t]) => option(v, t, filters.source))
-    .join('')}</select></label></div><div id="transaction-list"></div>`;
+    .join('')}</select></label></div></details><div id="transaction-list"></div>`;
 }
 function renderTransactions() {
   const list = rows().filter(
@@ -404,6 +393,11 @@ function renderTransactions() {
     ? list.map((e) => row(e, true)).join('')
     : empty('Nenhum lançamento encontrado. Experimente outros filtros.');
   $('#transaction-indicators').innerHTML = stats(list);
+  const count = Object.entries(filters).filter(([key, value]) =>
+    key === 'query' ? value.trim() : value !== 'all',
+  ).length;
+  $('#filter-count').textContent = count ? String(count) : '';
+  $('[data-clear-filters]').hidden = !count;
 }
 function fixedPage() {
   const list = fixedRows(state, month),
@@ -417,7 +411,7 @@ function fixedPage() {
     ['Atrasadas', pending.filter((r) => r.date < today())],
     ['Pagas', paid],
   ];
-  return `<div class="fixed-summary"><article><small>Total previsto</small><strong>${money(sum(list))}</strong></article><article><small>Pago</small><strong class="green">${money(paidTotal)}</strong></article><article><small>A pagar</small><strong class="pink">${money(remainingTotal)}</strong></article></div><div class="main-grid"><div>${sections.map(([title, rs]) => panel(title, `${rs.length} competência(s) em ${monthName().toLowerCase()}`, rs.length ? rs.map((e) => row(e, true)).join('') : empty('Nenhuma conta nesta situação.'))).join('')}</div>${panel('Minhas contas cadastradas', 'Gerencie vigências sem apagar o histórico.', state.fixedAccounts.length ? state.fixedAccounts.map((a) => `<article class="registered-account"><strong>${esc(a.name)}</strong><small>Desde ${a.startMonth.split('-').reverse().join('/')} ${a.endMonth ? `· término ${a.endMonth.split('-').reverse().join('/')}` : '· mensal'}</small><button class="text-button" data-fixed-action="details" data-id="${a.id}">Detalhes e histórico →</button></article>`).join('') : empty('Nenhuma conta fixa cadastrada.<br>Comece por aluguel, internet ou uma assinatura.'), '<button class="text-button" data-new-fixed>＋ Nova conta</button>')}</div>`;
+  return `<div class="fixed-summary"><article><small>Total previsto</small><strong>${money(sum(list))}</strong></article><article><small>Pago</small><strong class="green">${money(paidTotal)}</strong></article><article><small>A pagar</small><strong class="pink">${money(remainingTotal)}</strong></article></div><div class="main-grid"><div>${sections.map(([title, rs]) => panel(title, `${rs.length} competência(s) em ${monthName().toLowerCase()}`, rs.length ? rs.map((e) => row(e, true)).join('') : empty('Nenhuma conta nesta situação.'))).join('')}</div>${panel('Minhas contas cadastradas', 'Gerencie vigências sem apagar o histórico.', state.fixedAccounts.length ? state.fixedAccounts.map((a) => `<article class="registered-account"><strong>${esc(a.name)}</strong><small>Desde ${a.startMonth.split('-').reverse().join('/')} ${a.endMonth ? `· término ${a.endMonth.split('-').reverse().join('/')}` : '· mensal'}</small><button class="text-button" data-fixed-action="details" data-id="${a.id}">Detalhes e histórico ${icon('right')}</button></article>`).join('') : empty('Nenhuma conta fixa cadastrada.<br>Comece por aluguel, internet ou uma assinatura.'), `<button class="text-button" data-new-fixed>${icon('plus')} Nova conta</button>`)}</div>`;
 }
 function errorPage() {
   return panel(
@@ -428,6 +422,7 @@ function errorPage() {
 }
 function render() {
   window.dispatchEvent(new CustomEvent('vertice:finance-view', { detail: { view } }));
+  hydrateIcons();
   $('#finance-area').dataset.view = view;
   $('#page-title').textContent = screens[view][0];
   $('#page-subtitle').hidden = !screens[view][1];
@@ -443,11 +438,8 @@ function render() {
     b.setAttribute('aria-pressed', String(active));
   });
   $('#new-entry').textContent =
-    view === 'fixed'
-      ? '＋ Nova conta fixa'
-      : view === 'goals'
-        ? '＋ Nova meta'
-        : '＋ Novo lançamento';
+    view === 'fixed' ? 'Nova conta fixa' : view === 'goals' ? 'Nova meta' : 'Novo lançamento';
+  $('#new-entry').innerHTML = icon('plus') + $('#new-entry').textContent;
   $('#new-entry').disabled = Boolean(loadError);
   document.querySelectorAll('[data-catalog]').forEach((b) => (b.disabled = Boolean(loadError)));
   document.querySelectorAll('#finance-tabs [data-view]').forEach((b) => {
@@ -465,7 +457,7 @@ function render() {
       monthlyBudget() +
       panel(
         'Contas próximas do vencimento',
-        'Até três próximas contas do mês selecionado.',
+        '',
         bills() +
           (rows().some((r) => r.type === 'expense' && !r.paid && r.date < today())
             ? '<button class="text-button" data-pending-history>Ver contas pendentes e atrasadas</button>'
@@ -481,11 +473,7 @@ function render() {
   else if (view === 'transactions') {
     $('#content').innerHTML =
       '<div id="transaction-indicators" aria-label="Indicadores dos lançamentos filtrados"></div>' +
-      panel(
-        'Lançamentos de ' + monthName().toLowerCase(),
-        'Contas fixas são identificadas para não serem registradas novamente como avulsos.',
-        transactionFilters(),
-      );
+      panel('Lançamentos de ' + monthName().toLowerCase(), '', transactionFilters());
     renderTransactions();
   } else if (view === 'fixed') $('#content').innerHTML = fixedPage();
   else if (view === 'budget')
@@ -502,7 +490,7 @@ function render() {
       monthComparison();
   else if (view === 'more')
     $('#content').innerHTML =
-      `<section class="panel more-links" aria-label="Mais opções do financeiro"><button data-view="wallets">Contas bancárias e saldos <span>›</span></button><button data-view="cards">Cartões e faturas <span>›</span></button><button data-settings-section="workspace-settings">Conta e compartilhamento <span>›</span></button><button data-catalog="methods">Formas de pagamento <span>›</span></button><button data-view="wealth">Patrimônio <span>›</span></button><button data-catalog="categories">Categorias <span>›</span></button><button data-settings-section="settings-area">Configurações e backups <span>›</span></button></section>`;
+      `<section class="panel more-links" aria-label="Mais opções do financeiro"><button data-view="wallets">${icon('wallet')}Contas bancárias e saldos ${icon('right')}</button><button data-view="cards">${icon('card')}Cartões e faturas ${icon('right')}</button><button data-settings-section="workspace-settings">${icon('people')}Conta e compartilhamento ${icon('right')}</button><button data-catalog="methods">${icon('card')}Formas de pagamento ${icon('right')}</button><button data-view="wealth">${icon('target')}Patrimônio ${icon('right')}</button><button data-catalog="categories">${icon('category')}Categorias ${icon('right')}</button><button data-settings-section="settings-area">${icon('settings')}Configurações e backups ${icon('right')}</button></section>`;
   else if (view === 'wallets') $('#content').innerHTML = walletsPage();
   else if (view === 'cards') $('#content').innerHTML = cardsPage();
   else if (view === 'wealth')
@@ -532,20 +520,22 @@ function catalogOptions(kind, current, type, required = true) {
   );
 }
 function field(label, name, value = '', type = 'text', extra = '') {
-  return `<label>${label}<input name="${name}" type="${type}" value="${esc(value)}" ${extra}></label>`;
+  return `<label class="field-${name}">${label}<input name="${name}" type="${type}" value="${esc(value)}" ${extra}></label>`;
 }
 function categoryField(current, type) {
-  return `<label>Categoria<select name="categoryId" required data-current="${esc(current || '')}" data-category-type="${type}">${catalogOptions('categories', current, type)}</select></label><button type="button" class="text-button manage-link" data-catalog="categories">Gerenciar categorias</button>`;
+  return `<label>Categoria<select name="categoryId" required data-current="${esc(current || '')}" data-category-type="${type}">${catalogOptions('categories', current, type)}</select></label><button type="button" class="text-button manage-link" data-catalog="categories" aria-label="Gerenciar categorias" title="Gerenciar categorias">${icon('settings')}</button>`;
 }
 function methodField(current, type = 'expense', allowUnknown = false) {
-  return `<label>${type === 'income' ? 'Forma de recebimento' : 'Forma de pagamento'}<select name="paymentMethodId" ${allowUnknown ? '' : 'required'} data-current="${esc(current || '')}">${catalogOptions('methods', current, undefined, !allowUnknown)}</select></label><button type="button" class="text-button manage-link" data-catalog="methods">Gerenciar formas de pagamento</button>`;
+  return `<label>${type === 'income' ? 'Forma de recebimento' : 'Forma de pagamento'}<select name="paymentMethodId" ${allowUnknown ? '' : 'required'} data-current="${esc(current || '')}">${catalogOptions('methods', current, undefined, !allowUnknown)}</select></label><button type="button" class="text-button manage-link" data-catalog="methods" aria-label="Gerenciar formas de pagamento" title="Gerenciar formas de pagamento">${icon('settings')}</button>`;
 }
 const noteField = (value) =>
   `<label>Observação <span class="muted">(opcional)</span><textarea name="observation" rows="2" maxlength="1000">${esc(value || '')}</textarea></label>`;
 function showForm(kind, title, body, context = {}) {
   editing = { kind, ...context };
+  $('#financial-form').dataset.kind = kind;
+  $('#financial-dialog').setAttribute('aria-labelledby', 'financial-dialog-title');
   $('#financial-form').innerHTML =
-    `<div class="dialog-heading"><h2>${title}</h2><button type="button" class="icon-button" data-close aria-label="Fechar">×</button></div>${body}<p id="financial-error" class="error" role="alert"></p><div class="dialog-actions"><button type="button" class="secondary" data-close>Cancelar</button><button type="submit" class="primary">${kind === 'pay' ? 'Confirmar pagamento' : kind === 'restore' ? 'Restaurar backup' : 'Salvar'}</button></div>`;
+    `<div class="dialog-heading"><h2 id="financial-dialog-title">${title}</h2><button type="button" class="icon-button" data-close aria-label="Fechar">${icon('close')}</button></div><div class="form-fields">${body}</div><p id="financial-error" class="error" role="alert"></p><div class="dialog-actions"><button type="button" class="secondary" data-close>Cancelar</button><button type="submit" class="primary">${kind === 'pay' ? 'Confirmar pagamento' : kind === 'restore' ? 'Restaurar backup' : 'Salvar'}</button></div>`;
   $('#financial-dialog').showModal();
 }
 function entryDefaults(type) {
@@ -657,7 +647,7 @@ function openInvoice(cardId) {
 }
 function walletsPage() {
   return (
-    `<div class="workspace-buttons"><button class="primary" data-wallet-new>＋ Nova conta</button><button class="secondary" data-transfer>Transferir</button></div>` +
+    `<div class="workspace-buttons"><button class="primary" data-wallet-new>${icon('plus')} Nova conta</button><button class="secondary" data-transfer>Transferir</button></div>` +
     (state.wallets ?? [])
       .map((w) =>
         panel(
@@ -689,7 +679,7 @@ function walletsPage() {
 }
 function cardsPage() {
   return (
-    '<button class="primary" data-card-new>＋ Novo cartão</button>' +
+    `<button class="primary" data-card-new>${icon('plus')} Novo cartão</button>` +
     (state.cards ?? [])
       .map((c) => {
         const i = invoice(state, c.id, month);
@@ -741,7 +731,7 @@ function openDetails(id) {
     .filter(([key, r]) => key.startsWith(id + ':') && r.payment)
     .sort(([a], [b]) => b.localeCompare(a));
   $('#fixed-detail-content').innerHTML =
-    `<div class="dialog-heading"><h2>${esc(a.name)}</h2><button class="icon-button" data-close aria-label="Fechar">×</button></div><p class="muted">Mensal desde ${a.startMonth}${a.endMonth ? ' · encerrada após ' + a.endMonth : ''}</p><div class="detail-actions"><button class="secondary" data-fixed-action="edit" data-id="${id}">Editar / reajustar</button><button class="secondary" data-fixed-action="adjust" data-id="${id}">Ajustar só ${monthName()}</button><button class="secondary" data-fixed-action="end" data-id="${id}">Encerrar recorrência</button>${fixedRows(state, month).find((r) => r.accountId === id)?.paidAmount ? `<button class="secondary" data-fixed-action="correct" data-id="${id}">Corrigir total pago</button><button class="secondary" data-fixed-action="undo" data-id="${id}">Desfazer todos os pagamentos de ${monthName()}</button>` : ''}</div><h3>Valores por vigência</h3><div class="version-history">${a.versions.map((v) => `<p><strong>${v.from}</strong> · ${money(v.amount)} · dia ${v.dueDay}<small>${esc(category(v.categoryId).name)} · ${esc(method(v.paymentMethodId))}</small></p>`).join('')}</div><h3>Pagamentos registrados</h3>${payments.length ? payments.map(([key, r]) => `<p class="payment-history"><strong>Competência ${key.slice(key.lastIndexOf(':') + 1)}</strong><br>${money(r.payment.amount)} · total pago · último registro em ${dateName(r.payment.date)}${r.payment.history ? r.payment.history.map((h) => `<small>${dateName(h.date)} · ${money(h.amount)}${h.observation ? ' · ' + esc(h.observation) : ''}</small>`).join('') : ''}<small>${esc(category(r.payment.snapshot.categoryId).name)} · ${esc(method(r.payment.snapshot.paymentMethodId))}</small></p>`).join('') : empty('Nenhum pagamento registrado.')}`;
+    `<div class="dialog-heading"><h2>${esc(a.name)}</h2><button class="icon-button" data-close aria-label="Fechar">${icon('close')}</button></div><p class="muted">Mensal desde ${a.startMonth}${a.endMonth ? ' · encerrada após ' + a.endMonth : ''}</p><div class="detail-actions"><button class="secondary" data-fixed-action="edit" data-id="${id}">Editar / reajustar</button><button class="secondary" data-fixed-action="adjust" data-id="${id}">Ajustar só ${monthName()}</button><button class="secondary" data-fixed-action="end" data-id="${id}">Encerrar recorrência</button>${fixedRows(state, month).find((r) => r.accountId === id)?.paidAmount ? `<button class="secondary" data-fixed-action="correct" data-id="${id}">Corrigir total pago</button><button class="secondary" data-fixed-action="undo" data-id="${id}">Desfazer todos os pagamentos de ${monthName()}</button>` : ''}</div><h3>Valores por vigência</h3><div class="version-history">${a.versions.map((v) => `<p><strong>${v.from}</strong> · ${money(v.amount)} · dia ${v.dueDay}<small>${esc(category(v.categoryId).name)} · ${esc(method(v.paymentMethodId))}</small></p>`).join('')}</div><h3>Pagamentos registrados</h3>${payments.length ? payments.map(([key, r]) => `<p class="payment-history"><strong>Competência ${key.slice(key.lastIndexOf(':') + 1)}</strong><br>${money(r.payment.amount)} · total pago · último registro em ${dateName(r.payment.date)}${r.payment.history ? r.payment.history.map((h) => `<small>${dateName(h.date)} · ${money(h.amount)}${h.observation ? ' · ' + esc(h.observation) : ''}</small>`).join('') : ''}<small>${esc(category(r.payment.snapshot.categoryId).name)} · ${esc(method(r.payment.snapshot.paymentMethodId))}</small></p>`).join('') : empty('Nenhum pagamento registrado.')}`;
   $('#fixed-detail').showModal();
 }
 function openCatalog(kind) {
@@ -861,6 +851,9 @@ $('#financial-form').addEventListener('submit', async (e) => {
   savingFinancial = true;
   const submit = e.target.querySelector('button[type=submit]');
   submit.disabled = true;
+  const submitLabel = submit.textContent;
+  submit.textContent = 'Salvando…';
+  e.target.setAttribute('aria-busy', 'true');
   const f = new FormData(e.target),
     get = (k) => String(f.get(k) || ''),
     context = editing;
@@ -1009,9 +1002,14 @@ $('#financial-form').addEventListener('submit', async (e) => {
     $('#financial-dialog').close();
   } catch (error) {
     $('#financial-error').textContent = error.message;
+    $('#financial-error').scrollIntoView({ block: 'nearest' });
   } finally {
     savingFinancial = false;
-    if (submit.isConnected) submit.disabled = false;
+    if (submit.isConnected) {
+      submit.disabled = false;
+      submit.textContent = submitLabel;
+    }
+    e.target.removeAttribute('aria-busy');
   }
 });
 $('#catalog-form').addEventListener('submit', async (e) => {
@@ -1089,9 +1087,23 @@ document.addEventListener('change', (e) => {
   }
 });
 document.addEventListener('click', async (e) => {
+  document.querySelectorAll('.row-menu[open]').forEach((menu) => {
+    if (!menu.contains(e.target)) menu.open = false;
+  });
   const b = e.target.closest('button');
   if (!b) return;
   try {
+    if (b.hasAttribute('data-clear-filters')) {
+      Object.assign(filters, {
+        query: '',
+        type: 'all',
+        category: 'all',
+        method: 'all',
+        status: 'all',
+        source: 'all',
+      });
+      render();
+    }
     if (b.hasAttribute('data-close')) {
       b.closest('dialog').close();
       return;
@@ -1325,5 +1337,16 @@ workspaceClient?.onChange(async () => {
     render();
   } catch (error) {
     toast(error.message);
+  }
+});
+
+// Native details keep action menus keyboard accessible without a menu framework.
+document.addEventListener('keydown', (e) => {
+  if (e.key !== 'Escape') return;
+  const menu = document.querySelector('.row-menu[open]');
+  if (menu) {
+    menu.open = false;
+    menu.querySelector('summary').focus();
+    e.preventDefault();
   }
 });

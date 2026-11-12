@@ -56,3 +56,7 @@ e Investimentos das despesas comuns; restante já desconta reserva uma única ve
 Metas são independentes. Preservar totals/expense/balance legados e o protocolo;
 não migrar dados para alterar a apresentação. Métodos de pagamento/data visíveis;
 crédito genérico não exige cartão. Configurações adicionais preservam séries/vínculos.
+
+Padrões visuais compartilhados ficam em ui.css; ícones SVG em ui.mjs. Preservar
+a cópia desses dois arquivos para raiz e /staging/ no build. Validação visual e
+interações: shared/workspaces/visual-browser-check.mjs com dados locais isolados.

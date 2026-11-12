@@ -3,6 +3,36 @@
 Atualizado em 11/11/2026 (America/Sao_Paulo). Registro de estado observado, não
 substitui consultas atuais aos serviços. Começar por este arquivo e AGENTS.md.
 
+## Reformulação visual — 12/11/2026
+
+Padrões visuais da entrada de revisão estão em `ui.css`, carregado após os estilos
+existentes; `ui.mjs` centraliza SVGs e hidrata ícones estáticos. Ambos são copiados
+para a raiz e `/staging/` pelo build. Sem novas dependências, alterações em src/, banco,
+cálculos, armazenamento, sincronização ou rotas.
+
+- Tema escuro/roxo preservado; cards, tipografia, cores, progressos, seletores,
+  listas, menus e formulários padronizados em todas as telas financeiras/configurações.
+  Ícones próprios de categorias armazenadas permanecem intactos.
+- Pesquisa visível; filtros recolhidos, contador de critérios ativos e Limpar.
+  Indicadores continuam refletindo os filtros. Editar permanece direto; copiar e
+  excluir ficam em Mais ações, com teclado/Escape e fechamento ao clicar fora.
+- Formulários com valor destacado, campos de 16px, gerenciamento de categorias/
+  pagamentos acessível por ícone identificado e ações fixadas ao rodapé do diálogo.
+  Data/método visíveis; opções adicionais preservadas. Salvamento mostra estado
+  ocupado e mantém rascunho em falha. Metas, recorrências, parcelas e backups intactos.
+- Removidos slogans/subtítulos redundantes e símbolos improvisados da navegação;
+  orientações financeiras e de recuperação permanecem. Gráfico semanal distingue
+  receitas verdes de despesas rosas, acompanhando os demais indicadores.
+- Corrigida a largura herdada pelos ícones do mês em telas estreitas. Indicadores
+  fora do Resumo são compactos para aproximar pesquisa e planejamento do topo.
+- Validação: 44 testes financeiros/rotas, build, ESLint/diff e Playwright para todas
+  as dez telas em 280/390/1440, filtros/limpeza, teclado, falha de valor/rascunho,
+  altura de 500px (aproxima teclado; não substitui aparelho físico), valores altos/
+  negativos, crédito sem cartão, edição/exclusão, pagamento/desfazer/reconfirmar,
+  backup/restauração/cópia anterior, persistência e configurações. Capturas em /tmp.
+  Sem leitura/gravação de registros reais; sessão Google e teclado físico ficam
+  para a revisão do titular no endereço conectado existente.
+
 ## Simplificação e indicadores consistentes — 12/11/2026
 
 Esta revisão substitui a apresentação/navegação descrita nas seções históricas abaixo.
