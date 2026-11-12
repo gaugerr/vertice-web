@@ -366,7 +366,6 @@ main#main:focus {
   }
 }
 
-
 /* Compact drawer: reduce width and vertical density without hiding actions. */
 .area-drawer {
   width: min(260px, 82vw);
