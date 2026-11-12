@@ -197,11 +197,14 @@ import { financeTitles, financeRoute, financeView } from './finance-navigation.m
 
 // Bind navigation before waiting for authentication, IndexedDB or network bootstrap.
 // A slow staging session must never leave the header and drawer inert.
-void Promise.all([
-  import('./app.js'),
-  import('./workspaces.js').then(({ workspaceEnvironment }) => workspaceEnvironment()),
-])
-  .then(([, environment]) => {
+void import('./app.js')
+  .then(async () => {
+    // app.js (through workspace-ui.mjs) initializes the session first.
+    // Reuse the established sequence instead of racing a second bootstrap.
+    const { workspaceEnvironment } = await import('./workspaces.js');
+    return workspaceEnvironment();
+  })
+  .then((environment) => {
     // OAuth must finish in the parent before the iframe reads the shared session.
     if (environment.actor)
       document.getElementById('shopping-frame').src =
