@@ -5,13 +5,13 @@ substitui consultas atuais aos serviços. Começar por este arquivo e AGENTS.md.
 
 ## Registro rápido, contas, cartões e séries — 11/11/2026
 
-**Preparado na branch `feat/finance-ledger`, ainda não ativado na preview.** A
-revisão automática rejeitou aplicar a migração ao Supabase hospedado por falta de
-autorização explícita para a mudança persistente no banco real e no comando
-compartilhado. Nenhuma alteração foi aplicada ao banco ou à Edge Function.
-Aguardar autorização do proprietário para a migração e atualização somente de
-`workspaces`, antes de integrar esta branch à `preview/controle-financeiro`.
-A implementação usa PostgreSQL descartável sem rede e dados sintéticos nos testes.
+**Ativado na versão de revisão.** O proprietário autorizou explicitamente a
+migração no banco real e a atualização de `workspaces`. Aplicação concluída:
+três tabelas novas com RLS, comando restrito ao serviço e Edge Function na versão 2,
+preservando sua autenticação/origem. A PR #29 foi integrada somente à branch
+`preview/controle-financeiro`; interface confirmada em `/staging/` e checks
+PostgreSQL/Web/Access/Cloudflare aprovados. Não houve merge em `main`.
+A migração está alinhada à versão hospedada `20261111225724`; não reaplicar.
 
 O proprietário autorizou estes recursos nesta etapa, substituindo a restrição
 anterior de não criar cartões/parcelamentos. Formulário comum começa com valor,
@@ -40,7 +40,7 @@ Orçamento admite limite total mensal independente das categorias, inclusive zer
 e cópia para o mês seguinte. Metas existentes continuam independentes; guardar uma
 meta não cria débito bancário automaticamente.
 
-Migração `20261111223526_finance_accounts_cards_series`: adiciona `finance_wallets`,
+Migração `20261111225724_finance_accounts_cards_series`: adiciona `finance_wallets`,
 `finance_cards`, `finance_moves`, metadata `finance_entries.extra`, vínculos de baixa
 em `finance_payments` e `finance_budget_months.total_limit_cents`. RLS por espaço e
 escrita pelo comando do serviço. `workspace_command` mantém assinatura, envolve o
