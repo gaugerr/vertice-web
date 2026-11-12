@@ -197,19 +197,14 @@ import { financeTitles, financeRoute, financeView } from './finance-navigation.m
 
 // Bind navigation before waiting for authentication, IndexedDB or network bootstrap.
 // A slow staging session must never leave the header and drawer inert.
-void import('./app.js')
-  .then(async () => {
-    // app.js (through workspace-ui.mjs) initializes the session first.
-    // Reuse the established sequence instead of racing a second bootstrap.
-    const { workspaceEnvironment } = await import('./workspaces.js');
-    return workspaceEnvironment();
-  })
-  .then((environment) => {
-    // OAuth must finish in the parent before the iframe reads the shared session.
-    if (environment.actor)
-      document.getElementById('shopping-frame').src =
-        document.getElementById('shopping-frame').dataset.src;
-  })
+void import('./app.js').then(() => {
+  // workspace-ui.mjs has completed the single session bootstrap by this point.
+  // Do not initialize auth a second time: the iframe must reuse that session.
+  if (document.documentElement.dataset.workspaceAuthenticated === 'true') {
+    const frame = document.getElementById('shopping-frame');
+    frame.src = frame.dataset.src;
+  }
+})
   .catch((error) => {
     const message = document.getElementById('workspace-message');
     if (message) message.textContent = error?.message || 'Não foi possível iniciar o espaço.';
