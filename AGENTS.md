@@ -1,390 +1,67 @@
-# Vértice — guia do projeto
+# Instruções para agentes e contribuidores
 
-> **Estado atual e retomada por IA (09/11/2026):** leia [AI-HANDOFF](docs/AI-HANDOFF.md).
-> App oficial, demonstração local e preview conectada são ambientes distintos.
-> Resultados e instruções anteriores abaixo devem ser interpretados no contexto do ambiente e da data; o handoff registra as pendências atuais.
+Leia primeiro docs/AI-HANDOFF.md. Ele registra o estado atual, os ambientes, as decisões e os riscos. Use docs/README.md para localizar a documentação detalhada.
 
-A interface em `preview/controle-financeiro` usa textos finais do produto; não
-reintroduzir badges ou ferramentas de demonstração nem restaurar exemplos.
-Primeiro acesso sem registros começa vazio; preservar dados, backups e os
-identificadores internos. Detalhes e validação em `docs/AI-HANDOFF.md`.
+## Regra principal: identificar o ambiente
 
-## Comece aqui: contexto e conexões
+- main: aplicativo oficial de compras, acesso Google/licença e central de planilhas financeiras.
+- preview/controle-financeiro: ecossistema em desenvolvimento, associado ao PR #28.
+- Raiz da preview: demonstração fictícia local.
+- /staging/ na preview: homologação conectada ao Supabase Vértice; pode conter dados reais.
+- vertice-kit: página de vendas separada.
 
-Guia para retomar o projeto sem o histórico do chat. Estado operacional conferido
-em **29/10/2026 UTC**; confirmar novamente antes de alterar produção. Instruções
-detalhadas e consultas seguras: [Operações](docs/OPERACOES.md).
+Nunca trate código da preview como funcionalidade já entregue no app oficial. Não faça merge, deploy, migração, alteração de configuração ou operação comercial sem autorização explícita do proprietário.
 
-1. **GitHub e workspace:** repositório `gaugerr/vertice-web`, produção na `main`.
-   Consultar a referência remota atual e executar `git status --short` antes de
-   editar. Há cópias antigas e alterações locais de trabalhos anteriores; não
-   resetar, sobrescrever ou publicar essas cópias inteiras. Usar branch baseada na
-   `main` atual e revisar o diff. SHA/deploy citado em um chat não é fonte atual.
-2. **Descobrir ferramentas:** procurar as ferramentas conectadas de GitHub,
-   Cloudflare e Supabase disponíveis na sessão. Seus nomes e IDs de conexão podem
-   mudar. Em ambiente gerenciado, consultar `cloud_environment.environment_status`
-   e a política de rede antes de usar CLI; não imprimir variáveis/credenciais nem
-   contornar o proxy. Credencial ausente no shell não significa plugin desconectado.
-3. **Cloudflare:** conta `ab0452392516e43ea097317ea48c57d5`. Com o plugin, descobrir
-   o endpoint pela busca e fazer GET de `/accounts/{account_id}/pages/projects`.
-   Conferir os projetos, domínios, último deploy de produção e commit:
-   `use-vertice` é o **app** (`app.usevertice.app.br`); `vertice-kit` é a
-   **página de vendas** (`usevertice.app.br`). Ambos acompanham `main`, com builds
-   diferentes. Não confundir preview com produção nem disparar deploy para testar conexão.
-4. **Supabase:** listar projetos na conexão apropriada e confirmar nome `vertice`,
-   ref **`wqutcsjdozcukwxvkbtc`**, região `us-east-1`. Não usar o projeto Docery.
-   A conexão que funcionou nesta revisão chamava-se `Supabase`, ID
-   `link_6acfe773755081919a0d054cf101d061`; redescobrir se não existir na sessão.
-   Verificar com SQL de leitura (`select now();`) e as consultas de produto/cron
-   em [Operações](docs/OPERACOES.md#supabase-banco-e-automação).
-5. **Cakto sem MCP:** o acesso já funciona pela API oficial, usando credenciais
-   somente no servidor, no Vault do Supabase (`CAKTO_CLIENT_ID` e
-   `CAKTO_CLIENT_SECRET`). Testar a função privada existente, sem recriá-la:
+## Antes de editar
 
-   ```sql
-   select cakto_private.read_api(
-     'products/988379d3-cbaa-465f-930b-14aa7d48422e/checkouts/1241258/'
-   );
-   ```
+1. Consulte o branch, commit e arquivos atuais no GitHub. Não confie em SHA, deploy ou estado copiado de conversas antigas.
+2. Verifique o diff e preserve alterações existentes.
+3. Leia o documento específico da área afetada e os testes correspondentes.
+4. Faça a menor alteração coerente. Não reescreva módulos ou troque tecnologias sem necessidade comprovada.
+5. Atualize a documentação quando uma decisão, contrato, comportamento ou validação mudar.
 
-   Esperado: `ok=true`, `status=200`. O resultado é configuração do checkout,
-   nunca token/segredo. A função é privada e só lê produtos/checkouts; não aceita
-   ofertas ou escrita. Fluxo de autenticação, endpoints e backups em
-   [API Cakto](docs/OPERACOES.md#api-cakto-sem-mcp).
+## Arquitetura e limites
 
-6. **Se falhar:** distinguir ferramenta ausente, falta de permissão, projeto
-   incorreto e indisponibilidade de rede. Informar a falha concreta; não pedir
-   segredos pelo chat, trocar OAuth, recriar infraestrutura ou desativar proteção
-   para contornar o problema. Reutilizar a configuração existente.
+- Compras oficiais: React + TypeScript + Vite + Tailwind CSS 4; domínio em src/domain, persistência Dexie/IndexedDB em src/data, telas em src/features.
+- As telas de compras acessam dados pelo contrato ShoppingRepository. Não escrever diretamente nas tabelas Dexie a partir de componentes.
+- Financeiro da preview: aplicação DOM/JavaScript em previews/controle-financeiro, com regras em finance-domain.mjs e finance-ledger.mjs.
+- A preview reutiliza as telas/repositório React de Compras via shopping.tsx.
+- shared/workspaces mantém persistência local, outbox, mapeamento, sincronização, versões, recibos idempotentes e conflitos.
+- Supabase é a fonte remota por espaço; acesso de escrita passa pelo serviço workspaces e workspace_command. Nunca usar service_role no navegador.
+- Valores financeiros são centavos inteiros. Preços e quantidades de compras usam representação decimal exata; não usar float para dinheiro.
+- Datas de competência são datas civis; distinguir competência de instante UTC e data real de pagamento.
 
-## Visão geral
+## Segurança e integridade
 
-PWA de listas de compras, pensado para uso rápido no mercado e funcionamento
-offline. Este repositório é `gaugerr/vertice-web`; o app Flutter e o Docery são
-projetos separados. App: <https://app.usevertice.app.br>.
-Página de vendas: <https://usevertice.app.br>. O endereço Pages anterior continua
-ativo para preservar o acesso aos dados locais de quem já o utiliza.
+- Nunca ler, imprimir, versionar ou pedir segredos. Nunca incluir tokens, cookies, service_role, chaves privadas ou dados pessoais em logs, commits, documentação ou respostas.
+- Não alterar Auth, licenças, Cakto, Vault, cron, domínios, callbacks ou políticas sem escopo e autorização explícitos.
+- Não reaplicar migrações já registradas. Migrações históricas em supabase/drafts não são instruções de deploy.
+- Não resetar o Supabase Vértice, não tocar no projeto Docery e nunca usar fixtures ou eventos sintéticos no banco real.
+- Preservar RLS, isolamento por workspace, validação de ator no servidor e escrita privilegiada exclusiva do serviço.
+- Não apagar dados para corrigir UI. Migrações Dexie/SQL devem ser aditivas, testadas e documentadas.
+- Backup/restauração devem validar o arquivo antes de substituir dados e preservar cópia recuperável.
 
-- **Stack:** React 19, TypeScript, Vite 7, Tailwind CSS 4, React Router 7,
-  Dexie/IndexedDB, Zod, big.js e lucide-react. Node 24 e npm; versões no lockfile.
-- **Compras:** dados locais no navegador. Login não faz backup nem sincronização.
-- **Acesso:** Google via Supabase, licença vitalícia liberada pelo produtor ou pela Cakto e
-  autorização offline assinada de até sete dias após validação online.
-- **Ainda não existem:** sincronização de compras na nuvem, leitura de etiquetas/códigos de barras ou integração automática com planilha.
-  A automação Cakto está ativa em produção; modelos de configuração e migrações
-  novas começam desativados por segurança. Não confundir esses dois estados.
+## Sincronização e espaços
 
-## Arquitetura e entrada
+- A gravação local e a outbox devem ser atômicas.
+- Reenvios precisam ser idempotentes; não remover pendências antes da confirmação do servidor.
+- Conflitos no mesmo registro exigem revisão explícita. Não resolver usando apenas o relógio do cliente.
+- Pagamentos e aportes devem verificar também a versão do registro pai.
+- Ao remover participante, colocar fila antiga em quarentena; nunca reenviar operações de uma geração anterior após novo convite.
+- Não prometer sincronização com o app fechado nem revogação instantânea enquanto o dispositivo estiver offline.
+- Dados exportados ou já baixados não podem ser apagados remotamente.
 
-Fluxo: **tela → `useRepository()` → `ShoppingRepository` → repositório Dexie →
-IndexedDB**. Regras puras ficam em `src/domain/services/`; componentes não escrevem
-diretamente nas tabelas. Formulários guardam rascunhos, não uma segunda cópia global
-dos registros. `useQuery` usa `useLiveQuery` para atualizar telas e outras abas.
+## Validação
 
-| Responsabilidade                                   | Arquivos principais                                                                                  |
-| -------------------------------------------------- | ---------------------------------------------------------------------------------------------------- |
-| Inicialização e estilos                            | `src/main.tsx`, `src/styles/globals.css`, `index.html`                                               |
-| Rotas e proteção de acesso                         | `src/app/router.tsx`, `src/app/Root.tsx`                                                             |
-| Cabeçalho, navegação, rodapé e saída com rascunhos | `src/app/App.tsx`                                                                                    |
-| Injeção do repositório e escopo de conta           | `src/app/repository-context.ts`, `src/app/services.ts`                                               |
-| Modelos, contrato e validação de entradas          | `src/domain/models/shopping.ts`, `src/domain/models/repository.ts`, `src/domain/schemas/shopping.ts` |
-| Banco, versões e gravações em andamento            | `src/data/database/database.ts`, `src/data/database/writes.ts`                                       |
-| Consultas, transações e operações de compras       | `src/data/repositories/dexie-shopping-repository.ts`                                                 |
-| Consultas reativas, mutações e rascunhos           | `src/shared/hooks/useQuery.ts`, `src/shared/hooks/useMutation.ts`, `src/shared/lib/drafts.ts`        |
+Na raiz: npm ci, npm run typecheck, npm run lint, npm test e npm run build conforme o escopo.
 
-Rotas: `/` listas; `/lists/:listId` categorias/resumo;
-`/lists/:listId/categories/:id` produtos; `/settings` dados/app; `/login` acesso;
-`/auth/callback` retorno Google; `/admin` licenças; `/privacy` privacidade;
-`/financeiro` central de acesso às planilhas do kit (mesma proteção de acesso).
+Para a preview financeira, execute os testes específicos descritos em previews/controle-financeiro/AGENTS.md e shared/workspaces/README.md. Testes PostgreSQL usam fixtures isoladas; nunca apontar para produção.
 
-## Mapa das funcionalidades
+Diferencie teste automatizado, homologação com identidades sintéticas e validação manual com contas/dispositivos reais. Não diga que uma etapa foi validada se ela não foi executada nesta revisão.
 
-Nos caminhos abaixo, `src/features/` contém as telas e componentes da funcionalidade.
+## Publicação e integração
 
-| Funcionalidade                                              | Onde alterar                                                                                                                                             |
-| ----------------------------------------------------------- | -------------------------------------------------------------------------------------------------------------------------------------------------------- |
-| Início, listas em andamento/finalizadas e chamada principal | `src/features/shopping-lists/pages/ListsPage.tsx`                                                                                                        |
-| Criar, editar, copiar e excluir listas                      | `src/features/shopping-lists/components/ListForm.tsx`, `ListCard.tsx`, `ListActions.tsx`; operações no repositório Dexie                                 |
-| Categorias e resumo da compra                               | `src/features/categories/pages/CategoriesPage.tsx`                                                                                                       |
-| Itens, filtros e marcação como comprado                     | `src/features/items/pages/ItemsPage.tsx`, `src/features/items/components/ItemRow.tsx`                                                                    |
-| Inclusão rápida, teclado e foco contínuo                    | `src/features/items/components/AddItemForm.tsx`                                                                                                          |
-| Edição completa e preço rápido após marcar o checkbox       | `src/features/items/components/ItemForm.tsx`, `PurchaseForm.tsx`                                                                                         |
-| Marca, embalagem e nome exibido                             | `src/features/items/components/ProductDetailsFields.tsx`, `src/features/items/hooks/useProductDetailsDraft.ts`, `src/domain/services/product-details.ts` |
-| Sugestões compactas de compras anteriores                   | `src/features/items/hooks/useItemSuggestions.ts`, `src/domain/services/item-suggestions.ts`; apresentação no `AddItemForm.tsx`                           |
-| Referência do último preço compatível                       | `src/features/items/hooks/usePriceReferences.ts`, `src/features/items/components/LastPriceReference.tsx`, `src/domain/services/price-history.ts`         |
-| Orçamento da lista, saldo e alertas                         | `src/features/budget/components/`, `src/domain/services/budget.ts`                                                                                       |
-| Finalizar/reabrir compra e revisão                          | `src/features/shopping-lists/components/CompletionDialog.tsx`, `ListActions.tsx`, `src/domain/services/completion.ts`                                    |
-| Comparar preço por peso, volume ou unidade                  | `src/features/comparator/components/`, `src/features/comparator/session.ts`, `src/domain/services/comparison.ts`                                         |
-| Decimais, totais e apresentação em reais                    | `src/domain/services/money.ts`                                                                                                                           |
-| Exportar/importar backup e formato Flutter                  | `src/features/backup/components/BackupPanel.tsx`, `src/data/backup/backup.ts`                                                                            |
-| Configurações e informações de armazenamento                | `src/features/settings/pages/SettingsPage.tsx`                                                                                                           |
-| Instalação, avisos offline e atualização                    | `src/pwa/registration.ts`, `src/pwa/connectivity.ts`, `src/pwa/components/`                                                                              |
-| Logo reutilizável e identidade visual                       | `src/shared/ui/Brand.tsx`, `src/styles/globals.css`, `public/icons/`                                                                                     |
-| Diálogos, botões, erros e estados vazios comuns             | `src/shared/ui/Dialog.tsx`, `Button.tsx`, `Feedback.tsx`, `RouteError.tsx`                                                                               |
-
-Os controles de voltar usam `src/shared/ui/BackLink.tsx`.
-
-Vértice Financeiro: `src/features/finance/` contém página, cartão inicial,
-configuração dos quatro links externos, tutorial e dicas. A primeira visita reduz
-o cartão por conta/navegador, sem confirmar cópia/download nem alterar compras.
-Ver `docs/FINANCEIRO.md`. Não colocar arquivos pagos no GitHub nem prometer
-sincronização com as planilhas.
-
-Links dos quatro arquivos: `src/features/finance/config.ts`; tutorial e dicas:
-`src/features/finance/guide.ts`. Google usa `/copy` em nova aba; no Android, o
-Planilhas pode abrir o modelo e exigir “Fazer uma cópia” pelo menu. Não prometer
-forçar o navegador. A rota protegida não impede o compartilhamento dos links.
-
-Arquivos citados apenas pelo nome na mesma linha pertencem ao último diretório
-explícito daquela linha. Testes de regras/componentes ficam próximos ao código em
-`*.test.ts`/`*.test.tsx`; fluxos de navegador ficam em `e2e/`.
-
-## Regras que precisam ser preservadas
-
-- **Dinheiro:** preço e quantidade são strings decimais canônicas; calcular com
-  big.js, arredondar cada item para centavos e somar só os comprados. Não substituir
-  por multiplicação de `number`/ponto flutuante. Orçamento é inteiro em centavos.
-- **Datas:** compra usa `YYYY-MM-DD` civil, sem conversão UTC na apresentação;
-  timestamps de criação/alteração são ISO UTC. Utilitário: `src/shared/lib/date.ts`.
-- **Embalagem ≠ quantidade:** três pacotes de 500 g são quantidade 3 e conteúdo
-  500 g; o conteúdo não multiplica o valor cobrado. Nome base, marca e embalagem
-  ficam separados; o nome exibido é derivado.
-- **Rapidez:** adicionar vários produtos mantém o teclado/foco. Marcar como comprado
-  abre os valores com o preço selecionado. Detalhes opcionais não podem atrapalhar.
-- **Finalização:** exige ao menos um comprado, preços positivos e revisão atual.
-  Compra finalizada é somente leitura até reabrir, inclusive no repositório.
-  Cópia é independente, preserva quantidades/detalhes, zera preços e desmarca itens.
-- **Histórico:** vem de itens comprados de outras listas finalizadas; não há tabela
-  separada de preços. Correspondência por nome, marca, embalagem equivalente e
-  unidade de cobrança; sem aproximação de nomes. Reabrir/excluir retira a referência.
-- **Sugestões:** após dois caracteres, até três linhas pequenas; consideram compras
-  finalizadas e evitam variantes já presentes na lista. Copiam detalhes, com
-  quantidade 1/preço zero/desmarcado; não substituem o texto livre nem puxam preços.
-- **Comparador:** independente das compras; rascunho no sessionStorage, cálculos
-  decimais, não altera itens/orçamento nem integra o backup.
-- **Orçamento:** gasto global da lista, independente de filtros/categorias; aviso
-  a partir de 80%, sem bloquear a compra.
-
-## Persistência, conta e segurança
-
-Há dois armazenamentos distintos: **compras no IndexedDB do aparelho** e
-**identidade/licenças/eventos de pagamento no Supabase**. A planilha é um terceiro
-arquivo independente, copiado/baixado pelo comprador. Não mover compras para o
-Supabase nem integrar a planilha como efeito colateral de alterações de interface.
-
-A base aditiva de compras/financeiro/casal está na migração
-`shared_shopping_finance_workspaces`; contrato e validação em
-[Banco de espaços](docs/WORKSPACE-DATABASE.md). Ela não ativa sincronização no app,
-não importa dados locais e não modifica Auth/licenças/Cakto. Escrita nova somente
-por serviço autenticado via `workspace_command`; leitura com RLS por participação.
-Teste isolado: `POSTGRES_CONTAINER=<container-sem-rede> node tools/test-workspaces-db.mjs`.
-Nunca apontar fixtures para produção nem reexecutar o rascunho da preview em cima
-dessa migração.
-
-- Dexie está na **versão 5**: `lists`, `categories`, `items` e recibos `migrations`.
-  Migrações futuras incrementam a versão e preservam registros; não apagar/recriar
-  banco, alterar nomes ou limpar armazenamento para resolver mudanças de interface.
-- Modo local `legacy`: banco `vertice_web`. Modo protegido: banco
-  `vertice_web_<projeto>_<uid>`, via `src/access/account-repository.ts`.
-  A transferência confirmada do legado fica em `src/access/legacy-migration.ts`;
-  mantém o original e um diário separado `vertice_account_migrations`.
-- Exclusões em cascata, cópia, finalização e restauração devem continuar
-  transacionais, com validação de relações e proteção contra alterações entre abas.
-- Backup **v5**, aceita v1–v5; até 10 MiB e 50 mil registros por coleção.
-  Restaurar substitui os dados da conta após confirmação; não faz mesclagem.
-  Nunca incluir sessões, credenciais ou autorizações de acesso no backup.
-- Trocar domínio/navegador/aparelho não transporta compras. Limpar dados do site
-  pode apagá-las. Não prometer armazenamento em nuvem ou persistência garantida.
-
-| Parte do acesso                                     | Arquivos                                                                                                                       |
-| --------------------------------------------------- | ------------------------------------------------------------------------------------------------------------------------------ |
-| Configuração pública, OAuth e chamadas às funções   | `src/access/config.ts`, `client.ts`, `CallbackPage.tsx`                                                                        |
-| Estado da sessão/licença e autorização offline      | `src/access/controller.ts`, `lease.ts`, `use-access.ts`, `license-public-key.json`                                             |
-| Bloqueio de telas e preservação de edição           | `src/access/AccessBoundary.tsx`, `AccessScreen.tsx`                                                                            |
-| Login, conta, administração e privacidade           | `src/access/LoginPage.tsx`, `AccountPanel.tsx`, `AdminPage.tsx`, `PrivacyPage.tsx`                                             |
-| Verificação e administração no servidor             | `supabase/functions/license-check/index.ts`, `supabase/functions/license-admin/index.ts`, `supabase/functions/_shared/http.ts` |
-| Tabelas, permissões, administrador inicial e testes | `supabase/migrations/`, `supabase/bootstrap-admin.sql`, `supabase/tests/access.sql`                                            |
-
-O administrador é autorizado pelo servidor; esconder um botão não é autorização.
-O painel permite excluir somente uma licença, com confirmação exata do e-mail.
-`access_admin_delete_license` preserva Auth, compras/eventos Cakto e auditoria;
-licenças de administradores são protegidas. Exclusão não equivale ao bloqueio
-manual de Revogar: uma nova notificação válida pode recriar a licença. Testes em
-`supabase/tests/admin_delete_license.sql` e `src/access/AdminPage.test.tsx`.
-Não usar email fixo/`user_metadata` do cliente para conceder privilégios nem promover
-automaticamente o primeiro usuário. Preservar separação de contas e validação da
-assinatura, identidade e validade da autorização offline. Revogação é conhecida na
-próxima validação online; não prometer revogação instantânea sem internet.
-
-Somente URL/chave pública e chave pública de assinatura entram no frontend.
-`service_role`, segredo Google e chave privada ficam fora do Git/cliente, no servidor.
-Não gerar nem rotacionar chaves ao fazer alterações visuais ou de documentação.
-
-### Banco do servidor e fluxo de acesso
-
-| Tabela                                 | Responsabilidade                                                                                                                                                                                                   |
-| -------------------------------------- | ------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------ |
-| `public.licenses`                      | Licença por e-mail normalizado; UID Google vinculado após identidade verificada, status, versão, referência e origem da concessão/override manual. RLS permite ao cliente ler somente a própria licença vinculada. |
-| `access_private.admins`                | UIDs autorizados a administrar; nunca inferir pelo primeiro login ou e-mail fixo no cliente.                                                                                                                       |
-| `access_private.audit`                 | Histórico das ações humanas e da vinculação de identidade.                                                                                                                                                         |
-| `access_private.cakto_events`          | Observações normalizadas/deduplicadas de webhooks, estado de processamento e tentativas.                                                                                                                           |
-| `access_private.cakto_orders`          | Identidade original e decisão agregada de cada pedido recebido.                                                                                                                                                    |
-| `access_private.cakto_products`        | Produtos conhecidos e flag de processamento por produto.                                                                                                                                                           |
-| `access_private.cakto_license_changes` | Auditoria das transições automáticas de licença.                                                                                                                                                                   |
-| `cakto_private.checkout_backups`       | Snapshots operacionais do checkout para revisão/restauração; não são compras do usuário.                                                                                                                           |
-
-Os schemas privados não são APIs do navegador. Funções de licença/administração e
-pagamento usam direitos do invocador e permissões restritas do servidor. Detalhes
-de relações, exclusões e consultas: [Operações](docs/OPERACOES.md).
-
-Fluxo: Google OAuth → `license-check` → RPC `access_license_check` → licença ativa
-→ autorização ES256 com UID, versão e audiência da origem, válida por até sete
-dias. O cliente valida a assinatura/chave pública e preserva o isolamento por conta.
-Online, verifica ao iniciar, voltar ao foco/visibilidade, recuperar conexão e a
-cada 15 minutos em primeiro plano; chamadas comuns têm intervalo mínimo de um
-minuto. Os timers locais não equivalem a uma requisição por segundo.
-Os **cinco minutos** abaixo pertencem à fila Cakto, não à renovação do app.
-
-Cakto: `supabase/functions/cakto-webhook/` valida assinatura e captura observações
-em `access_private.cakto_events`. O processador exclusivo do servidor agrega o
-histórico do pedido, concede/revoga licenças automáticas e preserva as manuais.
-Produção conferida em 29/10/2026: produto real habilitado e recuperação ativa a cada
-cinco minutos (`vertice-cakto-process-pending`); limpeza diária restrita ao histórico
-de execução desses jobs, após sete dias. A tentativa imediata depende da flag do
-webhook. Não reexecutar `supabase/cakto-retry-job.sql` como diagnóstico: ele
-**pausa jobs existentes**. Não habilitar, pausar ou recriar configurações durante
-tarefas de código/documentação. Estado e consultas em `docs/OPERACOES.md`;
-contrato, regras e testes em `docs/access/CAKTO.md`.
-Testes: `npm run typecheck:cakto`, `npm run test:cakto` e
-`supabase/tests/cakto_*.sql` no Supabase isolado. Nunca apontar fixtures para
-produção nem registrar corpos de webhook, que contêm o segredo da integração.
-
-## Marca, PWA e publicação
-
-- Interface em português, tema escuro e poucos textos. Marca: **vértice branco**,
-  ponto verde, símbolo roxo com V/carrinho. Chamada do início:
-  **“Onde suas compras encontram o equilíbrio.”** Preferir SVG leve a banner raster.
-- `vite.config.ts`: manifesto, cache Workbox e build; `public/icons/`: SVG e PNGs
-  192/512/maskable. Manter as versões coerentes e a área segura do ícone maskable.
-- Service worker só em produção; primeiro acesso/preparo exige internet. Com acesso
-  protegido, também exige login/licença e renovação da autorização em até sete dias.
-  Atualização pede ação do usuário, protege rascunhos e aguarda gravações pendentes.
-- `public/online.txt` verifica conectividade real, sem cache. Rotas SPA e cache
-  da hospedagem são definidos em `public/_redirects` e `public/_headers`.
-- Hospedagem e previews são exclusivamente Cloudflare Pages. Não recriar
-  integração, projeto ou deploy na Vercel. `vercel.json` contém somente o bloqueio
-  de deploys Git enquanto a desconexão externa não for confirmada.
-- Cloudflare Pages usa `tools/build-cloudflare.mjs`, sempre com acesso protegido,
-  saída `dist` e Node 24. Rotas/cache: `public/_redirects` e `public/_headers`.
-  Configuração, autorização de origem e migração por backup: `docs/CLOUDFLARE.md`.
-- Checkout Cakto: visual claro nativo com roxo discreto no botão e seleção,
-  tanto no celular quanto no computador. Não restaurar o tema escuro antigo ou
-  recriar blocos que trocam a cor do texto durante o carregamento. Oferta `jjnk3vv`
-  a R$ 18,91; total observado com taxa do comprador de R$ 0,99: R$ 19,90 à vista.
-  A API do checkout é separada do site e da automação. Procedimento e limites em
-  `docs/OPERACOES.md`; alterações futuras exigem backup e verificação do total.
-- Página de vendas independente em `marketing/`: `index.html`, `styles.css` e
-  `conversion.css`, `script.js` e `site-config.js`. Prévias interativas independentes
-  em `interactive-demo.js`/`.css`: estado em memória, dinheiro em centavos inteiros,
-  sem persistência ou sincronização, com exemplos de compras e finanças independentes.
-  A abertura destaca o app de lista de compras inteligente e offline e a planilha
-  financeira completa, com dashboard e gráficos. Uso offline depende de preparo e
-  validação do acesso. Projeto Pages `vertice-kit`, raiz
-  `/marketing`, build `node build.mjs` e saída `dist`. CTAs de compra levam ao
-  checkout Cakto `https://pay.cakto.com.br/jjnk3vv_1241258`; o WhatsApp é suporte.
-  Configuração de checkout e telefone: `site-config.js`.
-  Manter o fallback dos links `data-checkout-link` no HTML. Sem formulário de
-  contatos. Condição exclusiva de lançamento: R$ 19,90 no total à vista, sem limite
-  de compras, prazo ou preço anterior anunciados. Não reintroduzir lote de 100,
-  contador de vagas ou preço riscado. A seção `#seus-motivos` relaciona objetivos do
-  comprador às funções reais do kit, sem prometer economia garantida.
-  Garantia: 7 dias após a entrega.
-  O build de marketing referencia CSS por hash do conteúdo no HTML publicado para
-  evitar mistura com estilos de versões anteriores. Fontes mantêm os links simples;
-  arquivos com hash e `dist/` são gerados, sem edição manual.
-  Mídias em `media/` incluem capturas reais do app e da planilha; depoimentos de exemplo ficam em template
-  inerte até haver relatos reais. Checklist: `marketing/MIDIAS_E_CONTEUDO.md`.
-  `social.png` é o cartão de compartilhamento 1200×630. Não publicar os arquivos
-  pagos do kit. App/planilha permanecem separados, com registro manual do total.
-  A galeria real do app usa `marketing/app-gallery.js`/`.css`: rolagem horizontal
-  nativa, três cartões no desktop e um cartão com prévia do próximo no celular.
-  Links de imagem funcionam sem JavaScript; ampliação usa diálogo nativo com foco,
-  fechamento por Escape e navegação manual, sem autoplay. Originais JPG em `media/`
-  são preservados; enquadramentos SVG com clipPath destacam cada recurso e removem
-  a barra do aparelho, inclusive no diálogo ampliado. Miniaturas e ampliação têm
-  limites explícitos no HTML, sem reconstruir textos ou valores das capturas.
-  O segundo carrossel, em `#planilha-em-detalhes`, usa os mesmos controles, com
-  contagem independente. Seus cinco slots `spreadsheet-*` mostram capturas reais
-  de Lançamentos, Contas Fixas, Orçamento, Metas e Resumo Anual. O dashboard usa
-  `spreadsheet-photo`. As capturas vêm de regiões da exportação PDF nativa Google
-  do modelo de demonstração, sem reconstruir textos ou valores. Não publicar o PDF
-  completo nem o arquivo pago. Um diálogo compartilhado amplia a galeria selecionada
-  ou o dashboard; planilhas mantêm largura legível e rolagem interna em duas direções.
-  Preservar as duas demonstrações interativas.
-  A página informa liberação automática após o pagamento, com a mesma conta Google
-  da compra; planilhas e tutorial ficam em Vértice Financeiro. Não prometer prazo
-  instantâneo de confirmação para todos os meios de pagamento.
-
-## Comandos e validação
-
-```sh
-nvm use
-npm ci
-npm run dev        # Desenvolvimento; sem service worker
-npm run typecheck
-npm run lint       # ESLint + Prettier
-npm test           # Vitest
-npm run build     # TypeScript, PWA e limite de JS: 250 KiB gzip
-npm run preview   # Conferir o build/PWA
-```
-
-Para fluxos de navegador: `npx playwright install --with-deps chromium webkit`,
-depois `npm run build` e `npm run test:e2e`. O servidor `tools/serve-test.mjs`
-é só de testes. Configurações: `playwright.config.ts`, `playwright.access.config.ts`
-e `playwright.hosted.config.ts`; suites `e2e/`, `e2e-access/` e `e2e-hosted/`.
-CI em `.github/workflows/`: `checks.yml` valida o app; `access.yml` testa acesso com
-Supabase isolado; `hosted.yml` verifica a hospedagem. Runners fixados em Ubuntu 24.04
-por compatibilidade com o Playwright instalado. Nunca apontar fixtures de teste para
-o Supabase de produção. WebKit no CI não comprova instalação em iPhone físico.
-
-Em integração de acesso, `e2e/fixtures.ts` cria uma sessão própria por teste via
-`e2e/support/access.ts`; as abas do mesmo contexto compartilham a sessão. Credenciais
-sintéticas ficam em `.secrets/` e só funcionam no Supabase local. Não reutilizar
-sessões de testes de logout nem salvar estado autenticado/headers em artefatos.
-`tools/wait-access.mjs` valida a prontidão das funções sem persistir uma sessão comum.
-
-Para mudanças pequenas, validar só o necessário; não criar testes que apenas
-espelham texto/estilo. Para dados, dinheiro, acesso ou offline, executar os cenários
-relevantes e preservar cobertura. Conferir telas estreitas, foco e ausência de
-rolagem horizontal ao alterar layout. Não atualizar dependências ou publicar fora
-do escopo solicitado. Manter este mapa atualizado quando mover ou criar funções.
-
-`e2e/responsive.spec.ts` verifica telas e diálogos de 280 a 844 px com toque,
-incluindo paisagem e nomes longos. O viewport limita a escala e `touch-action`
-preserva a rolagem sem pinça; preferências de acessibilidade do navegador podem
-sobrepor o bloqueio. A emulação não substitui conferir gestos em aparelho físico.
-
-## Mídias e pendências para continuidade
-
-- Logos e capa oficiais em `artes/vertice/`, com mapa em seu `README.md`.
-  Capturas reais usadas no site em `marketing/media/`. O enquadramento de várias
-  capturas remove a barra do celular pelo SVG da página; o JPG original pode
-  continuar contendo notificações. Não reconstruir valores ou telas nas capturas.
-- Instagram atual: **@usevertice.app**. Domínios continuam terminando em
-  `usevertice.app.br`; não trocar os domínios pelo nome do perfil. Suporte no
-  WhatsApp: `5551980614158` (formato internacional).
-- A página de vendas foi considerada finalizada pelo proprietário. Preservar as
-  demonstrações e galerias; fazer novas mudanças somente no escopo solicitado.
-- Cards em “Por categoria” mostram até cinco itens, pendentes primeiro e
-  comprados completando as vagas; preservam a ordem de cada grupo. “+ N itens…”
-  indica excedentes, com singular para um. Totais e “Concluída” usam o grupo
-  completo; tocar abre todos os produtos. Seleção em `CategoriesPage.tsx`, com
-  atualização reativa também em listas finalizadas.
-- Conciliação automática de notificações que nunca chegaram, alertas e painel de
-  revisão de pagamentos ainda não foram implementados. A fila atual recupera
-  eventos já recebidos, sem consultar pedidos na API Cakto.
-
-Detalhes: `README.md`, `docs/access/SETUP.md`, `docs/access/GOOGLE.md`,
-`docs/access/VALIDATION.md`, `docs/VALIDATION.md`, `docs/FUTURE-SYNC.md` e
-`docs/FLUTTER-TO-WEB.md`. Alguns documentos têm registros históricos; conferir o
-código e o estado atual antes de tratar uma descrição antiga como implementação.
+- PR #28 é draft e não representa autorização de merge em main.
+- A branch preview é o ambiente de evolução. Documentação e código do ecossistema devem permanecer nela até decisão explícita.
+- Antes de integrar: revisar diff completo, migrações, RLS, compatibilidade de dados, autenticação/licenças, backup/restauração, fluxo offline/online, conflitos, duas contas e dois dispositivos, PWA/rotas e rollback.
+- A página de vendas e os projetos Cloudflare existentes devem permanecer intactos.
