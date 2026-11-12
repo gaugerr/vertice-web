@@ -16,6 +16,7 @@ let client,
   lastInvite,
   creating = false;
 const environment = await workspaceEnvironment();
+document.documentElement.dataset.workspaceAuthenticated = String(Boolean(environment.actor));
 const actor = environment.actor ?? { uid: 'unauthenticated', email: '', name: '', licensed: false },
   transport = environment.transport;
 $('#workspace-login').hidden = environment.mode !== 'staging' || Boolean(environment.actor);
