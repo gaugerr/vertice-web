@@ -1,5 +1,9 @@
 # Vértice
 
+> **Estado atual e retomada por IA (09/11/2026):** leia [AI-HANDOFF](docs/AI-HANDOFF.md).
+> App oficial, demonstração local e preview conectada são ambientes distintos.
+> Resultados e instruções anteriores abaixo devem ser interpretados no contexto do ambiente e da data; o handoff registra as pendências atuais.
+
 Aplicativo de listas de compras em React, TypeScript, Vite e Tailwind CSS 4. Os dados ficam no IndexedDB, através do Dexie, e o aplicativo foi estruturado para funcionar offline após o primeiro carregamento completo.
 
 Este projeto é independente do Flutter. Não substitui automaticamente o site já publicado.

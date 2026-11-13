@@ -1,5 +1,9 @@
 # Do Flutter para React
 
+> **Estado atual e retomada por IA (09/11/2026):** leia [AI-HANDOFF](AI-HANDOFF.md).
+> App oficial, demonstração local e preview conectada são ambientes distintos.
+> Resultados e instruções anteriores abaixo devem ser interpretados no contexto do ambiente e da data; o handoff registra as pendências atuais.
+
 | Flutter                                | Neste projeto                                                  |
 | -------------------------------------- | -------------------------------------------------------------- |
 | Widget                                 | Componente React, uma função que retorna JSX                   |

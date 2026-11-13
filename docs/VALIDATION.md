@@ -1,5 +1,9 @@
 # Validação — marca, embalagem e nome automático
 
+> **Estado atual e retomada por IA (09/11/2026):** leia [AI-HANDOFF](AI-HANDOFF.md).
+> App oficial, demonstração local e preview conectada são ambientes distintos.
+> Resultados e instruções anteriores abaixo devem ser interpretados no contexto do ambiente e da data; o handoff registra as pendências atuais.
+
 Hospedagem atual em **https://app.usevertice.app.br**, projeto Cloudflare Pages `use-vertice`, repositório [gaugerr/vertice-web](https://github.com/gaugerr/vertice-web).
 
 Registro histórico de validação; não comprova o deploy atual. Código validado e publicado na main: `2b09e4c5c183c329221c30629bdf1d20257f2867`. Desenvolvimento em `feat/product-details`. O registro posterior altera somente a documentação.

@@ -1,5 +1,9 @@
 # Integração Cakto — captura e processamento de licenças
 
+> **Estado atual e retomada por IA (09/11/2026):** leia [AI-HANDOFF](../AI-HANDOFF.md).
+> App oficial, demonstração local e preview conectada são ambientes distintos.
+> Resultados e instruções anteriores abaixo devem ser interpretados no contexto do ambiente e da data; o handoff registra as pendências atuais.
+
 **Produção ativa; última conferência em 29/10/2026 UTC.** No projeto Supabase
 `vertice` (`wqutcsjdozcukwxvkbtc`), o produto real está com
 `processing_enabled=true`, o webhook está publicado e os jobs de recuperação

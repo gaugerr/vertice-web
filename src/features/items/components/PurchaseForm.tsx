@@ -1,5 +1,5 @@
 import { LastPriceReference } from './LastPriceReference';
-import { useState, type FormEvent, type RefObject } from 'react';
+import { useEffect, useRef, useState, type FormEvent, type RefObject } from 'react';
 import type { ShoppingItem, Unit } from '../../../domain/models/shopping';
 import { useRepository } from '../../../app/repository-context';
 import { decimalInput } from '../../../domain/services/money';
@@ -30,6 +30,14 @@ export function PurchaseForm({
   const [quantity, setQuantity] = useState(decimalInput(item.quantity));
   const [unit, setUnit] = useState<Unit>(item.unit);
   const mutation = useMutation();
+  const form = useRef<HTMLFormElement>(null);
+  const enterAfterMarking = useRef(false);
+  useEffect(() => {
+    if (!marking && enterAfterMarking.current) {
+      enterAfterMarking.current = false;
+      if (!readOnly) form.current?.requestSubmit();
+    }
+  }, [marking, readOnly]);
   const details = useProductDetailsDraft(item);
   const busy = marking || mutation.pending;
   const dirty =
@@ -58,14 +66,20 @@ export function PurchaseForm({
 
   return (
     <form
+      ref={form}
       id={`purchase-${item.id}`}
       className="purchase-form form-stack"
       aria-label={`Valores de ${formatItemName(item)}`}
       aria-busy={busy}
       onSubmit={submit}
       onKeyDown={(event) => {
+        if (event.key === 'Enter' && marking && event.target === priceInput.current) {
+          event.preventDefault();
+          enterAfterMarking.current = true;
+        }
         if (event.key === 'Escape') {
           event.preventDefault();
+          enterAfterMarking.current = false;
           close();
         }
       }}

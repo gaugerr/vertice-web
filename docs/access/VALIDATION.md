@@ -1,5 +1,9 @@
 # Validação da entrega de acesso
 
+> **Estado atual e retomada por IA (09/11/2026):** leia [AI-HANDOFF](../AI-HANDOFF.md).
+> App oficial, demonstração local e preview conectada são ambientes distintos.
+> Resultados e instruções anteriores abaixo devem ser interpretados no contexto do ambiente e da data; o handoff registra as pendências atuais.
+
 As migrações foram aplicadas somente no projeto Supabase Vértice `wqutcsjdozcukwxvkbtc`. Os nomes locais refletem as versões retornadas pelo histórico do servidor. A primeira migração foi inicialmente gerada pela CLI antes de ser aplicada pelo conector.
 
 Permissões verificadas no projeto hospedado:

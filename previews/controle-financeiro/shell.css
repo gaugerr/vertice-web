@@ -1,0 +1,452 @@
+[hidden] {
+  display: none !important;
+}
+header {
+  position: sticky;
+  top: 0;
+  z-index: 15;
+  gap: 15px;
+}
+header > .brand {
+  margin-right: auto;
+}
+.menu-toggle {
+  display: grid;
+  place-items: center;
+  width: 40px;
+  height: 40px;
+  flex-shrink: 0;
+  background: #231e2c;
+  border: 1px solid #3d334b;
+  border-radius: 10px;
+  color: #dac9ff;
+}
+.menu-toggle:hover {
+  background: #382b49;
+}
+.area-strip {
+  min-height: 43px;
+  border-bottom: 1px solid #2b2834;
+  display: flex;
+  align-items: center;
+  gap: 12px;
+  padding: 7px 36px;
+  color: #9e92ad;
+  font-size: 11px;
+  background: #16131c;
+}
+.area-strip > button {
+  background: none;
+  color: #ddccfa;
+  font-size: 12px;
+  font-weight: 650;
+  padding: 5px 0;
+}
+.area-strip > button span {
+  margin-left: 8px;
+  color: #a28cbd;
+}
+.preview-hint {
+  margin-left: auto;
+  font-size: 10px;
+  color: #80728e;
+}
+main#main {
+  margin: 0 auto;
+  padding: 32px 34px 90px;
+  max-width: 1250px;
+}
+body.area-shopping main#main {
+  padding: 0;
+  max-width: 1320px;
+}
+.page-heading .primary {
+  margin-top: 0;
+}
+#shopping-frame {
+  display: block;
+  width: 100%;
+  height: calc(100dvh - 132px);
+  min-height: 420px;
+  border: 0;
+  background: #101014;
+}
+.area-drawer {
+  position: fixed;
+  inset: 0 auto 0 0;
+  margin: 0;
+  width: min(280px, 85vw);
+  height: 100dvh;
+  max-height: 100dvh;
+  overflow-y: auto;
+  border: 0;
+  border-right: 1px solid #4b3a5d;
+  border-radius: 0;
+  padding: 20px 16px;
+  background: #17131e;
+  box-shadow: 20px 0 80px #0007;
+}
+.area-drawer::backdrop {
+  background: #0009;
+  backdrop-filter: blur(3px);
+}
+.drawer-head {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  margin-bottom: 20px;
+}
+.drawer-head .brand > span {
+  font-size: 24px;
+}
+.area-drawer nav button {
+  padding: 11px 10px;
+  gap: 10px;
+  font-size: 15px;
+  align-items: center;
+}
+.area-drawer nav button > span:first-child {
+  font-size: 23px;
+  width: 26px;
+  text-align: center;
+}
+.area-drawer nav button > span:last-child {
+  font-size: 14px;
+  line-height: 1.5;
+}
+.area-drawer nav button small {
+  display: block;
+  font-size: 10px;
+  color: #9b8baa;
+  font-weight: 400;
+  margin-top: 4px;
+}
+.area-drawer .nav-label {
+  margin-left: 13px;
+  font-size: 9px;
+}
+.drawer-footer {
+  border-top: 1px solid #352b3e;
+  margin: 42px 12px 0;
+  padding-top: 24px;
+}
+.drawer-footer .preview {
+  margin: 0;
+}
+.drawer-footer p {
+  font-size: 11px;
+  line-height: 1.8;
+  color: #8e809d;
+  margin-top: 19px;
+}
+#finance-tabs {
+  display: flex;
+  position: fixed;
+  bottom: 0;
+  left: 50%;
+  transform: translateX(-50%);
+  width: min(680px, 100%);
+  z-index: 16;
+  background: #1c1525f5;
+  border: 1px solid #4b3a5f;
+  border-bottom: 0;
+  border-radius: 15px 15px 0 0;
+  backdrop-filter: blur(16px);
+  padding: 8px 12px max(8px, env(safe-area-inset-bottom));
+}
+#finance-tabs button {
+  display: flex;
+  flex-direction: column;
+  gap: 4px;
+  align-items: center;
+  justify-content: center;
+  text-align: center;
+  font-size: 21px;
+  width: 25%;
+  padding: 8px 2px;
+  margin: 0;
+  border-radius: 8px;
+}
+#finance-tabs button small {
+  font-size: 10px;
+}
+#finance-tabs button.active {
+  box-shadow: none;
+  color: #d7c5ff;
+  background: #372745;
+}
+#settings-area .secondary {
+  margin-top: 22px;
+}
+.toast {
+  bottom: 90px;
+}
+main#main:focus {
+  outline: none;
+}
+@media (max-width: 640px) {
+  header {
+    padding: 0 14px;
+    height: 69px;
+    gap: 10px;
+  }
+  .brand {
+    gap: 8px;
+  }
+  .brand > span:first-of-type {
+    font-size: 25px;
+  }
+  .brand > img {
+    width: 28px;
+    height: 28px;
+  }
+  .preview {
+    letter-spacing: 1px;
+    font-size: 8px;
+  }
+  .header-right .avatar {
+    display: none;
+  }
+  .header-right {
+    gap: 0;
+  }
+  .menu-toggle {
+    width: 36px;
+    height: 36px;
+  }
+  .area-strip {
+    padding: 6px 18px;
+    gap: 9px;
+    font-size: 10px;
+    min-height: 41px;
+  }
+  .preview-hint {
+    font-size: 8px;
+  }
+  .area-strip > button {
+    font-size: 11px;
+  }
+  main#main {
+    padding: 24px 18px 92px;
+  }
+  #shopping-frame {
+    height: calc(100dvh - 110px);
+    min-height: 360px;
+  }
+  .page-heading .primary {
+    margin-top: 20px;
+  }
+  #finance-tabs {
+    border-radius: 0;
+    border-left: 0;
+    border-right: 0;
+  }
+  #finance-tabs button {
+    padding: 7px 1px;
+  }
+  #finance-tabs button small {
+    font-size: 9px;
+  }
+  .sample {
+    display: none;
+  }
+}
+.stat {
+  min-width: 0;
+}
+@media (max-width: 990px) {
+  .stats {
+    grid-template-columns: repeat(2, minmax(0, 1fr));
+  }
+}
+@media (max-width: 360px) {
+  .stat strong {
+    font-size: 18px;
+    letter-spacing: -0.5px;
+  }
+  .stat .stat-top {
+    font-size: 9px;
+    gap: 5px;
+  }
+  .stat .stat-icon {
+    font-size: 13px;
+  }
+  .toolbar {
+    gap: 10px;
+  }
+  .month-control span {
+    min-width: 108px;
+  }
+  .example-label {
+    max-width: 80px;
+  }
+  .donut {
+    width: 120px;
+    height: 120px;
+  }
+  .donut-content {
+    gap: 12px;
+  }
+  .category-legend {
+    min-width: 100px;
+  }
+  .donut-center strong {
+    font-size: 14px;
+  }
+  .chart-bottom {
+    flex-wrap: wrap;
+  }
+  .txn-actions button {
+    padding: 4px;
+  }
+}
+
+/* Mobile drawer refinement: preserve every destination and action, improve grouping. */
+.area-drawer {
+  padding: 18px 16px 24px;
+  overscroll-behavior: contain;
+}
+.drawer-head {
+  margin-bottom: 16px;
+}
+.area-drawer nav {
+  display: grid;
+  gap: 6px;
+}
+.area-drawer nav button {
+  min-height: 52px;
+  padding: 10px 12px;
+  border-radius: 14px;
+}
+.area-drawer nav button.active {
+  background: #2b2235;
+  box-shadow: inset 3px 0 0 var(--purple, #b69bff);
+  color: #e0d2ff;
+}
+.area-drawer nav button:focus-visible,
+.area-drawer .workspace-bar button:focus-visible {
+  outline: 2px solid #b69bff;
+  outline-offset: 3px;
+}
+.area-drawer .workspace-bar {
+  margin: 24px 0 0;
+  padding: 18px 0 0;
+  gap: 8px;
+}
+.area-drawer .workspace-bar label {
+  gap: 9px;
+}
+.area-drawer .workspace-bar select {
+  width: 100%;
+  max-width: none;
+  min-height: 48px;
+  padding: 10px 12px;
+  border-radius: 13px;
+}
+.area-drawer .workspace-bar button {
+  width: 100%;
+  min-height: 44px;
+  justify-content: flex-start;
+  border-radius: 11px;
+  padding: 9px 12px;
+}
+.area-drawer .workspace-bar button:hover {
+  background: #25202e;
+}
+#workspace-logout {
+  margin-top: 2px;
+}
+@media (max-width: 420px) {
+  .area-drawer {
+    width: min(320px, 88vw);
+    padding-inline: 16px;
+  }
+  .area-drawer .workspace-bar select {
+    max-width: none;
+  }
+}
+
+/* Compact drawer: reduce width and vertical density without hiding actions. */
+.area-drawer {
+  width: min(260px, 82vw);
+  padding: 14px 12px 18px;
+}
+.drawer-head {
+  margin-bottom: 12px;
+}
+.drawer-head .brand > span {
+  font-size: 21px;
+}
+.area-drawer nav {
+  gap: 4px;
+}
+.area-drawer nav button {
+  min-height: 44px;
+  padding: 7px 10px;
+  gap: 8px;
+  border-radius: 11px;
+}
+.area-drawer nav button > span:first-child {
+  width: 22px;
+  font-size: 20px;
+}
+.area-drawer nav button > span:last-child {
+  font-size: 13px;
+  line-height: 1.3;
+}
+.area-drawer nav button small {
+  font-size: 9px;
+  margin-top: 2px;
+  line-height: 1.25;
+}
+.area-drawer .nav-label {
+  margin: 8px 0 2px 10px;
+}
+.area-drawer .workspace-bar {
+  margin-top: 16px;
+  padding-top: 12px;
+  gap: 6px;
+}
+.area-drawer .workspace-bar select {
+  min-height: 42px;
+  padding: 8px 10px;
+  border-radius: 10px;
+}
+.area-drawer .workspace-bar button {
+  min-height: 38px;
+  padding: 7px 10px;
+  border-radius: 9px;
+}
+.drawer-footer {
+  margin: 22px 8px 0;
+  padding-top: 14px;
+}
+.drawer-footer p {
+  margin-top: 12px;
+  line-height: 1.5;
+}
+@media (max-width: 420px) {
+  .area-drawer {
+    width: min(280px, 82vw);
+    padding-inline: 12px;
+  }
+}
+
+/* Keep area choices snug around their labels instead of stretching across the drawer. */
+.area-drawer {
+  width: min(240px, 80vw);
+}
+.area-drawer nav {
+  justify-items: start;
+}
+.area-drawer nav button {
+  width: fit-content;
+  min-width: 148px;
+  max-width: 100%;
+  justify-content: flex-start;
+}
+@media (max-width: 420px) {
+  .area-drawer {
+    width: min(240px, 80vw);
+  }
+}

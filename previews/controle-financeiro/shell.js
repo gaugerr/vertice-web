@@ -1,0 +1,214 @@
+import { financeTitles, financeRoute, financeView } from './finance-navigation.mjs';
+(() => {
+  const menu = document.getElementById('app-menu');
+  const toggle = document.getElementById('menu-toggle');
+  const frame = document.getElementById('shopping-frame');
+  const names = { shopping: 'Compras', finance: 'Financeiro', settings: 'Configurações' };
+  const screens = financeTitles;
+  const key = 'vertice_navigation_preview_v1';
+  let area = 'shopping',
+    shoppingScreen = 'Minhas listas',
+    financialView = 'overview',
+    enteringFinance = false;
+  const openMenu = () => {
+    applyArea(area, false);
+    menu.showModal();
+    toggle.setAttribute('aria-expanded', 'true');
+  };
+  const closeMenu = () => {
+    menu.close();
+    toggle.setAttribute('aria-expanded', 'false');
+  };
+  function breadcrumb() {
+    document
+      .getElementById('area-shortcut')
+      .replaceChildren(
+        document.createTextNode(names[area] + ' '),
+        Object.assign(document.createElement('span'), { textContent: '⌄' }),
+      );
+    document.getElementById('current-screen').textContent =
+      area === 'finance'
+        ? screens[financialView]
+        : area === 'shopping'
+          ? shoppingScreen
+          : 'Conta e dados';
+    document.title = `${names[area]} · Vértice`;
+  }
+  function applyArea(next, save = true) {
+    if (!Object.hasOwn(names, next)) next = 'shopping';
+    area = next;
+    document.body.className = 'area-' + next;
+    document.getElementById('shopping-area').hidden = next !== 'shopping';
+    document.getElementById('finance-area').hidden = next !== 'finance';
+    document.getElementById('settings-area').hidden = next !== 'settings';
+    document.getElementById('finance-tabs').hidden = !['finance', 'settings'].includes(next);
+    if (next === 'settings')
+      document.querySelectorAll('#finance-tabs [data-view]').forEach((b) => {
+        const active = b.dataset.view === 'more';
+        b.classList.toggle('active', active);
+        if (active) b.setAttribute('aria-current', 'page');
+        else b.removeAttribute('aria-current');
+      });
+    menu.querySelectorAll('[data-area]').forEach((b) => {
+      const active =
+        b.dataset.area === next &&
+        (b.dataset.financeView
+          ? b.dataset.financeView === financialView
+          : next !== 'finance' || !['analysis', 'wealth'].includes(financialView));
+      b.classList.toggle('active', active);
+      if (active) b.setAttribute('aria-current', 'page');
+      else b.removeAttribute('aria-current');
+    });
+    breadcrumb();
+    requestAnimationFrame(resizeShoppingFrame);
+    if (save) {
+      try {
+        localStorage.setItem(key, JSON.stringify({ area, financialView }));
+      } catch {
+        /* The navigation still works without storage. */
+      }
+    }
+  }
+  function resizeShoppingFrame() {
+    if (area !== 'shopping') return;
+    frame.style.minHeight = '0';
+    frame.style.height =
+      Math.max(100, window.innerHeight - frame.getBoundingClientRect().top) + 'px';
+  }
+  window.addEventListener('resize', resizeShoppingFrame);
+  const frameSizing = new ResizeObserver(resizeShoppingFrame);
+  for (const node of [
+    document.querySelector('header'),
+    document.querySelector('.area-strip'),
+    document.querySelector('#workspace-message'),
+  ])
+    if (node) frameSizing.observe(node);
+  function navigate(next, destination) {
+    applyArea(next);
+    const hash =
+      next === 'finance'
+        ? 'financeiro/' + financeRoute(financialView)
+        : next === 'settings'
+          ? 'configuracoes'
+          : 'compras';
+    if (location.hash !== '#' + hash) history.pushState({ area: next }, '', '#' + hash);
+    if (destination)
+      frame.contentWindow.postMessage(
+        { type: 'vertice:shopping-navigate', path: destination },
+        location.origin,
+      );
+    closeMenu();
+    window.scrollTo({ top: 0, behavior: 'instant' });
+    if (next === 'shopping') frame.focus();
+    else document.getElementById('main').focus({ preventScroll: true });
+  }
+  function readLocation() {
+    const [part, ...segments] = location.hash.slice(1).split('/');
+    const targetView = financeView(segments.join('/'));
+    if (part === 'financeiro' && targetView) {
+      financialView = targetView;
+      window.dispatchEvent(
+        new CustomEvent('vertice:finance-navigate', { detail: { view: financialView } }),
+      );
+    }
+    applyArea(
+      part === 'financeiro' ? 'finance' : part === 'configuracoes' ? 'settings' : 'shopping',
+    );
+  }
+  document.addEventListener('click', (e) => {
+    const b = e.target.closest('[data-settings-section]');
+    if (b) {
+      navigate('settings');
+      document.getElementById(b.dataset.settingsSection)?.scrollIntoView({ behavior: 'smooth' });
+    }
+  });
+  document.getElementById('finance-tabs').addEventListener('click', (e) => {
+    if (e.target.closest('[data-view]') && area !== 'finance') {
+      enteringFinance = true;
+      applyArea('finance');
+    }
+  });
+  toggle.addEventListener('click', openMenu);
+  document.getElementById('area-shortcut').addEventListener('click', openMenu);
+  document.getElementById('menu-close').addEventListener('click', closeMenu);
+  menu.addEventListener('close', () => toggle.setAttribute('aria-expanded', 'false'));
+  menu.addEventListener('click', (e) => {
+    const b = e.target.closest('[data-area]');
+    if (b) {
+      if (
+        b.dataset.financeView ||
+        (b.dataset.area === 'finance' && ['analysis', 'wealth'].includes(financialView))
+      ) {
+        financialView = b.dataset.financeView || 'overview';
+        window.dispatchEvent(
+          new CustomEvent('vertice:finance-navigate', { detail: { view: financialView } }),
+        );
+      }
+      navigate(b.dataset.area);
+    } else if (e.target === menu) closeMenu();
+  });
+  window.addEventListener('vertice:finance-view', (e) => {
+    const changed = financialView !== e.detail.view;
+    financialView = e.detail.view;
+    breadcrumb();
+    if (area === 'finance') {
+      try {
+        localStorage.setItem(key, JSON.stringify({ area, financialView }));
+      } catch {
+        /* Optional state. */
+      }
+      if (changed || enteringFinance)
+        history.pushState({ area }, '', '#financeiro/' + financeRoute(financialView));
+      enteringFinance = false;
+    }
+  });
+  window.addEventListener('message', (e) => {
+    if (e.origin !== location.origin || e.source !== frame.contentWindow) return;
+    if (e.data?.type === 'vertice:shopping-route' && typeof e.data.label === 'string') {
+      shoppingScreen = e.data.label;
+      breadcrumb();
+    }
+  });
+  document
+    .getElementById('shopping-settings')
+    .addEventListener('click', () => navigate('shopping', '/settings'));
+  window.addEventListener('popstate', readLocation);
+  window.addEventListener('hashchange', readLocation);
+  document.getElementById('main').tabIndex = -1;
+  if (location.hash) readLocation();
+  else {
+    try {
+      const saved = JSON.parse(localStorage.getItem(key));
+      if (saved && Object.hasOwn(names, saved.area)) {
+        area = saved.area;
+        if (Object.hasOwn(screens, saved.financialView)) {
+          financialView = saved.financialView;
+          window.dispatchEvent(
+            new CustomEvent('vertice:finance-navigate', { detail: { view: financialView } }),
+          );
+        }
+      }
+    } catch {
+      /* First visit. */
+    }
+    applyArea(area, false);
+  }
+})();
+
+// Bind navigation before waiting for authentication, IndexedDB or network bootstrap.
+// A slow staging session must never leave the header and drawer inert.
+void import('./app.js')
+  .then(() => {
+    // workspace-ui.mjs has completed the single session bootstrap by this point.
+    // Do not initialize auth a second time: the iframe must reuse that session.
+    if (document.documentElement.dataset.workspaceAuthenticated === 'true') {
+      const frame = document.getElementById('shopping-frame');
+      frame.src = frame.dataset.src;
+    }
+  })
+  .catch((error) => {
+    const message = document.getElementById('workspace-message');
+    if (message) message.textContent = error?.message || 'Não foi possível iniciar o espaço.';
+  });
+
+document.documentElement.dataset.workspaceReady = 'true';
