@@ -1172,3 +1172,17 @@ footer {
     max-width: 100%;
   }
 }
+
+
+/* The drawer itself must stay narrow on mobile; do not let later dialog rules widen it. */
+dialog.area-drawer {
+  box-sizing: border-box;
+  width: min(240px, 80vw) !important;
+  max-width: 240px;
+}
+@media (max-width: 640px) {
+  dialog.area-drawer {
+    width: min(240px, 80vw) !important;
+    max-width: 240px;
+  }
+}
