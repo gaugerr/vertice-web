@@ -1,6 +1,6 @@
 # Preview fixo de controle financeiro
 
-> **Estado atual e retomada por IA (09/11/2026):** leia [AI-HANDOFF](../../docs/AI-HANDOFF.md).
+> **Estado consultado em 16/11/2026:** leia [AI-HANDOFF](../../docs/AI-HANDOFF.md).
 > App oficial, demonstração local e preview conectada são ambientes distintos.
 > Resultados e instruções anteriores abaixo devem ser interpretados no contexto do ambiente e da data; o handoff registra as pendências atuais.
 
@@ -23,7 +23,7 @@ Não publica mudanças na interface oficial. A entrada autenticada pode usar as 
 - Limites por mês em monthlyBudgets, com fallback aos limites antigos. Alterar/copiar um mês cria um retrato próprio, nunca reescreve outros meses. Valores nulos antigos significam sem limite.
 - Pendências anteriores são consultadas separadamente do resultado mensal; abrir o mês original mantém a competência. Comparação mensal usa os totais canônicos confirmados.
 - Metas têm saldo inicial e histórico de aportes com IDs/datas. Corrigir/subtrair aportes recalcula o progresso e nunca cria lançamentos implícitos. Preservar metas antigas sem inferir histórico.
-- Backups financeiros versionados não incluem Compras. Validar arquivo/referências/históricos antes de confirmar restauração; guardar cópia anterior antes de substituir. Não alterar dados em erro ou cancelamento. Migração futura para banco deve impor isolamento por usuário no servidor.
+- Backups financeiros versionados não incluem Compras. Validar arquivo/referências/históricos antes de confirmar restauração; guardar cópia anterior antes de substituir. Não alterar dados em erro ou cancelamento. A demonstração local permanece no navegador; `/staging/` já usa `WorkspaceClient` e isolamento por workspace no servidor. Não tratar a demonstração como fonte de dados do staging nem importar dados automaticamente.
 - Compras: reutiliza telas/repositório reais de src/ através de shopping.tsx, agora com WorkspaceClient.shopping e banco isolado por espaço. O banco vertice_shopping_navigation_preview_v1 é lido somente para preservar a demonstração anterior do titular.
 - shell.js mantém o menu de áreas, breadcrumbs e abas inferiores apenas do Financeiro.
 - Navegação: Resumo, Lançamentos, Planejamento (Orçamentos/Contas fixas/Metas) e Análises. Mais permanece no menu lateral. `finance-navigation.mjs` preserva aliases antigos; cadastros/configurações continuam acessíveis por Mais e pelos formulários.
