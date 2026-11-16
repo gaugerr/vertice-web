@@ -14,7 +14,14 @@ Aplicativo de compras e ferramentas financeiras, em evolução para um ecossiste
 | Preview de demonstração        | raiz do endereço de preview                  | Dados fictícios locais, sem conexão com a conta real.                                                                               |
 | Preview conectada              | mesmo endereço + /staging/                   | Homologação autorizada com Google e banco Supabase Vértice. Pode conter dados reais.                                                |
 
-O PR #29 foi integrado à branch de preview. A descrição do PR #28 registra migrações e validações nessa branch. Isso não significa que o ecossistema foi publicado na main.
+PRs relevantes (estado consultado em 16/11/2026):
+
+- **PR #27:** continua aberto e draft contra `main`. A migração inicial `20261109173641` já está representada no ecossistema e foi registrada como aplicada ao projeto Vértice; não reaplicar nem integrar isoladamente sem revisar a sobreposição.
+- **PR #28:** continua aberto e draft contra `main`, com `preview/controle-financeiro` como head. É desenvolvimento/homologação, não publicação oficial.
+- **PR #29:** fechado como merged em 11/11/2026 somente em `preview/controle-financeiro`. Registra o ledger financeiro v2, a migração `20261111225724` e a ativação do serviço de workspaces na `/staging/`; não alterou `main`.
+- **PR #30:** documentação em draft, com destino `preview/controle-financeiro`; ainda não integrada.
+
+Este é um retrato do GitHub em 16/11/2026. Reconfira branches, PRs, Actions e serviços antes de qualquer operação.
 
 ## Começar
 
