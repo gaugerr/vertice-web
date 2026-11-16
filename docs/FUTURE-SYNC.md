@@ -2,12 +2,14 @@
 
 Este documento trata da **integração do ecossistema da preview ao aplicativo oficial**. A sincronização por workspace já existe na branch de desenvolvimento; não descreva mais essa parte como se ainda fosse apenas uma proposta.
 
-Estado em 12/11/2026:
+Estado consultado em 16/11/2026:
 
 - main: compras locais em IndexedDB/Dexie; login Google controla acesso/licença, não sincroniza compras.
 - preview/controle-financeiro: Compras + Financeiro, espaços, Supabase, outbox, sincronização, conflitos e backups em desenvolvimento/homologação.
-- PR #28: draft, ainda não integrado ao main.
-- PR #29: integrado à branch de preview conforme descrição do PR #28.
+- PR #27: aberto e draft contra `main`; a migração inicial `20261109173641` está registrada como aplicada e já integra o ecossistema em preview. Não reaplicar nem integrar isoladamente sem revisar a sobreposição.
+- PR #28: aberto e draft contra `main`, com `preview/controle-financeiro` como head; 41 commits e 96 arquivos. Ainda não integrado ao app oficial.
+- PR #29: fechado como merged em 11/11/2026 somente na branch de preview. Registra a migração `20261111225724` e o ledger v2; `main` não foi alterada.
+- PR #30: documentação em draft, direcionada à branch de preview; ainda não integrada.
 
 ## O que falta para o app oficial
 
