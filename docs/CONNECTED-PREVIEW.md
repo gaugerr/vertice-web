@@ -1,11 +1,16 @@
 # Preview conectada do Vértice
 
-> **Estado atual e retomada por IA (09/11/2026):** leia [AI-HANDOFF](AI-HANDOFF.md).
+> **Estado consultado em 16/11/2026:** leia [AI-HANDOFF](AI-HANDOFF.md).
 > App oficial, demonstração local e preview conectada são ambientes distintos.
 > Resultados e instruções anteriores abaixo devem ser interpretados no contexto do ambiente e da data; o handoff registra as pendências atuais.
 
 Entrada autenticada: <https://preview-controle-financeiro.vertice-financeiro-preview.pages.dev/staging/>.
 Demonstração fictícia preservada: o mesmo endereço sem `/staging/`.
+
+O PR #29 foi fechado como merged em 11/11/2026 somente na branch de preview; seu
+registro informa a migração `20261111225724` aplicada e a Edge Function `workspaces`
+atualizada para v2. O PR #28 continua aberto e draft contra `main`. Esta conexão
+não integra o app oficial nem comprova o piloto completo com duas contas reais.
 
 O proprietário autorizou o uso do banco Vértice existente. Dados registrados na
 entrada autenticada são dados reais da conta e ficam separados da demonstração.
@@ -101,4 +106,7 @@ locais, preparar os módulos da PWA e integrar a navegação financeira ao ponto
 entrada protegido oficial. A pasta de preview não substitui automaticamente o
 router oficial. Preservar administração de licenças, backup e acesso offline.
 Exigir CI verde e revisar o diff unificado, sem rascunhos duplicados de schema.
-O PR de banco pode ser revisado separadamente; a interface ainda requer essa etapa.
+O serviço e a interface de Compras/Financeiro estão conectados na branch de preview;
+o PR #29 foi integrado somente nela. O PR #28 continua draft e não está integrado
+a `main`. Permanecem pendentes o piloto real completo com duas contas/dispositivos
+e a integração do shell, rotas e preparo PWA ao app oficial.
