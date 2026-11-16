@@ -61,7 +61,10 @@ Diferencie teste automatizado, homologação com identidades sintéticas e valid
 
 ## Publicação e integração
 
-- PR #28 é draft e não representa autorização de merge em main.
+- PR #28 é draft, aberto contra `main`, e não representa autorização de merge.
+- PR #27 também continua draft contra `main`; a migração inicial de workspaces já está representada na preview e registrada como aplicada. Não reaplicar nem integrar esse PR isoladamente sem revisar a sobreposição.
+- PR #29 foi merged somente em `preview/controle-financeiro`; não alterou `main`.
+- PR #30 é uma PR draft de documentação direcionada à branch de preview. Reconfira seu estado e a mergeability antes de qualquer integração.
 - A branch preview é o ambiente de evolução. Documentação e código do ecossistema devem permanecer nela até decisão explícita.
 - Antes de integrar: revisar diff completo, migrações, RLS, compatibilidade de dados, autenticação/licenças, backup/restauração, fluxo offline/online, conflitos, duas contas e dois dispositivos, PWA/rotas e rollback.
 - A página de vendas e os projetos Cloudflare existentes devem permanecer intactos.
