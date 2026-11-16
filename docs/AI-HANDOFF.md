@@ -26,15 +26,15 @@ A raiz da preview usa demonstração fictícia local. `/staging/` usa Google e S
 
 ### Estado do GitHub verificado em 16/11/2026
 
-| Referência | Estado verificado |
-| --- | --- |
-| `main` | Branch padrão; head `8e16a5a` (05/11/2026). |
-| `preview/controle-financeiro` | Head `0b9213e` (13/11/2026), 41 commits à frente de `main` e nenhum atrás; head do PR #28. |
-| PR #27 | Aberto, draft, base `main`; registra a migração inicial `20261109173641`, já presente no ecossistema e registrada como aplicada ao projeto Vértice. |
-| PR #28 | Aberto, draft, base `main`, head `preview/controle-financeiro`; 41 commits e 96 arquivos. Não integrado ao app oficial. |
-| PR #29 | Fechado como merged em 11/11/2026 para `preview/controle-financeiro`; não foi integrado a `main`. Registra o ledger v2, a migração `20261111225724` e a atualização da Edge Function `workspaces` para v2. |
-| PR #30 | Aberto, draft, base `preview/controle-financeiro`, head `docs/ecosystem-handoff`; documentação apenas. Revalidar mergeability antes de integrar. |
-| PR #31 | Fechado sem merge; a alteração proposta não foi integrada por esse PR. |
+| Referência                    | Estado verificado                                                                                                                                                                                          |
+| ----------------------------- | ---------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- |
+| `main`                        | Branch padrão; head `8e16a5a` (05/11/2026).                                                                                                                                                                |
+| `preview/controle-financeiro` | Head `0b9213e` (13/11/2026), 41 commits à frente de `main` e nenhum atrás; head do PR #28.                                                                                                                 |
+| PR #27                        | Aberto, draft, base `main`; registra a migração inicial `20261109173641`, já presente no ecossistema e registrada como aplicada ao projeto Vértice.                                                        |
+| PR #28                        | Aberto, draft, base `main`, head `preview/controle-financeiro`; 41 commits e 96 arquivos. Não integrado ao app oficial.                                                                                    |
+| PR #29                        | Fechado como merged em 11/11/2026 para `preview/controle-financeiro`; não foi integrado a `main`. Registra o ledger v2, a migração `20261111225724` e a atualização da Edge Function `workspaces` para v2. |
+| PR #30                        | Aberto, draft, base `preview/controle-financeiro`, head `docs/ecosystem-handoff`; documentação apenas. Revalidar mergeability antes de integrar.                                                           |
+| PR #31                        | Fechado sem merge; a alteração proposta não foi integrada por esse PR.                                                                                                                                     |
 
 O head de `main` consultado é de 05/11 e o da preview é de 13/11. A consulta de checks combinados e execuções de workflow para os SHAs atuais não retornou registros nesta revisão; isso não comprova sucesso nem falha. Use Actions e o estado dos serviços antes de declarar CI ou publicação como atuais.
 
