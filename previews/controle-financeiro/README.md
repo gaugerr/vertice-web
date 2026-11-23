@@ -1,8 +1,8 @@
 # Vértice — Preview de Compras e Financeiro
 
-> **Estado consultado em 16/11/2026:** leia [AI-HANDOFF](../../docs/AI-HANDOFF.md).
+> **Estado do repositório consultado em 23/11/2026:** leia [AI-HANDOFF](../../docs/AI-HANDOFF.md).
+> Esta revisão não sondou Cloudflare, Supabase ou Auth; não comprova disponibilidade atual do serviço.
 > App oficial, demonstração local e preview conectada são ambientes distintos.
-> Resultados e instruções anteriores abaixo devem ser interpretados no contexto do ambiente e da data; o handoff registra as pendências atuais.
 
 Preview fixo: https://preview-controle-financeiro.vertice-financeiro-preview.pages.dev
 
@@ -101,4 +101,5 @@ node previews/controle-financeiro/build.mjs
 
 Build: `node build.mjs`. Instala dependências fixadas da raiz se necessário.
 Arquivos gerados em dist/ não devem ser versionados. Para testar localmente, sirva dist/
-por HTTP. Contas, gráficos e metas financeiras continuam sendo protótipos locais.
+por HTTP. A demonstração local usa armazenamento do navegador; `/staging/` usa Supabase
+Vértice e `WorkspaceClient`. Esses recursos não estão integrados ao app oficial em `main`.
