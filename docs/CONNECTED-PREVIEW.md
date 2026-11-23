@@ -1,8 +1,8 @@
 # Preview conectada do Vértice
 
-> **Estado consultado em 16/11/2026:** leia [AI-HANDOFF](AI-HANDOFF.md).
+> **Estado do repositório/GitHub consultado em 23/11/2026:** leia [AI-HANDOFF](AI-HANDOFF.md).
+> Esta revisão não sondou Cloudflare, Supabase ou Auth; não comprova disponibilidade atual do serviço.
 > App oficial, demonstração local e preview conectada são ambientes distintos.
-> Resultados e instruções anteriores abaixo devem ser interpretados no contexto do ambiente e da data; o handoff registra as pendências atuais.
 
 Entrada autenticada: <https://preview-controle-financeiro.vertice-financeiro-preview.pages.dev/staging/>.
 Demonstração fictícia preservada: o mesmo endereço sem `/staging/`.
