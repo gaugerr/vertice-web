@@ -14,14 +14,17 @@ Aplicativo de compras e ferramentas financeiras, em evolução para um ecossiste
 | Preview de demonstração        | raiz do endereço de preview                  | Dados fictícios locais, sem conexão com a conta real.                                                                               |
 | Preview conectada              | mesmo endereço + /staging/                   | Homologação autorizada com Google e banco Supabase Vértice. Pode conter dados reais.                                                |
 
-PRs relevantes (estado consultado em 16/11/2026):
+PRs relevantes (estado consultado em 23/11/2026):
 
 - **PR #27:** continua aberto e draft contra `main`. A migração inicial `20261109173641` já está representada no ecossistema e foi registrada como aplicada ao projeto Vértice; não reaplicar nem integrar isoladamente sem revisar a sobreposição.
 - **PR #28:** continua aberto e draft contra `main`, com `preview/controle-financeiro` como head. É desenvolvimento/homologação, não publicação oficial.
 - **PR #29:** fechado como merged em 11/11/2026 somente em `preview/controle-financeiro`. Registra o ledger financeiro v2, a migração `20261111225724` e a ativação do serviço de workspaces na `/staging/`; não alterou `main`.
-- **PR #30:** documentação em draft, com destino `preview/controle-financeiro`; ainda não integrada.
+- **PR #30:** documentação em draft, com destino `preview/controle-financeiro`; aberta e marcada como mergeable na consulta de 23/11.
+- **PR #31:** fechada sem merge; o ajuste de menu mobile não entrou por esse PR.
 
-Este é um retrato do GitHub em 16/11/2026. Reconfira branches, PRs, Actions e serviços antes de qualquer operação.
+Este é um retrato do GitHub em 23/11/2026. Reconfira branches, PRs, Actions e serviços antes de qualquer operação.
+
+**Actions:** não há checks associados às heads atuais. O último `Web checks` de PR na preview (13/11, commit `edf14e3`) falhou no Prettier de `previews/controle-financeiro/ui.css`; `Access integration` e `Workspace database regression` passaram. O check de push passou, mas não substitui a validação do PR. Detalhes em [AI-HANDOFF](docs/AI-HANDOFF.md).
 
 ## Começar
 
