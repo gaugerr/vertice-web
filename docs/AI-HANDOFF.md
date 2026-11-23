@@ -145,11 +145,11 @@ A descrição atualizada do PR #28 (13/11) registra 44 testes financeiros/rotas 
 
 1. Resolver a falha de formatação registrada em `previews/controle-financeiro/ui.css` e obter novos checks disparados pelo PR #28 para a head atual; não usar o check de push como substituto.
 2. Retomar o desenvolvimento a partir do head atual de preview/controle-financeiro; verificar commits e PR #28 antes de editar.
-2. Concluir os fluxos pendentes e manter docs/AI-HANDOFF.md atualizado.
-3. Homologar com duas contas Google e dois dispositivos: convite, isolamento, troca de espaço, edição concorrente, offline/online, remoção/reentrada, backups e restauração.
-4. Testar falhas de rede, resposta perdida, duplicidade, conflito, migração e atualização de cliente antigo.
-5. Revisar acessibilidade, PWA, rotas e integração com o shell oficial.
-6. Fazer plano de rollout/rollback e só então propor integração ao main.
+3. Concluir os fluxos pendentes e manter docs/AI-HANDOFF.md atualizado.
+4. Homologar com duas contas Google e dois dispositivos: convite, isolamento, troca de espaço, edição concorrente, offline/online, remoção/reentrada, backups e restauração.
+5. Testar falhas de rede, resposta perdida, duplicidade, conflito, migração e atualização de cliente antigo.
+6. Revisar acessibilidade, PWA, rotas e integração com o shell oficial.
+7. Fazer plano de rollout/rollback e só então propor integração ao main.
 
 **Não fazer merge nem deploy oficial sem autorização explícita do proprietário.**
 
