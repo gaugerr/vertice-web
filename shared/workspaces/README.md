@@ -1,8 +1,8 @@
 # Espaços pessoais e do casal
 
-> **Estado consultado em 16/11/2026:** leia [AI-HANDOFF](../../docs/AI-HANDOFF.md).
+> **Estado do repositório consultado em 23/11/2026:** leia [AI-HANDOFF](../../docs/AI-HANDOFF.md).
+> A consulta de hoje não verificou o histórico remoto do Supabase nem a disponibilidade dos serviços.
 > App oficial, demonstração local e preview conectada são ambientes distintos.
-> Resultados e instruções anteriores abaixo devem ser interpretados no contexto do ambiente e da data; o handoff registra as pendências atuais.
 
 Implementação experimental, desativada no aplicativo oficial. A preview principal
 usa exclusivamente um servidor de demonstração em IndexedDB e três identidades
