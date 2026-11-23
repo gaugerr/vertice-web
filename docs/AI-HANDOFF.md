@@ -1,6 +1,6 @@
 # Vértice — handoff para humanos e agentes
 
-**Atualizado em 16/11/2026 (America/Sao_Paulo).** Este documento é um retrato do repositório e do estado registrado no GitHub nesta data. Não substitui a conferência dos serviços antes de qualquer operação.
+**Atualizado em 23/11/2026 (America/Sao_Paulo).** Este documento é um retrato do repositório e do estado registrado no GitHub nesta data. Não substitui a conferência dos serviços antes de qualquer operação.
 
 ## 1. Resumo executivo
 
@@ -24,7 +24,7 @@ O PR #29 foi fechado como merged em 11/11/2026 somente na branch `preview/contro
 
 A raiz da preview usa demonstração fictícia local. `/staging/` usa Google e Supabase Vértice e pode conter dados reais. Nunca confundir os dois endereços.
 
-### Estado do GitHub verificado em 16/11/2026
+### Estado do GitHub verificado em 23/11/2026
 
 | Referência                    | Estado verificado                                                                                                                                                                                          |
 | ----------------------------- | ---------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- |
@@ -33,10 +33,12 @@ A raiz da preview usa demonstração fictícia local. `/staging/` usa Google e S
 | PR #27                        | Aberto, draft, base `main`; registra a migração inicial `20261109173641`, já presente no ecossistema e registrada como aplicada ao projeto Vértice.                                                        |
 | PR #28                        | Aberto, draft, base `main`, head `preview/controle-financeiro`; 41 commits e 96 arquivos. Não integrado ao app oficial.                                                                                    |
 | PR #29                        | Fechado como merged em 11/11/2026 para `preview/controle-financeiro`; não foi integrado a `main`. Registra o ledger v2, a migração `20261111225724` e a atualização da Edge Function `workspaces` para v2. |
-| PR #30                        | Aberto, draft, base `preview/controle-financeiro`, head `docs/ecosystem-handoff`; documentação apenas. Revalidar mergeability antes de integrar.                                                           |
+| PR #30                        | Aberto, draft, base `preview/controle-financeiro`, head `docs/ecosystem-handoff`; documentação apenas, mergeable na consulta de 23/11.                                                                            |
 | PR #31                        | Fechado sem merge; a alteração proposta não foi integrada por esse PR.                                                                                                                                     |
 
-O head de `main` consultado é de 05/11 e o da preview é de 13/11. A consulta de checks combinados e execuções de workflow para os SHAs atuais não retornou registros nesta revisão; isso não comprova sucesso nem falha. Use Actions e o estado dos serviços antes de declarar CI ou publicação como atuais.
+Heads verificadas em 23/11: `main` continua em `8e16a5a` (05/11) e `preview/controle-financeiro` em `0b9213e` (13/11), 41 commits à frente de `main`. Não há checks nem workflow runs associados a essas heads exatas. O commit atual da preview foi criado com `[skip ci]`.
+
+O último conjunto de checks disparado por pull request para a preview foi em 13/11, no commit `edf14e3`: [Access integration](https://github.com/gaugerr/vertice-web/actions/runs/43334289213) e [Workspace database regression](https://github.com/gaugerr/vertice-web/actions/runs/43334289121) passaram; [Web checks](https://github.com/gaugerr/vertice-web/actions/runs/43334289183) falhou em `npm run lint`, no `prettier --check`, por formatação de `previews/controle-financeiro/ui.css`. `typecheck` e `typecheck:cakto` passaram antes da falha; testes, build e E2E foram ignorados após o lint falhar. O [Web checks` de push](https://github.com/gaugerr/vertice-web/actions/runs/43334283006) no mesmo commit passou, mas não substitui o resultado do evento de PR. Na `main`, os últimos checks encontrados são de 04/11 no commit `a5a0e4c` e passaram; não há execução associada à head atual `8e16a5a`. Portanto, não há CI verde atual comprovada para a head da preview ou o resultado de merge do PR #28.
 
 ## 3. Arquitetura
 
@@ -137,11 +139,12 @@ Preview financeira:
 - Testes de workspace/PostgreSQL: shared/workspaces/vitest.config.mjs, ledger-postgres.test.mjs e tools/test-workspaces-db.mjs conforme ambiente isolado.
 - E2E e verificações de navegador estão em e2e/, e2e-hosted/ e shared/workspaces/\*browser-check.mjs.
 
-A descrição atualizada do PR #28 (13/11) registra 44 testes financeiros/rotas e 28 testes de persistência/sincronização aprovados, build, ESLint, Prettier, diff e Playwright nas dez telas em 280/390/1440 px. Também registra duas suítes PostgreSQL opcionais não executadas naquela revisão visual e deixa teclado físico e sessão Google real para revisão do titular. São registros da PR, não uma leitura de CI ao vivo. A consulta de checks/workflows desta revisão não retornou execuções para os SHAs consultados. Testes sintéticos não substituem piloto com duas contas reais e dois dispositivos.
+A descrição atualizada do PR #28 (13/11) registra 44 testes financeiros/rotas e 28 testes de persistência/sincronização aprovados, build, ESLint, Prettier, diff e Playwright nas dez telas em 280/390/1440 px. Também registra duas suítes PostgreSQL opcionais não executadas naquela revisão visual e deixa teclado físico e sessão Google real para revisão do titular. São registros da PR, não uma leitura de CI ao vivo. A situação de Actions consultada em 23/11 está descrita na seção 2; a head atual da preview não tem execução associada e não há CI verde atual comprovada. Testes sintéticos não substituem piloto com duas contas reais e dois dispositivos.
 
 ## 7. Próximas etapas e critérios para integração
 
-1. Retomar o desenvolvimento a partir do head atual de preview/controle-financeiro; verificar commits e PR #28 antes de editar.
+1. Resolver a falha de formatação registrada em `previews/controle-financeiro/ui.css` e obter novos checks disparados pelo PR #28 para a head atual; não usar o check de push como substituto.
+2. Retomar o desenvolvimento a partir do head atual de preview/controle-financeiro; verificar commits e PR #28 antes de editar.
 2. Concluir os fluxos pendentes e manter docs/AI-HANDOFF.md atualizado.
 3. Homologar com duas contas Google e dois dispositivos: convite, isolamento, troca de espaço, edição concorrente, offline/online, remoção/reentrada, backups e restauração.
 4. Testar falhas de rede, resposta perdida, duplicidade, conflito, migração e atualização de cliente antigo.
