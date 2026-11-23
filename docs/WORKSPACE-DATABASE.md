@@ -1,8 +1,8 @@
 # Banco de compras, financeiro e casal
 
-> **Estado atual e retomada por IA (09/11/2026):** leia [AI-HANDOFF](AI-HANDOFF.md).
+> **Registro histórico da migração inicial (09/11/2026):** leia [AI-HANDOFF](AI-HANDOFF.md) para o estado atual.
+> Este documento descreve a primeira etapa do schema. A conexão da preview `/staging/` e a migração financeira posterior estão registradas no handoff e no PR #29.
 > App oficial, demonstração local e preview conectada são ambientes distintos.
-> Resultados e instruções anteriores abaixo devem ser interpretados no contexto do ambiente e da data; o handoff registra as pendências atuais.
 
 ## Escopo desta etapa
 
@@ -96,12 +96,15 @@ de retry para diagnosticar esta etapa. Havendo falha, corrigir o SQL local e
 revalidar antes de tentar novamente. Para pausar a futura sincronização, desativar
 o endpoint novo; não apagar tabelas com dados como forma de rollback.
 
-## Próxima integração
+## Continuidade
 
-Conectar o serviço de workspaces e uma preview autenticada ao projeto autorizado,
-com configuração explícita para esse ambiente e chave de assinatura dedicada.
-Preservar a demonstração fictícia separada e os guards anteriores até adaptar essa
-configuração deliberadamente. Não remover o bloqueio de produção indiscriminadamente.
-Depois validar duas contas Google reais e migração confirmada dos dados locais,
-mantendo backup/origem. Login real e sincronização entre aparelhos não são
-comprovados pelos testes de banco desta etapa.
+A etapa descrita neste documento foi sucedida pela conexão autenticada de `/staging/`
+registrada no PR #29, merged somente em `preview/controle-financeiro` em 11/11/2026.
+A migração `20261111225724_finance_accounts_cards_series` estendeu o ledger; seu
+registro de aplicação está no PR #29. Este arquivo continua sendo a referência da
+migração inicial, não um roteiro para conectar ou reaplicar o schema.
+
+Próximos passos do ecossistema: concluir o piloto com duas contas Google e dois
+dispositivos reais, validar migração recuperável dos dados locais e integrar o shell,
+rotas e preparo PWA ao app oficial. O PR #28 permanece draft; nenhuma dessas etapas
+autoriza merge ou publicação em `main`. Preservar backups e a demonstração fictícia.

@@ -1,8 +1,8 @@
 # Espaços pessoais e do casal
 
-> **Estado atual e retomada por IA (09/11/2026):** leia [AI-HANDOFF](../../docs/AI-HANDOFF.md).
+> **Estado do repositório consultado em 23/11/2026:** leia [AI-HANDOFF](../../docs/AI-HANDOFF.md).
+> A consulta de hoje não verificou o histórico remoto do Supabase nem a disponibilidade dos serviços.
 > App oficial, demonstração local e preview conectada são ambientes distintos.
-> Resultados e instruções anteriores abaixo devem ser interpretados no contexto do ambiente e da data; o handoff registra as pendências atuais.
 
 Implementação experimental, desativada no aplicativo oficial. A preview principal
 usa exclusivamente um servidor de demonstração em IndexedDB e três identidades
@@ -57,11 +57,20 @@ mostram registros materializados; o Resumo do app inclui também os derivados.
 ## Backend e regras de acesso
 
 O schema canônico está em `supabase/migrations`, com as migrações
-`20261109173641_shared_shopping_finance_workspaces` e
-`20261109180048_workspace_preview_signing`. Já foram aplicadas no projeto Vértice
-existente com autorização do proprietário. Os arquivos em `supabase/drafts` são
-históricos; não reaplicá-los. Tabelas usam `workspace_id`, autoria, versões e
-exclusões lógicas. Auth/licenças/Cakto permanecem preservados.
+`20261109173641_shared_shopping_finance_workspaces`,
+`20261109180048_workspace_preview_signing` e
+`20261111225724_finance_accounts_cards_series`. As duas primeiras foram registradas
+como aplicadas no projeto Vértice existente. A terceira, integrada pelo PR #29 em
+11/11/2026, adiciona contas, cartões, movimentos, metadados financeiros e vínculos
+de pagamento; o PR registra sua aplicação e a atualização de `workspaces` para v2.
+Não reaplicar nenhuma delas. O histórico remoto não foi consultado nesta revisão.
+Os arquivos em `supabase/drafts` são históricos; não são instruções de deploy.
+Tabelas usam `workspace_id`, autoria, versões e exclusões lógicas.
+
+O ledger v2 envia `ledger_version: 2`. A migração mantém a assinatura pública de
+`workspace_command`, protege referências e alocações de faturas e exige cliente
+atualizado quando operações usam entidades/metadados novos. Clientes antigos não
+devem sobrescrever ou apagar esses registros. Auth/licenças/Cakto permanecem preservados.
 
 Leitura direta passa por RLS e participação ativa. Apenas o serviço autenticado
 pode chamar `workspace_command` e gravar dados; o navegador não recebe privilégios
