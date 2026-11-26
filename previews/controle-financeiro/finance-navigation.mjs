@@ -9,25 +9,24 @@ export const financeTitles = {
   more: 'Mais',
   wealth: 'Mais · Patrimônio',
   wallets: 'Mais · Contas',
-  cards: 'Mais · Cartões',
 };
 export function financeGroup(view) {
   return planningViews.includes(view)
     ? 'planning'
-    : ['wealth', 'wallets', 'cards'].includes(view)
+    : ['wealth', 'wallets'].includes(view)
       ? 'more'
       : view;
 }
 export function financeRoute(view) {
   if (planningViews.includes(view)) return 'planning/' + view;
   if (view === 'overview') return 'home';
-  return ['wealth', 'wallets', 'cards'].includes(view) ? 'more/' + view : view;
+  return ['wealth', 'wallets'].includes(view) ? 'more/' + view : view;
 }
 export function financeView(route) {
   if (route === 'home') return 'overview';
   if (route === 'planning') return 'budget';
   if (route.startsWith('planning/') && planningViews.includes(route.slice(9)))
     return route.slice(9);
-  if (['more/wealth', 'more/wallets', 'more/cards'].includes(route)) return route.slice(5);
+  if (['more/wealth', 'more/wallets'].includes(route)) return route.slice(5);
   return Object.hasOwn(financeTitles, route) ? route : null;
 }

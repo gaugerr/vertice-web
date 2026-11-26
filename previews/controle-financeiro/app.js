@@ -3,12 +3,10 @@ import {
   stopSeries,
   saveMonthlyLimit,
   saveWallet,
-  saveCard,
   saveMove,
   saveLedgerEntry,
   deleteLedgerEntry,
   walletBalance,
-  invoice,
 } from './finance-ledger.mjs';
 import { planningViews, financeGroup } from './finance-navigation.mjs';
 import { openPreviewWorkspace, WorkspaceFinanceStore } from './workspaces.js';
@@ -92,7 +90,6 @@ const screens = {
   overview: ['Resumo', ''],
   more: ['Mais', ''],
   wallets: ['Contas e saldos', 'Saldos manuais calculados apenas com os movimentos vinculados.'],
-  cards: ['Cartões e faturas', 'Compras por competência e pagamentos sem duplicar despesas.'],
   transactions: ['Lançamentos', ''],
   fixed: ['Planejamento', ''],
   budget: ['Planejamento', ''],
@@ -195,7 +192,7 @@ function row(e, full = false) {
   const date = e.paymentDate
     ? `${e.paid ? 'Pago' : 'Último pagamento'} em ${dateName(e.paymentDate)}`
     : dateName(e.date);
-  return `<article class="transaction"><span class="txn-icon ${e.type === 'income' ? 'income' : ''}" aria-hidden="true">${esc(c.icon)}</span><div class="txn-info"><strong>${esc(e.name)}${e.seriesId ? ` · ${e.seriesIndex}/${e.seriesCount}` : ''}</strong><small>${esc(c.name)}${!c.active ? ' · arquivada' : ''}${source}</small><small>${esc(method(e.paymentMethodId))} · ${date}</small>${e.observation ? `<p class="record-note">${esc(e.observation)}</p>` : ''}</div><div class="txn-amount ${e.type === 'income' ? 'green' : ''}">${e.type === 'income' ? '+' : '−'} ${money(e.amount)}<small>${e.paid ? (e.type === 'income' ? 'Recebido' : 'Pago') : e.paidAmount ? `Parcial · pago ${money(e.paidAmount)} · resta ${money(e.remainingAmount)}` : 'Pendente'}</small></div>${full ? `<div class="txn-actions">${fixed ? `<button data-fixed-action="${e.paid ? 'correct' : 'pay'}" data-id="${esc(e.accountId)}" aria-label="${e.paid ? 'Corrigir pagamento de' : 'Pagar'} ${esc(e.name)}" title="${e.paid ? 'Corrigir pagamento' : 'Pagar'}">${actionIcon(e.paid ? 'edit' : 'check')}</button><button data-fixed-action="details" data-id="${esc(e.accountId)}" aria-label="Detalhes de ${esc(e.name)}" title="Detalhes">${actionIcon('more')}</button>` : `<button data-entry-edit="${esc(e.id)}" aria-label="Editar ${esc(e.name)}" title="Editar">${actionIcon('edit')}</button><details class="row-menu"><summary aria-label="Mais ações de ${esc(e.name)}">${icon('more')}</summary><div class="row-menu-items"><button data-entry-copy="${esc(e.id)}">${icon('copy')}Copiar</button><button class="danger-action" data-entry-delete="${esc(e.id)}">${icon('trash')}Excluir</button></div></details>`}</div>` : ''}</article>`;
+  return `<article class="transaction"><span class="txn-icon ${e.type === 'income' ? 'income' : ''}" aria-hidden="true">${esc(c.icon)}</span><div class="txn-info"><strong>${esc(e.name)}${e.seriesId ? ` · ${e.seriesIndex}/${e.seriesCount}` : ''}</strong><small>${esc(c.name)}${!c.active ? ' · arquivada' : ''}${source}</small><small>${esc(method(e.paymentMethodId))} · ${date}</small>${e.observation ? `<p class="record-note">${esc(e.observation)}</p>` : ''}</div><div class="txn-amount ${e.type === 'income' ? 'green' : ''}">${e.type === 'income' ? '+' : '−'} ${money(e.amount)}<small>${e.paid ? (e.type === 'income' ? 'Recebido' : 'Pago') : e.paidAmount ? `Parcial · pago ${money(e.paidAmount)} · resta ${money(e.remainingAmount)}` : 'Pendente'}</small></div>${full ? `<div class="txn-actions">${fixed ? `<button data-fixed-action="${e.paid ? 'correct' : 'pay'}" data-id="${esc(e.accountId)}" aria-label="${e.paid ? 'Corrigir pagamento de' : 'Pagar'} ${esc(e.name)}" title="${e.paid ? 'Corrigir pagamento' : 'Pagar'}">${actionIcon(e.paid ? 'edit' : 'check')}</button><button data-fixed-action="details" data-id="${esc(e.accountId)}" aria-label="Detalhes de ${esc(e.name)}" title="Detalhes">${actionIcon('more')}</button>` : `${e.cardId ? '' : `<button data-entry-edit="${esc(e.id)}" aria-label="Editar ${esc(e.name)}" title="Editar">${actionIcon('edit')}</button>`}<details class="row-menu"><summary aria-label="Mais ações de ${esc(e.name)}">${icon('more')}</summary><div class="row-menu-items"><button data-entry-copy="${esc(e.id)}">${icon('copy')}Copiar</button><button class="danger-action" data-entry-delete="${esc(e.id)}">${icon('trash')}Excluir</button></div></details>`}</div>` : ''}</article>`;
 }
 function distribution() {
   const list = state.categories
@@ -429,7 +426,7 @@ function render() {
   $('#page-subtitle').textContent = screens[view][1];
   $('#month').textContent = monthName();
   $('#finance-area .toolbar').hidden = ['goals', 'more', 'wallets'].includes(view);
-  $('#new-entry').hidden = ['more', 'wallets', 'cards'].includes(view);
+  $('#new-entry').hidden = ['more', 'wallets'].includes(view);
   if (planningViews.includes(view)) planningView = view;
   $('#planning-tabs').hidden = !planningViews.includes(view);
   document.querySelectorAll('#planning-tabs [data-view]').forEach((b) => {
@@ -490,9 +487,8 @@ function render() {
       monthComparison();
   else if (view === 'more')
     $('#content').innerHTML =
-      `<section class="panel more-links" aria-label="Mais opções do financeiro"><button data-view="wallets">${icon('wallet')}Contas bancárias e saldos ${icon('right')}</button><button data-view="cards">${icon('card')}Cartões e faturas ${icon('right')}</button><button data-settings-section="workspace-settings">${icon('people')}Conta e compartilhamento ${icon('right')}</button><button data-catalog="methods">${icon('card')}Formas de pagamento ${icon('right')}</button><button data-view="wealth">${icon('target')}Patrimônio ${icon('right')}</button><button data-catalog="categories">${icon('category')}Categorias ${icon('right')}</button><button data-settings-section="settings-area">${icon('settings')}Configurações e backups ${icon('right')}</button></section>`;
+      `<section class="panel more-links" aria-label="Mais opções do financeiro"><button data-view="wallets">${icon('wallet')}Contas bancárias e saldos ${icon('right')}</button><button data-settings-section="workspace-settings">${icon('people')}Conta e compartilhamento ${icon('right')}</button><button data-catalog="methods">${icon('card')}Formas de pagamento ${icon('right')}</button><button data-view="wealth">${icon('target')}Patrimônio ${icon('right')}</button><button data-catalog="categories">${icon('category')}Categorias ${icon('right')}</button><button data-settings-section="settings-area">${icon('settings')}Configurações e backups ${icon('right')}</button></section>`;
   else if (view === 'wallets') $('#content').innerHTML = walletsPage();
-  else if (view === 'cards') $('#content').innerHTML = cardsPage();
   else if (view === 'wealth')
     $('#content').innerHTML =
       panel(
@@ -574,15 +570,6 @@ function walletOptions(current = '') {
       .join('')
   );
 }
-function cardOptions(current = '') {
-  return (
-    option('', 'Não usar cartão cadastrado', current) +
-    (state.cards ?? [])
-      .filter((c) => c.active || c.id === current)
-      .map((c) => option(c.id, c.name + (c.active ? '' : ' (arquivado)'), current))
-      .join('')
-  );
-}
 function openEntry(id, copy = false) {
   const original = state.entries.find((e) => e.id === id);
   const source = copy ? null : original;
@@ -600,7 +587,7 @@ function openEntry(id, copy = false) {
       .map((name) => `<option value="${esc(name)}"></option>`)
       .join(
         '',
-      )}</datalist><div id="entry-category">${categoryField(e.categoryId, type)}</div><label class="check-label"><input name="paid" type="checkbox" ${!copy && (!original || original.paid) ? 'checked' : ''}> Já foi pago ou recebido</label><div id="entry-method">${methodField(e.paymentMethodId, type, Boolean(source && source.paymentMethodId === null))}</div>${field('Data', 'date', date, 'date', 'required')}<details class="entry-details"><summary>Parcelar, repetir e mais opções</summary><label>Conta<select name="walletId">${walletOptions(e.walletId)}</select></label><label>Cartão de crédito<select name="cardId">${cardOptions(original?.cardId)}</select></label><p class="muted">Crédito pode ser usado sem cadastrar cartão. Ao vincular um cartão, a compra entra na fatura; pague a fatura para baixar as despesas. Não vincule também uma conta à compra.</p>${!source ? `<label>Frequência<select name="seriesMode"><option value="single">Uma vez</option><option value="installments">Parcelar o valor total</option><option value="repeat">Repetir valor mensalmente</option></select></label>${field('Número de parcelas / meses', 'seriesCount', 2, 'number', 'min="2" max="120"')}<p class="muted">Parcelas dividem o valor total. Repetições usam o mesmo valor em cada mês; somente a primeira pode começar paga.</p>` : source.seriesId ? `<p class="muted">Esta edição altera somente esta parcela/ocorrência; pagamentos anteriores e outras competências são preservados.</p><button type="button" class="text-button danger-action" data-series-stop="${esc(source.id)}">Encerrar parcelas/repetições em aberto</button>` : ''}${noteField(original?.observation)}</details>`,
+      )}</datalist><div id="entry-category">${categoryField(e.categoryId, type)}</div><label class="check-label"><input name="paid" type="checkbox" ${!copy && (!original || original.paid) ? 'checked' : ''}> Já foi pago ou recebido</label><div id="entry-method">${methodField(e.paymentMethodId, type, Boolean(source && source.paymentMethodId === null))}</div>${field('Data', 'date', date, 'date', 'required')}<details class="entry-details"><summary>Parcelar, repetir e mais opções</summary><label>Conta<select name="walletId">${walletOptions(e.walletId)}</select></label>${!source ? `<label>Frequência<select name="seriesMode"><option value="single">Uma vez</option><option value="installments">Parcelar o valor total</option><option value="repeat">Repetir valor mensalmente</option></select></label>${field('Número de parcelas / meses', 'seriesCount', 2, 'number', 'min="2" max="120"')}<p class="muted">Parcelas dividem o valor total. Repetições usam o mesmo valor em cada mês; somente a primeira pode começar paga.</p>` : source.seriesId ? `<p class="muted">Esta edição altera somente esta parcela/ocorrência; pagamentos anteriores e outras competências são preservados.</p><button type="button" class="text-button danger-action" data-series-stop="${esc(source.id)}">Encerrar parcelas/repetições em aberto</button>` : ''}${noteField(original?.observation)}</details>`,
     { id: source?.id ?? crypto.randomUUID(), isNew: !source, source },
   );
   $('#financial-form [name=amount]').focus();
@@ -614,15 +601,6 @@ function openWallet(id) {
     { id: w?.id ?? crypto.randomUUID(), source: w },
   );
 }
-function openCard(id) {
-  const c = state.cards?.find((c) => c.id === id);
-  showForm(
-    'card',
-    c ? 'Editar cartão' : 'Novo cartão',
-    `${field('Nome', 'name', c?.name ?? '', 'text', 'required maxlength="80"')}<div class="form-grid">${field('Dia do fechamento', 'closingDay', c?.closingDay ?? 20, 'number', 'required min="1" max="31"')}${field('Dia do vencimento', 'dueDay', c?.dueDay ?? 5, 'number', 'required min="1" max="31"')}</div><p class="muted">Compras no dia do fechamento entram na fatura seguinte. Sem conexão automática com o banco; confira os valores com sua fatura.</p>`,
-    { id: c?.id ?? crypto.randomUUID(), source: c },
-  );
-}
 function openTransfer() {
   if ((state.wallets ?? []).filter((w) => w.active).length < 2)
     throw Error('Cadastre duas contas ativas para transferir.');
@@ -631,18 +609,6 @@ function openTransfer() {
     'Transferir entre contas',
     `<label>De<select name="fromWalletId" required>${walletOptions()}</select></label><label>Para<select name="toWalletId" required>${walletOptions()}</select></label>${field('Valor (R$)', 'amount', '', 'text', 'required inputmode="decimal"')}${field('Data', 'date', today(), 'date', 'required')}<p class="muted">Transferências movimentam os saldos; não são receitas nem despesas.</p>`,
     { id: crypto.randomUUID() },
-  );
-}
-function openInvoice(cardId) {
-  const i = invoice(state, cardId, month);
-  if (i.remaining <= 0) throw Error('Não há saldo a pagar nesta fatura.');
-  if (!(state.wallets ?? []).some((w) => w.active))
-    throw Error('Cadastre uma conta para pagar a fatura.');
-  showForm(
-    'invoice',
-    'Pagar fatura',
-    `<p>${esc(state.cards.find((c) => c.id === cardId).name)} · ${monthName()}</p>${field('Valor do pagamento (R$)', 'amount', decimal(i.remaining), 'text', 'required inputmode="decimal"')}<label>Debitar da conta<select name="fromWalletId" required>${walletOptions()}</select></label>${field('Data do pagamento', 'date', today(), 'date', 'required')}<p class="muted">O pagamento baixa as compras existentes e debita a conta uma vez. Pagamentos parciais mantêm o restante pendente.</p>`,
-    { id: crypto.randomUUID(), cardId, month },
   );
 }
 function walletsPage() {
@@ -663,7 +629,7 @@ function walletsPage() {
         )
       : '') +
     panel(
-      'Transferências e pagamentos de fatura',
+      'Transferências e movimentos antigos',
       'Estes movimentos não criam receitas ou despesas.',
       (state.moves ?? [])
         .slice()
@@ -671,28 +637,10 @@ function walletsPage() {
         .slice(0, 20)
         .map(
           (m) =>
-            `<div class="old-pending-row"><div><strong>${m.kind === 'invoice' ? 'Pagamento de fatura' : 'Transferência'}</strong><small>${dateName(m.date)} · ${money(m.amount)}</small></div><button class="text-button" data-move-delete="${esc(m.id)}">Desfazer</button></div>`,
+            `<div class="old-pending-row"><div><strong>${m.kind === 'invoice' ? 'Pagamento de fatura' : 'Transferência'}</strong><small>${dateName(m.date)} · ${money(m.amount)}</small></div>${m.kind === 'invoice' ? '' : `<button class="text-button" data-move-delete="${esc(m.id)}">Desfazer</button>`}</div>`,
         )
         .join('') || empty('Nenhum movimento registrado.'),
     )
-  );
-}
-function cardsPage() {
-  return (
-    `<button class="primary" data-card-new>${icon('plus')} Novo cartão</button>` +
-    (state.cards ?? [])
-      .map((c) => {
-        const i = invoice(state, c.id, month);
-        return panel(
-          c.name,
-          `${c.active ? 'Ativo' : 'Arquivado'} · fecha dia ${c.closingDay} · vence dia ${c.dueDay}`,
-          `<div class="fixed-summary"><article><small>Fatura</small><strong>${money(i.total)}</strong></article><article><small>Pago</small><strong class="green">${money(i.paid)}</strong></article><article><small>Restante</small><strong>${money(i.remaining)}</strong></article></div><div class="workspace-buttons">${i.remaining > 0 ? `<button class="primary" data-invoice-pay="${esc(c.id)}">Pagar fatura</button>` : ''}<button class="text-button" data-card-edit="${esc(c.id)}">Editar</button><button class="text-button" data-card-toggle="${esc(c.id)}">${c.active ? 'Arquivar' : 'Reativar'}</button></div>${i.entries.map((e) => `<div class="old-pending-row"><span>${esc(e.name)}${e.seriesId ? ` · ${e.seriesIndex}/${e.seriesCount}` : ''}</span><strong>${money(e.amount)}</strong></div>`).join('') || empty('Nenhuma compra nesta competência.')}`,
-        );
-      })
-      .join('') +
-    (!(state.cards ?? []).length
-      ? empty('Cadastre um cartão para organizar compras e faturas. Não há dados automáticos.')
-      : '')
   );
 }
 function fixedVersion(a, m) {
@@ -886,30 +834,12 @@ $('#financial-form').addEventListener('submit', async (e) => {
             openingDate: get('date'),
             active: context.source?.active ?? true,
           });
-        else if (context.kind === 'card')
-          saveCard(s, {
-            id: context.id,
-            name: get('name'),
-            closingDay: Number(get('closingDay')),
-            dueDay: Number(get('dueDay')),
-            active: context.source?.active ?? true,
-          });
         else if (context.kind === 'transfer')
           saveMove(s, {
             id: context.id,
             kind: 'transfer',
             fromWalletId: get('fromWalletId'),
             toWalletId: get('toWalletId'),
-            amount: cents(get('amount')),
-            date: get('date'),
-          });
-        else if (context.kind === 'invoice')
-          saveMove(s, {
-            id: context.id,
-            kind: 'invoice',
-            fromWalletId: get('fromWalletId'),
-            cardId: context.cardId,
-            month: context.month,
             amount: cents(get('amount')),
             date: get('date'),
           });
@@ -935,13 +865,6 @@ $('#financial-form').addEventListener('submit', async (e) => {
                   )
                 : {}),
               ...(get('walletId') ? { walletId: get('walletId') } : {}),
-              ...(get('cardId')
-                ? {
-                    cardId: get('cardId'),
-                    purchaseDate: get('date'),
-                    date: context.source?.date ?? get('date'),
-                  }
-                : {}),
             },
             { mode: get('seriesMode') || 'single', count: Number(get('seriesCount') || 1) },
           );
@@ -1068,11 +991,6 @@ document.addEventListener('change', (e) => {
       e.target.value,
       state.entries.find((r) => r.id === editing?.id)?.paymentMethodId === null,
     );
-    if (e.target.value === 'income') $('#financial-form [name=cardId]').value = '';
-  }
-  if (e.target.name === 'cardId' && e.target.value) {
-    $('#financial-form [name=walletId]').value = '';
-    $('#financial-form [name=paid]').checked = false;
   }
   if (e.target.name === 'name' && editing?.isNew && editing.kind === 'entry') {
     const type = $('#entry-type').value;
@@ -1143,7 +1061,7 @@ document.addEventListener('click', async (e) => {
     if (
       b.dataset.seriesStop &&
       confirm(
-        'Excluir esta e as próximas parcelas/repetições em aberto? Valores já pagos e faturas com pagamento serão preservados.',
+        'Excluir esta e as próximas parcelas/repetições em aberto? Valores já pagos serão preservados.',
       )
     ) {
       await transact(
@@ -1154,23 +1072,15 @@ document.addEventListener('click', async (e) => {
     }
     if (b.hasAttribute('data-wallet-new')) openWallet();
     if (b.dataset.walletEdit) openWallet(b.dataset.walletEdit);
-    if (b.hasAttribute('data-card-new')) openCard();
-    if (b.dataset.cardEdit) openCard(b.dataset.cardEdit);
     if (b.hasAttribute('data-transfer')) openTransfer();
-    if (b.dataset.invoicePay) openInvoice(b.dataset.invoicePay);
     if (b.dataset.walletToggle)
       await transact((s) => {
         const w = s.wallets.find((w) => w.id === b.dataset.walletToggle);
         w.active = !w.active;
       }, 'Conta atualizada. O histórico foi preservado.');
-    if (b.dataset.cardToggle)
-      await transact((s) => {
-        const c = s.cards.find((c) => c.id === b.dataset.cardToggle);
-        c.active = !c.active;
-      }, 'Cartão atualizado. O histórico foi preservado.');
     if (
       b.dataset.moveDelete &&
-      confirm('Desfazer este movimento? Saldos e baixas da fatura serão recalculados.')
+      confirm('Desfazer este movimento? Os saldos serão recalculados.')
     )
       await transact((s) => {
         s.moves = s.moves.filter((m) => m.id !== b.dataset.moveDelete);

@@ -61,10 +61,6 @@ try {
     await form.locator('[name=amount]').fill(name === 'Conta A' ? '1000' : '0');
     await save();
   }
-  const wallet = await p.evaluate(async () => {
-    const c = await (await import('/workspaces.js')).openPreviewWorkspace();
-    return (await c.finance()).wallets.find((w) => w.name === 'Conta A').id;
-  });
   await p.locator('[data-transfer]').click();
   const walletA = await form
     .locator('[name=fromWalletId] option')
@@ -80,20 +76,11 @@ try {
   await save();
   await p.locator('#menu-toggle').click();
   await p.locator('[data-finance-view=more]').click();
-  await p.locator('#content [data-view=cards]').click();
-  await p.locator('[data-card-new]').click();
-  await form.locator('[name=name]').fill('Cartão A');
-  await save();
-  const card = await p.evaluate(async () => {
-    const c = await (await import('/workspaces.js')).openPreviewWorkspace();
-    return (await c.finance()).cards[0].id;
-  });
   await p.locator('#finance-tabs [data-view=overview]').click();
   await p.locator('#new-entry').click();
   await form.locator('[name=amount]').fill('100');
   await form.locator('[name=name]').fill('Compra parcelada');
   await form.locator('details summary').click();
-  await form.locator('[name=cardId]').selectOption(card);
   await form.locator('[name=seriesMode]').selectOption('installments');
   await form.locator('[name=seriesCount]').fill('3');
   await save();
@@ -110,22 +97,9 @@ try {
   );
   await p.locator('#menu-toggle').click();
   await p.locator('[data-finance-view=more]').click();
-  await p.locator('#content [data-view=cards]').click();
-  for (let i = 0; i < 12; i++) {
-    const current = await p.locator('#month').innerText();
-    const has = await p.locator('[data-invoice-pay]').count();
-    if (has) break;
-    await p.locator('#next-month').click();
-    assert(current !== (await p.locator('#month').innerText()));
-  }
-  await p.locator('[data-invoice-pay]').click();
-  await form.locator('[name=fromWalletId]').selectOption(wallet);
-  await save();
-  await p.locator('#menu-toggle').click();
-  await p.locator('[data-finance-view=more]').click();
   await p.locator('#content [data-view=wallets]').click();
   const balances = await p.locator('.wealth-value').allTextContents();
-  assert(balances.some((s) => s.includes('866,66')));
+  assert(balances.some((s) => s.includes('900,00')));
   assert(balances.some((s) => s.includes('100,00')));
   await p.reload();
   await p.locator('html[data-workspace-ready=true]').waitFor({ state: 'attached' });
@@ -142,7 +116,7 @@ try {
   }
   assert.deepEqual(errors, []);
   console.log(
-    'PASS: despesa em dois campos, busca sem acentos, contas/transferência, parcelas, cartão/pagamento de fatura, saldos, recarga e backup; layouts 280/390/1440.',
+    'PASS: despesa em dois campos, busca sem acentos, contas/transferência, parcelas, saldos, recarga e backup; layouts 280/390/1440.',
   );
 } finally {
   await browser.close();

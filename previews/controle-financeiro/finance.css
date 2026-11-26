@@ -797,8 +797,7 @@ textarea {
 #financial-form [name='amount'] {
   font-size: 22px;
 }
-#finance-area[data-view='wallets'] #content > .panel,
-#finance-area[data-view='cards'] #content > .panel {
+#finance-area[data-view='wallets'] #content > .panel {
   margin-top: 18px;
 }
 

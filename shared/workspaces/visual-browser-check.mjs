@@ -43,7 +43,6 @@ try {
       'more',
       'more/wealth',
       'more/wallets',
-      'more/cards',
     ]) {
       await open(view);
       await fits(`${view} at ${width}`);
