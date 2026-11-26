@@ -365,6 +365,12 @@ sobrepor o bloqueio. A emulação não substitui conferir gestos em aparelho fí
 - Conciliação automática de notificações que nunca chegaram, alertas e painel de
   revisão de pagamentos ainda não foram implementados. A fila atual recupera
   eventos já recebidos, sem consultar pedidos na API Cakto.
+- Enter ignorado durante a marcação de item. Em `src/features/items/components/PurchaseForm.tsx`,
+  `submit()` retorna silenciosamente quando `marking` está ativo. Uma tentativa de submissão por Enter
+  durante esse período é descartada sem feedback. O rascunho permanece na tela, portanto não há perda
+  de dados, mas o comportamento pode confundir o usuário. Melhoria a avaliar: apresentar um estado visual
+  claro de salvamento e permitir que a submissão seja processada após a conclusão da marcação, ou
+  fornecer feedback explícito enquanto a operação estiver pendente.
 
 Detalhes: `README.md`, `docs/access/SETUP.md`, `docs/access/GOOGLE.md`,
 `docs/access/VALIDATION.md`, `docs/VALIDATION.md`, `docs/FUTURE-SYNC.md` e
