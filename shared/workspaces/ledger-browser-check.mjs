@@ -43,7 +43,6 @@ try {
     return (await c.finance()).entries.find((e) => e.name === 'Café corrigido');
   });
   assert.equal(credit.paymentMethodId, 'P4');
-  assert(!credit.cardId);
   p.once('dialog', (d) => d.accept());
   await p.locator('.row-menu > summary').click();
   await p.locator('[data-entry-delete]').click();

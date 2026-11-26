@@ -8,6 +8,7 @@ import {
   readShopping,
   changesBetween,
   keyOf,
+  isLegacyCardRecord,
 } from './mapping.mjs';
 import { validateState } from '../../previews/controle-financeiro/finance-domain.mjs';
 export const OFFLINE_MS = 86400000;
@@ -331,18 +332,6 @@ export class WorkspaceClient {
     for (const c of changes) {
       const existing = await this.db.workspaceRecords.get(keyOf(c.entity, c.id));
       c.expected_version = existing?.confirmedVersion ?? 0;
-      if (c.entity === 'finance_moves' && c.body.card_id) {
-        const parent = await this.db.workspaceRecords.get(keyOf('finance_cards', c.body.card_id));
-        if (
-          parent &&
-          !op.guards.some((g) => g.entity === 'finance_cards' && g.id === c.body.card_id)
-        )
-          op.guards.push({
-            entity: 'finance_cards',
-            id: c.body.card_id,
-            expected_version: parent.confirmedVersion ?? 0,
-          });
-      }
       if (['finance_payments', 'finance_goal_contributions'].includes(c.entity)) {
         const entity = c.entity === 'finance_payments' ? 'finance_entries' : 'finance_goals',
           id = c.body.entry_id ?? c.body.goal_id,
@@ -370,8 +359,8 @@ export class WorkspaceClient {
     await this.db.transaction('rw', dataTables(this.db), async () => {
       await this.assertWrite();
       state = await this.finance();
-      const before = (await this.db.workspaceRecords.toArray()).filter((r) =>
-        r.entity.startsWith('finance_'),
+      const before = (await this.db.workspaceRecords.toArray()).filter(
+        (r) => r.entity.startsWith('finance_') && !isLegacyCardRecord(r),
       );
       if (expectedRevision !== undefined && state.revision !== expectedRevision && !baseline)
         throw new WorkspaceError(
@@ -629,8 +618,8 @@ export class WorkspaceFinanceStore {
       this.client.db.workspaceMeta,
       async () => {
         this.state = await this.client.finance();
-        this.baseline = (await this.client.db.workspaceRecords.toArray()).filter((r) =>
-          r.entity.startsWith('finance_'),
+        this.baseline = (await this.client.db.workspaceRecords.toArray()).filter(
+          (r) => r.entity.startsWith('finance_') && !isLegacyCardRecord(r),
         );
       },
     );

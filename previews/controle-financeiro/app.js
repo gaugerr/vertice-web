@@ -192,7 +192,7 @@ function row(e, full = false) {
   const date = e.paymentDate
     ? `${e.paid ? 'Pago' : 'Último pagamento'} em ${dateName(e.paymentDate)}`
     : dateName(e.date);
-  return `<article class="transaction"><span class="txn-icon ${e.type === 'income' ? 'income' : ''}" aria-hidden="true">${esc(c.icon)}</span><div class="txn-info"><strong>${esc(e.name)}${e.seriesId ? ` · ${e.seriesIndex}/${e.seriesCount}` : ''}</strong><small>${esc(c.name)}${!c.active ? ' · arquivada' : ''}${source}</small><small>${esc(method(e.paymentMethodId))} · ${date}</small>${e.observation ? `<p class="record-note">${esc(e.observation)}</p>` : ''}</div><div class="txn-amount ${e.type === 'income' ? 'green' : ''}">${e.type === 'income' ? '+' : '−'} ${money(e.amount)}<small>${e.paid ? (e.type === 'income' ? 'Recebido' : 'Pago') : e.paidAmount ? `Parcial · pago ${money(e.paidAmount)} · resta ${money(e.remainingAmount)}` : 'Pendente'}</small></div>${full ? `<div class="txn-actions">${fixed ? `<button data-fixed-action="${e.paid ? 'correct' : 'pay'}" data-id="${esc(e.accountId)}" aria-label="${e.paid ? 'Corrigir pagamento de' : 'Pagar'} ${esc(e.name)}" title="${e.paid ? 'Corrigir pagamento' : 'Pagar'}">${actionIcon(e.paid ? 'edit' : 'check')}</button><button data-fixed-action="details" data-id="${esc(e.accountId)}" aria-label="Detalhes de ${esc(e.name)}" title="Detalhes">${actionIcon('more')}</button>` : `${e.cardId ? '' : `<button data-entry-edit="${esc(e.id)}" aria-label="Editar ${esc(e.name)}" title="Editar">${actionIcon('edit')}</button>`}<details class="row-menu"><summary aria-label="Mais ações de ${esc(e.name)}">${icon('more')}</summary><div class="row-menu-items"><button data-entry-copy="${esc(e.id)}">${icon('copy')}Copiar</button><button class="danger-action" data-entry-delete="${esc(e.id)}">${icon('trash')}Excluir</button></div></details>`}</div>` : ''}</article>`;
+  return `<article class="transaction"><span class="txn-icon ${e.type === 'income' ? 'income' : ''}" aria-hidden="true">${esc(c.icon)}</span><div class="txn-info"><strong>${esc(e.name)}${e.seriesId ? ` · ${e.seriesIndex}/${e.seriesCount}` : ''}</strong><small>${esc(c.name)}${!c.active ? ' · arquivada' : ''}${source}</small><small>${esc(method(e.paymentMethodId))} · ${date}</small>${e.observation ? `<p class="record-note">${esc(e.observation)}</p>` : ''}</div><div class="txn-amount ${e.type === 'income' ? 'green' : ''}">${e.type === 'income' ? '+' : '−'} ${money(e.amount)}<small>${e.paid ? (e.type === 'income' ? 'Recebido' : 'Pago') : e.paidAmount ? `Parcial · pago ${money(e.paidAmount)} · resta ${money(e.remainingAmount)}` : 'Pendente'}</small></div>${full ? `<div class="txn-actions">${fixed ? `<button data-fixed-action="${e.paid ? 'correct' : 'pay'}" data-id="${esc(e.accountId)}" aria-label="${e.paid ? 'Corrigir pagamento de' : 'Pagar'} ${esc(e.name)}" title="${e.paid ? 'Corrigir pagamento' : 'Pagar'}">${actionIcon(e.paid ? 'edit' : 'check')}</button><button data-fixed-action="details" data-id="${esc(e.accountId)}" aria-label="Detalhes de ${esc(e.name)}" title="Detalhes">${actionIcon('more')}</button>` : `<button data-entry-edit="${esc(e.id)}" aria-label="Editar ${esc(e.name)}" title="Editar">${actionIcon('edit')}</button><details class="row-menu"><summary aria-label="Mais ações de ${esc(e.name)}">${icon('more')}</summary><div class="row-menu-items"><button data-entry-copy="${esc(e.id)}">${icon('copy')}Copiar</button><button class="danger-action" data-entry-delete="${esc(e.id)}">${icon('trash')}Excluir</button></div></details>`}</div>` : ''}</article>`;
 }
 function distribution() {
   const list = state.categories
@@ -575,7 +575,7 @@ function openEntry(id, copy = false) {
   const source = copy ? null : original;
   const type = original?.type ?? 'expense';
   const defaults = entryDefaults(type);
-  const date = original?.purchaseDate ?? original?.date ?? today();
+  const date = original?.date ?? today();
   const e = original ?? defaults;
   showForm(
     'entry',
@@ -629,7 +629,7 @@ function walletsPage() {
         )
       : '') +
     panel(
-      'Transferências e movimentos antigos',
+      'Transferências',
       'Estes movimentos não criam receitas ou despesas.',
       (state.moves ?? [])
         .slice()
@@ -637,7 +637,7 @@ function walletsPage() {
         .slice(0, 20)
         .map(
           (m) =>
-            `<div class="old-pending-row"><div><strong>${m.kind === 'invoice' ? 'Pagamento de fatura' : 'Transferência'}</strong><small>${dateName(m.date)} · ${money(m.amount)}</small></div>${m.kind === 'invoice' ? '' : `<button class="text-button" data-move-delete="${esc(m.id)}">Desfazer</button>`}</div>`,
+            `<div class="old-pending-row"><div><strong>Transferência</strong><small>${dateName(m.date)} · ${money(m.amount)}</small></div><button class="text-button" data-move-delete="${esc(m.id)}">Desfazer</button></div>`,
         )
         .join('') || empty('Nenhum movimento registrado.'),
     )
@@ -752,11 +752,12 @@ $('#finance-backup-file').onchange = async (e) => {
   if (!file) return;
   try {
     if (file.size > BACKUP_LIMIT) throw Error('Use um backup de até 5 MB.');
-    const imported = readBackup(await file.text());
+    const notes = [];
+    const imported = readBackup(await file.text(), notes);
     showForm(
       'restore',
       'Restaurar backup financeiro',
-      `<p>O arquivo contém <strong>${imported.entries.length} lançamentos</strong>, <strong>${imported.fixedAccounts.length} contas fixas</strong> e <strong>${imported.goals.length} metas</strong>.</p><p>Ao confirmar, o financeiro do espaço ativo será substituído. Uma cópia dos dados atuais será guardada antes da troca. As listas de compras permanecem separadas.</p>`,
+      `<p>O arquivo contém <strong>${imported.entries.length} lançamentos</strong>, <strong>${imported.fixedAccounts.length} contas fixas</strong> e <strong>${imported.goals.length} metas</strong>.</p>${notes.map((n) => `<p class="muted">${esc(n)}</p>`).join('')}<p>Ao confirmar, o financeiro do espaço ativo será substituído. Uma cópia dos dados atuais será guardada antes da troca. As listas de compras permanecem separadas.</p>`,
       { imported },
     );
     $('#finance-backup-status').textContent = 'Confira o conteúdo e confirme a restauração.';
@@ -1078,10 +1079,7 @@ document.addEventListener('click', async (e) => {
         const w = s.wallets.find((w) => w.id === b.dataset.walletToggle);
         w.active = !w.active;
       }, 'Conta atualizada. O histórico foi preservado.');
-    if (
-      b.dataset.moveDelete &&
-      confirm('Desfazer este movimento? Os saldos serão recalculados.')
-    )
+    if (b.dataset.moveDelete && confirm('Desfazer este movimento? Os saldos serão recalculados.'))
       await transact((s) => {
         s.moves = s.moves.filter((m) => m.id !== b.dataset.moveDelete);
       }, 'Movimento desfeito.');

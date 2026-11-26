@@ -20,14 +20,6 @@ const name = (value) => {
 };
 const getWallet = (s, id) =>
   (s.wallets ?? []).find((w) => w.id === id) ?? fail('Conta não encontrada.');
-const getCard = (s, id) =>
-  (s.cards ?? []).find((c) => c.id === id) ?? fail('Cartão não encontrado.');
-export function invoiceMonth(card, date) {
-  if (!validDate(date)) fail('Data da compra inválida.');
-  let closing = date.slice(0, 7);
-  if (date >= dueDate(closing, card.closingDay)) closing = adjacentMonth(closing, 1);
-  return card.dueDay <= card.closingDay ? adjacentMonth(closing, 1) : closing;
-}
 export function saveWallet(s, w) {
   name(w.name);
   amount(w.openingBalance, true);
@@ -47,59 +39,6 @@ export function saveWallet(s, w) {
   if (old) Object.assign(old, value);
   else s.wallets.push(value);
 }
-export function saveCard(s, c) {
-  name(c.name);
-  if (
-    !Number.isInteger(c.closingDay) ||
-    !Number.isInteger(c.dueDay) ||
-    c.closingDay < 1 ||
-    c.closingDay > 31 ||
-    c.dueDay < 1 ||
-    c.dueDay > 31
-  )
-    fail('Informe dias entre 1 e 31.');
-  const old = (s.cards ??= []).find((x) => x.id === c.id);
-  if (
-    old &&
-    (old.closingDay !== c.closingDay || old.dueDay !== c.dueDay) &&
-    s.entries.some((e) => e.cardId === c.id)
-  )
-    fail(
-      'Preserve o ciclo do cartão com compras registradas. Crie outro cartão para um ciclo novo.',
-    );
-  const value = { ...c, name: c.name.trim(), active: c.active !== false };
-  if (old) Object.assign(old, value);
-  else s.cards.push(value);
-}
-export function invoice(s, cardId, month) {
-  const entries = s.entries
-    .filter((e) => e.cardId === cardId && e.date.startsWith(month))
-    .sort((a, b) => a.date.localeCompare(b.date) || a.id.localeCompare(b.id));
-  const total = entries.reduce((sum, e) => sum + e.amount, 0);
-  const paid = (s.moves ?? [])
-    .filter((m) => m.kind === 'invoice' && m.cardId === cardId && m.month === month)
-    .reduce((sum, m) => sum + m.amount, 0);
-  return { total, paid, remaining: total - paid, entries };
-}
-export function invoiceAllocations(s) {
-  const result = [],
-    allocated = new Map();
-  for (const move of (s.moves ?? [])
-    .filter((m) => m.kind === 'invoice')
-    .sort((a, b) => a.date.localeCompare(b.date) || a.id.localeCompare(b.id))) {
-    let remaining = move.amount;
-    for (const e of invoice(s, move.cardId, move.month).entries) {
-      const n = Math.min(remaining, e.amount - (allocated.get(e.id) ?? 0));
-      if (n > 0) {
-        result.push({ move, entry: e, amount: n });
-        allocated.set(e.id, (allocated.get(e.id) ?? 0) + n);
-        remaining -= n;
-      }
-    }
-    if (remaining) fail('O pagamento ultrapassa o total da fatura.');
-  }
-  return result;
-}
 export function saveMove(s, m) {
   amount(m.amount);
   if (!validDate(m.date)) fail('Data do movimento inválida.');
@@ -107,43 +46,19 @@ export function saveMove(s, m) {
   if (!wallet.active) fail('Escolha uma conta ativa.');
   if (m.date < wallet.openingDate)
     fail('O movimento deve ser posterior ao saldo inicial da conta.');
-  if (m.kind === 'transfer') {
-    const target = getWallet(s, m.toWalletId);
-    if (target.id === wallet.id || !target.active) fail('Escolha duas contas ativas diferentes.');
-    if (m.date < target.openingDate) fail('Confira a data do saldo inicial da conta de destino.');
-  } else if (m.kind === 'invoice') {
-    getCard(s, m.cardId);
-    if (!validMonth(m.month)) fail('Competência da fatura inválida.');
-  } else fail('Movimento inválido.');
-  const next = (s.moves ?? []).filter((x) => x.id !== m.id).concat({ ...m });
-  invoiceAllocations({ ...s, moves: next });
-  s.moves = next;
-}
-export function ensureEditable(s, e) {
-  if (e?.cardId && invoice(s, e.cardId, e.date.slice(0, 7)).paid)
-    fail('Desfaça os pagamentos dessa fatura antes de alterar suas compras.');
+  if (m.kind !== 'transfer') fail('Movimento inválido.');
+  const target = getWallet(s, m.toWalletId);
+  if (target.id === wallet.id || !target.active) fail('Escolha duas contas ativas diferentes.');
+  if (m.date < target.openingDate) fail('Confira a data do saldo inicial da conta de destino.');
+  s.moves = (s.moves ?? []).filter((x) => x.id !== m.id).concat({ ...m });
 }
 export function saveLedgerEntry(s, e, { mode = 'single', count = 1 } = {}) {
   const old = s.entries.find((x) => x.id === e.id);
-  ensureEditable(s, old);
   if (e.walletId) {
     const w = getWallet(s, e.walletId);
     if (!w.active && old?.walletId !== w.id) fail('Escolha uma conta ativa.');
   }
-  if (e.cardId) {
-    const c = getCard(s, e.cardId);
-    if (e.type !== 'expense') fail('Cartão de crédito é usado somente para despesas.');
-    if (!c.active && old?.cardId !== c.id) fail('Escolha um cartão ativo.');
-    if (e.walletId) fail('A conta será debitada no pagamento da fatura, não na compra.');
-    e.paid = false;
-  }
   if (old || mode === 'single') {
-    if (e.cardId) {
-      const card = getCard(s, e.cardId);
-      let month = invoiceMonth(card, e.purchaseDate ?? e.date);
-      for (let i = 1; i < (e.seriesIndex ?? 1); i++) month = adjacentMonth(month, 1);
-      e.date = dueDate(month, card.dueDay);
-    }
     saveEntry(s, e);
     return;
   }
@@ -156,10 +71,8 @@ export function saveLedgerEntry(s, e, { mode = 'single', count = 1 } = {}) {
     fail('Informe de 2 a 120 parcelas ou repetições.');
   if (mode === 'installments' && e.amount < count)
     fail('Cada parcela precisa ter ao menos um centavo.');
-  const card = e.cardId ? getCard(s, e.cardId) : null;
-  const first = card ? invoiceMonth(card, e.purchaseDate ?? e.date) : e.date.slice(0, 7);
-  const day = card ? card.dueDay : Number(e.date.slice(8));
-  let month = first;
+  const day = Number(e.date.slice(8));
+  let month = e.date.slice(0, 7);
   const planned = [];
   for (let i = 0; i < count; i++) {
     if (!month || !validMonth(month)) fail('Período fora do intervalo permitido.');
@@ -175,15 +88,13 @@ export function saveLedgerEntry(s, e, { mode = 'single', count = 1 } = {}) {
           ? e.amount
           : Math.floor(e.amount / count) + (i < e.amount % count ? 1 : 0),
       date: dueDate(month, day),
-      paid: !card && i === 0 && e.paid,
+      paid: i === 0 && e.paid,
     });
     month = adjacentMonth(month, 1);
   }
   for (const item of planned) saveEntry(s, item);
 }
 export function deleteLedgerEntry(s, id) {
-  const e = s.entries.find((x) => x.id === id);
-  ensureEditable(s, e);
   s.entries = s.entries.filter((x) => x.id !== id);
 }
 export function stopSeries(s, id) {
@@ -194,8 +105,7 @@ export function stopSeries(s, id) {
       e.seriesId === source.seriesId &&
       e.seriesIndex >= source.seriesIndex &&
       !e.paid &&
-      !e.paidAmount &&
-      (!e.cardId || !invoice(s, e.cardId, e.date.slice(0, 7)).paid),
+      !e.paidAmount,
   );
   if (!removable.length) fail('Não há parcelas ou repetições em aberto para excluir.');
   const ids = new Set(removable.map((e) => e.id));
@@ -216,7 +126,7 @@ export function walletBalance(s, id, at) {
   let balance = wallet.openingBalance;
   const includes = (date) => date >= wallet.openingDate && date <= at;
   for (const e of s.entries)
-    if (e.walletId === id && !e.cardId && e.paid && includes(e.date))
+    if (e.walletId === id && e.paid && includes(e.date))
       balance += (e.type === 'income' ? 1 : -1) * e.amount;
   for (const o of Object.values(s.occurrences))
     for (const h of o.payment?.history ?? [])
@@ -230,10 +140,10 @@ export function walletBalance(s, id, at) {
   return balance;
 }
 export function validateLedger(s) {
-  for (const key of ['wallets', 'cards', 'moves'])
+  for (const key of ['wallets', 'moves'])
     if (s[key] !== undefined && (!Array.isArray(s[key]) || s[key].length > 50000))
       fail('Dados financeiros adicionais inválidos.');
-  for (const key of ['wallets', 'cards', 'moves']) {
+  for (const key of ['wallets', 'moves']) {
     const ids = new Set();
     for (const row of s[key] ?? []) {
       if (!row || typeof row.id !== 'string' || !row.id || ids.has(row.id))
@@ -246,30 +156,11 @@ export function validateLedger(s) {
     amount(w.openingBalance, true);
     if (!validDate(w.openingDate) || typeof w.active !== 'boolean') fail('Conta inválida.');
   }
-  for (const c of s.cards ?? []) {
-    name(c.name);
-    if (
-      !Number.isInteger(c.closingDay) ||
-      !Number.isInteger(c.dueDay) ||
-      c.closingDay < 1 ||
-      c.closingDay > 31 ||
-      c.dueDay < 1 ||
-      c.dueDay > 31 ||
-      typeof c.active !== 'boolean'
-    )
-      fail('Cartão inválido.');
-  }
   for (const [month, limit] of Object.entries(s.monthlyLimits ?? {}))
     if (!validMonth(month) || !Number.isSafeInteger(limit) || limit < 0 || limit > MAX_AMOUNT)
       fail('Limite mensal inválido.');
   for (const e of s.entries) {
     if (e.walletId) getWallet(s, e.walletId);
-    if (e.cardId) {
-      if (e.id.length > 100) fail('Identificador de compra no cartão muito longo.');
-      getCard(s, e.cardId);
-      if (e.walletId || e.type !== 'expense' || !validDate(e.purchaseDate))
-        fail('Compra no cartão inválida.');
-    }
     if (
       e.seriesId &&
       (!['repeat', 'installments'].includes(e.seriesKind) ||
@@ -294,13 +185,48 @@ export function validateLedger(s) {
     amount(m.amount);
     if (!validDate(m.date)) fail('Data do movimento inválida.');
     getWallet(s, m.fromWalletId);
-    if (m.kind === 'transfer') {
-      getWallet(s, m.toWalletId);
-      if (m.fromWalletId === m.toWalletId) fail('Transferência inválida.');
-    } else if (m.kind === 'invoice') {
-      getCard(s, m.cardId);
-      if (!validMonth(m.month)) fail('Fatura inválida.');
-    } else fail('Movimento inválido.');
+    if (m.kind !== 'transfer') fail('Movimento inválido.');
+    getWallet(s, m.toWalletId);
+    if (m.fromWalletId === m.toWalletId) fail('Transferência inválida.');
   }
-  invoiceAllocations(s);
+}
+// Credit cards no longer exist. Older data may still carry them: card purchases keep their
+// amounts and dates as ordinary expenses, and each invoice payment (the only card record that
+// moved money) is folded into the opening balance of the wallet it was paid from, so today's
+// balance is unchanged (a payment dated in the future would take effect immediately). Anything
+// that cannot be converted without losing a value is refused, never dropped.
+export function dropLegacyCards(s, notes = []) {
+  if (!s || typeof s !== 'object') return s;
+  let purchases = 0;
+  for (const e of Array.isArray(s.entries) ? s.entries : []) {
+    if (e?.cardId === undefined && e?.purchaseDate === undefined) continue;
+    if (e.cardId !== undefined && !e.paid && Number(e.paidAmount) > 0)
+      fail(
+        'Este backup tem compras de cartão com fatura paga em parte. Quite ou ajuste esses lançamentos antes de importar.',
+      );
+    delete e.cardId;
+    delete e.purchaseDate;
+    delete e.paidAmount;
+    delete e.remainingAmount;
+    purchases++;
+  }
+  let payments = 0;
+  if (Array.isArray(s.moves)) {
+    const wallets = new Map((s.wallets ?? []).map((w) => [w.id, w]));
+    for (const m of s.moves) {
+      if (m?.kind !== 'invoice') continue;
+      const wallet = wallets.get(m.fromWalletId);
+      if (!wallet) fail('Este backup tem um pagamento de fatura sem conta. Importação recusada.');
+      if (m.date >= wallet.openingDate) wallet.openingBalance -= m.amount;
+      payments++;
+    }
+    s.moves = s.moves.filter((m) => m?.kind !== 'invoice');
+  }
+  const cards = Array.isArray(s.cards) ? s.cards.length : 0;
+  delete s.cards;
+  if (purchases) notes.push(`${purchases} compra(s) de cartão viraram despesas comuns.`);
+  if (payments)
+    notes.push(`${payments} pagamento(s) de fatura foram incorporados ao saldo inicial da conta.`);
+  if (cards) notes.push(`${cards} cartão(ões) cadastrado(s) foram ignorados.`);
+  return s;
 }

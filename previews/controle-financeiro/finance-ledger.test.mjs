@@ -15,21 +15,16 @@ import {
   stopSeries,
   saveMonthlyLimit,
   saveWallet,
-  saveCard,
   saveMove,
   saveLedgerEntry,
-  deleteLedgerEntry,
   walletBalance,
-  invoice,
-  invoiceMonth,
 } from './finance-ledger.mjs';
-import { financeRows, readFinance } from '../../shared/workspaces/mapping.mjs';
+import { financeRows, readFinance, isLegacyCardRecord } from '../../shared/workspaces/mapping.mjs';
 import { createBackup, readBackup } from './finance-backup.mjs';
 const setup = () => {
   const s = emptyState();
   saveWallet(s, { id: 'w', name: 'Conta', openingBalance: 100000, openingDate: '2026-01-01' });
   saveWallet(s, { id: 'w2', name: 'Outra', openingBalance: 0, openingDate: '2026-01-01' });
-  saveCard(s, { id: 'c', name: 'Cartão', closingDay: 20, dueDay: 5 });
   return s;
 };
 const entry = (over) => ({
@@ -107,61 +102,6 @@ test('transferência não é receita, saldo inicial não entra em totais e trans
   );
   assert.equal(s.moves.length, 1);
 });
-test('fechamento é exclusivo e vencimento usa data civil inclusive fevereiro', () => {
-  const c = { closingDay: 20, dueDay: 5 };
-  assert.equal(invoiceMonth(c, '2026-11-19'), '2026-12');
-  assert.equal(invoiceMonth(c, '2026-11-20'), '2027-01');
-  assert.equal(invoiceMonth({ closingDay: 5, dueDay: 10 }, '2026-11-04'), '2026-11');
-});
-test('fatura parcial liquida compras existentes, sem duplicar despesa nem débito bancário', () => {
-  let s = setup();
-  saveLedgerEntry(s, entry({ cardId: 'c', purchaseDate: '2026-11-10', paid: false }), {
-    mode: 'installments',
-    count: 3,
-  });
-  saveMove(s, {
-    id: 'pay1',
-    kind: 'invoice',
-    fromWalletId: 'w',
-    cardId: 'c',
-    month: '2026-12',
-    amount: 1000,
-    date: '2026-12-05',
-  });
-  s = readFinance(financeRows(s));
-  assert.equal(totals(monthlyRows(s, '2026-12')).expense, 1000);
-  assert.equal(totals(monthlyRows(s, '2026-12')).expectedExpense, 3334);
-  assert.equal(walletBalance(s, 'w', '2026-12-05'), 99000);
-  assert.equal(invoice(s, 'c', '2026-12').remaining, 2334);
-  assert.throws(() => deleteLedgerEntry(s, s.entries[0].id), /Desfaça/);
-  saveMove(s, {
-    id: 'pay2',
-    kind: 'invoice',
-    fromWalletId: 'w',
-    cardId: 'c',
-    month: '2026-12',
-    amount: 2334,
-    date: '2026-12-06',
-  });
-  s = readFinance(financeRows(s));
-  assert.equal(totals(monthlyRows(s, '2026-12')).expense, 3334);
-  assert.equal(walletBalance(s, 'w', '2026-12-06'), 96666);
-  assert.throws(() =>
-    saveMove(s, {
-      id: 'over',
-      kind: 'invoice',
-      fromWalletId: 'w',
-      cardId: 'c',
-      month: '2026-12',
-      amount: 1,
-      date: '2026-12-06',
-    }),
-  );
-  s.moves = [];
-  s = readFinance(financeRows(s));
-  assert.equal(totals(monthlyRows(s, '2026-12')).expense, 0);
-  assert.equal(walletBalance(s, 'w', '2026-12-06'), 100000);
-});
 test('contas fixas preservam a conta dos pagamentos e da correção', () => {
   let s = setup();
   saveFixed(s, {
@@ -180,15 +120,133 @@ test('contas fixas preservam a conta dos pagamentos e da correção', () => {
   s = readFinance(financeRows(s));
   assert.equal(walletBalance(s, 'w', '2026-11-06'), 91000);
 });
-test('backup mantém contas, cartões e movimentos; legado continua válido', () => {
+test('backup mantém contas e movimentos; legado continua válido', () => {
   const s = setup();
   s.revision = 0;
   validateState(s);
-  const restored = readBackup(createBackup(s));
+  const notes = [];
+  const restored = readBackup(createBackup(s), notes);
   assert.equal(restored.wallets.length, 2);
-  assert.equal(restored.cards.length, 1);
+  assert.deepEqual(notes, []);
   validateState(emptyState());
   assert.throws(() => validateState({ ...s, wallets: [{ ...s.wallets[0], openingBalance: NaN }] }));
+});
+const legacyBackup = (state) =>
+  JSON.stringify({
+    app: 'vertice-finance-preview',
+    formatVersion: 1,
+    exportedAt: '2026-11-26T21:00:00.000Z',
+    state: { ...setup(), revision: 0, ...state },
+  });
+const card = { id: 'c', name: 'Cartão', closingDay: 20, dueDay: 5, active: true };
+test('backup antigo com cartão mantém valores: compras viram despesas e faturas pagas, saldo da conta', () => {
+  const notes = [];
+  const restored = readBackup(
+    legacyBackup({
+      cards: [card],
+      entries: [
+        entry({
+          id: 'p1',
+          date: '2026-12-05',
+          cardId: 'c',
+          purchaseDate: '2026-11-10',
+          paid: true,
+        }),
+        entry({
+          id: 'p2',
+          amount: 3000,
+          date: '2026-12-05',
+          cardId: 'c',
+          purchaseDate: '2026-11-11',
+          paid: false,
+          paidAmount: 0,
+          remainingAmount: 3000,
+        }),
+      ],
+      moves: [
+        {
+          id: 'pay1',
+          kind: 'invoice',
+          fromWalletId: 'w',
+          cardId: 'c',
+          month: '2026-12',
+          amount: 10000,
+          date: '2026-12-05',
+        },
+      ],
+    }),
+    notes,
+  );
+  assert.equal(restored.cards, undefined);
+  assert.equal(restored.moves.length, 0);
+  assert.ok(restored.entries.every((e) => e.cardId === undefined && e.purchaseDate === undefined));
+  // The invoice payment was R$ 100,00 out of the wallet; the balance stays the same.
+  assert.equal(walletBalance(restored, 'w', '2026-12-05'), 90000);
+  assert.equal(totals(monthlyRows(restored, '2026-12')).expense, 10000);
+  assert.equal(totals(monthlyRows(restored, '2026-12')).expectedExpense, 13000);
+  assert.equal(notes.length, 3);
+  assert.equal(
+    financeRows(restored).some((r) => r.entity === 'finance_cards'),
+    false,
+  );
+});
+test('backup antigo com fatura paga em parte é recusado em vez de perder o valor pago', () => {
+  assert.throws(
+    () =>
+      readBackup(
+        legacyBackup({
+          cards: [card],
+          entries: [
+            entry({
+              cardId: 'c',
+              purchaseDate: '2026-11-10',
+              paid: false,
+              paidAmount: 4000,
+              remainingAmount: 6000,
+            }),
+          ],
+        }),
+      ),
+    /paga em parte/,
+  );
+});
+test('registros antigos de cartão vindos do servidor são ignorados na leitura', () => {
+  const rows = financeRows(setup());
+  const legacy = [
+    { entity: 'finance_cards', id: 'c', body: { id: 'c', name: 'Cartão', closing_day: 20 } },
+    {
+      entity: 'finance_moves',
+      id: 'pay1',
+      body: { id: 'pay1', kind: 'invoice', from_wallet_id: 'w', card_id: 'c', amount_cents: 1 },
+    },
+  ];
+  assert.ok(legacy.every(isLegacyCardRecord));
+  assert.equal(rows.some(isLegacyCardRecord), false);
+  const s = readFinance([
+    ...rows,
+    ...legacy,
+    {
+      entity: 'finance_entries',
+      id: 'x',
+      body: {
+        id: 'x',
+        source: 'manual',
+        kind: 'expense',
+        name: 'Compra',
+        reference_date: '2026-12-05',
+        planned_amount_cents: 500,
+        settlement_discount_cents: 0,
+        category_id: 'D01',
+        payment_method_id: 'P2',
+        observation: '',
+        extra: { cardId: 'c', purchaseDate: '2026-11-10' },
+      },
+    },
+  ]);
+  assert.equal(s.cards, undefined);
+  assert.equal(s.moves, undefined);
+  assert.equal(s.entries.find((e) => e.id === 'x').cardId, undefined);
+  assert.equal(s.entries.find((e) => e.id === 'x').purchaseDate, undefined);
 });
 
 test('limite global mensal não reescreve categorias, aceita zero e é preservado no mapeamento', () => {

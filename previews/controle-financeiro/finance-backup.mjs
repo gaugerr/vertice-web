@@ -1,4 +1,5 @@
 import { validateState } from './finance-domain.mjs';
+import { dropLegacyCards } from './finance-ledger.mjs';
 export const BACKUP_LIMIT = 5 * 1024 * 1024;
 export function createBackup(state, exportedAt = new Date().toISOString()) {
   validateState(state);
@@ -8,7 +9,8 @@ export function createBackup(state, exportedAt = new Date().toISOString()) {
     2,
   );
 }
-export function readBackup(raw) {
+// `notes` receives a message for each legacy credit-card structure converted or ignored.
+export function readBackup(raw, notes = []) {
   if (typeof raw !== 'string' || new TextEncoder().encode(raw).length > BACKUP_LIMIT)
     throw Error('Use um backup financeiro de até 5 MB.');
   let file;
@@ -22,7 +24,7 @@ export function readBackup(raw) {
   }
   if (file?.app !== 'vertice-finance-preview' || file.formatVersion !== 1)
     throw Error('Escolha um backup do financeiro do Vértice.');
-  const state = validateState(file.state);
+  const state = validateState(dropLegacyCards(file.state, notes));
   if (!Number.isSafeInteger(state.revision) || state.revision < 0)
     throw Error('Versão de dados inválida.');
   const lists = [
@@ -30,7 +32,6 @@ export function readBackup(raw) {
     state.methods,
     state.entries,
     ...(state.wallets ? [state.wallets] : []),
-    ...(state.cards ? [state.cards] : []),
     ...(state.moves ? [state.moves] : []),
     state.fixedAccounts,
     state.goals,

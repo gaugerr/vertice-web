@@ -1,4 +1,3 @@
-import { invoiceAllocations } from '../../previews/controle-financeiro/finance-ledger.mjs';
 import { emptyState, validateState } from '../../previews/controle-financeiro/finance-domain.mjs';
 export const ENTITIES = [
   'shopping_lists',
@@ -7,7 +6,6 @@ export const ENTITIES = [
   'finance_categories',
   'finance_payment_methods',
   'finance_wallets',
-  'finance_cards',
   'finance_moves',
   'finance_fixed_accounts',
   'finance_fixed_versions',
@@ -21,6 +19,12 @@ export const ENTITIES = [
 ];
 const monthId = (m) => '00000000-0000-4000-8000-' + m.replace('-', '').padStart(12, '0');
 export const keyOf = (entity, id) => entity + '/' + id;
+// Credit cards were removed. Rows a device may still hold from before (cards and invoice
+// payments) are ignored here and never rewritten or deleted by this client; the database
+// migration is what converts or removes them.
+export const isLegacyCardRecord = (r) =>
+  r.entity === 'finance_cards' || (r.entity === 'finance_moves' && r.body?.kind === 'invoice');
+const LEGACY_ENTRY_EXTRA = ['cardId', 'purchaseDate'];
 export function financeRows(s) {
   validateState(s);
   const result = [];
@@ -42,20 +46,11 @@ export function financeRows(s) {
       opening_date: w.openingDate,
       is_archived: !w.active,
     });
-  for (const c of s.cards ?? [])
-    add('finance_cards', c.id, {
-      name: c.name,
-      closing_day: c.closingDay,
-      due_day: c.dueDay,
-      is_archived: !c.active,
-    });
   for (const m of s.moves ?? [])
     add('finance_moves', m.id, {
       kind: m.kind,
       from_wallet_id: m.fromWalletId,
-      to_wallet_id: m.toWalletId ?? null,
-      card_id: m.cardId ?? null,
-      invoice_month: m.month ? m.month + '-01' : null,
+      to_wallet_id: m.toWalletId,
       amount_cents: m.amount,
       movement_date: m.date,
       observation: m.observation ?? '',
@@ -79,18 +74,10 @@ export function financeRows(s) {
   }
   for (const e of s.entries) {
     add('finance_entries', e.id, {
-      ...(e.walletId || e.cardId || e.seriesId
+      ...(e.walletId || e.seriesId
         ? {
             extra: Object.fromEntries(
-              [
-                'walletId',
-                'cardId',
-                'purchaseDate',
-                'seriesId',
-                'seriesKind',
-                'seriesIndex',
-                'seriesCount',
-              ]
+              ['walletId', 'seriesId', 'seriesKind', 'seriesIndex', 'seriesCount']
                 .filter((k) => e[k] != null)
                 .map((k) => [k, e[k]]),
             ),
@@ -110,7 +97,7 @@ export function financeRows(s) {
       fixed_version_id: null,
       shopping_list_id: null,
     });
-    if (e.paid && !e.cardId)
+    if (e.paid)
       add('finance_payments', e.id + ':confirm', {
         ...(e.walletId ? { wallet_id: e.walletId } : {}),
         entry_id: e.id,
@@ -168,17 +155,6 @@ export function financeRows(s) {
       );
     }
   }
-  for (const { move, entry, amount } of invoiceAllocations(s))
-    add('finance_payments', move.id + ':' + entry.id, {
-      entry_id: entry.id,
-      payment_date: move.date,
-      movement_type: 'payment',
-      amount_cents: amount,
-      observation: 'Pagamento de fatura',
-      sequence_no: 0,
-      wallet_id: null,
-      invoice_move_id: move.id,
-    });
   for (const [c, v] of Object.entries(s.budgets))
     if (v !== null) add('finance_budget_defaults', c, { category_id: c, limit_cents: v });
   for (const m of new Set([
@@ -217,8 +193,7 @@ export function readFinance(records) {
   const s = emptyState(),
     get = (e) => records.filter((r) => r.entity === e && !r.body.deleted_at).map((r) => r.body);
   const wallets = get('finance_wallets'),
-    cards = get('finance_cards'),
-    moves = get('finance_moves');
+    moves = get('finance_moves').filter((m) => m.kind === 'transfer');
   if (wallets.length)
     s.wallets = wallets.map((w) => ({
       id: w.id,
@@ -227,21 +202,12 @@ export function readFinance(records) {
       openingDate: w.opening_date,
       active: !w.is_archived,
     }));
-  if (cards.length)
-    s.cards = cards.map((c) => ({
-      id: c.id,
-      name: c.name,
-      closingDay: Number(c.closing_day),
-      dueDay: Number(c.due_day),
-      active: !c.is_archived,
-    }));
   if (moves.length)
     s.moves = moves.map((m) => ({
       id: m.id,
       kind: m.kind,
       fromWalletId: m.from_wallet_id,
-      ...(m.to_wallet_id ? { toWalletId: m.to_wallet_id } : {}),
-      ...(m.card_id ? { cardId: m.card_id, month: m.invoice_month.slice(0, 7) } : {}),
+      toWalletId: m.to_wallet_id,
       amount: Number(m.amount_cents),
       date: m.movement_date,
       observation: m.observation,
@@ -291,10 +257,9 @@ export function readFinance(records) {
       settled = paid >= amount - Number(e.settlement_discount_cents ?? 0);
     if (e.source !== 'fixed') {
       s.entries.push({
-        ...(e.extra ?? {}),
-        ...(e.extra?.cardId
-          ? { paidAmount: paid, remainingAmount: Math.max(0, amount - paid) }
-          : {}),
+        ...Object.fromEntries(
+          Object.entries(e.extra ?? {}).filter(([k]) => !LEGACY_ENTRY_EXTRA.includes(k)),
+        ),
         id: e.id,
         name: e.name,
         type: e.kind,

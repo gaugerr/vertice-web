@@ -1,4 +1,5 @@
 import { emptyState, migrateV1, validateState } from './finance-domain.mjs';
+import { dropLegacyCards } from './finance-ledger.mjs';
 export const STORAGE_KEY = 'vertice-finance-preview-v2';
 export const LEGACY_KEY = 'vertice-finance-preview-v1';
 export const BACKUP_KEY = LEGACY_KEY + '-backup';
@@ -13,7 +14,7 @@ export class FinanceStore {
     let next;
     if (raw !== null) {
       try {
-        next = validateState(JSON.parse(raw));
+        next = validateState(dropLegacyCards(JSON.parse(raw)));
       } catch {
         throw Error(
           'Não foi possível ler o financeiro salvo. Nada foi apagado. Você pode baixar os dados preservados e tentar novamente.',
@@ -45,7 +46,7 @@ export class FinanceStore {
     const current = this.storage.getItem(STORAGE_KEY);
     if (current === null)
       throw Error('Os dados financeiros mudaram. Atualize a página antes de salvar.');
-    const latest = validateState(JSON.parse(current));
+    const latest = validateState(dropLegacyCards(JSON.parse(current)));
     if (latest.revision !== this.state.revision)
       throw Error(
         'O financeiro foi alterado em outra aba. Feche o formulário e atualize a página antes de salvar.',
