@@ -3,6 +3,38 @@
 Atualizado em 11/11/2026 (America/Sao_Paulo). Registro de estado observado, não
 substitui consultas atuais aos serviços. Começar por este arquivo e AGENTS.md.
 
+## Remoção de cartões e faturas — 27/11/2026
+
+Cartões de crédito, faturas, fechamento, vencimento e pagamento de fatura deixaram de
+existir no Financeiro. Crédito continua apenas como forma de pagamento comum. Seções
+abaixo que citam cartões ou faturas descrevem o estado anterior e estão marcadas.
+
+- **Interface:** sem tela, menu, ação ou campo de cartão. Contas, transferências,
+  parcelas e repetições permanecem.
+- **Domínio:** `finance-ledger.mjs` não tem mais cartões, faturas, alocação FIFO nem
+  regras de competência de fatura. Movimentos são somente transferências.
+- **Sincronização:** `shared/workspaces/mapping.mjs` e `core.mjs` não leem nem gravam
+  `finance_cards`, movimentos de fatura nem `cardId`/`purchaseDate`. Linhas antigas que
+  um aparelho ainda guarde são ignoradas, nunca reescritas ou apagadas pelo cliente.
+- **Backups antigos:** `readBackup` aceita arquivos com cartões. Compras viram despesas
+  comuns com os mesmos valores e datas; cada pagamento de fatura é incorporado ao saldo
+  inicial da conta de origem (o saldo de hoje não muda); cartões cadastrados são
+  ignorados. Compra com fatura paga só em parte é recusada, para não perder o valor.
+  A tela de restauração mostra o que foi convertido.
+- **Banco (preparada, NÃO aplicada):** `supabase/migrations/20261127000000_remove_finance_cards_and_invoices.sql`
+  remove `finance_cards`, `finance_moves.card_id/invoice_month`, `finance_payments.invoice_move_id`,
+  o gatilho `guard_card_snapshot` e as regras de cartão de `workspace_command`; estreita
+  `finance_moves` a transferências. Não reescreve linhas financeiras: aborta, revertendo
+  tudo, se ainda houver compra de cartão ou pagamento de fatura ativos. Cadastros de cartão
+  e linhas apagadas vão para `finance_legacy_card_archive` (só `service_role`), que pode ser
+  removida depois.
+- **Ordem de publicação:** aplicar a migração antes de publicar o cliente novo. Dados
+  reais conferidos no backup de 26/11/2026: nenhum lançamento com cartão, nenhum pagamento
+  de fatura, dois cadastros de cartão sem uso.
+- **Validação:** testes de domínio, de mapeamento e de importação de backup legado; suítes
+  PostgreSQL executadas contra a migração em Postgres embutido (PGlite), sem tocar no
+  Supabase. Não foi aplicada em nenhum banco remoto.
+
 ## Reformulação visual — 12/11/2026
 
 Padrões visuais da entrada de revisão estão em `ui.css`, carregado após os estilos
@@ -53,12 +85,12 @@ SQL por espaço. Schema/migração existente revisados; nenhuma mudança no banc
   permanecem independentes, sem inferir vínculos ou criar débitos automaticamente.
   Lançamentos usa os mesmos cálculos sobre as linhas filtradas, inclusive na busca.
   Orçamento continua considerando despesas pagas e previstas, incluindo reserva;
-  projeção considera receitas/despesas previstas, sem duplicar pagamentos de fatura.
+  projeção considera receitas/despesas previstas, sem duplicar pagamentos.
 - Resumo: restante, receitas/despesas/guardado, orçamento, vencimentos, últimos cinco,
   categorias e comparação. Explicação de cálculo recolhida; gráfico semanal em Análises.
   Indicadores e orçamento restante reutilizados nas demais telas pertinentes.
 - Método de pagamento e data ficam visíveis no formulário. Novos registros começam
-  no dia atual; edições/cópias preservam data. Crédito genérico funciona sem cartão.
+  no dia atual; edições/cópias preservam data. Crédito é uma forma de pagamento comum.
   Parcelamento, recorrência, observações e vínculos opcionais ficam nas opções adicionais.
 - Preservados dados, IDs, metas, parcelamentos, recorrências, histórico, backups,
   autenticação, licenças, Cakto, RLS, compartilhamento, fila offline e conflitos.
@@ -66,11 +98,14 @@ SQL por espaço. Schema/migração existente revisados; nenhuma mudança no banc
 - Validação: 44 testes financeiros/rotas, 28 de persistência/sincronização; build,
   ESLint e diff. Duas suítes PostgreSQL opcionais não executadas nesta revisão
   de interface/domínio. Playwright: conta vazia/com dados, registro rápido, crédito
-  sem cartão, edição/exclusão, busca/filtros/indicadores, orçamento, parcelas/faturas
-  existentes, recarga/backup, navegação e ausência de overflow em 280/390/1440 px.
+  edição/exclusão, busca/filtros/indicadores, orçamento, parcelas,
+  recarga/backup, navegação e ausência de overflow em 280/390/1440 px.
   Casos de pessoas reais e sessões Google devem ser revisados pelo titular em /staging/.
 
 ## Registro rápido, contas, cartões e séries — 11/11/2026
+
+> Cartões e faturas descritos nesta seção foram removidos em 27/11/2026 (veja a seção
+> no topo). Contas, transferências, parcelas e séries continuam valendo.
 
 **Ativado na versão de revisão.** O proprietário autorizou explicitamente a
 migração no banco real e a atualização de `workspaces`. Aplicação concluída:
@@ -83,33 +118,29 @@ A migração está alinhada à versão hospedada `20261111225724`; não reaplica
 O proprietário autorizou estes recursos nesta etapa, substituindo a restrição
 anterior de não criar cartões/parcelamentos. Formulário comum começa com valor,
 descrição e categoria sugerida; tipo, data e pagamento usam histórico/dia civil.
-Data, conta/cartão, frequência e observação ficam em detalhes. Não prometer dez
+Data, conta, frequência e observação ficam em detalhes. Não prometer dez
 segundos para qualquer pessoa/rede: o teste automatizado valida o caminho de dois
 campos sem seleções obrigatórias adicionais. Busca ignora acentos.
 
 `finance-ledger.mjs`: contas manuais com saldo inicial (não receita), transferências
-fora de receitas/despesas, cartões com fechamento/vencimento, parcelas e repetições
-mensais de 2 a 120 meses. Parcelas distribuem centavos exatos; somente a primeira
+fora de receitas/despesas, parcelas e repetições mensais de 2 a 120 meses. Parcelas distribuem centavos exatos; somente a primeira
 pode começar paga. Receita recorrente é uma série finita explícita; contas fixas
 continuam com a recorrência mensal existente. Edição altera uma ocorrência;
-encerrar série preserva pagamentos e faturas já parcialmente pagas.
+encerrar série preserva pagamentos.
 
-Compra no dia do fechamento entra na fatura seguinte, conforme escolha do usuário.
-As competências seguem o vencimento de cada fatura, não o mês do pagamento bancário.
-Pagamentos parciais de fatura geram baixas vinculadas às compras, sem novo lançamento
-de despesa; a conta é debitada uma vez pelo movimento de fatura. Alocação FIFO
-determinística. Reverter pagamentos precede edição de compras de fatura já paga.
 Saldos até hoje incluem apenas movimentos vinculados, posteriores ao saldo inicial.
 Não há Open Finance, conciliação automática, rotativo, cálculo de juros ou importação
-bancária. Não inferir dívidas/despesas antigas de um meio genérico Cartão de Crédito.
+bancária. Crédito é só uma forma de pagamento: não existem cartões, faturas,
+fechamento ou vencimento (removidos em 27/11/2026).
 
 Orçamento admite limite total mensal independente das categorias, inclusive zero,
 e cópia para o mês seguinte. Metas existentes continuam independentes; guardar uma
 meta não cria débito bancário automaticamente.
 
-Migração `20261111225724_finance_accounts_cards_series`: adiciona `finance_wallets`,
-`finance_cards`, `finance_moves`, metadata `finance_entries.extra`, vínculos de baixa
-em `finance_payments` e `finance_budget_months.total_limit_cents`. RLS por espaço e
+Migração `20261111225724_finance_accounts_cards_series`: adicionou `finance_wallets`,
+`finance_cards` (removida pela migração de 27/11/2026), `finance_moves`, metadata
+`finance_entries.extra`, vínculos de baixa em `finance_payments` e
+`finance_budget_months.total_limit_cents`. RLS por espaço e
 escrita pelo comando do serviço. `workspace_command` mantém assinatura, envolve o
 comando anterior em validação, e protege dados novos contra clientes antigos.
 Operações novas enviam `ledger_version: 2`; filas antigas sem dados novos continuam
@@ -119,13 +150,14 @@ Auth/licenças/Cakto e jobs não foram alterados.
 Backups mantêm compatibilidade com o formato existente e incluem os campos novos.
 Testes críticos em `finance-ledger.test.mjs`, `shared/workspaces/ledger-postgres.test.mjs`
 e `ledger-browser-check.mjs`: competências/centavos, repetição, transferências,
-fatura parcial/reversão, saldos, duplicidade, concorrência e fluxo mobile/backup.
+saldos, duplicidade, concorrência, importação de backup antigo e fluxo mobile/backup.
 
 ## Navegação financeira em cinco acessos — 11/11/2026
 
 Inventário anterior: Resumo, Lançamentos, Orçamento, Contas Fixas, Metas,
-Análises, Patrimônio e Configurações. Não existem contas bancárias nem faturas de
-cartões; conta Google/compartilhamento e formas de pagamento são os recursos reais.
+Análises, Patrimônio e Configurações. Não existem faturas de cartões (cartões foram
+removidos em 27/11/2026); conta Google/compartilhamento e formas de pagamento são os
+recursos reais.
 
 Nova barra: Início, Lançamentos, Planejamento, Análises e Mais. Planejamento
 reutiliza Orçamentos, Contas fixas e Metas em abas internas, com os mesmos
@@ -242,7 +274,7 @@ voltem a pendentes. Regressão PostgreSQL desse commit aprovada na CI.
 
 ## Decisões do produto
 
-Manter facilidade de uso; contas/cartões/parcelamentos manuais foram autorizados na atualização de 11/11/2026, conforme o registro acima.
+Manter facilidade de uso; contas/parcelamentos manuais foram autorizados na atualização de 11/11/2026, conforme o registro acima. Cartões e faturas foram removidos em 27/11/2026.
 Menu de áreas troca Compras/Financeiro; abas inferiores pertencem ao Financeiro.
 Categorias e formas de pagamento editáveis, contas fixas versionadas, pagamentos
 parciais/correções, orçamento mensal, metas/aportes, resumo e backups já existem

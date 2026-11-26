@@ -42,7 +42,7 @@ montado durante a troca de área para preservar rascunhos. Nenhuma transferênci
 
 Os cadastros, regras e armazenamento estão separados em `finance-domain.mjs`,
 `finance-store.mjs`, `finance-backup.mjs` e `app.js` para facilitar alterações futuras.
-Cartões/faturas/parcelas não são calculados.
+Não há cartões nem faturas. Parcelas e repetições mensais são geradas como lançamentos comuns.
 
 ## Melhorias com uso simples
 
