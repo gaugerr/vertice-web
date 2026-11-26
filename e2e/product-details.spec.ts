@@ -25,6 +25,8 @@ async function add(page: Page, name: string) {
 async function buy(page: Page, name: string) {
   await page.getByRole('checkbox', { name: `Marcar ${name} como comprado`, exact: true }).tap();
   const form = page.getByRole('form', { name: `Valores de ${name}`, exact: true });
+  // The purchase write keeps the form busy; Enter is ignored until it settles.
+  await expect(form).not.toHaveAttribute('aria-busy', 'true');
   await expect(form.getByLabel('Preço por un (R$)', { exact: true })).toBeFocused();
   return form;
 }
