@@ -9,6 +9,7 @@ import {
   walletBalance,
 } from './finance-ledger.mjs';
 import { planningViews, financeGroup } from './finance-navigation.mjs';
+import { isCreditMethod, paidCopy, seriesPreview, seriesSummary } from './entry-form.mjs';
 import { openPreviewWorkspace, WorkspaceFinanceStore } from './workspaces.js';
 import './workspace-ui.mjs';
 import {
@@ -171,7 +172,9 @@ function recentTransactions() {
       ? `<ul>${recent
           .map((e) => {
             const status = e.paid
-              ? ''
+              ? paidWord(e) === 'No crédito'
+                ? ' · No crédito'
+                : ''
               : e.paidAmount
                 ? ` · Parcial: pago ${money(e.paidAmount)}`
                 : ' · Pendente';
@@ -192,7 +195,7 @@ function row(e, full = false) {
   const date = e.paymentDate
     ? `${e.paid ? 'Pago' : 'Último pagamento'} em ${dateName(e.paymentDate)}`
     : dateName(e.date);
-  return `<article class="transaction"><span class="txn-icon ${e.type === 'income' ? 'income' : ''}" aria-hidden="true">${esc(c.icon)}</span><div class="txn-info"><strong>${esc(e.name)}${e.seriesId ? ` · ${e.seriesIndex}/${e.seriesCount}` : ''}</strong><small>${esc(c.name)}${!c.active ? ' · arquivada' : ''}${source}</small><small>${esc(method(e.paymentMethodId))} · ${date}</small>${e.observation ? `<p class="record-note">${esc(e.observation)}</p>` : ''}</div><div class="txn-amount ${e.type === 'income' ? 'green' : ''}">${e.type === 'income' ? '+' : '−'} ${money(e.amount)}<small>${e.paid ? (e.type === 'income' ? 'Recebido' : 'Pago') : e.paidAmount ? `Parcial · pago ${money(e.paidAmount)} · resta ${money(e.remainingAmount)}` : 'Pendente'}</small></div>${full ? `<div class="txn-actions">${fixed ? `<button data-fixed-action="${e.paid ? 'correct' : 'pay'}" data-id="${esc(e.accountId)}" aria-label="${e.paid ? 'Corrigir pagamento de' : 'Pagar'} ${esc(e.name)}" title="${e.paid ? 'Corrigir pagamento' : 'Pagar'}">${actionIcon(e.paid ? 'edit' : 'check')}</button><button data-fixed-action="details" data-id="${esc(e.accountId)}" aria-label="Detalhes de ${esc(e.name)}" title="Detalhes">${actionIcon('more')}</button>` : `<button data-entry-edit="${esc(e.id)}" aria-label="Editar ${esc(e.name)}" title="Editar">${actionIcon('edit')}</button><details class="row-menu"><summary aria-label="Mais ações de ${esc(e.name)}">${icon('more')}</summary><div class="row-menu-items"><button data-entry-copy="${esc(e.id)}">${icon('copy')}Copiar</button><button class="danger-action" data-entry-delete="${esc(e.id)}">${icon('trash')}Excluir</button></div></details>`}</div>` : ''}</article>`;
+  return `<article class="transaction"><span class="txn-icon ${e.type === 'income' ? 'income' : ''}" aria-hidden="true">${esc(c.icon)}</span><div class="txn-info"><strong>${esc(e.name)}${e.seriesId ? ` · ${e.seriesIndex}/${e.seriesCount}` : ''}</strong><small>${esc(c.name)}${!c.active ? ' · arquivada' : ''}${source}</small><small>${esc(method(e.paymentMethodId))} · ${date}</small>${e.observation ? `<p class="record-note">${esc(e.observation)}</p>` : ''}</div><div class="txn-amount ${e.type === 'income' ? 'green' : ''}">${e.type === 'income' ? '+' : '−'} ${money(e.amount)}<small>${e.paid ? paidWord(e) : e.paidAmount ? `Parcial · pago ${money(e.paidAmount)} · resta ${money(e.remainingAmount)}` : 'Pendente'}</small></div>${full ? `<div class="txn-actions">${fixed ? `<button data-fixed-action="${e.paid ? 'correct' : 'pay'}" data-id="${esc(e.accountId)}" aria-label="${e.paid ? 'Corrigir pagamento de' : 'Pagar'} ${esc(e.name)}" title="${e.paid ? 'Corrigir pagamento' : 'Pagar'}">${actionIcon(e.paid ? 'edit' : 'check')}</button><button data-fixed-action="details" data-id="${esc(e.accountId)}" aria-label="Detalhes de ${esc(e.name)}" title="Detalhes">${actionIcon('more')}</button>` : `<button data-entry-edit="${esc(e.id)}" aria-label="Editar ${esc(e.name)}" title="Editar">${actionIcon('edit')}</button><details class="row-menu"><summary aria-label="Mais ações de ${esc(e.name)}">${icon('more')}</summary><div class="row-menu-items"><button data-entry-copy="${esc(e.id)}">${icon('copy')}Copiar</button><button class="danger-action" data-entry-delete="${esc(e.id)}">${icon('trash')}Excluir</button></div></details>`}</div>` : ''}</article>`;
 }
 function distribution() {
   const list = state.categories
@@ -546,16 +549,9 @@ function entryDefaults(type) {
     .sort((a, b) => b.date.localeCompare(a.date));
   const previous = active[0];
   return {
-    categoryId:
-      previous?.categoryId ??
-      state.categories.find(
-        (c) => c.active && c.type === type && c.id === (type === 'expense' ? 'D16' : 'R04'),
-      )?.id ??
-      state.categories.find((c) => c.active && c.type === type)?.id,
-    paymentMethodId:
-      previous?.paymentMethodId ??
-      state.methods.find((m) => m.active && m.id === 'P2')?.id ??
-      state.methods.find((m) => m.active)?.id,
+    // Sem histórico, nada é escolhido pelo usuário: o campo fica em "Selecione…".
+    categoryId: previous?.categoryId ?? '',
+    paymentMethodId: previous?.paymentMethodId ?? '',
     walletId:
       previous?.walletId && state.wallets?.some((w) => w.id === previous.walletId && w.active)
         ? previous.walletId
@@ -571,6 +567,43 @@ function walletOptions(current = '') {
       .join('')
   );
 }
+function entryFormBody(original, source, copy, e, type, date) {
+  const paid = !copy && (!original || original.paid);
+  const isCredit = isCreditMethod(state.methods.find((m) => m.id === e.paymentMethodId));
+  const hint = paidCopy({ type, isCredit, paid });
+  const names = [...new Set(state.entries.filter((r) => r.type === type).map((r) => r.name))];
+  const seriesEdit = source?.seriesId
+    ? `<p class="muted">Esta edição altera somente esta parcela/ocorrência; pagamentos anteriores e outras competências são preservados.</p><button type="button" class="text-button danger-action" data-series-stop="${esc(source.id)}">Encerrar parcelas/repetições em aberto</button>`
+    : '';
+  return `<fieldset class="type-switch"><legend>Tipo</legend>${[
+    ['expense', 'Despesa'],
+    ['income', 'Receita'],
+  ]
+    .map(
+      ([value, label]) =>
+        `<label><input type="radio" name="type" value="${value}" ${type === value ? 'checked' : ''}><span>${label}</span></label>`,
+    )
+    .join('')}</fieldset>
+    <label class="field-amount">Valor<span class="money-input"><span aria-hidden="true">R$</span><input name="amount" type="text" inputmode="decimal" autocomplete="off" required placeholder="0,00" value="${original ? decimal(original.amount) : ''}"></span></label>
+    <label class="field-name">Descrição<input name="name" type="text" required maxlength="80" list="entry-names" autocomplete="off" placeholder="Ex.: mercado, salário" value="${esc(original?.name ?? '')}"></label>
+    <datalist id="entry-names">${names
+      .slice(0, 50)
+      .map((name) => `<option value="${esc(name)}"></option>`)
+      .join('')}</datalist>
+    <div id="entry-category">${categoryField(e.categoryId, type)}</div>
+    <div id="entry-method">${methodField(e.paymentMethodId, type, Boolean(source && source.paymentMethodId === null))}</div>
+    <fieldset class="date-field"><legend>Data</legend><div class="date-chips"><button type="button" class="chip" data-date-chip="today">Hoje</button><button type="button" class="chip" data-date-chip="yesterday">Ontem</button></div><input name="date" type="date" required value="${date}"></fieldset>
+    <div class="paid-field"><label class="check-label"><input name="paid" type="checkbox" ${paid ? 'checked' : ''}> <span id="paid-label">${hint.label}</span></label><p class="field-hint" id="paid-hint">${hint.hint}</p></div>
+    <details class="entry-details"${source?.seriesId ? ' open' : ''}><summary>Parcelar, repetir e mais opções</summary>
+      <label>Conta<select name="walletId">${walletOptions(e.walletId)}</select></label>
+      ${
+        source
+          ? seriesEdit
+          : `<label>Frequência<select name="seriesMode"><option value="single">Uma vez</option><option value="installments">Parcelar o valor total</option><option value="repeat">Repetir valor mensalmente</option></select></label><div class="series-config" hidden><label>Número de parcelas ou meses<input name="seriesCount" type="number" inputmode="numeric" min="2" max="120" value="2" disabled></label><p class="series-preview" id="series-preview" aria-live="polite"></p><p class="muted">Parcelas dividem o valor total. Repetições usam o mesmo valor em cada mês; somente a primeira pode começar paga.</p></div>`
+      }
+      ${noteField(original?.observation)}
+    </details>`;
+}
 function openEntry(id, copy = false) {
   const original = state.entries.find((e) => e.id === id);
   const source = copy ? null : original;
@@ -581,17 +614,53 @@ function openEntry(id, copy = false) {
   showForm(
     'entry',
     copy ? 'Copiar lançamento' : source ? 'Editar lançamento' : 'Novo lançamento',
-    `<label>Tipo<select name="type" id="entry-type">${option('expense', 'Despesa', type)}${option('income', 'Receita', type)}</select></label>${field('Valor (R$)', 'amount', original ? decimal(original.amount) : '', 'text', 'required inputmode="decimal"')}${field('Descrição', 'name', original?.name ?? '', 'text', 'required maxlength="80" list="entry-names"')}<datalist id="entry-names">${[
-      ...new Set(state.entries.filter((r) => r.type === type).map((r) => r.name)),
-    ]
-      .slice(0, 50)
-      .map((name) => `<option value="${esc(name)}"></option>`)
-      .join(
-        '',
-      )}</datalist><div id="entry-category">${categoryField(e.categoryId, type)}</div><label class="check-label"><input name="paid" type="checkbox" ${!copy && (!original || original.paid) ? 'checked' : ''}> Já foi pago ou recebido</label><div id="entry-method">${methodField(e.paymentMethodId, type, Boolean(source && source.paymentMethodId === null))}</div>${field('Data', 'date', date, 'date', 'required')}<details class="entry-details"><summary>Parcelar, repetir e mais opções</summary><label>Conta<select name="walletId">${walletOptions(e.walletId)}</select></label>${!source ? `<label>Frequência<select name="seriesMode"><option value="single">Uma vez</option><option value="installments">Parcelar o valor total</option><option value="repeat">Repetir valor mensalmente</option></select></label>${field('Número de parcelas / meses', 'seriesCount', 2, 'number', 'min="2" max="120"')}<p class="muted">Parcelas dividem o valor total. Repetições usam o mesmo valor em cada mês; somente a primeira pode começar paga.</p>` : source.seriesId ? `<p class="muted">Esta edição altera somente esta parcela/ocorrência; pagamentos anteriores e outras competências são preservados.</p><button type="button" class="text-button danger-action" data-series-stop="${esc(source.id)}">Encerrar parcelas/repetições em aberto</button>` : ''}${noteField(original?.observation)}</details>`,
+    entryFormBody(original, source, copy, e, type, date),
     { id: source?.id ?? crypto.randomUUID(), isNew: !source, source },
   );
+  updateEntryHints();
   $('#financial-form [name=amount]').focus();
+}
+// Textos e prévias que dependem das escolhas: tipo, forma de pagamento, pago e parcelas.
+function updateEntryHints() {
+  const form = $('#financial-form');
+  if (form.dataset.kind !== 'entry') return;
+  const type = form.querySelector('[name=type]:checked')?.value ?? 'expense';
+  const method = state.methods.find((m) => m.id === form.elements.paymentMethodId?.value);
+  const copy = paidCopy({
+    type,
+    isCredit: isCreditMethod(method),
+    paid: form.elements.paid.checked,
+  });
+  $('#paid-label').textContent = copy.label;
+  $('#paid-hint').textContent = copy.hint;
+  const mode = form.elements.seriesMode?.value;
+  if (!mode) return;
+  const single = mode === 'single';
+  form.elements.seriesCount.disabled = single;
+  form.querySelector('.series-config').hidden = single;
+  if (single) return;
+  let amount = NaN;
+  try {
+    amount = cents(form.elements.amount.value);
+  } catch {
+    /* A prévia só aparece com um valor válido. */
+  }
+  const preview = seriesPreview({
+    amount,
+    date: form.elements.date.value,
+    mode,
+    count: Number(form.elements.seriesCount.value),
+  });
+  $('#series-preview').textContent = preview
+    ? seriesSummary(preview, mode)
+    : 'Informe valor, data e de 2 a 120 parcelas ou meses.';
+}
+// Status exibido nas listas: crédito não é "Pago", é um gasto lançado no crédito.
+function paidWord(e) {
+  if (e.type === 'income') return 'Recebido';
+  return isCreditMethod(state.methods.find((m) => m.id === e.paymentMethodId))
+    ? 'No crédito'
+    : 'Pago';
 }
 function openWallet(id) {
   const w = state.wallets?.find((w) => w.id === id);
@@ -692,6 +761,7 @@ function openCatalog(kind) {
   $('#catalog-type').disabled = false;
   $('#catalog-type-label').hidden = kind !== 'categories';
   $('#catalog-error').textContent = '';
+  $('#catalog-return').hidden = !$('#financial-dialog').open;
   renderCatalog();
   $('#catalog-dialog').showModal();
 }
@@ -786,14 +856,44 @@ $('#export-finance').disabled = Boolean(loadError);
 $('#import-finance').disabled = Boolean(loadError);
 $('#new-entry').onclick = () =>
   view === 'fixed' ? openFixed() : view === 'goals' ? openGoal() : openEntry();
+const FIELD_NAMES = {
+  amount: 'Valor',
+  name: 'Descrição',
+  categoryId: 'Categoria',
+  paymentMethodId: 'Forma de pagamento',
+  date: 'Data',
+  seriesCount: 'Número de parcelas',
+};
 $('#financial-form').addEventListener(
   'invalid',
   (e) => {
     const details = e.target.closest('details');
     if (details) details.open = true;
+    e.target.setAttribute('aria-invalid', 'true');
+    // Os eventos "invalid" chegam em sequência; o resumo usa todos os campos inválidos de uma vez.
+    queueMicrotask(() => {
+      const missing = [...$('#financial-form').querySelectorAll(':invalid')].map(
+        (f) => FIELD_NAMES[f.name] ?? f.name,
+      );
+      if (missing.length)
+        $('#financial-error').textContent = 'Confira: ' + [...new Set(missing)].join(', ') + '.';
+      $('#financial-form').querySelector(':invalid')?.focus();
+    });
   },
   true,
 );
+$('#financial-form').addEventListener('input', (e) => {
+  e.target.removeAttribute('aria-invalid');
+  if (['amount', 'date', 'seriesCount'].includes(e.target.name)) updateEntryHints();
+});
+$('#financial-form').addEventListener('click', (e) => {
+  const chip = e.target.closest('[data-date-chip]');
+  if (!chip) return;
+  const d = new Date(today() + 'T12:00:00Z');
+  if (chip.dataset.dateChip === 'yesterday') d.setUTCDate(d.getUTCDate() - 1);
+  $('#financial-form [name=date]').value = d.toISOString().slice(0, 10);
+  updateEntryHints();
+});
 let savingFinancial = false;
 $('#financial-form').addEventListener('submit', async (e) => {
   e.preventDefault();
@@ -808,6 +908,11 @@ $('#financial-form').addEventListener('submit', async (e) => {
     get = (k) => String(f.get(k) || ''),
     context = editing;
   try {
+    const entryAmount = context.kind === 'entry' ? cents(get('amount')) : 0;
+    const entrySaved =
+      context.kind === 'entry'
+        ? `${get('type') === 'income' ? 'Receita' : 'Despesa'} de ${money(entryAmount)} ${context.source ? 'atualizada' : 'registrada'}. Acompanhe a sincronização.`
+        : '';
     if (context.kind === 'restore') {
       state = await store.restore(context.imported);
       render();
@@ -851,7 +956,7 @@ $('#financial-form').addEventListener('submit', async (e) => {
             {
               id: context.id,
               name: get('name'),
-              amount: cents(get('amount')),
+              amount: entryAmount,
               date: get('date'),
               categoryId: get('categoryId'),
               paymentMethodId: get('paymentMethodId') || null,
@@ -918,11 +1023,7 @@ $('#financial-form').addEventListener('submit', async (e) => {
             date: get('date'),
           });
       },
-      context.kind === 'entry'
-        ? context.source
-          ? 'Lançamento atualizado. Acompanhe a sincronização.'
-          : 'Lançamento registrado. Acompanhe a sincronização.'
-        : 'Salvo. Acompanhe a sincronização.',
+      context.kind === 'entry' ? entrySaved : 'Salvo. Acompanhe a sincronização.',
     );
     $('#financial-dialog').close();
   } catch (error) {
@@ -939,11 +1040,12 @@ $('#financial-form').addEventListener('submit', async (e) => {
 });
 $('#catalog-form').addEventListener('submit', async (e) => {
   e.preventDefault();
+  const id = $('#catalog-id').value || crypto.randomUUID();
   try {
     await transact(
       (s) =>
         saveCatalog(s, catalogKind, {
-          id: $('#catalog-id').value || crypto.randomUUID(),
+          id,
           name: $('#catalog-name').value,
           type: $('#catalog-type').value,
         }),
@@ -955,6 +1057,16 @@ $('#catalog-form').addEventListener('submit', async (e) => {
     $('#catalog-error').textContent = '';
     renderCatalog();
     refreshFormCatalogs();
+    // Com o lançamento aberto, o cadastro novo fica escolhido ao voltar.
+    const select = $(
+      '#financial-form select[name=' +
+        (catalogKind === 'categories' ? 'categoryId' : 'paymentMethodId') +
+        ']',
+    );
+    if (select && [...select.options].some((o) => o.value === id)) {
+      select.value = id;
+      select.dispatchEvent(new Event('change', { bubbles: true }));
+    }
   } catch (error) {
     $('#catalog-error').textContent = error.message;
   }
@@ -981,21 +1093,30 @@ document.addEventListener('change', (e) => {
     filters[e.target.dataset.filter] = e.target.value;
     renderTransactions();
   }
-  if (e.target.id === 'entry-type') {
-    const defaults = entryDefaults(e.target.value);
+  if (e.target.name === 'type' && e.target.closest('#financial-form')) {
+    const type = e.target.value;
+    const defaults = entryDefaults(type);
     const old = editing?.isNew ? defaults.paymentMethodId : $('#entry-method select').value;
     $('#entry-category').innerHTML = categoryField(
-      editing?.isNew ? defaults.categoryId : null,
-      e.target.value,
+      editing?.isNew ? defaults.categoryId : $('#entry-category select').value,
+      type,
     );
     $('#entry-method').innerHTML = methodField(
       old,
-      e.target.value,
+      type,
       state.entries.find((r) => r.id === editing?.id)?.paymentMethodId === null,
     );
+    updateEntryHints();
   }
+  if (
+    e.target.closest?.('#financial-form') &&
+    (e.target.name === 'paymentMethodId' ||
+      e.target.name === 'paid' ||
+      e.target.name === 'seriesMode')
+  )
+    updateEntryHints();
   if (e.target.name === 'name' && editing?.isNew && editing.kind === 'entry') {
-    const type = $('#entry-type').value;
+    const type = $('#financial-form [name=type]:checked').value;
     const previous = state.entries.find(
       (r) =>
         r.type === type &&

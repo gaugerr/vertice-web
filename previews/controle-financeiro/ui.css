@@ -1300,3 +1300,160 @@ dialog.area-drawer {
     padding-bottom: 120px;
   }
 }
+
+/* Formulário de lançamentos: valor em destaque, tipo em segmento, opções recolhidas. */
+#financial-form[data-kind='entry'] .form-fields {
+  display: flex;
+  flex-direction: column;
+  gap: 14px;
+}
+#financial-form[data-kind='entry'] fieldset {
+  min-width: 0;
+  margin: 0;
+  padding: 0;
+  border: 0;
+}
+#financial-form[data-kind='entry'] legend,
+#financial-form[data-kind='entry'] .type-switch legend {
+  position: absolute;
+  width: 1px;
+  height: 1px;
+  overflow: hidden;
+  clip: rect(0 0 0 0);
+}
+.type-switch {
+  display: grid;
+  grid-template-columns: 1fr 1fr;
+  gap: 4px;
+  padding: 4px;
+  border: 1px solid #3a334a;
+  border-radius: 14px;
+  background: #15121c;
+}
+.type-switch label {
+  position: relative;
+  display: block;
+}
+.type-switch input {
+  position: absolute;
+  opacity: 0;
+  width: 1px;
+  height: 1px;
+  margin: 0;
+}
+.type-switch span {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  min-height: 46px;
+  border-radius: 10px;
+  color: #aaa4b8;
+  font-size: 14px;
+  font-weight: 650;
+  cursor: pointer;
+}
+.type-switch label:has(input:checked) span {
+  background: #32253f;
+  color: #decfff;
+}
+.type-switch label:has(input:focus-visible) span {
+  outline: 2px solid #c7b2ff;
+  outline-offset: 2px;
+}
+.money-input {
+  display: flex;
+  align-items: center;
+  gap: 10px;
+  min-height: 72px;
+  margin-top: 6px;
+  padding: 0 18px;
+  border: 1px solid #3a334a;
+  border-radius: 16px;
+  background: #15121c;
+}
+.money-input > span {
+  color: #aaa4b8;
+  font-size: 18px;
+  font-weight: 600;
+}
+#financial-form[data-kind='entry'] .field-amount input {
+  flex: 1;
+  min-width: 0;
+  padding: 0;
+  border: 0;
+  background: transparent;
+  font-size: 34px;
+  font-weight: 650;
+  font-variant-numeric: tabular-nums;
+  box-shadow: none;
+}
+#financial-form[data-kind='entry'] .field-amount input:focus-visible {
+  outline: none;
+}
+.money-input:focus-within {
+  border-color: #b69bff;
+}
+.date-field {
+  display: grid;
+  gap: 8px;
+}
+#financial-form[data-kind='entry'] .date-field > legend {
+  position: static;
+  width: auto;
+  height: auto;
+  overflow: visible;
+  clip: auto;
+  font-size: 13px;
+  color: #d9d2e6;
+}
+.date-chips {
+  display: flex;
+  gap: 8px;
+}
+.chip {
+  min-height: 38px;
+  padding: 0 14px;
+  border: 1px solid #3a334a;
+  border-radius: 999px;
+  background: #1d1926;
+  color: #d9d2e6;
+  font-size: 13px;
+  font-weight: 600;
+}
+.chip:hover {
+  background: #2b2639;
+}
+.field-hint {
+  margin: 4px 0 0 30px;
+  font-size: 12px;
+  line-height: 1.45;
+  color: var(--muted);
+}
+.series-config {
+  display: grid;
+  gap: 10px;
+  margin-top: 10px;
+}
+.series-preview {
+  margin: 0;
+  padding: 12px 14px;
+  border-radius: 12px;
+  background: #1f2a26;
+  color: #c9f2dd;
+  font-size: 13px;
+  line-height: 1.5;
+}
+@media (max-width: 640px) {
+  .money-input {
+    min-height: 66px;
+  }
+  #financial-form[data-kind='entry'] .field-amount input {
+    font-size: 30px;
+  }
+  .type-switch span {
+    min-height: 50px;
+  }
+  .chip {
+    min-height: 42px;
+  }
+}
