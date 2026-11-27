@@ -210,6 +210,89 @@ test('backup antigo com fatura paga em parte é recusado em vez de perder o valo
     /paga em parte/,
   );
 });
+test('backup v1 com cartão: saldos finais, contas sem cartão e totais mensais batem com o motor antigo', () => {
+  // Oráculo: valores produzidos pelo motor de cartões antes da remoção (commit 6a749a1).
+  const data = legacyBackup({
+    cards: [card],
+    entries: [
+      entry({
+        id: 'p1',
+        date: '2026-12-05',
+        cardId: 'c',
+        purchaseDate: '2026-11-10',
+        amount: 10000,
+      }),
+      entry({
+        id: 'p2',
+        date: '2026-12-05',
+        cardId: 'c',
+        purchaseDate: '2026-11-11',
+        amount: 3000,
+        paid: false,
+        paidAmount: 0,
+        remainingAmount: 3000,
+      }),
+      entry({
+        id: 'p3',
+        date: '2026-10-05',
+        cardId: 'c',
+        purchaseDate: '2026-09-15',
+        amount: 5000,
+      }),
+      entry({ id: 'e4', date: '2026-11-15', amount: 2000, walletId: 'w' }),
+    ],
+    moves: [
+      {
+        id: 'pay1',
+        kind: 'invoice',
+        fromWalletId: 'w',
+        cardId: 'c',
+        month: '2026-10',
+        amount: 5000,
+        date: '2026-10-05',
+      },
+      {
+        id: 'pay2',
+        kind: 'invoice',
+        fromWalletId: 'w',
+        cardId: 'c',
+        month: '2026-12',
+        amount: 10000,
+        date: '2026-12-05',
+      },
+      {
+        id: 't1',
+        kind: 'transfer',
+        fromWalletId: 'w',
+        toWalletId: 'w2',
+        amount: 3000,
+        date: '2026-11-20',
+      },
+    ],
+  });
+  const restored = readBackup(data, []);
+  // Saldo final e contas sem cartão: iguais ao original.
+  assert.equal(walletBalance(restored, 'w', '2026-12-31'), 80000);
+  assert.equal(walletBalance(restored, 'w2', '2026-12-31'), 3000);
+  assert.equal(walletBalance(restored, 'w2', '2026-11-20'), 3000);
+  // Totais mensais: iguais ao original (despesa realizada e prevista).
+  const expected = {
+    '2026-10': [5000, 5000],
+    '2026-11': [2000, 2000],
+    '2026-12': [10000, 13000],
+  };
+  for (const [month, [expense, expectedExpense]] of Object.entries(expected)) {
+    const t = totals(monthlyRows(restored, month));
+    assert.deepEqual([t.expense, t.expectedExpense], [expense, expectedExpense], month);
+  }
+  // Histórico: divergência conhecida. Pagamentos de fatura foram antecipados ao saldo inicial,
+  // então saldos anteriores a cada pagamento ficam menores que no original (100000 em 01/01).
+  // shortcut: saldos históricos anteriores a um pagamento de fatura diferem do original em
+  // exatamente o valor dos pagamentos ainda não ocorridos; reavaliar se o histórico precisar ser exato.
+  assert.equal(walletBalance(restored, 'w', '2026-01-01'), 85000);
+  assert.equal(walletBalance(restored, 'w', '2026-10-05'), 85000);
+  assert.equal(walletBalance(restored, 'w', '2026-11-20'), 80000);
+});
 test('registros antigos de cartão vindos do servidor são ignorados na leitura', () => {
   const rows = financeRows(setup());
   const legacy = [
