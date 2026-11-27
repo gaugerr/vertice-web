@@ -1,0 +1,1 @@
+drop function if exists cakto_private.approved_checkout_request(text,text,jsonb);
