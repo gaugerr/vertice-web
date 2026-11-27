@@ -21,7 +21,11 @@ abaixo que citam cartões ou faturas descrevem o estado anterior e estão marcad
   inicial da conta de origem (o saldo de hoje não muda); cartões cadastrados são
   ignorados. Compra com fatura paga só em parte é recusada, para não perder o valor.
   A tela de restauração mostra o que foi convertido.
-- **Banco (preparada, NÃO aplicada):** `supabase/migrations/20261127000000_remove_finance_cards_and_invoices.sql`
+- **Banco (APLICADA no Supabase `vertice`, ref `wqutcsjdozcukwxvkbtc`):** `supabase/migrations/20261127000000_remove_finance_cards_and_invoices.sql`
+  Verificado em 27/11/2026: `supabase_migrations.schema_migrations` lista a versão
+  `20261127000000`; `finance_cards` não existe mais; `finance_legacy_card_archive` existe.
+  Data e responsável pela aplicação **não identificados**. Não reaplicar.
+  Conteúdo da migração:
   remove `finance_cards`, `finance_moves.card_id/invoice_month`, `finance_payments.invoice_move_id`,
   o gatilho `guard_card_snapshot` e as regras de cartão de `workspace_command`; estreita
   `finance_moves` a transferências. Não reescreve linhas financeiras: aborta, revertendo
@@ -29,9 +33,14 @@ abaixo que citam cartões ou faturas descrevem o estado anterior e estão marcad
   faturas e pagamentos de fatura apagados vão para `finance_legacy_card_archive`
   (só `service_role`), que pode ser removida depois. Compras de cartão apagadas ficam em
   `finance_entries`, sem efeito.
-- **Ordem de publicação:** aplicar a migração antes de publicar o cliente novo. Dados
-  reais conferidos no backup de 26/11/2026: nenhum lançamento com cartão, nenhum pagamento
-  de fatura, dois cadastros de cartão sem uso.
+- **Staging:** verificado em 27/11/2026 que `finance-ledger.mjs` e `finance-domain.mjs`
+  servidos em `/staging/` correspondem à versão atual da fonte local, com as telas de
+  cartão removidas. Não verificado: histórico de deploy no Cloudflare Pages (o staging
+  foi comparado pelo conteúdo, não pelo registro de deploy).
+- **Crédito:** "Cartão de Crédito" continua existindo como forma de pagamento comum.
+  Não são cartões, faturas, fechamento ou vencimento.
+- **Dados reais conferidos no backup de 26/11/2026:** nenhum lançamento com cartão, nenhum
+  pagamento de fatura, dois cadastros de cartão sem uso.
 - **Validação:** `npm test` cobre domínio, mapeamento e importação de backup legado
   (`previews/controle-financeiro/*.test.mjs` via `node --test`, e `shared/workspaces`). As
   suítes PostgreSQL (`shared/workspaces/ledger-postgres.test.mjs`, `postgres.test.mjs`,
@@ -297,8 +306,10 @@ com confirmação de compartilhamento, mas essa evolução ainda NÃO foi implem
 
 Supabase Vértice: `wqutcsjdozcukwxvkbtc`, região us-east-1. Docery
 `vapycmnoepasbnszcatz` é outro app: não tocar. Nenhuma branch/projeto pago foi criado.
-Migrações JÁ aplicadas: `20261109173641_shared_shopping_finance_workspaces` e
-`20261109180048_workspace_preview_signing`. Não reaplicar rascunhos em
+Migrações JÁ aplicadas: `20261109173641_shared_shopping_finance_workspaces`,
+`20261109180048_workspace_preview_signing`, `20261111225724_finance_accounts_cards_series`
+e `20261127000000_remove_finance_cards_and_invoices` (verificado em 27/11/2026; data e
+responsável desta última não identificados). Nas versões listadas por `list_migrations` em 27/11/2026, nenhuma migração de finanças estava pendente. Não reaplicar rascunhos em
 `supabase/drafts`, não resetar o banco e não empurrar migrações antigas em lote.
 
 Novas tabelas públicas `shopping_*`, `finance_*`, `user_import_batches` e

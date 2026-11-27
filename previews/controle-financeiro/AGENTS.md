@@ -48,8 +48,9 @@ Contas/séries estão em `finance-ledger.mjs`. Registros financeiros novos usam
 `ledger_version: 2`; preservar compatibilidade e RLS do workspace. Saldo inicial não
 é receita e transferências não entram no resultado. Não existem cartões nem faturas
 (removidos em 27/11/2026): `dropLegacyCards` converte backups antigos sem perder
-valores, e o cliente ignora linhas legadas de cartão. Aplicar a migração
-`20261127000000_remove_finance_cards_and_invoices` antes de publicar este cliente.
+valores, e o cliente ignora linhas legadas de cartão. A migração
+`20261127000000_remove_finance_cards_and_invoices` está aplicada no Supabase `vertice`
+(verificado em 27/11/2026; data e responsável não identificados): não reaplicar.
 Testes críticos: `finance-ledger.test.mjs`, `shared/workspaces/ledger-postgres.test.mjs`
 e `ledger-browser-check.mjs`.
 
