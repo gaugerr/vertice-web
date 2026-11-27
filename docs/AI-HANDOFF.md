@@ -25,15 +25,18 @@ abaixo que citam cartões ou faturas descrevem o estado anterior e estão marcad
   remove `finance_cards`, `finance_moves.card_id/invoice_month`, `finance_payments.invoice_move_id`,
   o gatilho `guard_card_snapshot` e as regras de cartão de `workspace_command`; estreita
   `finance_moves` a transferências. Não reescreve linhas financeiras: aborta, revertendo
-  tudo, se ainda houver compra de cartão ou pagamento de fatura ativos. Cadastros de cartão
-  e linhas apagadas vão para `finance_legacy_card_archive` (só `service_role`), que pode ser
-  removida depois.
+  tudo, se ainda houver compra de cartão ou pagamento de fatura ativos. Cadastros de cartão,
+  faturas e pagamentos de fatura apagados vão para `finance_legacy_card_archive`
+  (só `service_role`), que pode ser removida depois. Compras de cartão apagadas ficam em
+  `finance_entries`, sem efeito.
 - **Ordem de publicação:** aplicar a migração antes de publicar o cliente novo. Dados
   reais conferidos no backup de 26/11/2026: nenhum lançamento com cartão, nenhum pagamento
   de fatura, dois cadastros de cartão sem uso.
-- **Validação:** testes de domínio, de mapeamento e de importação de backup legado; suítes
-  PostgreSQL executadas contra a migração em Postgres embutido (PGlite), sem tocar no
-  Supabase. Não foi aplicada em nenhum banco remoto.
+- **Validação:** `npm test` cobre domínio, mapeamento e importação de backup legado
+  (`previews/controle-financeiro/*.test.mjs` via `node --test`, e `shared/workspaces`). As
+  suítes PostgreSQL (`shared/workspaces/ledger-postgres.test.mjs`, `postgres.test.mjs`,
+  `tools/test-workspaces-db.mjs`) exigem `POSTGRES_CONTAINER` isolado com Docker e ficam
+  puladas sem ele. Não foi aplicada em nenhum banco remoto.
 
 ## Reformulação visual — 12/11/2026
 

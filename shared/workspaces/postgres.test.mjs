@@ -1,3 +1,4 @@
+// @vitest-environment node
 import 'fake-indexeddb/auto';
 import { test, expect, vi } from 'vitest';
 import { generateKeyPair, exportJWK, SignJWT } from 'jose';

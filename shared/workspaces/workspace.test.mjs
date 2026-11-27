@@ -1,3 +1,4 @@
+// @vitest-environment node
 import 'fake-indexeddb/auto';
 import { test, expect, afterEach } from 'vitest';
 import { WorkspaceClient, WorkspaceFinanceStore, workspaceDatabase } from './core.mjs';
