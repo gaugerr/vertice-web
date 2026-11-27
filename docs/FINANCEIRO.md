@@ -1,5 +1,9 @@
 # Vértice Financeiro
 
+> **Estado atual e retomada por IA (09/11/2026):** leia [AI-HANDOFF](AI-HANDOFF.md).
+> App oficial, demonstração local e preview conectada são ambientes distintos.
+> Resultados e instruções anteriores abaixo devem ser interpretados no contexto do ambiente e da data; o handoff registra as pendências atuais.
+
 Central protegida em `/financeiro`, dentro de `Root`/`AccessBoundary`. Não há novo
 login, integração com dados financeiros, sincronização ou alteração no banco de
 compras. O desenvolvimento local mantém o modo legacy existente; Cloudflare

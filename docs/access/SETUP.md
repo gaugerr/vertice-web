@@ -1,5 +1,9 @@
 # Acesso Google e licenças
 
+> **Estado atual e retomada por IA (09/11/2026):** leia [AI-HANDOFF](../AI-HANDOFF.md).
+> App oficial, demonstração local e preview conectada são ambientes distintos.
+> Resultados e instruções anteriores abaixo devem ser interpretados no contexto do ambiente e da data; o handoff registra as pendências atuais.
+
 A implementação está na `main`. A produção principal usa Cloudflare Pages em `https://use-vertice.pages.dev`, com build `node tools/build-cloudflare.mjs`; veja [CLOUDFLARE.md](../CLOUDFLARE.md). Produção e previews usam exclusivamente Cloudflare Pages e exigem login Google e licença. A ativação do domínio principal foi autorizada pelo proprietário após o login real no preview e a configuração das origens no Supabase. Não há sincronização de compras nesta entrega.
 
 ## Configuração externa necessária

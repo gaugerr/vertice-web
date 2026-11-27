@@ -1,5 +1,9 @@
 # Primeiro passo: criar o login Google
 
+> **Estado atual e retomada por IA (09/11/2026):** leia [AI-HANDOFF](../AI-HANDOFF.md).
+> App oficial, demonstração local e preview conectada são ambientes distintos.
+> Resultados e instruções anteriores abaixo devem ser interpretados no contexto do ambiente e da data; o handoff registra as pendências atuais.
+
 Você não precisa comprar domínio nem criar senha para o Vértice. Use a conta Google que administra o projeto e não envie senhas ou segredos pelo chat.
 
 1. Abra https://console.cloud.google.com/ e crie ou selecione um projeto para o Vértice.

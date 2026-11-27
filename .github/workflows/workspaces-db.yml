@@ -1,0 +1,42 @@
+name: Workspace database regression
+on:
+  push:
+    branches: [feature/shared-database, main]
+    paths:
+      - 'supabase/migrations/**'
+      - 'tools/test-workspaces-db.mjs'
+      - 'tools/sql/access-fingerprint.sql'
+      - '.github/workflows/workspaces-db.yml'
+  pull_request:
+    paths:
+      - 'supabase/migrations/**'
+      - 'tools/test-workspaces-db.mjs'
+      - 'tools/sql/access-fingerprint.sql'
+      - '.github/workflows/workspaces-db.yml'
+permissions:
+  contents: read
+jobs:
+  postgres:
+    runs-on: ubuntu-24.04
+    timeout-minutes: 5
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-node@v4
+        with:
+          node-version-file: .nvmrc
+      - name: Start disposable PostgreSQL without network or published ports
+        run: docker run -d --name vertice-workspaces-test --network none -e POSTGRES_HOST_AUTH_METHOD=trust postgres:17-alpine
+      - name: Wait for PostgreSQL
+        run: |
+          for attempt in {1..30}; do
+            if docker exec vertice-workspaces-test pg_isready -h 127.0.0.1 -U postgres; then exit 0; fi
+            sleep 1
+          done
+          exit 1
+      - name: Existing Cakto migrations and shared data regression
+        env:
+          POSTGRES_CONTAINER: vertice-workspaces-test
+        run: node tools/test-workspaces-db.mjs
+      - name: Remove disposable container
+        if: always()
+        run: docker rm -f vertice-workspaces-test

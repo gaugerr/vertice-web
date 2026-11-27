@@ -1,6 +1,10 @@
 # Evolução para Supabase e acesso comercial
 
-Este documento descreve a futura sincronização das compras e integração de pagamentos. O acesso Google, as licenças manuais e a autorização offline já estão implementados na branch `feat/google-access`; veja [a configuração atual](access/SETUP.md). Ainda não há pagamento automático nem fila de sincronização das compras.
+> **Estado atual e retomada por IA (09/11/2026):** leia [AI-HANDOFF](AI-HANDOFF.md).
+> App oficial, demonstração local e preview conectada são ambientes distintos.
+> Resultados e instruções anteriores abaixo devem ser interpretados no contexto do ambiente e da data; o handoff registra as pendências atuais.
+
+Este documento descreve a futura sincronização das compras e integração de pagamentos. O acesso Google, as licenças manuais e a autorização offline já estão implementados na branch `feat/google-access`; veja [a configuração atual](access/SETUP.md). A Cakto já automatiza licenças. A fila de sincronização existe na preview conectada; a integração ao ponto de entrada oficial ainda está pendente.
 
 ## Fluxo pretendido
 

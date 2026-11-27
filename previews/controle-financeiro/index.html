@@ -1,0 +1,261 @@
+<!doctype html>
+<html lang="pt-BR">
+  <head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width,initial-scale=1" />
+    <meta name="theme-color" content="#101014" />
+    <title>Vértice · Compras e Financeiro</title>
+    <meta
+      name="description"
+      content="Organize suas compras e seu financeiro, acompanhe contas e planeje seus objetivos."
+    />
+    <link rel="icon" href="vertice.svg" />
+    <link rel="stylesheet" href="styles.css" />
+    <link rel="stylesheet" href="shell.css" />
+    <link rel="stylesheet" href="finance.css" />
+    <link rel="stylesheet" href="workspace.css" />
+    <link rel="stylesheet" href="ui.css" />
+  </head>
+  <body class="area-shopping">
+    <a href="#main" class="skip">Pular para o conteúdo</a>
+    <header>
+      <button
+        class="menu-toggle"
+        id="menu-toggle"
+        aria-label="Abrir menu de áreas"
+        aria-controls="app-menu"
+        aria-expanded="false"
+      >
+        <svg
+          width="23"
+          height="23"
+          viewBox="0 0 24 24"
+          fill="none"
+          stroke="currentColor"
+          stroke-width="1.8"
+          aria-hidden="true"
+        >
+          <path d="M4 6h16M4 12h16M4 18h16" />
+        </svg>
+      </button>
+      <div class="brand">
+        <img src="vertice.svg" alt="" width="37" height="37" /><span>vértice<b>.</b></span>
+      </div>
+      <div class="header-right">
+        <button
+          id="sync-toggle"
+          class="icon-button"
+          popovertarget="sync-panel"
+          aria-label="Sincronização: verificando"
+          title="Sincronização"
+        >
+          <svg
+            id="sync-icon"
+            width="21"
+            height="21"
+            viewBox="0 0 24 24"
+            fill="none"
+            stroke="currentColor"
+            stroke-width="1.8"
+            stroke-linecap="round"
+            stroke-linejoin="round"
+            aria-hidden="true"
+          >
+            <path d="M20 7a9 9 0 0 0-15-2L2 8m0-5v5h5M4 17a9 9 0 0 0 15 2l3-3m0 5v-5h-5" />
+          </svg>
+        </button>
+      </div>
+    </header>
+    <div class="area-strip">
+      <button id="area-shortcut" aria-label="Trocar área pelo menu">Compras <span>⌄</span></button
+      ><span aria-hidden="true">/</span><span id="current-screen">Minhas listas</span>
+    </div>
+
+    <p id="workspace-message" role="status"></p>
+    <main id="main">
+      <section class="panel" id="workspace-access-block" hidden>
+        <h2>Acesso ao espaço removido</h2>
+        <p>
+          Não é mais possível abrir ou sincronizar este espaço. As alterações pendentes foram
+          preservadas neste aparelho. Em Configurações, você pode baixar uma cópia de recuperação ou
+          escolher outro espaço.
+        </p>
+      </section>
+      <section id="workspace-login-panel" class="panel" hidden>
+        <h1>Seu Vértice conectado</h1>
+        <p>
+          Entre com sua conta Google para salvar suas listas e seu financeiro na nuvem ou aceitar o
+          convite de outra pessoa.
+        </p>
+        <button class="primary" id="workspace-login-start">Entrar com Google</button>
+        <p class="muted">
+          Use a conta vinculada à sua compra. A pessoa convidada pode entrar com a própria conta
+          Google.
+        </p>
+      </section>
+      <section id="shopping-area" aria-label="Listas de compras">
+        <iframe
+          id="shopping-frame"
+          title="Vértice · Listas de compras"
+          data-src="shopping/index.html"
+          allow="clipboard-write"
+        ></iframe>
+      </section>
+      <section id="finance-area" hidden>
+        <div class="page-heading">
+          <div>
+            <h1 id="page-title">Resumo</h1>
+            <p id="page-subtitle">
+              Um olhar simples para o que entra, o que sai e o que vem pela frente.
+            </p>
+          </div>
+          <button class="primary" id="new-entry">
+            <span data-icon="plus"></span> Novo lançamento
+          </button>
+        </div>
+        <div class="toolbar">
+          <div class="month-control">
+            <button id="prev-month" aria-label="Mês anterior"><span data-icon="left"></span></button
+            ><span id="month"></span
+            ><button id="next-month" aria-label="Próximo mês">
+              <span data-icon="right"></span>
+            </button>
+          </div>
+        </div>
+        <nav id="planning-tabs" class="planning-tabs" aria-label="Planejamento" hidden>
+          <button data-view="budget">Orçamentos</button
+          ><button data-view="fixed">Contas fixas</button><button data-view="goals">Metas</button>
+        </nav>
+        <div id="content" aria-live="polite"></div>
+        <footer>vértice.</footer>
+      </section>
+      <section id="settings-area" hidden>
+        <div class="page-heading">
+          <div>
+            <div class="eyebrow">VÉRTICE</div>
+            <h1>Configurações</h1>
+            <p>Conta, preferências e dados.</p>
+          </div>
+        </div>
+        <div class="main-grid">
+          <section class="panel" id="workspace-settings">
+            <h2>Espaço e compartilhamento</h2>
+            <div id="workspace-settings-content"></div>
+            <button class="secondary" id="workspace-recovery" hidden>
+              Revisar alterações pendentes
+            </button>
+          </section>
+          <section class="panel">
+            <h2>Categorias financeiras</h2>
+            <p class="panel-subtitle">Organize suas receitas e despesas.</p>
+            <button class="secondary" data-catalog="categories">Gerenciar categorias</button>
+          </section>
+          <section class="panel">
+            <h2>Formas de pagamento</h2>
+            <p class="panel-subtitle">Pix, dinheiro, débito, crédito e outras opções.</p>
+            <button class="secondary" data-catalog="methods">Gerenciar formas de pagamento</button>
+          </section>
+          <section class="panel">
+            <h2>Dados das compras</h2>
+            <p class="panel-subtitle">Exporte suas listas ou restaure um backup no espaço ativo.</p>
+            <button class="secondary" id="shopping-settings">Abrir dados das compras</button>
+          </section>
+          <section class="panel">
+            <h2>Backup do financeiro</h2>
+            <p class="panel-subtitle">
+              Guarde um arquivo ou restaure um backup. As listas de compras têm backup separado.
+            </p>
+            <div class="backup-actions">
+              <button class="secondary" id="export-finance">Exportar backup</button
+              ><button class="secondary" id="import-finance">Restaurar backup</button
+              ><button class="text-button" id="export-before-restore" hidden>
+                Baixar cópia anterior à restauração
+              </button>
+            </div>
+            <input id="finance-backup-file" type="file" accept=".json,application/json" hidden />
+            <p id="finance-backup-status" role="status" class="muted"></p>
+          </section>
+        </div>
+      </section>
+    </main>
+    <nav hidden id="finance-tabs" class="mobile-nav" aria-label="Navegação móvel">
+      <button data-view="overview" class="active">
+        <span data-icon="home"></span><small>Resumo</small>
+      </button>
+      <button data-view="transactions">
+        <span data-icon="arrows"></span><small>Lançamentos</small>
+      </button>
+      <button data-view="planning">
+        <span data-icon="planning"></span><small>Planejamento</small>
+      </button>
+      <button data-view="analysis"><span data-icon="chart"></span><small>Análises</small></button>
+    </nav>
+    <dialog id="app-menu" class="area-drawer">
+      <div class="drawer-head">
+        <div class="brand">
+          <img src="vertice.svg" width="32" height="32" alt="" /><span>vértice<b>.</b></span>
+        </div>
+        <button class="icon-button" id="menu-close" aria-label="Fechar menu">
+          <span data-icon="close"></span>
+        </button>
+      </div>
+      <nav aria-label="Áreas do Vértice">
+        <button data-area="shopping"><span data-icon="shopping"></span><span>Compras</span></button
+        ><button data-area="finance"><span data-icon="chart"></span><span>Financeiro</span></button
+        ><button data-area="finance" data-finance-view="more">
+          <span data-icon="more"></span><span>Mais</span>
+        </button>
+      </nav>
+      <div class="workspace-bar">
+        <label
+          >Espaço<select id="workspace-selector" aria-label="Espaço ativo">
+            <option>Carregando…</option>
+          </select></label
+        ><button class="text-button" id="workspace-manage">Compartilhar</button
+        ><button class="text-button" id="workspace-login" hidden>Entrar com Google</button
+        ><button class="text-button" id="workspace-logout" hidden>Sair</button>
+      </div>
+      <p id="workspace-menu-message" role="status"></p>
+    </dialog>
+    <div id="sync-panel" popover>
+      <h2>Sincronização</h2>
+      <p id="workspace-sync" role="status">Verificando…</p>
+      <p id="sync-last" class="muted">Aguardando a primeira sincronização completa</p>
+      <button class="text-button" id="sync-review" hidden>Revisar pendências</button>
+    </div>
+    <dialog id="financial-dialog"><form id="financial-form"></form></dialog>
+    <dialog id="fixed-detail"><div id="fixed-detail-content"></div></dialog>
+    <dialog id="goal-history"><div id="goal-history-content"></div></dialog>
+    <dialog id="workspace-dialog"><form id="workspace-form"></form></dialog>
+    <dialog id="catalog-dialog">
+      <div class="dialog-heading">
+        <h2 id="catalog-title">Cadastros</h2>
+        <button class="icon-button" data-close aria-label="Fechar">
+          <span data-icon="close"></span>
+        </button>
+      </div>
+      <p class="muted">
+        Renomear mantém os vínculos. Arquivar retira a opção dos novos registros, sem apagar o
+        histórico. O tipo da categoria não muda depois da criação.
+      </p>
+      <form id="catalog-form">
+        <input id="catalog-id" type="hidden" /><label
+          >Nome<input id="catalog-name" maxlength="50" required /></label
+        ><label id="catalog-type-label"
+          >Tipo<select id="catalog-type">
+            <option value="expense">Despesa</option>
+            <option value="income">Receita</option>
+          </select></label
+        >
+        <p class="error" id="catalog-error" role="alert"></p>
+        <div class="dialog-actions">
+          <button class="secondary" type="button" id="catalog-new">Novo cadastro</button
+          ><button class="primary">Salvar cadastro</button>
+        </div>
+      </form>
+      <div id="catalog-list"></div>
+    </dialog>
+    <div class="toast" id="toast" role="status"></div>
+    <script type="module" src="shell.js"></script>
+  </body>
+</html>

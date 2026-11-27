@@ -1,5 +1,9 @@
 # Hospedagem na Cloudflare Pages
 
+> **Estado atual e retomada por IA (09/11/2026):** leia [AI-HANDOFF](AI-HANDOFF.md).
+> App oficial, demonstração local e preview conectada são ambientes distintos.
+> Resultados e instruções anteriores abaixo devem ser interpretados no contexto do ambiente e da data; o handoff registra as pendências atuais.
+
 Projeto: `gaugerr/vertice-web`, branch de produção `main`, nome `use-vertice`.
 Aplicativo: <https://app.usevertice.app.br>. Página de vendas:
 <https://usevertice.app.br>, projeto Pages `vertice-kit` (raiz `/marketing`).

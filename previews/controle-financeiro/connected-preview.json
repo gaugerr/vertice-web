@@ -1,0 +1,16 @@
+{
+  "enabled": true,
+  "connectionMode": "existing-project-preview",
+  "projectRef": "wqutcsjdozcukwxvkbtc",
+  "allowedOrigin": "https://preview-controle-financeiro.vertice-financeiro-preview.pages.dev",
+  "url": "https://wqutcsjdozcukwxvkbtc.supabase.co",
+  "endpoint": "https://wqutcsjdozcukwxvkbtc.supabase.co/functions/v1/workspaces",
+  "issuer": "https://wqutcsjdozcukwxvkbtc.supabase.co",
+  "publishableKey": "sb_publishable_na1zSXjXeXTF0RzGkpplhA__XR1-0Sl",
+  "publicKey": {
+    "kty": "EC",
+    "x": "XZSwyDcel-GrttZ0AAcvtM4QsGYNk5OWK8dUXQnxm6M",
+    "y": "WvMRrZZ-FLNWWj70wL5fZEiJDfLBoOxW0jGA31IMfuo",
+    "crv": "P-256"
+  }
+}

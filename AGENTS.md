@@ -1,5 +1,14 @@
 # Vértice — guia do projeto
 
+> **Estado atual e retomada por IA (09/11/2026):** leia [AI-HANDOFF](docs/AI-HANDOFF.md).
+> App oficial, demonstração local e preview conectada são ambientes distintos.
+> Resultados e instruções anteriores abaixo devem ser interpretados no contexto do ambiente e da data; o handoff registra as pendências atuais.
+
+A interface em `preview/controle-financeiro` usa textos finais do produto; não
+reintroduzir badges ou ferramentas de demonstração nem restaurar exemplos.
+Primeiro acesso sem registros começa vazio; preservar dados, backups e os
+identificadores internos. Detalhes e validação em `docs/AI-HANDOFF.md`.
+
 ## Comece aqui: contexto e conexões
 
 Guia para retomar o projeto sem o histórico do chat. Estado operacional conferido
@@ -162,6 +171,15 @@ Há dois armazenamentos distintos: **compras no IndexedDB do aparelho** e
 **identidade/licenças/eventos de pagamento no Supabase**. A planilha é um terceiro
 arquivo independente, copiado/baixado pelo comprador. Não mover compras para o
 Supabase nem integrar a planilha como efeito colateral de alterações de interface.
+
+A base aditiva de compras/financeiro/casal está na migração
+`shared_shopping_finance_workspaces`; contrato e validação em
+[Banco de espaços](docs/WORKSPACE-DATABASE.md). Ela não ativa sincronização no app,
+não importa dados locais e não modifica Auth/licenças/Cakto. Escrita nova somente
+por serviço autenticado via `workspace_command`; leitura com RLS por participação.
+Teste isolado: `POSTGRES_CONTAINER=<container-sem-rede> node tools/test-workspaces-db.mjs`.
+Nunca apontar fixtures para produção nem reexecutar o rascunho da preview em cima
+dessa migração.
 
 - Dexie está na **versão 5**: `lists`, `categories`, `items` e recibos `migrations`.
   Migrações futuras incrementam a versão e preservam registros; não apagar/recriar
