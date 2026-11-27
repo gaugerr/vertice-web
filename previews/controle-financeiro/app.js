@@ -10,6 +10,7 @@ import {
 } from './finance-ledger.mjs';
 import { planningViews, financeGroup } from './finance-navigation.mjs';
 import { isCreditMethod, paidCopy, seriesPreview, seriesSummary } from './entry-form.mjs';
+import { budgetStatus, budgetPercent, paymentStatus, dayLabel } from './presentation.mjs';
 import { openPreviewWorkspace, WorkspaceFinanceStore } from './workspaces.js';
 import './workspace-ui.mjs';
 import {
@@ -129,25 +130,22 @@ function panel(title, subtitle, body, action = '') {
 const to = (label, destination) =>
   `<button class="text-button" data-view="${destination}">${label}${icon('right')}</button>`;
 function stats(selectedRows) {
-  return (
-    overviewBalance(selectedRows) +
-    `<p class="competence-note">Saldo projetado: ${money(summaryTotals(state, month, selectedRows).forecast)} · inclui receitas e despesas previstas na competência.</p>`
-  );
+  return overviewBalance(selectedRows);
 }
 function overviewBalance(selectedRows) {
   const t = summaryTotals(state, month, selectedRows);
-  return `<section class="overview-balance" aria-label="Saldos e movimentação mensal"><div class="monthly-result"><span>Quanto sobrou no mês</span><strong class="${t.remainingAfterSaving < 0 ? 'pink' : 'green'}">${money(t.remainingAfterSaving)}</strong><small>Resultado antes de guardar: ${money(t.resultBeforeSaving)}</small></div><div class="overview-indicators">${[
-    ['Receitas', t.income, 'green'],
-    ['Despesas', t.operatingExpense, 'pink'],
-    ['Guardado', t.invested, 'purple'],
+  return `<section class="overview-balance" aria-label="Saldos e movimentação mensal"><div class="monthly-result"><span>Quanto sobrou no mês</span><strong class="${t.remainingAfterSaving < 0 ? 'pink' : 'green'}">${money(t.remainingAfterSaving)}</strong><small>Receitas pagas menos despesas pagas, já descontada a reserva.</small></div><div class="overview-indicators">${[
+    ['Receitas', t.income, 'green', 'Recebidas no mês'],
+    ['Despesas', t.operatingExpense, 'pink', 'Pagas no mês'],
+    ['Guardado', t.invested, 'purple', 'Reserva e investimentos'],
   ]
     .map(
-      ([label, amount, color]) =>
-        `<div><span>${label}</span><strong class="${color}">${money(amount)}</strong><small>${label === 'Guardado' ? 'Reserva e investimentos' : 'Confirmadas'}</small></div>`,
+      ([label, amount, color, note]) =>
+        `<div><span>${label}</span><strong class="${color}">${money(amount)}</strong><small>${note}</small></div>`,
     )
     .join(
       '',
-    )}</div><details class="competence-note"><summary>Como calculamos</summary><p>Resultado do mês: receitas menos despesas confirmadas, sem a reserva. Quanto sobrou: resultado menos Reserva e Investimentos, descontada uma única vez. Aportes em metas são independentes. Valores por competência, sem representar saldo bancário.</p></details></section>`;
+    )}</div><div class="overview-extra"><p><span>Antes de guardar</span><strong>${money(t.resultBeforeSaving)}</strong></p><p><span>Previsto até o fim do mês</span><strong>${money(t.forecast)}</strong></p></div><details class="competence-note"><summary>Como calculamos</summary><p>Quanto sobrou: receitas pagas menos despesas pagas; a reserva já está descontada. Antes de guardar: quanto sobraria sem a reserva. Previsto: receitas e despesas do mês, inclusive as que ainda não foram pagas ou recebidas. Aportes em metas são independentes. Valores por competência, sem representar saldo bancário.</p></details></section>`;
 }
 function monthlyBudget() {
   const b = overviewData(state, month).budget;
@@ -181,21 +179,39 @@ function recentTransactions() {
             return `<li><div><strong>${esc(e.name)}${e.seriesId ? ` · ${e.seriesIndex}/${e.seriesCount}` : ''}</strong><small>${dateName(e.date)}${status}</small></div><span class="${e.type === 'income' ? 'green' : 'pink'}">${e.type === 'income' ? '+' : '−'} ${money(e.amount)}</span></li>`;
           })
           .join('')}</ul>`
-      : `<div class="empty"><p>Comece pelo seu primeiro lançamento</p><button class="text-button" data-new-entry>${icon('plus')} Novo lançamento</button></div>`
+      : `<div class="empty"><p>Nenhum lançamento em ${esc(monthName().toLowerCase())}.</p><button class="text-button" data-new-entry>${icon('plus')} Novo lançamento</button></div>`
   }</section>`;
+}
+// Resumo de uma linha para a lista filtrada: mesmos valores de overviewBalance, sem o bloco grande.
+function compactSummary(selectedRows) {
+  const t = summaryTotals(state, month, selectedRows);
+  return `<section class="compact-summary" aria-label="Totais dos lançamentos listados"><p><span>Receitas</span><strong class="green">${money(t.income)}</strong></p><p><span>Despesas</span><strong class="pink">${money(t.operatingExpense)}</strong></p><p><span>Guardado</span><strong class="purple">${money(t.invested)}</strong></p><p><span>Quanto sobrou</span><strong class="${t.remainingAfterSaving < 0 ? 'pink' : 'green'}">${money(t.remainingAfterSaving)}</strong></p></section>`;
+}
+function hasFinanceData() {
+  return Boolean(state.entries.length || state.fixedAccounts?.length || state.goals?.length);
+}
+function welcomePanel() {
+  return `<section class="panel welcome-panel" aria-labelledby="welcome-title"><h2 id="welcome-title">Vamos começar</h2><p class="panel-subtitle">Três passos para entender seu mês com clareza.</p><ol class="welcome-steps"><li><div><strong>Registre uma receita ou despesa</strong><small>Leva menos de um minuto.</small></div><button class="primary" data-new-entry>${icon('plus')} Novo lançamento</button></li><li><div><strong>Defina limites por categoria</strong><small>Acompanhe quanto ainda pode gastar.</small></div><button class="secondary" data-view="budget">Planejar</button></li><li><div><strong>Cadastre contas que se repetem</strong><small>Aluguel, internet ou assinaturas.</small></div><button class="secondary" data-new-fixed>Nova conta fixa</button></li></ol></section>`;
 }
 function empty(message) {
   return `<div class="empty">${message}</div>`;
 }
 const actionIcon = icon;
-function row(e, full = false) {
+function row(e, full = false, grouped = false) {
   const c = category(e.categoryId),
     fixed = e.source === 'fixed';
+  const st = paymentStatus({
+    type: e.type,
+    paid: Boolean(e.paid),
+    partial: Boolean(!e.paid && e.paidAmount),
+    credit: isCreditMethod(state.methods.find((m) => m.id === e.paymentMethodId)),
+  });
+  const statusHtml = `<span class="status-pill status-${st.key}">${st.label}</span>${!e.paid && e.paidAmount ? `<span class="partial-detail">pago ${money(e.paidAmount)} · resta ${money(e.remainingAmount)}</span>` : ''}`;
   const source = fixed ? ' · Conta fixa' : e.seriesId ? ' · Série' : '';
   const date = e.paymentDate
     ? `${e.paid ? 'Pago' : 'Último pagamento'} em ${dateName(e.paymentDate)}`
     : dateName(e.date);
-  return `<article class="transaction"><span class="txn-icon ${e.type === 'income' ? 'income' : ''}" aria-hidden="true">${esc(c.icon)}</span><div class="txn-info"><strong>${esc(e.name)}${e.seriesId ? ` · ${e.seriesIndex}/${e.seriesCount}` : ''}</strong><small>${esc(c.name)}${!c.active ? ' · arquivada' : ''}${source}</small><small>${esc(method(e.paymentMethodId))} · ${date}</small>${e.observation ? `<p class="record-note">${esc(e.observation)}</p>` : ''}</div><div class="txn-amount ${e.type === 'income' ? 'green' : ''}">${e.type === 'income' ? '+' : '−'} ${money(e.amount)}<small>${e.paid ? paidWord(e) : e.paidAmount ? `Parcial · pago ${money(e.paidAmount)} · resta ${money(e.remainingAmount)}` : 'Pendente'}</small></div>${full ? `<div class="txn-actions">${fixed ? `<button data-fixed-action="${e.paid ? 'correct' : 'pay'}" data-id="${esc(e.accountId)}" aria-label="${e.paid ? 'Corrigir pagamento de' : 'Pagar'} ${esc(e.name)}" title="${e.paid ? 'Corrigir pagamento' : 'Pagar'}">${actionIcon(e.paid ? 'edit' : 'check')}</button><button data-fixed-action="details" data-id="${esc(e.accountId)}" aria-label="Detalhes de ${esc(e.name)}" title="Detalhes">${actionIcon('more')}</button>` : `<button data-entry-edit="${esc(e.id)}" aria-label="Editar ${esc(e.name)}" title="Editar">${actionIcon('edit')}</button><details class="row-menu"><summary aria-label="Mais ações de ${esc(e.name)}">${icon('more')}</summary><div class="row-menu-items"><button data-entry-copy="${esc(e.id)}">${icon('copy')}Copiar</button><button class="danger-action" data-entry-delete="${esc(e.id)}">${icon('trash')}Excluir</button></div></details>`}</div>` : ''}</article>`;
+  return `<article class="transaction"><span class="txn-icon ${e.type === 'income' ? 'income' : ''}" aria-hidden="true">${esc(c.icon)}</span><div class="txn-info"><strong>${esc(e.name)}${e.seriesId ? ` · ${e.seriesIndex}/${e.seriesCount}` : ''}</strong><small>${esc(c.name)}${!c.active ? ' · arquivada' : ''}${source} · ${esc(method(e.paymentMethodId))}${grouped ? '' : ' · ' + date}</small>${e.observation ? `<p class="record-note">${esc(e.observation)}</p>` : ''}</div><div class="txn-amount ${e.type === 'income' ? 'green' : ''}">${e.type === 'income' ? '+' : '−'} ${money(e.amount)}<small>${statusHtml}</small></div>${full ? `<div class="txn-actions">${fixed ? `<button data-fixed-action="${e.paid ? 'correct' : 'pay'}" data-id="${esc(e.accountId)}" aria-label="${e.paid ? 'Corrigir pagamento de' : 'Pagar'} ${esc(e.name)}" title="${e.paid ? 'Corrigir pagamento' : 'Pagar'}">${actionIcon(e.paid ? 'edit' : 'check')}</button><button data-fixed-action="details" data-id="${esc(e.accountId)}" aria-label="Detalhes de ${esc(e.name)}" title="Detalhes">${actionIcon('more')}</button>` : `<button data-entry-edit="${esc(e.id)}" aria-label="Editar ${esc(e.name)}" title="Editar">${actionIcon('edit')}</button><details class="row-menu"><summary aria-label="Mais ações de ${esc(e.name)}">${icon('more')}</summary><div class="row-menu-items"><button data-entry-copy="${esc(e.id)}">${icon('copy')}Copiar</button><button class="danger-action" data-entry-delete="${esc(e.id)}">${icon('trash')}Excluir</button></div></details>`}</div>` : ''}</article>`;
 }
 function distribution() {
   const list = state.categories
@@ -230,21 +246,52 @@ function chart() {
     points = (values) => values.map((v, i) => `${45 + i * 115},${170 - (v / max) * 135}`).join(' ');
   return `<div class="chart-legend"><span>● Entradas</span><span class="pink">● Saídas</span></div><svg class="line-chart" viewBox="0 0 550 210" role="img" aria-label="Entradas e saídas pagas agrupadas por semana da competência">${[35, 80, 125, 170].map((y) => `<line x1="40" y1="${y}" x2="520" y2="${y}" stroke="#302837" stroke-dasharray="4 5"/>`).join('')}<polyline points="${points(a)}" fill="none" stroke="#b7edce" stroke-width="2.5"/><polyline points="${points(b)}" fill="none" stroke="#efaab7" stroke-width="2.5"/>${[1, 2, 3, 4, 5].map((v, i) => `<text x="${45 + i * 115}" y="204" fill="#9e91ae" text-anchor="middle" font-size="11">${v}ª sem.</text>`).join('')}</svg><p class="muted">Valores confirmados por semana da competência.</p>`;
 }
-function budgetRows(compact = false) {
+function budgetItems() {
   const limits = budgetsFor(state, month);
-  let cats = state.categories.filter(
-    (c) => c.type === 'expense' && (c.active || spend(c.id) > 0 || limits[c.id] != null),
-  );
-  if (compact) cats = cats.sort((a, b) => spend(b.id) - spend(a.id)).slice(0, 3);
-  return cats
+  return state.categories
+    .filter((c) => c.type === 'expense' && (c.active || spend(c.id) > 0 || limits[c.id] != null))
     .map((c) => {
       const used = spend(c.id),
-        limit = limits[c.id],
-        defined = limit != null,
-        p = defined ? (limit ? Math.round((used / limit) * 100) : used ? 100 : 0) : 0;
-      return `<div class="budget-row"><div class="budget-line"><span>${esc(c.name)}${!c.active ? ' (arquivada)' : ''}</span><small>${money(used)} / ${defined ? money(limit) : 'Sem limite'}</small></div><div class="track"><div style="width:${Math.min(100, p)}%;background:${defined && used > limit ? 'var(--pink)' : 'var(--purple)'}"></div></div><div class="budget-foot"><span>${defined ? (used > limit ? `Excedeu ${money(used - limit)}` : `Restam ${money(limit - used)}`) : 'Defina um limite para acompanhar'}</span>${compact ? '' : `<button class="text-button" data-budget="${c.id}">${defined ? 'Ajustar limite' : 'Definir limite'}</button>`}</div></div>`;
-    })
-    .join('');
+        limit = limits[c.id] ?? null;
+      return { c, used, limit, status: budgetStatus(used, limit), p: budgetPercent(used, limit) };
+    });
+}
+function budgetCounts() {
+  const items = budgetItems();
+  const count = (key) => items.filter((i) => i.status.key === key).length;
+  return { total: items.length, none: count('none'), near: count('near'), over: count('over') };
+}
+function budgetRows() {
+  const items = budgetItems();
+  const withLimit = items.filter((i) => i.limit != null).sort((a, b) => b.p - a.p);
+  const withoutLimit = items.filter((i) => i.limit == null);
+  const withLimitHtml = withLimit.length
+    ? withLimit
+        .map(({ c, used, limit, status, p }) => {
+          const note =
+            used > limit ? `Excedeu ${money(used - limit)}` : `Restam ${money(limit - used)}`;
+          return `<div class="budget-row budget-${status.key}"><div class="budget-top"><span class="budget-name">${esc(c.name)}${!c.active ? ' (arquivada)' : ''}</span><span class="status-pill status-${status.key}">${status.label}</span></div><div class="track" aria-hidden="true"><div style="width:${Math.min(100, p)}%"></div></div><div class="budget-foot"><div><span><strong>${money(used)}</strong> de ${money(limit)} · ${p}%</span><small>${note}</small></div><button class="text-button" data-budget="${c.id}" aria-label="Editar limite de ${esc(c.name)}">Editar</button></div></div>`;
+        })
+        .join('')
+    : '<p class="muted">Nenhuma categoria com limite neste mês. Defina um limite abaixo para começar.</p>';
+  const withoutRow = ({ c, used }) =>
+    `<div class="budget-row budget-none"><span class="budget-name">${esc(c.name)}${!c.active ? ' (arquivada)' : ''}</span><span class="budget-spent">${money(used)}</span><button class="text-button" data-budget="${c.id}" aria-label="Definir limite de ${esc(c.name)}">Definir</button></div>`;
+  const spentWithout = withoutLimit.filter((i) => i.used > 0);
+  const unspentWithout = withoutLimit.filter((i) => i.used === 0);
+  const withoutHtml = withoutLimit.length
+    ? `<h3 class="budget-group-title">Sem limite</h3>${spentWithout.map(withoutRow).join('')}${unspentWithout.length ? `<details class="budget-more"><summary>${unspentWithout.length} categoria(s) sem gasto neste mês</summary>${unspentWithout.map(withoutRow).join('')}</details>` : ''}`
+    : '';
+  return `<h3 class="budget-group-title">Com limite</h3>${withLimitHtml}${withoutHtml}`;
+}
+function budgetPanel() {
+  const c = budgetCounts();
+  const summary = `${c.total - c.none} com limite · ${c.near} perto do limite · ${c.over} acima · ${c.none} sem limite`;
+  return panel(
+    'Orçamento por categoria',
+    `${summary}. Alterações valem somente para ${monthName().toLowerCase()}.`,
+    budgetRows(),
+    '<button class="text-button" id="copy-budget">Copiar mês anterior</button>',
+  );
 }
 function goals(compact = false) {
   const list = compact ? state.goals.slice(0, 2) : state.goals;
@@ -365,6 +412,20 @@ function transactionFilters() {
     .map(([v, t]) => option(v, t, filters.source))
     .join('')}</select></label></div></details><div id="transaction-list"></div>`;
 }
+// Agrupa a lista por dia (a lista já vem em ordem de data).
+function dayGroups(list) {
+  let html = '',
+    current = null;
+  for (const e of list) {
+    if (e.date !== current) {
+      if (current !== null) html += '</div>';
+      current = e.date;
+      html += `<div class="day-group"><h3 class="day-heading">${esc(dayLabel(e.date, today()))}</h3>`;
+    }
+    html += row(e, true, true);
+  }
+  return html + '</div>';
+}
 function renderTransactions() {
   const list = rows().filter(
     (e) =>
@@ -389,10 +450,15 @@ function renderTransactions() {
             .toLocaleLowerCase('pt-BR'),
         ),
   );
+  const filtersActive = Object.entries(filters).some(([key, value]) =>
+    key === 'query' ? value.trim() : value !== 'all',
+  );
   $('#transaction-list').innerHTML = list.length
-    ? list.map((e) => row(e, true)).join('')
-    : empty('Nenhum lançamento encontrado. Experimente outros filtros.');
-  $('#transaction-indicators').innerHTML = stats(list);
+    ? dayGroups(list)
+    : filtersActive || rows().length
+      ? empty('Nenhum lançamento com esses filtros. Ajuste a busca ou use Limpar.')
+      : `<div class="empty"><p>Nenhum lançamento em ${esc(monthName().toLowerCase())}.</p><button class="text-button" data-new-entry>${icon('plus')} Novo lançamento</button></div>`;
+  $('#transaction-indicators').innerHTML = compactSummary(list);
   const count = Object.entries(filters).filter(([key, value]) =>
     key === 'query' ? value.trim() : value !== 'all',
   ).length;
@@ -452,7 +518,8 @@ function render() {
     $('#content').innerHTML = errorPage();
     return;
   }
-  if (view === 'overview')
+  if (view === 'overview' && !hasFinanceData()) $('#content').innerHTML = welcomePanel();
+  else if (view === 'overview')
     $('#content').innerHTML =
       overviewBalance() +
       monthlyBudget() +
@@ -479,9 +546,8 @@ function render() {
   } else if (view === 'fixed') $('#content').innerHTML = fixedPage();
   else if (view === 'budget')
     $('#content').innerHTML =
-      stats() +
       monthlyBudget() +
-      `<div class="main-grid">${panel('Limite total do mês', 'Independente dos limites por categoria.', state.monthlyLimits?.[month] != null ? `<strong class="wealth-value">${money(state.monthlyLimits[month])}</strong>` : '<p class="muted">Nenhum limite total definido.</p>', '<button class="text-button" data-monthly-limit>Ajustar limite mensal</button>')}${panel('Orçamento por categoria', 'Limites de ' + monthName().toLowerCase() + '. Alterações valem somente para este mês.', budgetRows(), '<button class="text-button" id="copy-budget">Copiar mês anterior</button>')}</div>`;
+      `<div class="main-grid budget-grid">${panel('Limite total do mês', 'Independente dos limites por categoria.', state.monthlyLimits?.[month] != null ? `<strong class="wealth-value">${money(state.monthlyLimits[month])}</strong>` : '<p class="muted">Nenhum limite total definido.</p>', '<button class="text-button" data-monthly-limit>Ajustar limite mensal</button>')}${budgetPanel()}</div>`;
   else if (view === 'analysis')
     $('#content').innerHTML =
       stats() +

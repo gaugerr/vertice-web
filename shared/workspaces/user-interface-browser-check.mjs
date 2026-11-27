@@ -31,7 +31,7 @@ try {
   await page.goto(base);
   await ready();
   await go('finance');
-  await page.getByText('Comece pelo seu primeiro lançamento', { exact: true }).waitFor();
+  await page.getByRole('heading', { name: 'Vamos começar' }).waitFor();
   await clean();
   await page.locator('[data-new-entry]').click();
   const form = page.locator('#financial-form');
