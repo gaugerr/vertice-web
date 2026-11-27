@@ -1,20 +1,3 @@
-#finance-tabs button {
-  width: 25%;
-  min-width: 0;
-  flex: 1;
-}
-#finance-tabs button small {
-  max-width: 100%;
-  font-size: 10px;
-  text-align: center;
-  line-height: 1.3;
-}
-#finance-tabs {
-  align-items: stretch;
-}
-#finance-tabs button {
-  min-height: 61px;
-}
 .competence-note {
   font-size: 10px;
   color: #a698b5;
@@ -281,17 +264,6 @@ textarea {
   .catalog-row strong {
     font-size: 11px;
   }
-  #finance-tabs {
-    padding-left: 5px;
-    padding-right: 5px;
-  }
-  #finance-tabs button {
-    padding: 6px 2px;
-    min-height: 58px;
-  }
-  #finance-tabs button small {
-    font-size: 9px;
-  }
   .competence-note {
     font-size: 10px;
   }
@@ -312,9 +284,6 @@ textarea {
   }
   .fixed-summary small {
     font-size: 9px;
-  }
-  #finance-tabs button small {
-    font-size: 8px;
   }
   .txn-amount {
     font-size: 10px;
@@ -571,10 +540,6 @@ textarea {
   margin: 22px 0 12px;
 }
 @media (max-width: 360px) {
-  #finance-area[data-view='overview'] #new-entry {
-    padding: 12px 10px;
-    font-size: 11px;
-  }
 }
 
 .overview-balance {
@@ -693,13 +658,6 @@ textarea {
   .available-balance strong,
   .monthly-result strong {
     font-size: 22px;
-  }
-  #finance-area[data-view='overview'] #new-entry {
-    position: fixed;
-    right: 16px;
-    bottom: calc(85px + env(safe-area-inset-bottom));
-    z-index: 17;
-    box-shadow: 0 4px 20px #0006;
   }
   body.area-finance main#main {
     padding-bottom: 160px;

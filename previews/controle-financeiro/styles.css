@@ -849,9 +849,6 @@ form > label {
 .toast.visible {
   display: block;
 }
-.mobile-nav {
-  display: none;
-}
 .skip {
   position: absolute;
   top: -80px;
@@ -1106,39 +1103,6 @@ form > label {
   footer span {
     display: block;
     margin-top: 5px;
-  }
-  .mobile-nav {
-    position: fixed;
-    bottom: 0;
-    left: 0;
-    right: 0;
-    z-index: 5;
-    display: flex;
-    background: #17131ff5;
-    border-top: 1px solid #393044;
-    backdrop-filter: blur(12px);
-    padding: 8px 12px max(8px, env(safe-area-inset-bottom));
-  }
-  .mobile-nav button {
-    display: flex;
-    flex-direction: column;
-    gap: 4px;
-    align-items: center;
-    justify-content: center;
-    text-align: center;
-    font-size: 20px;
-    width: 25%;
-    padding: 7px 2px;
-    margin: 0;
-    border-radius: 7px;
-  }
-  .mobile-nav button small {
-    font-size: 9px;
-  }
-  .mobile-nav button.active {
-    box-shadow: none;
-    color: #d1bcfa;
-    background: #32243f;
   }
   .toast {
     bottom: 85px;

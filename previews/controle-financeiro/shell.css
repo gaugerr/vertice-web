@@ -139,42 +139,6 @@ body.area-shopping main#main {
   color: #8e809d;
   margin-top: 19px;
 }
-#finance-tabs {
-  display: flex;
-  position: fixed;
-  bottom: 0;
-  left: 50%;
-  transform: translateX(-50%);
-  width: min(680px, 100%);
-  z-index: 16;
-  background: #1c1525f5;
-  border: 1px solid #4b3a5f;
-  border-bottom: 0;
-  border-radius: 15px 15px 0 0;
-  backdrop-filter: blur(16px);
-  padding: 8px 12px max(8px, env(safe-area-inset-bottom));
-}
-#finance-tabs button {
-  display: flex;
-  flex-direction: column;
-  gap: 4px;
-  align-items: center;
-  justify-content: center;
-  text-align: center;
-  font-size: 21px;
-  width: 25%;
-  padding: 8px 2px;
-  margin: 0;
-  border-radius: 8px;
-}
-#finance-tabs button small {
-  font-size: 10px;
-}
-#finance-tabs button.active {
-  box-shadow: none;
-  color: #d7c5ff;
-  background: #372745;
-}
 #settings-area .secondary {
   margin-top: 22px;
 }
@@ -235,17 +199,6 @@ main#main:focus {
   }
   .page-heading .primary {
     margin-top: 20px;
-  }
-  #finance-tabs {
-    border-radius: 0;
-    border-left: 0;
-    border-right: 0;
-  }
-  #finance-tabs button {
-    padding: 7px 1px;
-  }
-  #finance-tabs button small {
-    font-size: 9px;
   }
   .sample {
     display: none;

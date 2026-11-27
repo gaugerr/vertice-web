@@ -434,9 +434,10 @@ function render() {
     b.classList.toggle('active', active);
     b.setAttribute('aria-pressed', String(active));
   });
-  $('#new-entry').textContent =
+  const newEntryLabel =
     view === 'fixed' ? 'Nova conta fixa' : view === 'goals' ? 'Nova meta' : 'Novo lançamento';
-  $('#new-entry').innerHTML = icon('plus') + $('#new-entry').textContent;
+  $('#new-entry').innerHTML = icon('plus') + `<span class="btn-label">${newEntryLabel}</span>`;
+  $('#new-entry').setAttribute('aria-label', newEntryLabel);
   $('#new-entry').disabled = Boolean(loadError);
   document.querySelectorAll('[data-catalog]').forEach((b) => (b.disabled = Boolean(loadError)));
   document.querySelectorAll('#finance-tabs [data-view]').forEach((b) => {
@@ -487,7 +488,7 @@ function render() {
       monthComparison();
   else if (view === 'more')
     $('#content').innerHTML =
-      `<section class="panel more-links" aria-label="Mais opções do financeiro"><button data-view="wallets">${icon('wallet')}Contas bancárias e saldos ${icon('right')}</button><button data-settings-section="workspace-settings">${icon('people')}Conta e compartilhamento ${icon('right')}</button><button data-catalog="methods">${icon('card')}Formas de pagamento ${icon('right')}</button><button data-view="wealth">${icon('target')}Patrimônio ${icon('right')}</button><button data-catalog="categories">${icon('category')}Categorias ${icon('right')}</button><button data-settings-section="settings-area">${icon('settings')}Configurações e backups ${icon('right')}</button></section>`;
+      `<section class="panel more-links" aria-label="Mais opções do financeiro"><button data-view="wallets">${icon('wallet')}Contas e saldos ${icon('right')}</button><button data-settings-section="workspace-settings">${icon('people')}Conta e compartilhamento ${icon('right')}</button><button data-catalog="methods">${icon('card')}Formas de pagamento ${icon('right')}</button><button data-view="wealth">${icon('target')}Patrimônio ${icon('right')}</button><button data-catalog="categories">${icon('category')}Categorias ${icon('right')}</button><button data-settings-section="settings-area">${icon('settings')}Configurações e backups ${icon('right')}</button></section>`;
   else if (view === 'wallets') $('#content').innerHTML = walletsPage();
   else if (view === 'wealth')
     $('#content').innerHTML =
@@ -519,10 +520,10 @@ function field(label, name, value = '', type = 'text', extra = '') {
   return `<label class="field-${name}">${label}<input name="${name}" type="${type}" value="${esc(value)}" ${extra}></label>`;
 }
 function categoryField(current, type) {
-  return `<label>Categoria<select name="categoryId" required data-current="${esc(current || '')}" data-category-type="${type}">${catalogOptions('categories', current, type)}</select></label><button type="button" class="text-button manage-link" data-catalog="categories" aria-label="Gerenciar categorias" title="Gerenciar categorias">${icon('settings')}</button>`;
+  return `<label>Categoria<select name="categoryId" required data-current="${esc(current || '')}" data-category-type="${type}">${catalogOptions('categories', current, type)}</select></label><button type="button" class="text-button manage-link" data-catalog="categories" aria-label="Gerenciar categorias" title="Gerenciar categorias">${icon('settings')}Gerenciar</button>`;
 }
 function methodField(current, type = 'expense', allowUnknown = false) {
-  return `<label>${type === 'income' ? 'Forma de recebimento' : 'Forma de pagamento'}<select name="paymentMethodId" ${allowUnknown ? '' : 'required'} data-current="${esc(current || '')}">${catalogOptions('methods', current, undefined, !allowUnknown)}</select></label><button type="button" class="text-button manage-link" data-catalog="methods" aria-label="Gerenciar formas de pagamento" title="Gerenciar formas de pagamento">${icon('settings')}</button>`;
+  return `<label>${type === 'income' ? 'Forma de recebimento' : 'Forma de pagamento'}<select name="paymentMethodId" ${allowUnknown ? '' : 'required'} data-current="${esc(current || '')}">${catalogOptions('methods', current, undefined, !allowUnknown)}</select></label><button type="button" class="text-button manage-link" data-catalog="methods" aria-label="Gerenciar formas de pagamento" title="Gerenciar formas de pagamento">${icon('settings')}Gerenciar</button>`;
 }
 const noteField = (value) =>
   `<label>Observação <span class="muted">(opcional)</span><textarea name="observation" rows="2" maxlength="1000">${esc(value || '')}</textarea></label>`;

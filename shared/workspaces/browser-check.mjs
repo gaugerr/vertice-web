@@ -13,7 +13,7 @@ import assert from 'node:assert/strict';
   const base = process.env.PREVIEW_URL ?? 'http://127.0.0.1:5195/';
   const ready = (p) => p.locator('html[data-workspace-ready=true]').waitFor({ state: 'attached' });
   const select = async (p, id) => {
-    await p.getByRole('button', { name: 'Abrir menu de áreas' }).click();
+    await p.getByRole('button', { name: 'Abrir menu' }).click();
     await Promise.all([
       p.waitForNavigation({ waitUntil: 'domcontentloaded' }),
       p.locator('#workspace-selector').selectOption(id),
@@ -22,12 +22,10 @@ import assert from 'node:assert/strict';
   };
   const go = async (p, area) => {
     await ready(p);
-    await p.getByRole('button', { name: 'Abrir menu de áreas' }).click();
     if (area === 'settings') {
-      await p.locator('[data-finance-view=more]').click();
-      await p.locator('[data-settings-section=settings-area]').click();
-    } else
-      await p.locator(`#app-menu nav[aria-label="Áreas do Vértice"] [data-area=${area}]`).click();
+      await p.getByRole('button', { name: 'Abrir menu' }).click();
+      await p.locator('#menu-settings').click();
+    } else await p.locator(`.area-switch [data-area=${area}]`).click();
   };
   const save = async (p) => p.locator('#financial-form button[type=submit]').click();
   try {
@@ -95,7 +93,7 @@ import assert from 'node:assert/strict';
       .locator('#transaction-list')
       .getByText('Despesa do casal', { exact: true })
       .waitFor();
-    assert.match(await owner.locator('.stats').textContent(), /60,00/);
+    assert.match(await owner.locator('#transaction-indicators').textContent(), /60,00/);
     await guest.evaluate(() =>
       localStorage.setItem('vertice_demo_offline_22222222-2222-4222-8222-222222222222', 'true'),
     );
@@ -124,7 +122,7 @@ import assert from 'node:assert/strict';
       .locator('#workspace-selector option')
       .filter({ hasText: 'Meu espaço' })
       .getAttribute('value');
-    await owner.getByRole('button', { name: 'Abrir menu de áreas' }).click();
+    await owner.getByRole('button', { name: 'Abrir menu' }).click();
     await owner.locator('#workspace-selector').selectOption(personalId);
     await owner.locator('#workspace-menu-message').filter({ hasText: 'Salve ou feche' }).waitFor();
     await owner.locator('#menu-close').click();

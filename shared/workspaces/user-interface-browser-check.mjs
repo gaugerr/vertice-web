@@ -14,16 +14,10 @@ try {
   const ready = () =>
     page.locator('html[data-workspace-ready=true]').waitFor({ state: 'attached' });
   const go = async (area) => {
-    await page.getByRole('button', { name: 'Abrir menu de áreas' }).click();
     if (area === 'settings') {
-      await page.locator('[data-finance-view=more]').click();
-      await page.locator('[data-settings-section=settings-area]').click();
-    } else
-      await page
-        .locator(
-          `#app-menu nav[aria-label="Áreas do Vértice"] [data-area=${area}]:not([data-finance-view])`,
-        )
-        .click();
+      await page.getByRole('button', { name: 'Abrir menu' }).click();
+      await page.locator('#menu-settings').click();
+    } else await page.locator(`.area-switch [data-area=${area}]`).click();
   };
   const clean = async () => {
     assert.doesNotMatch(

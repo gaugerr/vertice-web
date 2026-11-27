@@ -22,7 +22,7 @@
       <button
         class="menu-toggle"
         id="menu-toggle"
-        aria-label="Abrir menu de áreas"
+        aria-label="Abrir menu"
         aria-controls="app-menu"
         aria-expanded="false"
       >
@@ -67,9 +67,25 @@
       </div>
     </header>
     <div class="area-strip">
-      <button id="area-shortcut" aria-label="Trocar área pelo menu">Compras <span>⌄</span></button
-      ><span aria-hidden="true">/</span><span id="current-screen">Minhas listas</span>
+      <div class="area-switch" role="group" aria-label="Área do Vértice">
+        <button id="area-shopping" data-area="shopping" aria-pressed="true">Compras</button
+        ><button id="area-finance" data-area="finance" aria-pressed="false">Financeiro</button>
+      </div>
+      <span aria-hidden="true">/</span><span id="current-screen">Minhas listas</span>
     </div>
+    <nav hidden id="finance-tabs" class="section-nav" aria-label="Seções do financeiro">
+      <button data-view="overview" class="active">
+        <span data-icon="home"></span><small>Resumo</small>
+      </button>
+      <button data-view="transactions">
+        <span data-icon="arrows"></span><small>Lançamentos</small>
+      </button>
+      <button data-view="planning">
+        <span data-icon="planning"></span><small>Planejamento</small>
+      </button>
+      <button data-view="analysis"><span data-icon="chart"></span><small>Análises</small></button>
+      <button data-view="more"><span data-icon="more"></span><small>Mais</small></button>
+    </nav>
 
     <p id="workspace-message" role="status"></p>
     <main id="main">
@@ -178,18 +194,6 @@
         </div>
       </section>
     </main>
-    <nav hidden id="finance-tabs" class="mobile-nav" aria-label="Navegação móvel">
-      <button data-view="overview" class="active">
-        <span data-icon="home"></span><small>Resumo</small>
-      </button>
-      <button data-view="transactions">
-        <span data-icon="arrows"></span><small>Lançamentos</small>
-      </button>
-      <button data-view="planning">
-        <span data-icon="planning"></span><small>Planejamento</small>
-      </button>
-      <button data-view="analysis"><span data-icon="chart"></span><small>Análises</small></button>
-    </nav>
     <dialog id="app-menu" class="area-drawer">
       <div class="drawer-head">
         <div class="brand">
@@ -199,11 +203,9 @@
           <span data-icon="close"></span>
         </button>
       </div>
-      <nav aria-label="Áreas do Vértice">
-        <button data-area="shopping"><span data-icon="shopping"></span><span>Compras</span></button
-        ><button data-area="finance"><span data-icon="chart"></span><span>Financeiro</span></button
-        ><button data-area="finance" data-finance-view="more">
-          <span data-icon="more"></span><span>Mais</span>
+      <nav aria-label="Conta e dados">
+        <button type="button" id="menu-settings">
+          <span data-icon="settings"></span><span>Configurações e backups</span>
         </button>
       </nav>
       <div class="workspace-bar">

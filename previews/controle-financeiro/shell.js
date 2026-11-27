@@ -20,12 +20,11 @@ import { financeTitles, financeRoute, financeView } from './finance-navigation.m
     toggle.setAttribute('aria-expanded', 'false');
   };
   function breadcrumb() {
-    document
-      .getElementById('area-shortcut')
-      .replaceChildren(
-        document.createTextNode(names[area] + ' '),
-        Object.assign(document.createElement('span'), { textContent: '⌄' }),
-      );
+    for (const b of document.querySelectorAll('.area-switch [data-area]')) {
+      const active = b.dataset.area === area;
+      b.classList.toggle('active', active);
+      b.setAttribute('aria-pressed', String(active));
+    }
     document.getElementById('current-screen').textContent =
       area === 'finance'
         ? screens[financialView]
@@ -49,16 +48,6 @@ import { financeTitles, financeRoute, financeView } from './finance-navigation.m
         if (active) b.setAttribute('aria-current', 'page');
         else b.removeAttribute('aria-current');
       });
-    menu.querySelectorAll('[data-area]').forEach((b) => {
-      const active =
-        b.dataset.area === next &&
-        (b.dataset.financeView
-          ? b.dataset.financeView === financialView
-          : next !== 'finance' || !['analysis', 'wealth'].includes(financialView));
-      b.classList.toggle('active', active);
-      if (active) b.setAttribute('aria-current', 'page');
-      else b.removeAttribute('aria-current');
-    });
     breadcrumb();
     requestAnimationFrame(resizeShoppingFrame);
     if (save) {
@@ -129,23 +118,16 @@ import { financeTitles, financeRoute, financeView } from './finance-navigation.m
     }
   });
   toggle.addEventListener('click', openMenu);
-  document.getElementById('area-shortcut').addEventListener('click', openMenu);
+  document.querySelector('.area-switch').addEventListener('click', (e) => {
+    const b = e.target.closest('[data-area]');
+    if (b) navigate(b.dataset.area);
+  });
   document.getElementById('menu-close').addEventListener('click', closeMenu);
+  // Único acesso às configurações quando a barra de seções está oculta (espaço bloqueado).
+  document.getElementById('menu-settings').addEventListener('click', () => navigate('settings'));
   menu.addEventListener('close', () => toggle.setAttribute('aria-expanded', 'false'));
   menu.addEventListener('click', (e) => {
-    const b = e.target.closest('[data-area]');
-    if (b) {
-      if (
-        b.dataset.financeView ||
-        (b.dataset.area === 'finance' && ['analysis', 'wealth'].includes(financialView))
-      ) {
-        financialView = b.dataset.financeView || 'overview';
-        window.dispatchEvent(
-          new CustomEvent('vertice:finance-navigate', { detail: { view: financialView } }),
-        );
-      }
-      navigate(b.dataset.area);
-    } else if (e.target === menu) closeMenu();
+    if (e.target === menu) closeMenu();
   });
   window.addEventListener('vertice:finance-view', (e) => {
     const changed = financialView !== e.detail.view;
