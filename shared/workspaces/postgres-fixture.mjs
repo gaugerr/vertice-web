@@ -65,6 +65,7 @@ export function postgresFixture(container) {
           'service_role',
         ),
       ),
+    query: (text) => sql(text),
     close: () => docker(['dropdb', '-U', 'postgres', name]),
   };
 }

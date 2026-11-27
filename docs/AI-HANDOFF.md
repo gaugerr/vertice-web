@@ -35,8 +35,10 @@ abaixo que citam cartões ou faturas descrevem o estado anterior e estão marcad
 - **Validação:** `npm test` cobre domínio, mapeamento e importação de backup legado
   (`previews/controle-financeiro/*.test.mjs` via `node --test`, e `shared/workspaces`). As
   suítes PostgreSQL (`shared/workspaces/ledger-postgres.test.mjs`, `postgres.test.mjs`,
-  `tools/test-workspaces-db.mjs`) exigem `POSTGRES_CONTAINER` isolado com Docker e ficam
-  puladas sem ele. Não foi aplicada em nenhum banco remoto.
+  `tools/test-workspaces-db.mjs`) exigem `POSTGRES_CONTAINER` isolado e ficam puladas sem ele.
+  Executadas em 27/11/2026 contra PostgreSQL 18.6 local e descartável (socket Unix, sem
+  Supabase), com o shim de `docker` apenas para o acesso ao container. Não foi aplicada em
+  nenhum banco remoto.
 
 ## Reformulação visual — 12/11/2026
 
