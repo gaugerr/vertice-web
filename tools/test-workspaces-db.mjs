@@ -24,6 +24,41 @@ assert.equal(
   ).length,
   0,
 );
+// As migrations do Cakto criam a extensão http, ausente na imagem postgres:17-alpine.
+// Sem a extensão real, instala o stub de tools/postgres-stubs (só tipos e assinaturas, sem HTTP).
+const hasHttp =
+  docker([
+    'exec',
+    container,
+    'psql',
+    '-X',
+    '-t',
+    '-A',
+    '-U',
+    'postgres',
+    '-d',
+    'postgres',
+    '-c',
+    "select count(*) from pg_available_extensions where name = 'http'",
+  ]) === '1';
+if (!hasHttp) {
+  const stubs = new URL('./postgres-stubs/', import.meta.url);
+  for (const file of ['http.control', 'http--1.0.sql']) {
+    docker(
+      [
+        'exec',
+        '-i',
+        '-u',
+        'root',
+        container,
+        'sh',
+        '-c',
+        `cat > /usr/local/share/postgresql/extension/${file}`,
+      ],
+      readFileSync(new URL(file, stubs), 'utf8'),
+    );
+  }
+}
 const database = 'workspace_test_' + randomUUID().replaceAll('-', '');
 docker(['exec', container, 'createdb', '-U', 'postgres', database]);
 let checks = 0;

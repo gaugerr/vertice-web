@@ -1,0 +1,3 @@
+comment = 'STUB de teste para a extensão http: apenas tipos e assinaturas, sem HTTP real. Não usar fora de testes descartáveis.'
+default_version = '1.0'
+relocatable = false

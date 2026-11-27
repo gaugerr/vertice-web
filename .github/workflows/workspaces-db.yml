@@ -6,12 +6,14 @@ on:
       - 'supabase/migrations/**'
       - 'tools/test-workspaces-db.mjs'
       - 'tools/sql/access-fingerprint.sql'
+      - 'tools/postgres-stubs/**'
       - '.github/workflows/workspaces-db.yml'
   pull_request:
     paths:
       - 'supabase/migrations/**'
       - 'tools/test-workspaces-db.mjs'
       - 'tools/sql/access-fingerprint.sql'
+      - 'tools/postgres-stubs/**'
       - '.github/workflows/workspaces-db.yml'
 permissions:
   contents: read
