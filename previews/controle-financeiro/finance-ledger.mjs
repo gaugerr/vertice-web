@@ -5,6 +5,8 @@ import {
   dueDate,
   adjacentMonth,
   saveEntry,
+  isCreditEntry,
+  isCreditMethodId,
 } from './finance-domain.mjs';
 const fail = (message) => {
   throw Error(message);
@@ -52,16 +54,34 @@ export function saveMove(s, m) {
   if (m.date < target.openingDate) fail('Confira a data do saldo inicial da conta de destino.');
   s.moves = (s.moves ?? []).filter((x) => x.id !== m.id).concat({ ...m });
 }
-export function saveLedgerEntry(s, e, { mode = 'single', count = 1 } = {}) {
+// Atomicidade local: a mudança roda numa cópia e só substitui o estado se tudo validar.
+// As séries tocadas são validadas pelo tipo: installments exige sequência completa; repeat
+// exige identidade e posições válidas, aceitando lacunas. Dados antigos fora da operação não
+// são revalidados aqui.
+function atomic(s, change, { seriesId, kind } = {}) {
+  const next = structuredClone(s);
+  const result = change(next);
+  validateLedger(next);
+  if (seriesId && kind === 'installments') validateSeriesSequence(next, seriesId);
+  if (seriesId && kind === 'repeat') validateRepeatSeries(next, seriesId);
+  for (const key of Object.keys(s)) delete s[key];
+  Object.assign(s, next);
+  return result;
+}
+const brl = (cents) =>
+  new Intl.NumberFormat('pt-BR', { style: 'currency', currency: 'BRL' }).format(cents / 100);
+const seriesMembers = (s, seriesId, kind) =>
+  s.entries
+    .filter((e) => e.seriesId === seriesId && (!kind || e.seriesKind === kind))
+    .sort((a, b) => a.seriesIndex - b.seriesIndex);
+// Criação de lançamento. Crédito: todas as ocorrências reconhecidas e sem conta.
+export function saveLedgerEntry(s, e, { mode = 'single', count = 1, removeWallet = false } = {}) {
   const old = s.entries.find((x) => x.id === e.id);
   if (e.walletId) {
     const w = getWallet(s, e.walletId);
     if (!w.active && old?.walletId !== w.id) fail('Escolha uma conta ativa.');
   }
-  if (old || mode === 'single') {
-    saveEntry(s, e);
-    return;
-  }
+  if (old || mode === 'single') return saveEntry(s, e, { removeWallet });
   if (
     !['installments', 'repeat'].includes(mode) ||
     !Number.isInteger(count) ||
@@ -71,13 +91,17 @@ export function saveLedgerEntry(s, e, { mode = 'single', count = 1 } = {}) {
     fail('Informe de 2 a 120 parcelas ou repetições.');
   if (mode === 'installments' && e.amount < count)
     fail('Cada parcela precisa ter ao menos um centavo.');
+  const credit = isCreditEntry(e);
+  if (credit && e.walletId) fail('Crédito não movimenta carteira. Remova a conta do lançamento.');
   const day = Number(e.date.slice(8));
   let month = e.date.slice(0, 7);
   const planned = [];
   for (let i = 0; i < count; i++) {
     if (!month || !validMonth(month)) fail('Período fora do intervalo permitido.');
+    const withoutWallet = { ...e };
+    delete withoutWallet.walletId;
     planned.push({
-      ...e,
+      ...(credit ? withoutWallet : e),
       id: e.id + ':' + i,
       seriesId: e.id,
       seriesKind: mode,
@@ -88,28 +112,209 @@ export function saveLedgerEntry(s, e, { mode = 'single', count = 1 } = {}) {
           ? e.amount
           : Math.floor(e.amount / count) + (i < e.amount % count ? 1 : 0),
       date: dueDate(month, day),
-      paid: i === 0 && e.paid,
+      paid: credit ? true : i === 0 && e.paid,
     });
     month = adjacentMonth(month, 1);
   }
-  for (const item of planned) saveEntry(s, item);
+  atomic(
+    s,
+    (n) => {
+      if (planned.some((item) => n.entries.some((x) => x.id === item.id)))
+        fail('Já existe um lançamento com este identificador.');
+      for (const item of planned) saveEntry(n, item);
+    },
+    { seriesId: e.id, kind: mode },
+  );
+  return null;
 }
+// Remove parcelas e renumera as restantes (1..M), mantendo IDs. Se restar uma só, ela vira
+// lançamento avulso: mesmo id e dados financeiros, sem metadados de série. Nada é recriado.
+function removeInstallments(n, ids) {
+  if (!ids.length) return;
+  const seriesId = n.entries.find((e) => ids.includes(e.id))?.seriesId;
+  const rest = n.entries.filter((e) => !ids.includes(e.id));
+  const members = rest
+    .filter((e) => e.seriesId === seriesId && e.seriesKind === 'installments')
+    .sort((a, b) => a.seriesIndex - b.seriesIndex);
+  if (members.length === 1) {
+    for (const key of ['seriesId', 'seriesKind', 'seriesIndex', 'seriesCount'])
+      delete members[0][key];
+  } else
+    members.forEach((m, i) => {
+      m.seriesIndex = i + 1;
+      m.seriesCount = members.length;
+    });
+  n.entries = rest;
+}
+// Exclusão de um lançamento. Parcela: remove e renumera. Repetição e avulso: remove sem renumerar.
 export function deleteLedgerEntry(s, id) {
-  s.entries = s.entries.filter((x) => x.id !== id);
+  const target = s.entries.find((x) => x.id === id);
+  atomic(
+    s,
+    (n) => {
+      if (target?.seriesKind === 'installments') removeInstallments(n, [id]);
+      else n.entries = n.entries.filter((x) => x.id !== id);
+    },
+    { seriesId: target?.seriesId, kind: target?.seriesKind },
+  );
 }
-export function stopSeries(s, id) {
+// "Esta e as seguintes" (somente parcelas): remove a escolhida e as posteriores.
+export function deleteInstallmentsFrom(s, id) {
+  const source = s.entries.find((e) => e.id === id);
+  if (source?.seriesKind !== 'installments') fail('Esta ação vale só para parcelas.');
+  atomic(
+    s,
+    (n) => {
+      const current = n.entries.find((e) => e.id === id);
+      const ids = seriesMembers(n, current.seriesId, 'installments')
+        .filter((e) => e.seriesIndex >= current.seriesIndex)
+        .map((e) => e.id);
+      removeInstallments(n, ids);
+    },
+    { seriesId: source.seriesId, kind: 'installments' },
+  );
+}
+// "Série inteira" (somente parcelas): remove todas as parcelas.
+export function deleteInstallmentSeries(s, id) {
+  const source = s.entries.find((e) => e.id === id);
+  if (source?.seriesKind !== 'installments') fail('Esta ação vale só para parcelas.');
+  atomic(
+    s,
+    (n) => {
+      n.entries = n.entries.filter((e) => e.seriesId !== source.seriesId);
+    },
+    { seriesId: source.seriesId, kind: 'installments' },
+  );
+}
+// Ocorrências de repeat com crédito: remove só as com data estritamente posterior a hoje,
+// a partir da posição escolhida. Preserva as lançadas (inclusive as de hoje). Sem renumeração.
+export function repeatCreditStopPlan(s, id, today) {
+  if (!validDate(today)) fail('Informe a data de hoje para encerrar.');
   const source = s.entries.find((e) => e.id === id);
   if (!source?.seriesId) fail('Série não encontrada.');
-  const removable = s.entries.filter(
-    (e) =>
-      e.seriesId === source.seriesId &&
-      e.seriesIndex >= source.seriesIndex &&
-      !e.paid &&
-      !e.paidAmount,
+  const members = seriesMembers(s, source.seriesId, 'repeat').filter(
+    (e) => e.seriesIndex >= source.seriesIndex,
   );
-  if (!removable.length) fail('Não há parcelas ou repetições em aberto para excluir.');
-  const ids = new Set(removable.map((e) => e.id));
-  s.entries = s.entries.filter((e) => !ids.has(e.id));
+  return {
+    removeIds: members.filter((e) => e.date > today).map((e) => e.id),
+    preservedIds: members.filter((e) => e.date <= today).map((e) => e.id),
+  };
+}
+// Encerramento de repetições. Parcelas não têm encerramento: usam as exclusões aprovadas.
+// Repeat com crédito: regra de data. Repeat sem crédito: comportamento atual, sem renumerar.
+export function stopSeries(s, id, { today } = {}) {
+  const source = s.entries.find((e) => e.id === id);
+  if (!source?.seriesId) fail('Série não encontrada.');
+  if (source.seriesKind === 'installments')
+    fail('Parcelas se excluem por "esta parcela", "esta e as seguintes" ou "série inteira".');
+  const seriesId = source.seriesId;
+  if (isCreditEntry(source)) {
+    const plan = repeatCreditStopPlan(s, id, today);
+    if (!plan.removeIds.length) fail('Não há ocorrências futuras para encerrar.');
+    atomic(
+      s,
+      (n) => {
+        n.entries = n.entries.filter((e) => !plan.removeIds.includes(e.id));
+      },
+      { seriesId, kind: 'repeat' },
+    );
+    return { removed: plan.removeIds.length, preserved: plan.preservedIds.length };
+  }
+  atomic(
+    s,
+    (n) => {
+      const removable = n.entries.filter(
+        (e) =>
+          e.seriesId === seriesId &&
+          e.seriesIndex >= source.seriesIndex &&
+          !e.paid &&
+          !e.paidAmount,
+      );
+      if (!removable.length) fail('Não há parcelas ou repetições em aberto para excluir.');
+      const ids = new Set(removable.map((e) => e.id));
+      n.entries = n.entries.filter((e) => !ids.has(e.id));
+    },
+    { seriesId, kind: 'repeat' },
+  );
+  return undefined;
+}
+// Plano da alteração de total. Crédito: redistribui entre todas. Demais: preserva pagas e
+// redistribui o saldo entre as não pagas. Não grava: serve de prévia.
+export function installmentTotalPlan(s, id, total) {
+  amount(total);
+  const source = s.entries.find((e) => e.id === id);
+  if (source?.seriesKind !== 'installments') fail('Alteração de total vale só para parcelas.');
+  const members = seriesMembers(s, source.seriesId, 'installments');
+  const credit = isCreditEntry(source);
+  const fixed = credit ? [] : members.filter((m) => m.paid);
+  const open = credit ? members : members.filter((m) => !m.paid);
+  const paidSum = fixed.reduce((n, m) => n + m.amount, 0);
+  if (!credit && total <= paidSum)
+    fail(`O novo total (${brl(total)}) não cobre o valor já pago (${brl(paidSum)}).`);
+  if (!open.length)
+    fail(`Não há parcelas não pagas para receber o saldo de ${brl(total - paidSum)}.`);
+  const rest = total - (credit ? 0 : paidSum);
+  if (rest < open.length) fail('Cada parcela não paga precisa de pelo menos R$ 0,01.');
+  const base = Math.floor(rest / open.length),
+    extra = rest % open.length;
+  const next = new Map(open.map((m, i) => [m.id, base + (i < extra ? 1 : 0)]));
+  return members.map((m) => ({
+    id: m.id,
+    seriesIndex: m.seriesIndex,
+    paid: m.paid,
+    from: m.amount,
+    to: next.get(m.id) ?? m.amount,
+  }));
+}
+export function updateInstallmentTotal(s, id, total) {
+  const seriesId = s.entries.find((e) => e.id === id)?.seriesId;
+  atomic(
+    s,
+    (n) => {
+      const plan = installmentTotalPlan(n, id, total);
+      for (const row of plan) n.entries.find((e) => e.id === row.id).amount = row.to;
+    },
+    { seriesId, kind: 'installments' },
+  );
+}
+// Parcelas: posições contíguas 1..M, seriesCount = M, ids seriesId:sufixo sem duplicata.
+// Com seriesId, valida só essa série; sem ele, todas as parcelas.
+export function validateSeriesSequence(s, seriesId) {
+  const groups = new Map();
+  for (const e of s.entries) {
+    if (e.seriesKind !== 'installments' || (seriesId && e.seriesId !== seriesId)) continue;
+    if (!groups.has(e.seriesId)) groups.set(e.seriesId, []);
+    groups.get(e.seriesId).push(e);
+  }
+  for (const [sid, members] of groups) {
+    const sorted = [...members].sort((a, b) => a.seriesIndex - b.seriesIndex);
+    sorted.forEach((m, i) => {
+      if (m.seriesIndex !== i + 1 || m.seriesCount !== sorted.length)
+        fail('Sequência de parcelas inconsistente.');
+      if (!m.id.startsWith(sid + ':')) fail('Identificador de parcela inconsistente.');
+    });
+    if (new Set(members.map((m) => m.id)).size !== members.length)
+      fail('Parcela duplicada na série.');
+  }
+}
+// Repetições: mesma identidade e mesma contagem em todas as ocorrências; posições únicas e
+// dentro de 1..seriesCount. Lacunas são aceitas, como no comportamento atual.
+export function validateRepeatSeries(s, seriesId) {
+  const groups = new Map();
+  for (const e of s.entries) {
+    if (e.seriesKind !== 'repeat' || (seriesId && e.seriesId !== seriesId)) continue;
+    if (!groups.has(e.seriesId)) groups.set(e.seriesId, []);
+    groups.get(e.seriesId).push(e);
+  }
+  for (const [sid, members] of groups) {
+    const count = members[0].seriesCount;
+    if (members.some((m) => m.seriesCount !== count)) fail('Série de repetição inconsistente.');
+    const indexes = members.map((m) => m.seriesIndex);
+    if (new Set(indexes).size !== indexes.length || indexes.some((i) => i < 1 || i > count))
+      fail('Posições de repetição inconsistentes.');
+    if (members.some((m) => !m.id.startsWith(sid + ':')))
+      fail('Identificador de repetição inconsistente.');
+  }
 }
 export function saveMonthlyLimit(s, month, limit) {
   if (
@@ -140,6 +345,15 @@ export function walletBalance(s, id, at) {
   return balance;
 }
 export function validateLedger(s) {
+  // Conta fixa de crédito é reconhecida automaticamente: não pode ter pagamento registrado.
+  for (const [key, record] of Object.entries(s.occurrences ?? {})) {
+    if (!record?.payment) continue;
+    const at = key.lastIndexOf(':');
+    const account = (s.fixedAccounts ?? []).find((a) => a.id === key.slice(0, at));
+    const version = account?.versions?.filter((v) => v.from <= key.slice(at + 1)).at(-1);
+    if (version && isCreditMethodId(version.paymentMethodId))
+      fail('Conta fixa de crédito não tem pagamento registrado.');
+  }
   for (const key of ['wallets', 'moves'])
     if (s[key] !== undefined && (!Array.isArray(s[key]) || s[key].length > 50000))
       fail('Dados financeiros adicionais inválidos.');
@@ -160,6 +374,8 @@ export function validateLedger(s) {
     if (!validMonth(month) || !Number.isSafeInteger(limit) || limit < 0 || limit > MAX_AMOUNT)
       fail('Limite mensal inválido.');
   for (const e of s.entries) {
+    if (isCreditEntry(e) && (e.paid !== true || e.walletId))
+      fail('Lançamento de crédito inválido: reconhecido e sem conta vinculada.');
     if (e.walletId) getWallet(s, e.walletId);
     if (
       e.seriesId &&

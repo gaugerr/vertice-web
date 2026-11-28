@@ -20,6 +20,7 @@ const actions = new Set([
   'revoke_invite',
   'access',
   'pull',
+  'materialize_fixed_credit',
   'apply',
   'copy',
 ]);

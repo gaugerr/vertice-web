@@ -5,6 +5,15 @@ import { financeTitles, financeRoute, financeView } from './finance-navigation.m
   const frame = document.getElementById('shopping-frame');
   const names = { shopping: 'Compras', finance: 'Financeiro', settings: 'Configurações' };
   const screens = financeTitles;
+  // O botão de novo lançamento fica na barra inferior no mobile e no cabeçalho da página no desktop.
+  const compact = matchMedia('(max-width: 640px)');
+  const placeNewEntry = () =>
+    (compact.matches
+      ? document.querySelector('#finance-tabs .nav-new-slot')
+      : document.querySelector('#finance-area .page-heading')
+    ).append(document.getElementById('new-entry'));
+  placeNewEntry();
+  compact.addEventListener('change', placeNewEntry);
   const key = 'vertice_navigation_preview_v1';
   let area = 'shopping',
     shoppingScreen = 'Minhas listas',
@@ -30,7 +39,7 @@ import { financeTitles, financeRoute, financeView } from './finance-navigation.m
         ? screens[financialView]
         : area === 'shopping'
           ? shoppingScreen
-          : 'Conta e dados';
+          : 'Configurações';
     document.title = `${names[area]} · Vértice`;
   }
   function applyArea(next, save = true) {
@@ -125,6 +134,13 @@ import { financeTitles, financeRoute, financeView } from './finance-navigation.m
   document.getElementById('menu-close').addEventListener('click', closeMenu);
   // Único acesso às configurações quando a barra de seções está oculta (espaço bloqueado).
   document.getElementById('menu-settings').addEventListener('click', () => navigate('settings'));
+  // "Mais" no menu, para telas estreitas (na barra, ele só aparece no desktop).
+  document.getElementById('menu-more').addEventListener('click', () => {
+    financialView = 'more';
+    enteringFinance = true;
+    navigate('finance');
+    window.dispatchEvent(new CustomEvent('vertice:finance-navigate', { detail: { view: 'more' } }));
+  });
   menu.addEventListener('close', () => toggle.setAttribute('aria-expanded', 'false'));
   menu.addEventListener('click', (e) => {
     if (e.target === menu) closeMenu();

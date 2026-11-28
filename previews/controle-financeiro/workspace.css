@@ -138,7 +138,7 @@
 .workspace-demo-tools button {
   margin-top: 10px;
 }
-@media (max-width: 420px) {
+@media (max-width: 640px) {
   .workspace-bar {
     gap: 6px;
   }

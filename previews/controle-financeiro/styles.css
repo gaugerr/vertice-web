@@ -7,18 +7,30 @@
     BlinkMacSystemFont,
     'Segoe UI',
     sans-serif;
-  color: #efedf5;
-  background: #101014;
   color-scheme: dark;
   font-synthesis: none;
-  --muted: #96929f;
-  --border: #2b2834;
-  --purple: #b09aff;
-  --mint: #b7edce;
-  --pink: #efaab7;
+  color: #f3f0fa;
+  background: #101016;
+  /* Tokens únicos (valores que prevaleciam na cascata). */
+  --purple: #b69bff;
+  --mint: #a3e5c5;
+  --pink: #f4a8b7;
+  --muted: #aaa6b8;
+  --border: #2c2b3a;
+  --surface: #181820;
+  --surface-raised: #20202b;
+  --radius: 20px;
+  /* Largura única do conteúdo em Financeiro, Configurações e Compras. */
+  --content-max: 1160px;
+  /* Altura da barra inferior do mobile (sem contar a área segura do aparelho). */
+  --nav-h: 64px;
 }
 * {
   box-sizing: border-box;
+}
+/* <small> herda ~0,83em do pai pelo padrão do navegador; piso de legibilidade. */
+small {
+  font-size: 12px;
 }
 body {
   margin: 0;
@@ -77,7 +89,7 @@ header {
   color: var(--mint);
 }
 .preview {
-  font-size: 10px;
+  font-size: 11px;
   letter-spacing: 1.4px;
   color: #c3b3f4;
   border: 1px solid #514269;
@@ -139,7 +151,7 @@ header {
   justify-content: space-between;
 }
 .nav-label {
-  font-size: 10px;
+  font-size: 11px;
   font-weight: 650;
   letter-spacing: 1.8px;
   color: #797381;
@@ -201,8 +213,7 @@ nav button:hover {
   color: #777180;
 }
 main {
-  max-width: 1570px;
-  margin-left: 234px;
+  max-width: var(--content-max);
   padding: 42px 44px 16px;
 }
 .page-heading {
@@ -213,7 +224,7 @@ main {
 }
 .eyebrow {
   color: #a79abf;
-  font-size: 10px;
+  font-size: 11px;
   font-weight: 650;
   letter-spacing: 2.1px;
   margin-bottom: 10px;
@@ -287,7 +298,7 @@ h1 {
   font-size: 22px;
 }
 .example-label {
-  font-size: 10px;
+  font-size: 11px;
   color: #8e859f;
 }
 .example-label:before {
@@ -330,7 +341,7 @@ h1 {
   font-variant-numeric: tabular-nums;
 }
 .stat small {
-  font-size: 10px;
+  font-size: 11px;
   color: #8f879e;
   line-height: 1.5;
 }
@@ -390,16 +401,16 @@ h1 {
   border: 1px solid #393142;
   border-radius: 5px;
   padding: 5px 8px;
-  font-size: 9px;
+  font-size: 11px;
 }
 .chart-label {
-  font-size: 10px;
+  font-size: 11px;
   color: #7c7489;
 }
 .chart-legend {
   display: flex;
   gap: 16px;
-  font-size: 10px;
+  font-size: 11px;
   color: #a59bb6;
 }
 .chart-legend i {
@@ -422,7 +433,7 @@ h1 {
   margin-top: 20px;
   border-top: 1px solid var(--border);
   padding-top: 16px;
-  font-size: 10px;
+  font-size: 11px;
   color: #a399b3;
 }
 .chart-bottom b {
@@ -457,7 +468,7 @@ h1 {
   gap: 6px;
 }
 .donut-center small {
-  font-size: 9px;
+  font-size: 11px;
   color: #948a9f;
 }
 .donut-center strong {
@@ -474,7 +485,7 @@ h1 {
   justify-content: space-between;
   gap: 12px;
   margin-bottom: 15px;
-  font-size: 10px;
+  font-size: 11px;
   color: #c7bed4;
 }
 .legend-row i {
@@ -524,7 +535,7 @@ h1 {
 }
 .txn-info small {
   display: block;
-  font-size: 10px;
+  font-size: 11px;
   color: #8e839d;
   margin-top: 5px;
 }
@@ -535,7 +546,7 @@ h1 {
   font-variant-numeric: tabular-nums;
 }
 .txn-amount small {
-  font-size: 9px;
+  font-size: 11px;
   display: block;
   margin-top: 5px;
   color: #8d8399;
@@ -559,7 +570,7 @@ h1 {
   border: 1px solid #383044;
   background: #221d2b;
   border-radius: 8px;
-  font-size: 10px;
+  font-size: 11px;
   line-height: 1.8;
   color: #bcb0cb;
 }
@@ -586,7 +597,7 @@ h1 {
   font-size: 15px;
 }
 .bill-date small {
-  font-size: 8px;
+  font-size: 11px;
   color: #8b7e98;
 }
 .bill-info {
@@ -596,7 +607,7 @@ h1 {
 .bill-info small {
   display: block;
   color: #8a7c99;
-  font-size: 9px;
+  font-size: 11px;
   margin-top: 5px;
 }
 .bill-value {
@@ -606,7 +617,7 @@ h1 {
 .bill-value button {
   display: block;
   margin-left: auto;
-  font-size: 9px;
+  font-size: 11px;
   color: var(--purple);
   background: none;
   padding: 5px 0;
@@ -623,7 +634,7 @@ h1 {
   gap: 12px;
 }
 .budget-line small {
-  font-size: 10px;
+  font-size: 11px;
   color: #8e819f;
 }
 .track {
@@ -642,7 +653,7 @@ h1 {
   display: flex;
   justify-content: space-between;
   margin-top: 7px;
-  font-size: 9px;
+  font-size: 11px;
   color: #8c7d9d;
 }
 .goal {
@@ -658,7 +669,7 @@ h1 {
   margin-bottom: 8px;
 }
 .goal p {
-  font-size: 10px;
+  font-size: 11px;
   color: #8f829f;
   line-height: 1.8;
 }
@@ -677,7 +688,7 @@ h1 {
   display: flex;
   justify-content: space-between;
   align-items: center;
-  font-size: 10px;
+  font-size: 11px;
   color: #a495b6;
 }
 .empty {
@@ -734,7 +745,7 @@ footer {
   gap: 20px;
   border-top: 1px solid #24202b;
   color: #72697e;
-  font-size: 9px;
+  font-size: 11px;
   margin-top: 30px;
   padding: 20px 0;
   line-height: 1.7;
@@ -764,7 +775,7 @@ dialog::backdrop {
   letter-spacing: -0.6px;
 }
 .dialog-heading .eyebrow {
-  font-size: 9px;
+  font-size: 11px;
 }
 .type-switch {
   display: flex;
@@ -866,7 +877,7 @@ form > label {
     margin-right: auto;
   }
 }
-@media (max-width: 1200px) {
+@media (max-width: 1024px) {
   main {
     padding: 32px 28px;
   }
@@ -903,7 +914,7 @@ form > label {
     padding: 18px;
   }
 }
-@media (max-width: 990px) {
+@media (max-width: 1024px) {
   .sidebar {
     width: 175px;
     padding: 28px 10px;
@@ -968,7 +979,7 @@ form > label {
     font-size: 27px;
   }
   .preview {
-    font-size: 8px;
+    font-size: 11px;
     margin-left: 2px;
     padding: 4px 6px;
   }
@@ -991,7 +1002,7 @@ form > label {
     display: block;
   }
   .eyebrow {
-    font-size: 9px;
+    font-size: 11px;
   }
   h1 {
     font-size: 27px;
@@ -1011,7 +1022,7 @@ form > label {
     margin: 25px 0 18px;
   }
   .example-label {
-    font-size: 9px;
+    font-size: 11px;
   }
   .desktop-text {
     display: none;
@@ -1031,14 +1042,14 @@ form > label {
     padding: 16px 14px;
   }
   .stat .stat-top {
-    font-size: 10px;
+    font-size: 11px;
   }
   .stat strong {
     font-size: 23px;
     margin: 14px 0 9px;
   }
   .stat small {
-    font-size: 9px;
+    font-size: 11px;
   }
   .main-grid {
     gap: 16px;
@@ -1065,7 +1076,7 @@ form > label {
     font-size: 16px;
   }
   .legend-row {
-    font-size: 10px;
+    font-size: 11px;
   }
   .transaction {
     gap: 9px;
@@ -1074,7 +1085,7 @@ form > label {
     font-size: 11px;
   }
   .txn-info small {
-    font-size: 9px;
+    font-size: 11px;
   }
   .txn-amount {
     font-size: 11px;
@@ -1090,14 +1101,14 @@ form > label {
     height: 33px;
   }
   .chart-bottom {
-    font-size: 9px;
+    font-size: 11px;
   }
   .line-chart {
     height: 180px;
   }
   footer {
     display: block;
-    font-size: 9px;
+    font-size: 11px;
     margin-top: 22px;
   }
   footer span {

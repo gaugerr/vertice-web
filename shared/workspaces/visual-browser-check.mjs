@@ -108,6 +108,8 @@ try {
   await p.setViewportSize({ width: 390, height: 844 });
   // Check financial settings without altering a real user's account.
   await open('more');
+  // Configurações tem um único caminho: o item do menu.
+  await p.locator('#menu-toggle').click();
   await p.locator('[data-settings-section=settings-area]').click();
   await fits('settings mobile');
   await p.screenshot({ path: '/tmp/vertice-visual-settings-mobile.png', fullPage: true });

@@ -1,6 +1,7 @@
 import Dexie from 'dexie';
 import { WorkspaceError, OFFLINE_MS } from './core.mjs';
 import { ENTITIES, keyOf, readFinance } from './mapping.mjs';
+import { isCreditMethodId } from '../../previews/controle-financeiro/finance-domain.mjs';
 const OWNER = '11111111-1111-4111-8111-111111111111',
   GUEST = '22222222-2222-4222-8222-222222222222';
 export const DEMO_ACTORS = [
@@ -22,6 +23,53 @@ export const invitationToken = () =>
   Array.from(crypto.getRandomValues(new Uint8Array(32)), (n) =>
     n.toString(16).padStart(2, '0'),
   ).join('');
+const demoLocalMonth = (timeZone, ms) => {
+  const parts = new Intl.DateTimeFormat('en-CA', {
+    timeZone,
+    year: 'numeric',
+    month: '2-digit',
+  }).formatToParts(new Date(ms));
+  return (
+    parts.find((p) => p.type === 'year').value + '-' + parts.find((p) => p.type === 'month').value
+  );
+};
+const demoFixedCreditBody = (records, accountId, month) => {
+  const account = records.find(
+    (r) => r.entity === 'finance_fixed_accounts' && r.id === accountId && !r.body.deleted_at,
+  );
+  if (!account) return null;
+  const end = account.body.end_month?.slice(0, 7) ?? null;
+  if (month < account.body.start_month.slice(0, 7) || (end && month > end)) return null;
+  const version = records
+    .filter(
+      (r) =>
+        r.entity === 'finance_fixed_versions' &&
+        r.body.fixed_account_id === accountId &&
+        !r.body.deleted_at &&
+        r.body.effective_month.slice(0, 7) <= month,
+    )
+    .sort((a, b) => b.body.effective_month.localeCompare(a.body.effective_month))[0]?.body;
+  if (!version || !isCreditMethodId(version.payment_method_id)) return null;
+  const [y, mo] = month.split('-').map(Number);
+  const day = Math.min(version.due_day, new Date(Date.UTC(y, mo, 0)).getUTCDate());
+  return {
+    id: accountId + ':' + month,
+    source: 'fixed',
+    kind: 'expense',
+    name: account.body.name,
+    competence_month: month + '-01',
+    reference_date: `${month}-${String(day).padStart(2, '0')}`,
+    planned_amount_cents: version.amount_cents,
+    local_override_cents: null,
+    settlement_discount_cents: 0,
+    category_id: version.category_id,
+    payment_method_id: version.payment_method_id,
+    observation: account.body.observation,
+    fixed_account_id: accountId,
+    fixed_version_id: accountId + ':v:' + version.effective_month.slice(0, 7),
+    shopping_list_id: null,
+  };
+};
 export class DemoTransport {
   constructor(
     actor,
@@ -45,7 +93,9 @@ export class DemoTransport {
     if (!this.online()) throw new WorkspaceError('network', 'Sem conexão.');
     const token = action === 'invite' ? invitationToken() : input.token,
       hash = token ? await sha256(token) : null,
-      digest = action === 'apply' ? await sha256(JSON.stringify(input.operation)) : null;
+      digest = action === 'apply' ? await sha256(JSON.stringify(input.operation)) : null,
+      digestMaterialize =
+        action === 'materialize_fixed_credit' ? await sha256(JSON.stringify(input)) : null;
     let result;
     await this.db.transaction('rw', this.db.table('state'), async () => {
       const store = this.db.table('state'),
@@ -335,6 +385,65 @@ export class DemoTransport {
           result = { revision: w.revision, records: [...changed.values()] };
           s.journals[w.id].push({ ...result, operation_id: op.id });
           s.operations[opkey] = { digest, result };
+        }
+      } else if (action === 'materialize_fixed_credit') {
+        // Espelha a RPC do servidor: mesma competência pelo fuso, mesma derivação, mesma idempotência.
+        const { w, m } = access(input.workspace_id);
+        if (input.generation !== m.generation)
+          throw new WorkspaceError('generation', 'A participação mudou.');
+        const opkey = w.id + ':materialize:' + input.operation_id;
+        if (s.operations[opkey]) {
+          if (s.operations[opkey].digest !== digestMaterialize)
+            throw new WorkspaceError(
+              'operation_reused',
+              'Operação reutilizada com conteúdo diferente.',
+            );
+          result = s.operations[opkey].result;
+        } else {
+          const records = s.records[w.id];
+          const month = demoLocalMonth(input.time_zone, this.clock());
+          const body =
+            input.competence_month === month
+              ? demoFixedCreditBody(records, input.account_id, month)
+              : null;
+          result = { status: input.competence_month === month ? 'not_eligible' : 'not_current' };
+          if (body) {
+            const existing = records.find(
+              (r) => r.entity === 'finance_entries' && r.id === body.id,
+            );
+            if (existing) result = { status: existing.body.deleted_at ? 'tombstoned' : 'exists' };
+            else {
+              const iso = new Date(this.clock()).toISOString();
+              const row = {
+                entity: 'finance_entries',
+                id: body.id,
+                body: {
+                  ...body,
+                  workspace_id: w.id,
+                  created_at: iso,
+                  updated_at: iso,
+                  created_by: actor.uid,
+                  updated_by: actor.uid,
+                  row_version: 1,
+                  deleted_at: null,
+                  extra: {},
+                },
+              };
+              records.push(row);
+              w.revision++;
+              result = {
+                status: 'inserted',
+                revision: w.revision,
+                records: [structuredClone(row)],
+              };
+              s.journals[w.id].push({
+                revision: w.revision,
+                records: result.records,
+                operation_id: input.operation_id,
+              });
+            }
+          }
+          s.operations[opkey] = { digest: digestMaterialize, result };
         }
       } else if (action === 'copy') {
         const { w } = owner(input.workspace_id);

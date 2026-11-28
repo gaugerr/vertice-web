@@ -346,11 +346,11 @@ test('limite global mensal não reescreve categorias, aceita zero e é preservad
   assert.equal(overviewData(s, '2026-11').budget.scope, 'categories');
 });
 
-test('encerrar uma série mantém pagamentos e remove apenas parcelas futuras em aberto', () => {
+test('parcelas não são encerradas por stopSeries: a exclusão usa as modalidades aprovadas, mantendo pagamentos até o usuário excluí-los', () => {
   const s = setup();
   saveLedgerEntry(s, entry(), { mode: 'installments', count: 3 });
-  stopSeries(s, s.entries[0].id);
-  assert.equal(s.entries.length, 1);
+  assert.throws(() => stopSeries(s, s.entries[0].id), /esta parcela.*esta e as seguintes/);
+  assert.equal(s.entries.length, 3);
   assert.equal(s.entries[0].paid, true);
 });
 

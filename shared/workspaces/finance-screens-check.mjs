@@ -245,7 +245,11 @@ for (const [width, height] of [
       await p.locator('#financial-form [name=openingAmount]').fill('0');
       await p.locator('#financial-form button[type=submit]').click();
       await p.getByText('Reserva teste', { exact: true }).waitFor();
-      await p.locator('#finance-tabs [data-view=more]').click();
+      // Em telas estreitas, Mais fica no menu (a barra inferior tem Novo no centro).
+      if (p.viewportSize().width <= 640) {
+        await p.locator('#menu-toggle').click();
+        await p.locator('#menu-more').click();
+      } else await p.locator('#finance-tabs [data-view=more]').click();
       await p.locator('.more-links button', { hasText: 'Patrimônio' }).click();
       assert.equal(await p.getByText('Investimentos registrados').isVisible(), true);
     },

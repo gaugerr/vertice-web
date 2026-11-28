@@ -10,8 +10,23 @@ import {
   keyOf,
   isLegacyCardRecord,
 } from './mapping.mjs';
-import { validateState } from '../../previews/controle-financeiro/finance-domain.mjs';
+import {
+  validateState,
+  fixedRows,
+  isCreditMethodId,
+} from '../../previews/controle-financeiro/finance-domain.mjs';
 export const OFFLINE_MS = 86400000;
+const MATERIALIZE_KEY = 'materialize-fixed';
+// Únicas respostas que encerram uma operação de materialização. Qualquer outra mantém a fila.
+// Intervalos entre tentativas após falha; a partir da 5ª falha, o último intervalo.
+const RETRY_DELAYS_MS = [15000, 30000, 60000, 120000, 300000];
+const FINAL_MATERIALIZE_STATUS = [
+  'inserted',
+  'exists',
+  'not_current',
+  'not_eligible',
+  'tombstoned',
+];
 export class WorkspaceError extends Error {
   constructor(code, message, detail) {
     super(message);
@@ -44,8 +59,16 @@ const dataTables = (db) => [
   db.workspaceConflicts,
 ];
 export class WorkspaceClient {
-  constructor({ project, actor, space, transport, clock = () => Date.now() }) {
+  constructor({
+    project,
+    actor,
+    space,
+    transport,
+    clock = () => Date.now(),
+    timeZone = Intl.DateTimeFormat().resolvedOptions().timeZone,
+  }) {
     this.actor = actor;
+    this.timeZone = timeZone;
     this.space = space;
     this.transport = transport;
     this.clock = clock;
@@ -348,13 +371,122 @@ export class WorkspaceClient {
     }
     await this.db.workspaceOutbox.put(op);
   }
+  // Competência corrente do dispositivo (mesma data local do aplicativo), no fuso IANA do aparelho.
+  localCompetence() {
+    const parts = new Intl.DateTimeFormat('en-CA', {
+      timeZone: this.timeZone,
+      year: 'numeric',
+      month: '2-digit',
+    }).formatToParts(new Date(this.clock()));
+    const part = (type) => parts.find((p) => p.type === type).value;
+    return `${part('year')}-${part('month')}`;
+  }
+  // Só ações sobre conta fixa de crédito (P4) na competência corrente entram na fila.
+  async queueFixedCredit(state, changes) {
+    const accounts = new Set();
+    for (const c of changes) {
+      if (c.entity === 'finance_fixed_accounts') accounts.add(c.id);
+      else if (
+        ['finance_fixed_versions', 'finance_entries'].includes(c.entity) &&
+        c.body?.fixed_account_id
+      )
+        accounts.add(c.body.fixed_account_id);
+    }
+    if (!accounts.size) return;
+    const month = this.localCompetence();
+    const eligible = fixedRows(state, month).filter(
+      (r) => accounts.has(r.accountId) && isCreditMethodId(r.paymentMethodId),
+    );
+    if (!eligible.length) return;
+    const queue = (await this.db.workspaceMeta.get(MATERIALIZE_KEY))?.value ?? [];
+    for (const r of eligible) {
+      if (queue.some((q) => q.key === r.id)) continue;
+      if (await this.serverKnown(r.id)) continue;
+      queue.push({
+        key: r.id,
+        account_id: r.accountId,
+        competence_month: month,
+        time_zone: this.timeZone,
+        operation_id: crypto.randomUUID(),
+      });
+    }
+    await this.db.workspaceMeta.put({ key: MATERIALIZE_KEY, value: queue });
+  }
+  // Confirmado pelo servidor (pull ou ack). Gravação pendente local não conta.
+  async serverKnown(key) {
+    const local = await this.db.workspaceRecords.get(keyOf('finance_entries', key));
+    return Boolean(local && (local.confirmedVersion ?? 0) > 0);
+  }
+  async outboxTouches(key) {
+    return (await this.db.workspaceOutbox.toArray()).some((o) =>
+      o.changes.some((c) => keyOf(c.entity, c.id) === key),
+    );
+  }
+  // Fila separada da financeira: falhas aqui não afetam a fila de gravações.
+  async sendMaterializations() {
+    const queue = (await this.db.workspaceMeta.get(MATERIALIZE_KEY))?.value ?? [];
+    if (!queue.length) return;
+    try {
+      await this.assertWrite();
+    } catch {
+      return;
+    }
+    const finished = new Set(),
+      failed = new Map(),
+      now = this.clock();
+    let inserted = false;
+    for (const item of queue) {
+      if (item.next_attempt_at > now) continue; // ainda no intervalo de espera
+      if (await this.serverKnown(item.key)) {
+        finished.add(item.operation_id);
+        continue;
+      }
+      if (await this.outboxTouches(keyOf('finance_entries', item.key))) continue;
+      let outcome = 'retry';
+      try {
+        const result = await this.transport.request('materialize_fixed_credit', {
+          workspace_id: this.space.id,
+          generation: this.space.generation,
+          operation_id: item.operation_id,
+          account_id: item.account_id,
+          competence_month: item.competence_month,
+          time_zone: item.time_zone,
+        });
+        if (FINAL_MATERIALIZE_STATUS.includes(result?.status)) outcome = 'done';
+        inserted ||= result?.status === 'inserted';
+      } catch (e) {
+        // Sem código (rede, timeout, erro inesperado) ou transitório: mantém e interrompe o lote.
+        // Outros códigos não são motivo para descartar: a operação continua na fila.
+        if (!e.code || ['network', 'unauthorized'].includes(e.code)) outcome = 'stop';
+      }
+      if (outcome === 'done') finished.add(item.operation_id);
+      else {
+        const attempts = (item.attempts ?? 0) + 1;
+        failed.set(item.operation_id, {
+          attempts,
+          next_attempt_at: now + RETRY_DELAYS_MS[Math.min(attempts, RETRY_DELAYS_MS.length) - 1],
+        });
+      }
+      if (outcome === 'stop') break;
+    }
+    await this.db.transaction('rw', this.db.workspaceMeta, async () => {
+      const current = (await this.db.workspaceMeta.get(MATERIALIZE_KEY))?.value ?? [];
+      await this.db.workspaceMeta.put({
+        key: MATERIALIZE_KEY,
+        value: current
+          .filter((i) => !finished.has(i.operation_id))
+          .map((i) => ({ ...i, ...failed.get(i.operation_id) })),
+      });
+    });
+    if (inserted) await this.pull().catch(() => {});
+  }
   async finance() {
     await this.assertRead();
     const s = readFinance(await this.db.workspaceRecords.toArray());
     s.revision = (await this.db.workspaceMeta.get('finance-revision'))?.value ?? 0;
     return s;
   }
-  async commitFinance(change, expectedRevision, baseline) {
+  async commitFinance(change, expectedRevision, baseline, { materialize = true } = {}) {
     let state;
     await this.db.transaction('rw', dataTables(this.db), async () => {
       await this.assertWrite();
@@ -410,7 +542,9 @@ export class WorkspaceClient {
         state.revision = revision;
       } else change(state);
       validateState(state);
-      await this.enqueue(changesBetween(before, financeRows(state)));
+      const changes = changesBetween(before, financeRows(state));
+      await this.enqueue(changes);
+      if (materialize) await this.queueFixedCredit(state, changes);
       state.revision++;
       await this.db.workspaceMeta.put({ key: 'finance-revision', value: state.revision });
     });
@@ -478,10 +612,12 @@ export class WorkspaceClient {
   async flush() {
     if (this.running || this.stopped) return this.running;
     this.syncError = null;
-    this.running = this.sendPending().finally(() => {
-      this.running = null;
-      this.notify();
-    });
+    this.running = this.sendPending()
+      .then(() => this.sendMaterializations())
+      .finally(() => {
+        this.running = null;
+        this.notify();
+      });
     this.notify();
     return this.running;
   }
@@ -633,11 +769,16 @@ export class WorkspaceFinanceStore {
     validateState(imported);
     const backup = await this.client.finance();
     await this.client.db.workspaceMeta.put({ key: 'finance-before-restore', value: backup });
-    await this.client.commitFinance((s) => {
-      const revision = s.revision;
-      for (const key of Object.keys(s)) delete s[key];
-      Object.assign(s, structuredClone(imported), { revision });
-    }, this.state?.revision);
+    await this.client.commitFinance(
+      (s) => {
+        const revision = s.revision;
+        for (const key of Object.keys(s)) delete s[key];
+        Object.assign(s, structuredClone(imported), { revision });
+      },
+      this.state?.revision,
+      undefined,
+      { materialize: false },
+    );
     return this.load();
   }
 }

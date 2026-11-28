@@ -15,3 +15,29 @@
     padding: 20px 18px 60px;
   }
 }
+
+/* Formulários: texto auxiliar "(opcional)" na mesma linha do rótulo; campos continuam em linha própria. */
+.form-stack label:has(> .muted) {
+  flex-direction: row;
+  flex-wrap: wrap;
+  align-items: baseline;
+  column-gap: 6px;
+  row-gap: 8px;
+}
+/* Diálogos: botões de ação sempre visíveis, mesmo com conteúdo longo em telas pequenas. */
+dialog[open] .dialog-actions {
+  position: sticky;
+  bottom: 0;
+  z-index: 1;
+  padding: 12px 0 4px;
+  background: #1b1822;
+}
+@media (max-width: 640px) {
+  /* Boas-vindas: título menor para a lista de compras aparecer logo abaixo. */
+  .hero h1 {
+    font-size: clamp(24px, 7vw, 30px);
+  }
+  .hero {
+    margin-top: 0;
+  }
+}

@@ -20,8 +20,8 @@ export function paidCopy({ type, isCredit, paid }) {
   return {
     label: income ? 'Já foi recebido' : 'Já foi pago',
     hint: paid
-      ? 'Entra no resultado do mês como realizado.'
-      : 'Fica como previsto até ser marcado como ' + (income ? 'recebido.' : 'pago.'),
+      ? 'Entra no resultado do mês.'
+      : 'Previsto até ser marcado como ' + (income ? 'recebido.' : 'pago.'),
   };
 }
 

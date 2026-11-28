@@ -80,6 +80,7 @@
       <button data-view="transactions">
         <span data-icon="arrows"></span><small>Lançamentos</small>
       </button>
+      <span class="nav-new-slot"></span>
       <button data-view="planning">
         <span data-icon="planning"></span><small>Planejamento</small>
       </button>
@@ -203,9 +204,12 @@
           <span data-icon="close"></span>
         </button>
       </div>
-      <nav aria-label="Conta e dados">
-        <button type="button" id="menu-settings">
-          <span data-icon="settings"></span><span>Configurações e backups</span>
+      <nav aria-label="Menu do Vértice">
+        <button type="button" id="menu-more" class="menu-mobile-only" data-menu-view="more">
+          <span data-icon="more"></span><span>Mais</span>
+        </button>
+        <button type="button" id="menu-settings" data-settings-section="settings-area">
+          <span data-icon="settings"></span><span>Configurações</span>
         </button>
       </nav>
       <div class="workspace-bar">
@@ -237,8 +241,8 @@
         </button>
       </div>
       <p class="muted">
-        Renomear mantém os vínculos. Arquivar retira a opção dos novos registros, sem apagar o
-        histórico. O tipo da categoria não muda depois da criação.
+        Renomear mantém os vínculos. Arquivar oculta a opção nos novos registros e preserva o
+        histórico.
       </p>
       <p class="muted" id="catalog-return" hidden>
         Ao fechar, você volta ao lançamento com os dados preenchidos.

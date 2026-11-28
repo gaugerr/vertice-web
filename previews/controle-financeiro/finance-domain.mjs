@@ -131,8 +131,8 @@ export function initialState() {
     ['Almoço de domingo', 12600, 'D04', 'P2', '08', true],
     ['Internet', 9990, 'D02', 'P6', '10', false],
     ['Energia elétrica', 18640, 'D02', 'P5', '12', false],
-    ['Academia', 8990, 'D06', 'P4', '15', false],
-    ['Streaming', 3990, 'D11', 'P4', '18', false],
+    ['Academia', 8990, 'D06', 'P6', '15', false],
+    ['Streaming', 3990, 'D11', 'P6', '18', false],
     ['Feira da semana', 8500, 'D03', 'P2', '20', false],
   ];
   s.entries = seeds.map(([name, amount, categoryId, paymentMethodId, day, paid], i) => ({
@@ -263,7 +263,14 @@ export function toggleCatalog(s, kind, id) {
   if (!c) throw Error('Cadastro não encontrado.');
   c.active = !c.active;
 }
-export function saveEntry(s, e) {
+// Crédito é só forma de pagamento: reconhecido sempre (paid=true) e sem conta vinculada.
+// Contrato de identidade: a forma de pagamento Crédito é reconhecida pelo id estável "P4",
+// nunca pelo nome exibido. Renomear a forma não altera o comportamento.
+export const CREDIT_METHOD_ID = 'P4';
+export const isCreditMethodId = (id) => id === CREDIT_METHOD_ID;
+export const isCreditEntry = (e) => isCreditMethodId(e?.paymentMethodId);
+// Retorna o impacto da carteira quando uma conversão para crédito remove um vínculo (ou null).
+export function saveEntry(s, e, { removeWallet = false } = {}) {
   const old = s.entries.find((v) => v.id === e.id);
   text(e.name);
   positive(e.amount);
@@ -271,9 +278,44 @@ export function saveEntry(s, e) {
   observation(e.observation);
   reference(s, e.categoryId, e.paymentMethodId, e.type, old?.categoryId, old?.paymentMethodId);
   if (typeof e.paid !== 'boolean') throw Error('Situação inválida.');
-  const value = { ...e, name: e.name.trim() };
-  if (old) Object.assign(old, value);
-  else s.entries.push(value);
+  const credit = isCreditEntry(e);
+  if (old?.seriesId && isCreditEntry(old) !== credit)
+    throw Error(
+      'A forma de pagamento de uma série não pode mudar entre crédito e as demais formas.',
+    );
+  if (credit && e.walletId)
+    throw Error('Crédito não movimenta carteira. Remova a conta do lançamento.');
+  let walletImpact = null;
+  if (!credit && old && isCreditEntry(old) && e.walletId && e.paid) {
+    // Crédito → outra forma com conta escolhida e pago: o débito segue a regra normal de saldo.
+    walletImpact = {
+      change: 'added',
+      walletId: e.walletId,
+      amount: e.amount,
+      type: e.type,
+      date: e.date,
+    };
+  }
+  if (credit && old?.walletId) {
+    if (!removeWallet)
+      throw Error(
+        'Este lançamento está vinculado a uma conta. Confirme a remoção do vínculo para convertê-lo em crédito.',
+      );
+    walletImpact = {
+      change: 'removed',
+      walletId: old.walletId,
+      amount: old.amount,
+      type: old.type,
+      paid: old.paid,
+    };
+  }
+  const value = { ...e, name: e.name.trim(), paid: credit ? true : e.paid };
+  if (credit) delete value.walletId;
+  if (old) {
+    if (credit) delete old.walletId;
+    Object.assign(old, value);
+  } else s.entries.push(value);
+  return walletImpact;
 }
 export function saveFixed(
   s,
@@ -355,6 +397,8 @@ export function fixedRows(s, month) {
     if (month < a.startMonth || (a.endMonth && month > a.endMonth)) continue;
     const v = a.versions.filter((v) => v.from <= month).at(-1);
     if (!v) continue;
+    const credit = isCreditMethodId(v.paymentMethodId);
+    const due = record?.amountOverride ?? v.amount;
     rows.push({
       id: key,
       source: 'fixed',
@@ -362,14 +406,14 @@ export function fixedRows(s, month) {
       month,
       name: a.name,
       date: dueDate(month, v.dueDay),
-      amount: record?.amountOverride ?? v.amount,
+      amount: due,
       baseAmount: v.amount,
       categoryId: v.categoryId,
       paymentMethodId: v.paymentMethodId,
       type: 'expense',
-      paid: false,
-      paidAmount: 0,
-      remainingAmount: record?.amountOverride ?? v.amount,
+      paid: credit,
+      paidAmount: credit ? due : 0,
+      remainingAmount: credit ? 0 : due,
       observation: record?.observation ?? a.observation,
     });
   }
@@ -388,6 +432,10 @@ export function payFixed(
   { date, amount, observation: note = '', settle = false, walletId = null },
 ) {
   const row = fixedRows(s, month).find((r) => r.accountId === id);
+  if (row && isCreditMethodId(row.paymentMethodId))
+    throw Error(
+      'Conta fixa de crédito é reconhecida automaticamente; não há pagamento a registrar.',
+    );
   if (!row || row.paid) throw Error('Esta competência não está disponível para pagamento.');
   if (!validDate(date)) throw Error('Informe a data real do pagamento.');
   positive(amount);
@@ -416,7 +464,9 @@ export function undoFixed(s, id, month) {
 }
 export function adjustFixed(s, id, month, amount, note = '') {
   const row = fixedRows(s, month).find((r) => r.accountId === id);
-  if (!row || row.paid || row.paidAmount)
+  // Crédito nasce reconhecido: o ajuste só troca o valor da competência, sem pagamento a desfazer.
+  const credit = row && isCreditMethodId(row.paymentMethodId);
+  if (!row || (!credit && (row.paid || row.paidAmount)))
     throw Error('Desfaça os pagamentos antes de ajustar esta competência.');
   positive(amount);
   observation(note);
@@ -827,4 +877,53 @@ export function correctPayment(
   payment.date = date;
   payment.amount = amount;
   payment.snapshot.observation = note;
+}
+
+// Classificação das despesas do mês. Cada despesa cai em exatamente uma situação:
+// paid = pagas (não crédito, qualquer data); creditRecognized = crédito com data <= hoje;
+// creditForecast = crédito com data > hoje; unpaid = não crédito não pago (vencida ou não).
+// Crédito de contas fixas (source "fixed") segue a regra de pagamento de contas fixas.
+export function expenseSituations(rows, today) {
+  let paid = 0,
+    creditRecognized = 0,
+    creditForecast = 0,
+    unpaid = 0;
+  for (const r of rows) {
+    if (r.type !== 'expense') continue;
+    if (isCreditMethodId(r.paymentMethodId)) {
+      if (r.date <= today) creditRecognized += r.amount;
+      else creditForecast += r.amount;
+      continue;
+    }
+    const realized = r.paidAmount ?? (r.paid ? r.amount : 0);
+    paid += realized;
+    unpaid += r.amount - realized;
+  }
+  return {
+    paid,
+    creditRecognized,
+    creditForecast,
+    unpaid,
+    lancadas: paid + creditRecognized,
+    previstas: creditForecast + unpaid,
+    total: paid + creditRecognized + creditForecast + unpaid,
+  };
+}
+// Quanto sobrou = receitas recebidas − (pagas + crédito do mês). Parcelas de outros meses
+// não entram. Compromissos futuros são informativos e ficam fora dos totais do mês.
+export function monthClassification(s, month, today) {
+  const rows = monthlyRows(s, month);
+  const expenses = expenseSituations(rows, today);
+  const end = `${month}-${String(monthEnd(month)).padStart(2, '0')}`;
+  const future = s.entries.filter((e) => e.date > end && (isCreditEntry(e) || !e.paid));
+  return {
+    ...expenses,
+    income: totals(rows).income,
+    quantoSobrou:
+      totals(rows).income - (expenses.paid + expenses.creditRecognized + expenses.creditForecast),
+    compromissosFuturos: {
+      count: future.length,
+      amount: future.reduce((n, e) => n + e.amount, 0),
+    },
+  };
 }

@@ -49,9 +49,7 @@ export function ListCard({
             <strong>{formatMoney(totalCents)}</strong>
           </p>
         ) : null}
-        <p className="description">
-          {list.description || 'Tudo o que você precisa, em um só lugar.'}
-        </p>
+        {list.description ? <p className="description">{list.description}</p> : null}
         <span className="card-date">
           <CalendarDays size={14} aria-hidden="true" />
           {formatDate(completed && list.purchaseDate ? list.purchaseDate : list.date)}

@@ -96,7 +96,7 @@ const screens = {
   fixed: ['Planejamento', ''],
   budget: ['Planejamento', ''],
   goals: ['Planejamento', ''],
-  analysis: ['Análises', ''],
+  analysis: ['Análises', 'Como o mês se move, por semana e por categoria.'],
   wealth: ['Patrimônio', 'Investimentos e metas, sem estimar seu patrimônio total.'],
 };
 function toast(message) {
@@ -129,9 +129,6 @@ function panel(title, subtitle, body, action = '') {
 }
 const to = (label, destination) =>
   `<button class="text-button" data-view="${destination}">${label}${icon('right')}</button>`;
-function stats(selectedRows) {
-  return overviewBalance(selectedRows);
-}
 function overviewBalance(selectedRows) {
   const t = summaryTotals(state, month, selectedRows);
   return `<section class="overview-balance" aria-label="Saldos e movimentação mensal"><div class="monthly-result"><span>Quanto sobrou no mês</span><strong class="${t.remainingAfterSaving < 0 ? 'pink' : 'green'}">${money(t.remainingAfterSaving)}</strong><small>Receitas pagas menos despesas pagas, já descontada a reserva.</small></div><div class="overview-indicators">${[
@@ -182,10 +179,10 @@ function recentTransactions() {
       : `<div class="empty"><p>Nenhum lançamento em ${esc(monthName().toLowerCase())}.</p><button class="text-button" data-new-entry>${icon('plus')} Novo lançamento</button></div>`
   }</section>`;
 }
-// Resumo de uma linha para a lista filtrada: mesmos valores de overviewBalance, sem o bloco grande.
+// Resumo da lista filtrada: aparece só com busca ou filtro ativos (sem filtro, os totais estão no Resumo).
 function compactSummary(selectedRows) {
   const t = summaryTotals(state, month, selectedRows);
-  return `<section class="compact-summary" aria-label="Totais dos lançamentos listados"><p><span>Receitas</span><strong class="green">${money(t.income)}</strong></p><p><span>Despesas</span><strong class="pink">${money(t.operatingExpense)}</strong></p><p><span>Guardado</span><strong class="purple">${money(t.invested)}</strong></p><p><span>Quanto sobrou</span><strong class="${t.remainingAfterSaving < 0 ? 'pink' : 'green'}">${money(t.remainingAfterSaving)}</strong></p></section>`;
+  return `<section class="compact-summary" aria-label="Totais dos lançamentos listados"><p><span>Receitas</span><strong class="green">${money(t.income)}</strong></p><p><span>Despesas</span><strong class="pink">${money(t.operatingExpense)}</strong></p><p><span>Lançamentos</span><strong>${selectedRows.length}</strong></p></section>`;
 }
 function hasFinanceData() {
   return Boolean(state.entries.length || state.fixedAccounts?.length || state.goals?.length);
@@ -212,25 +209,6 @@ function row(e, full = false, grouped = false) {
     ? `${e.paid ? 'Pago' : 'Último pagamento'} em ${dateName(e.paymentDate)}`
     : dateName(e.date);
   return `<article class="transaction"><span class="txn-icon ${e.type === 'income' ? 'income' : ''}" aria-hidden="true">${esc(c.icon)}</span><div class="txn-info"><strong>${esc(e.name)}${e.seriesId ? ` · ${e.seriesIndex}/${e.seriesCount}` : ''}</strong><small>${esc(c.name)}${!c.active ? ' · arquivada' : ''}${source} · ${esc(method(e.paymentMethodId))}${grouped ? '' : ' · ' + date}</small>${e.observation ? `<p class="record-note">${esc(e.observation)}</p>` : ''}</div><div class="txn-amount ${e.type === 'income' ? 'green' : ''}">${e.type === 'income' ? '+' : '−'} ${money(e.amount)}<small>${statusHtml}</small></div>${full ? `<div class="txn-actions">${fixed ? `<button data-fixed-action="${e.paid ? 'correct' : 'pay'}" data-id="${esc(e.accountId)}" aria-label="${e.paid ? 'Corrigir pagamento de' : 'Pagar'} ${esc(e.name)}" title="${e.paid ? 'Corrigir pagamento' : 'Pagar'}">${actionIcon(e.paid ? 'edit' : 'check')}</button><button data-fixed-action="details" data-id="${esc(e.accountId)}" aria-label="Detalhes de ${esc(e.name)}" title="Detalhes">${actionIcon('more')}</button>` : `<button data-entry-edit="${esc(e.id)}" aria-label="Editar ${esc(e.name)}" title="Editar">${actionIcon('edit')}</button><details class="row-menu"><summary aria-label="Mais ações de ${esc(e.name)}">${icon('more')}</summary><div class="row-menu-items"><button data-entry-copy="${esc(e.id)}">${icon('copy')}Copiar</button><button class="danger-action" data-entry-delete="${esc(e.id)}">${icon('trash')}Excluir</button></div></details>`}</div>` : ''}</article>`;
-}
-function distribution() {
-  const list = state.categories
-      .filter((c) => c.type === 'expense')
-      .map((c) => ({ ...c, value: spend(c.id) }))
-      .filter((c) => c.value > 0)
-      .sort((a, b) => b.value - a.value),
-    total = list.reduce((n, c) => n + c.value, 0);
-  let offset = 0;
-  return `<div class="donut-content"><div class="donut"><svg viewBox="0 0 120 120" aria-label="Distribuição das despesas por categoria"><circle cx="60" cy="60" r="50" fill="none" stroke="#302735" stroke-width="13"/>${list
-    .map((c) => {
-      const len = (c.value / total) * 314.159,
-        r = `<circle cx="60" cy="60" r="50" fill="none" stroke="${esc(c.color)}" stroke-width="13" stroke-dasharray="${len} ${314.159 - len}" stroke-dashoffset="${-offset}"/>`;
-      offset += len;
-      return r;
-    })
-    .join(
-      '',
-    )}</svg><div class="donut-center"><small>Despesas do mês</small><strong>${money(total)}</strong></div></div><div class="category-legend">${list.length ? list.map((c) => `<div class="legend-row"><span><i style="background:${esc(c.color)}"></i>${esc(c.name)}</span><span>${Math.round((c.value / total) * 100)}%</span></div>`).join('') : '<p class="muted">Nenhuma despesa neste mês.</p>'}</div></div>`;
 }
 function chart() {
   const list = rows().filter((r) => r.paid || r.paidAmount),
@@ -265,14 +243,14 @@ function budgetRows() {
   const items = budgetItems();
   const withLimit = items.filter((i) => i.limit != null).sort((a, b) => b.p - a.p);
   const withoutLimit = items.filter((i) => i.limit == null);
+  const limitRow = ({ c, used, limit, status, p }) => {
+    const note = used > limit ? `Excedeu ${money(used - limit)}` : `Restam ${money(limit - used)}`;
+    return `<div class="budget-row budget-${status.key}"><div class="budget-top"><span class="budget-name">${esc(c.name)}${!c.active ? ' (arquivada)' : ''}</span><span class="status-pill status-${status.key}">${status.label}</span></div><div class="track" aria-hidden="true"><div style="width:${Math.min(100, p)}%"></div></div><div class="budget-foot"><div><span><strong>${money(used)}</strong> de ${money(limit)} · ${p}%</span><small>${note}</small></div><button class="text-button" data-budget="${c.id}" aria-label="Editar limite de ${esc(c.name)}">Editar</button></div></div>`;
+  };
+  const withLimitSpent = withLimit.filter((i) => i.used > 0),
+    withLimitIdle = withLimit.filter((i) => i.used === 0);
   const withLimitHtml = withLimit.length
-    ? withLimit
-        .map(({ c, used, limit, status, p }) => {
-          const note =
-            used > limit ? `Excedeu ${money(used - limit)}` : `Restam ${money(limit - used)}`;
-          return `<div class="budget-row budget-${status.key}"><div class="budget-top"><span class="budget-name">${esc(c.name)}${!c.active ? ' (arquivada)' : ''}</span><span class="status-pill status-${status.key}">${status.label}</span></div><div class="track" aria-hidden="true"><div style="width:${Math.min(100, p)}%"></div></div><div class="budget-foot"><div><span><strong>${money(used)}</strong> de ${money(limit)} · ${p}%</span><small>${note}</small></div><button class="text-button" data-budget="${c.id}" aria-label="Editar limite de ${esc(c.name)}">Editar</button></div></div>`;
-        })
-        .join('')
+    ? `${withLimitSpent.map(limitRow).join('')}${withLimitIdle.length ? `<details class="budget-more"><summary>${withLimitIdle.length} categoria(s) com limite sem gasto neste mês</summary>${withLimitIdle.map(limitRow).join('')}</details>` : ''}`
     : '<p class="muted">Nenhuma categoria com limite neste mês. Defina um limite abaixo para começar.</p>';
   const withoutRow = ({ c, used }) =>
     `<div class="budget-row budget-none"><span class="budget-name">${esc(c.name)}${!c.active ? ' (arquivada)' : ''}</span><span class="budget-spent">${money(used)}</span><button class="text-button" data-budget="${c.id}" aria-label="Definir limite de ${esc(c.name)}">Definir</button></div>`;
@@ -300,7 +278,7 @@ function goals(compact = false) {
       ? list
           .map(
             (g) =>
-              `<article class="goal"><div class="goal-heading"><h3>${esc(g.name)}</h3>${compact ? '' : `<div class="txn-actions"><button data-goal-edit="${esc(g.id)}" aria-label="Editar meta ${esc(g.name)}" title="Editar meta">${actionIcon('edit')}</button><button class="danger-action" data-goal-delete="${esc(g.id)}" aria-label="Excluir meta ${esc(g.name)}" title="Excluir meta">${actionIcon('trash')}</button></div>`}</div><p>${esc(g.subtitle || '')}</p><div class="goal-total">${money(g.current)} <small>de ${money(g.target)}</small></div><div class="track"><div style="width:${Math.min(100, (g.current / g.target) * 100)}%;background:var(--mint)"></div></div><div class="goal-actions"><span>${Math.round((g.current / g.target) * 100)}% do caminho</span><button class="text-button" data-goal="${esc(g.id)}">${icon('plus')} Guardar</button></div>${compact ? '' : `<button class="text-button" data-goal-history="${esc(g.id)}">Ver aportes</button>`}</article>`,
+              `<article class="goal"><div class="goal-heading"><h3>${esc(g.name)}</h3>${compact ? '' : `<div class="txn-actions"><button data-goal-edit="${esc(g.id)}" aria-label="Editar meta ${esc(g.name)}" title="Editar meta">${actionIcon('edit')}</button><button class="danger-action" data-goal-delete="${esc(g.id)}" aria-label="Excluir meta ${esc(g.name)}" title="Excluir meta">${actionIcon('trash')}</button></div>`}</div><p>${esc(g.subtitle || '')}</p><div class="goal-total">${money(g.current)} <small>de ${money(g.target)}</small></div><div class="track"><div style="width:${Math.min(100, (g.current / g.target) * 100)}%;background:var(--mint)"></div></div><div class="goal-actions"><span>${g.current >= g.target ? 'Meta atingida' : `Faltam ${money(g.target - g.current)} · ${Math.round((g.current / g.target) * 100)}% concluído`}</span><button class="text-button" data-goal="${esc(g.id)}">${icon('plus')} Guardar</button></div>${compact ? '' : `<button class="text-button" data-goal-history="${esc(g.id)}">Ver aportes</button>`}</article>`,
           )
           .join('')
       : empty('Crie uma meta para começar a guardar.')) +
@@ -332,7 +310,7 @@ function monthComparison() {
   return panel(
     'Comparar com o mês anterior',
     monthName(previous),
-    `<div class="month-comparison">${line('Entradas recebidas', current.income, prior.income)}${line('Despesas pagas', current.operatingExpense, prior.operatingExpense)}${line('Guardado', current.invested, prior.invested)}${line('Resultado do mês', current.resultBeforeSaving, prior.resultBeforeSaving)}${line('Restante após guardar', current.remainingAfterSaving, prior.remainingAfterSaving)}</div><p class="muted">Valores confirmados por competência. O mês em andamento pode estar incompleto.</p>`,
+    `<div class="month-comparison">${line('Entradas recebidas', current.income, prior.income)}${line('Despesas pagas', current.operatingExpense, prior.operatingExpense)}${line('Guardado', current.invested, prior.invested)}${line('Resultado do mês', current.resultBeforeSaving, prior.resultBeforeSaving)}${current.invested || prior.invested ? line('Restante após guardar', current.remainingAfterSaving, prior.remainingAfterSaving) : ''}</div><p class="muted">Valores confirmados por competência. O mês em andamento pode estar incompleto.</p>`,
   );
 }
 function openGoal(id) {
@@ -458,7 +436,7 @@ function renderTransactions() {
     : filtersActive || rows().length
       ? empty('Nenhum lançamento com esses filtros. Ajuste a busca ou use Limpar.')
       : `<div class="empty"><p>Nenhum lançamento em ${esc(monthName().toLowerCase())}.</p><button class="text-button" data-new-entry>${icon('plus')} Novo lançamento</button></div>`;
-  $('#transaction-indicators').innerHTML = compactSummary(list);
+  $('#transaction-indicators').innerHTML = filtersActive ? compactSummary(list) : '';
   const count = Object.entries(filters).filter(([key, value]) =>
     key === 'query' ? value.trim() : value !== 'all',
   ).length;
@@ -535,9 +513,7 @@ function render() {
             : ''),
         to('Ver todas', 'transactions'),
       ) +
-      recentTransactions() +
-      categorySpending() +
-      monthComparison();
+      recentTransactions();
   else if (view === 'transactions') {
     $('#content').innerHTML =
       '<div id="transaction-indicators" aria-label="Indicadores dos lançamentos filtrados"></div>' +
@@ -550,14 +526,12 @@ function render() {
       `<div class="main-grid budget-grid">${panel('Limite total do mês', 'Independente dos limites por categoria.', state.monthlyLimits?.[month] != null ? `<strong class="wealth-value">${money(state.monthlyLimits[month])}</strong>` : '<p class="muted">Nenhum limite total definido.</p>', '<button class="text-button" data-monthly-limit>Ajustar limite mensal</button>')}${budgetPanel()}</div>`;
   else if (view === 'analysis')
     $('#content').innerHTML =
-      stats() +
       panel('Evolução semanal', 'Entradas e saídas confirmadas por semana.', chart()) +
-      panel('Distribuição das despesas', 'Despesas pagas e previstas do mês.', distribution()) +
       categorySpending() +
       monthComparison();
   else if (view === 'more')
     $('#content').innerHTML =
-      `<section class="panel more-links" aria-label="Mais opções do financeiro"><button data-view="wallets">${icon('wallet')}Contas e saldos ${icon('right')}</button><button data-settings-section="workspace-settings">${icon('people')}Conta e compartilhamento ${icon('right')}</button><button data-catalog="methods">${icon('card')}Formas de pagamento ${icon('right')}</button><button data-view="wealth">${icon('target')}Patrimônio ${icon('right')}</button><button data-catalog="categories">${icon('category')}Categorias ${icon('right')}</button><button data-settings-section="settings-area">${icon('settings')}Configurações e backups ${icon('right')}</button></section>`;
+      `<section class="panel more-links" aria-label="Mais opções do financeiro"><button data-view="wallets">${icon('wallet')}Contas e saldos ${icon('right')}</button><button class="more-analysis" data-view="analysis">${icon('chart')}Análises ${icon('right')}</button><button data-view="wealth">${icon('target')}Patrimônio ${icon('right')}</button></section>`;
   else if (view === 'wallets') $('#content').innerHTML = walletsPage();
   else if (view === 'wealth')
     $('#content').innerHTML =
@@ -568,7 +542,7 @@ function render() {
       ) +
       panel(
         'Metas e valores guardados',
-        'Os valores das metas são independentes dos lançamentos.',
+        'Acompanhe quanto já foi guardado em cada meta.',
         '<p class="muted">Acompanhe seus valores guardados na aba Metas de Planejamento.</p>',
         to('Ver metas', 'goals'),
       );
@@ -602,6 +576,13 @@ function showForm(kind, title, body, context = {}) {
   $('#financial-dialog').setAttribute('aria-labelledby', 'financial-dialog-title');
   $('#financial-form').innerHTML =
     `<div class="dialog-heading"><h2 id="financial-dialog-title">${title}</h2><button type="button" class="icon-button" data-close aria-label="Fechar">${icon('close')}</button></div><div class="form-fields">${body}</div><p id="financial-error" class="error" role="alert"></p><div class="dialog-actions"><button type="button" class="secondary" data-close>Cancelar</button><button type="submit" class="primary">${kind === 'pay' ? 'Confirmar pagamento' : kind === 'restore' ? 'Restaurar backup' : 'Salvar'}</button></div>`;
+  // Teclado do celular: "próximo" avança entre os campos e "concluir" fecha no último.
+  const fields = [
+    ...$('#financial-form').querySelectorAll(
+      'input:not([type=hidden]):not([type=checkbox]):not([type=radio]), select, textarea',
+    ),
+  ];
+  fields.forEach((el, i) => (el.enterKeyHint = i === fields.length - 1 ? 'done' : 'next'));
   $('#financial-dialog').showModal();
 }
 function entryDefaults(type) {
@@ -755,7 +736,7 @@ function walletsPage() {
         panel(
           w.name,
           w.active ? 'Conta ativa' : 'Arquivada',
-          `<strong class="wealth-value">${money(walletBalance(state, w.id, today()))}</strong><small>Saldo inicial em ${dateName(w.openingDate)} · apenas movimentos vinculados até hoje.</small><div class="workspace-buttons"><button class="text-button" data-wallet-edit="${esc(w.id)}">Editar</button><button class="text-button" data-wallet-toggle="${esc(w.id)}">${w.active ? 'Arquivar' : 'Reativar'}</button></div>`,
+          `<strong class="wealth-value">${money(walletBalance(state, w.id, today()))}</strong><small>Saldo atual: inicial de ${dateName(w.openingDate)} mais os movimentos vinculados até hoje.</small><div class="workspace-buttons"><button class="text-button" data-wallet-edit="${esc(w.id)}">Editar</button><button class="text-button" data-wallet-toggle="${esc(w.id)}">${w.active ? 'Arquivar' : 'Reativar'}</button></div>`,
         ),
       )
       .join('') +
@@ -789,7 +770,7 @@ function openFixed(id) {
   showForm(
     'fixed',
     a ? 'Editar conta / reajustar' : 'Nova conta fixa',
-    `${field('Nome da conta', 'name', a?.name || '', 'text', 'required maxlength="80"')}<div class="form-grid">${field('Valor mensal (R$)', 'amount', v ? decimal(v.amount) : '', 'text', 'required inputmode="decimal"')}${field('Dia do vencimento', 'dueDay', v?.dueDay || 5, 'number', 'required min="1" max="31"')}</div>${categoryField(v?.categoryId, 'expense')}${methodField(v?.paymentMethodId)}<div class="form-grid">${field('Mês de início', 'startMonth', a?.startMonth || month, 'month', a ? 'readonly required' : 'required')}${field('Término (opcional)', 'endMonth', a?.endMonth || '', 'month')}</div>${a ? field('Aplicar alterações a partir de', 'from', from, 'month', 'required') : '<p class="muted">O primeiro valor começa no mês de início. Vencimentos inexistentes usam o último dia do mês.</p>'}${a ? '<p class="muted">A vigência escolhida altera competências em aberto. Pagamentos já registrados mantêm os valores e os dados históricos.</p>' : ''}${noteField(a?.observation)}`,
+    `${field('Nome da conta', 'name', a?.name || '', 'text', 'required maxlength="80"')}<fieldset class="form-section"><legend>Valor e vencimento</legend><div class="form-grid">${field('Valor mensal (R$)', 'amount', v ? decimal(v.amount) : '', 'text', 'required inputmode="decimal"')}${field('Dia do vencimento', 'dueDay', v?.dueDay || 5, 'number', 'required min="1" max="31"')}</div></fieldset><fieldset class="form-section"><legend>Categoria e pagamento</legend>${categoryField(v?.categoryId, 'expense')}${methodField(v?.paymentMethodId)}</fieldset><fieldset class="form-section"><legend>Período</legend><div class="form-grid">${field('Mês de início', 'startMonth', a?.startMonth || month, 'month', a ? 'readonly required' : 'required')}${field('Término (opcional)', 'endMonth', a?.endMonth || '', 'month')}</div>${a ? field('Aplicar alterações a partir de', 'from', from, 'month', 'required') : '<p class="muted">Vale a partir do mês de início. Dia 31 em mês curto usa o último dia.</p>'}${a ? '<p class="muted">Altera competências em aberto. Pagamentos já registrados não mudam.</p>' : ''}</fieldset>${noteField(a?.observation)}`,
     { id: a?.id || crypto.randomUUID() },
   );
 }
@@ -938,12 +919,14 @@ $('#financial-form').addEventListener(
     e.target.setAttribute('aria-invalid', 'true');
     // Os eventos "invalid" chegam em sequência; o resumo usa todos os campos inválidos de uma vez.
     queueMicrotask(() => {
-      const missing = [...$('#financial-form').querySelectorAll(':invalid')].map(
-        (f) => FIELD_NAMES[f.name] ?? f.name,
-      );
+      const missing = [
+        ...$('#financial-form').querySelectorAll('input:invalid, select:invalid, textarea:invalid'),
+      ].map((f) => FIELD_NAMES[f.name] ?? f.name);
       if (missing.length)
         $('#financial-error').textContent = 'Confira: ' + [...new Set(missing)].join(', ') + '.';
-      $('#financial-form').querySelector(':invalid')?.focus();
+      $('#financial-form')
+        .querySelector('input:invalid, select:invalid, textarea:invalid')
+        ?.focus();
     });
   },
   true,

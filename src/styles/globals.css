@@ -85,6 +85,18 @@ h3 {
 svg {
   flex-shrink: 0;
 }
+/* Texto só para leitores de tela. O Tailwind não gera esta utilitária em todos os bundles. */
+.sr-only {
+  position: absolute;
+  width: 1px;
+  height: 1px;
+  padding: 0;
+  margin: -1px;
+  overflow: hidden;
+  clip: rect(0, 0, 0, 0);
+  white-space: nowrap;
+  border: 0;
+}
 /* Visually hidden file inputs must keep the 1px dimensions from sr-only. */
 input:not([type='checkbox']):not(.sr-only),
 textarea,
